@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-
+import { Link } from "react-router-dom";
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
   return (
@@ -25,8 +25,8 @@ const Index = () => {
               محفظة جاهزة، توثيق الهوية، قائمة بيضاء للوصول المبكر، واستبيانات ضمن منصة تعليمية تفاعلية.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Button size="lg">انضم لنا(وصول مبكر)</Button>
-              <Button variant="outline" size="lg">الوصول المبكر</Button>
+              <Button asChild size="lg"><Link to="/early-access">انضم لنا (Early Access)</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/wallet">المحفظة (Wallet)</Link></Button>
             </div>
           </div>
         </section>

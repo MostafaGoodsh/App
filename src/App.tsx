@@ -6,6 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import MainLayout from "./layouts/MainLayout";
+import Wallet from "./pages/Wallet";
+import EarlyAccess from "./pages/EarlyAccess";
+import Identity from "./pages/Identity";
+import Learning from "./pages/Learning";
+import Surveys from "./pages/Surveys";
 
 const queryClient = new QueryClient();
 
@@ -17,9 +23,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<MainLayout />}>
+              <Route index element={<Index />} />
+              <Route path="wallet" element={<Wallet />} />
+              <Route path="early-access" element={<EarlyAccess />} />
+              <Route path="identity" element={<Identity />} />
+              <Route path="learning" element={<Learning />} />
+              <Route path="surveys" element={<Surveys />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
