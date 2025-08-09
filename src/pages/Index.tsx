@@ -20,12 +20,12 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">منصة العملات الرقمية - أسود وذهبي</h1>
+            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">منصة العملات الرقمية — رحلة بين الأصل و المصير</h1>
             <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-2xl mx-auto">
               محفظة جاهزة، توثيق الهوية، قائمة بيضاء للوصول المبكر، واستبيانات ضمن منصة تعليمية تفاعلية.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Button size="lg">انضم إلى القائمة البيضاء</Button>
+              <Button size="lg">انضم لنا(وصول مبكر)</Button>
               <Button variant="outline" size="lg">الوصول المبكر</Button>
             </div>
           </div>
@@ -33,7 +33,7 @@ const Index = () => {
 
         <section className="container mx-auto px-4 py-12 grid md:grid-cols-3 gap-6">
           {[
-            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "محفظة آمنة" },
+            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة" },
             { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "الهوية والقائمة البيضاء" },
             { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "تعليم تفاعلي" },
           ].map((card) => (
