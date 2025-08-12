@@ -12,6 +12,8 @@ import EarlyAccess from "./pages/EarlyAccess";
 import Identity from "./pages/Identity";
 import Learning from "./pages/Learning";
 import Surveys from "./pages/Surveys";
+import Auth from "./pages/Auth";
+import RequireAuth from "./components/auth/RequireAuth";
 
 const queryClient = new QueryClient();
 
@@ -25,11 +27,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Index />} />
-              <Route path="wallet" element={<Wallet />} />
+              <Route path="auth" element={<Auth />} />
+              <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
               <Route path="early-access" element={<EarlyAccess />} />
-              <Route path="identity" element={<Identity />} />
+              <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
               <Route path="learning" element={<Learning />} />
-              <Route path="surveys" element={<Surveys />} />
+              <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

@@ -27,6 +27,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-4">
               <Button asChild size="lg"><Link to="/early-access">انضم لنا (Early Access)</Link></Button>
               <Button asChild variant="outline" size="lg"><Link to="/wallet">المحفظة (Wallet)</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/auth">تسجيل الدخول</Link></Button>
             </div>
           </div>
         </section>

@@ -6,8 +6,11 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { signOut } from "@/lib/auth";
 
 const Header = () => {
+  const { user } = useAuth();
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -49,6 +52,13 @@ const Header = () => {
           <Button asChild size="sm">
             <Link to="/early-access">انضم لنا (Early Access)</Link>
           </Button>
+          {user ? (
+            <Button size="sm" variant="outline" onClick={signOut}>تسجيل الخروج</Button>
+          ) : (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/auth">تسجيل الدخول</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
