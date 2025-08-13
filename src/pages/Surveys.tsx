@@ -27,7 +27,7 @@ const Surveys = () => {
 
   const fetchActiveSurveys = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('surveys')
         .select('*')
         .eq('is_active', true)

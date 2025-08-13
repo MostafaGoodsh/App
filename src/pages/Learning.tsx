@@ -25,7 +25,7 @@ const Learning = () => {
 
   const fetchPublishedContent = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('learning_content')
         .select('*')
         .eq('is_published', true)
