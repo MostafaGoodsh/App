@@ -7,13 +7,51 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
+      crypto_addresses: {
+        Row: {
+          address: string
+          created_at: string
+          cryptocurrency: string
+          id: string
+          is_active: boolean | null
+          label: string | null
+          wallet_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          cryptocurrency: string
+          id?: string
+          is_active?: boolean | null
+          label?: string | null
+          wallet_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          cryptocurrency?: string
+          id?: string
+          is_active?: boolean | null
+          label?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crypto_addresses_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       early_access: {
         Row: {
           created_at: string
@@ -41,6 +79,69 @@ export type Database = {
           phone?: string | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      identity_verification: {
+        Row: {
+          address: string | null
+          created_at: string
+          date_of_birth: string | null
+          document_back_url: string | null
+          document_front_url: string | null
+          document_number: string | null
+          document_type: string | null
+          full_name: string | null
+          id: string
+          nationality: string | null
+          phone_number: string | null
+          selfie_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verification_notes: string | null
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_number?: string | null
+          document_type?: string | null
+          full_name?: string | null
+          id?: string
+          nationality?: string | null
+          phone_number?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verification_notes?: string | null
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_number?: string | null
+          document_type?: string | null
+          full_name?: string | null
+          id?: string
+          nationality?: string | null
+          phone_number?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verification_notes?: string | null
+          verification_type?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -189,9 +290,12 @@ export type Database = {
           amount: number
           created_at: string
           description: string | null
+          gas_fee: number | null
           id: string
+          network: string | null
           reference_id: string | null
           status: string | null
+          transaction_hash: string | null
           transaction_type: string
           user_id: string
           wallet_id: string
@@ -200,9 +304,12 @@ export type Database = {
           amount: number
           created_at?: string
           description?: string | null
+          gas_fee?: number | null
           id?: string
+          network?: string | null
           reference_id?: string | null
           status?: string | null
+          transaction_hash?: string | null
           transaction_type: string
           user_id: string
           wallet_id: string
@@ -211,9 +318,12 @@ export type Database = {
           amount?: number
           created_at?: string
           description?: string | null
+          gas_fee?: number | null
           id?: string
+          network?: string | null
           reference_id?: string | null
           status?: string | null
+          transaction_hash?: string | null
           transaction_type?: string
           user_id?: string
           wallet_id?: string
@@ -270,9 +380,12 @@ export type Database = {
         Row: {
           balance: number | null
           created_at: string
-          currency: string | null
+          cryptocurrency: string | null
           id: string
           is_active: boolean | null
+          mnemonic_encrypted: string | null
+          private_key_encrypted: string | null
+          public_key: string | null
           updated_at: string
           user_id: string
           wallet_address: string | null
@@ -281,9 +394,12 @@ export type Database = {
         Insert: {
           balance?: number | null
           created_at?: string
-          currency?: string | null
+          cryptocurrency?: string | null
           id?: string
           is_active?: boolean | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          public_key?: string | null
           updated_at?: string
           user_id: string
           wallet_address?: string | null
@@ -292,9 +408,12 @@ export type Database = {
         Update: {
           balance?: number | null
           created_at?: string
-          currency?: string | null
+          cryptocurrency?: string | null
           id?: string
           is_active?: boolean | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          public_key?: string | null
           updated_at?: string
           user_id?: string
           wallet_address?: string | null

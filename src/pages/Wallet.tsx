@@ -1,305 +1,540 @@
 import { Helmet } from "react-helmet-async";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Wallet as WalletIcon, Plus, ArrowUpDown, Copy, Eye, EyeOff, Bitcoin, Coins, QrCode } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
 
 interface Wallet {
   id: string;
-  balance: number;
-  currency: string;
   wallet_type: string;
-  wallet_address: string;
+  wallet_address: string | null;
+  balance: number;
+  cryptocurrency: string;
+  is_active: boolean;
+  created_at: string;
+  public_key?: string;
+}
+
+interface CryptoAddress {
+  id: string;
+  cryptocurrency: string;
+  address: string;
+  label: string | null;
   is_active: boolean;
 }
 
 interface Transaction {
   id: string;
-  amount: number;
   transaction_type: string;
-  description: string;
+  amount: number;
+  description: string | null;
   status: string;
+  transaction_hash: string | null;
+  network: string;
+  gas_fee: number;
   created_at: string;
 }
 
+const SUPPORTED_CRYPTOCURRENCIES = [
+  { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', color: 'text-orange-500' },
+  { value: 'ETH', label: 'Ethereum (ETH)', icon: 'Ξ', color: 'text-blue-500' },
+  { value: 'USDT', label: 'Tether (USDT)', icon: '₮', color: 'text-green-500' },
+  { value: 'BNB', label: 'Binance Coin (BNB)', icon: 'BNB', color: 'text-yellow-500' },
+  { value: 'ADA', label: 'Cardano (ADA)', icon: 'ADA', color: 'text-blue-400' },
+  { value: 'DOT', label: 'Polkadot (DOT)', icon: 'DOT', color: 'text-pink-500' }
+];
+
 const Wallet = () => {
+  const canonical = typeof window !== "undefined" ? window.location.href : "/wallet";
   const { user } = useAuth();
+  const { toast } = useToast();
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [cryptoAddresses, setCryptoAddresses] = useState<CryptoAddress[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [amount, setAmount] = useState('');
-  const canonical = typeof window !== "undefined" ? window.location.href : "/wallet";
+  const [showPrivateKeys, setShowPrivateKeys] = useState(false);
+  const [newCryptocurrency, setNewCryptocurrency] = useState("BTC");
+  const [amount, setAmount] = useState("");
+  const [receiverAddress, setReceiverAddress] = useState("");
 
   useEffect(() => {
     if (user) {
-      fetchWalletData();
+      fetchWallets();
+      fetchTransactions();
+      fetchCryptoAddresses();
     }
   }, [user]);
 
-  const fetchWalletData = async () => {
+  const fetchWallets = async () => {
     try {
-      // جلب بيانات المحافظ
-      const { data: walletsData, error: walletsError } = await (supabase as any)
+      const { data, error } = await supabase
         .from('wallets')
         .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setWallets(data || []);
+    } catch (error) {
+      console.error('Error fetching wallets:', error);
+      toast({
+        title: "خطأ في جلب المحافظ",
+        description: "حدث خطأ أثناء جلب بيانات المحافظ",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const fetchCryptoAddresses = async () => {
+    try {
+      const { data: walletsData, error: walletsError } = await supabase
+        .from('wallets')
+        .select('id')
         .eq('user_id', user?.id);
 
       if (walletsError) throw walletsError;
 
-      // إنشاء محفظة افتراضية إذا لم توجد
-      if (!walletsData || walletsData.length === 0) {
-        await createDefaultWallet();
-      } else {
-        setWallets(walletsData);
-      }
+      if (walletsData && walletsData.length > 0) {
+        const walletIds = walletsData.map(w => w.id);
+        const { data, error } = await supabase
+          .from('crypto_addresses')
+          .select('*')
+          .in('wallet_id', walletIds)
+          .eq('is_active', true);
 
-      // جلب المعاملات
-      const { data: transactionsData, error: transactionsError } = await (supabase as any)
+        if (error) throw error;
+        setCryptoAddresses(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching crypto addresses:', error);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (transactionsError) throw transactionsError;
-      setTransactions(transactionsData || []);
-
+      if (error) throw error;
+      setTransactions(data || []);
     } catch (error) {
-      console.error('Error fetching wallet data:', error);
-      toast.error('حدث خطأ في جلب بيانات المحفظة');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "خطأ في جلب المعاملات",
+        description: "حدث خطأ أثناء جلب بيانات المعاملات",
+        variant: "destructive"
+      });
     }
+    setLoading(false);
   };
 
-  const createDefaultWallet = async () => {
+  const createWallet = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      // Generate a mock address for demonstration
+      const mockAddress = generateMockAddress(newCryptocurrency);
+      
+      const { data: walletData, error: walletError } = await supabase
         .from('wallets')
-        .insert({
-          user_id: user?.id,
-          balance: 1000,
-          currency: 'SAR',
-          wallet_type: 'digital',
-          wallet_address: `wallet_${user?.id?.substring(0, 8)}`,
-          is_active: true
-        })
+        .insert([
+          {
+            user_id: user?.id,
+            wallet_type: 'crypto',
+            wallet_address: mockAddress,
+            balance: 0,
+            cryptocurrency: newCryptocurrency,
+            is_active: true,
+            public_key: `pub_${mockAddress.substring(0, 10)}`
+          }
+        ])
         .select()
         .single();
 
-      if (error) throw error;
-      setWallets([data]);
-    } catch (error) {
-      console.error('Error creating wallet:', error);
-    }
-  };
-
-  const handleDeposit = async () => {
-    if (!amount || !wallets[0]) return;
-
-    try {
-      const depositAmount = parseFloat(amount);
-      const newBalance = wallets[0].balance + depositAmount;
-
-      // تحديث الرصيد
-      const { error: walletError } = await (supabase as any)
-        .from('wallets')
-        .update({ balance: newBalance })
-        .eq('id', wallets[0].id);
-
       if (walletError) throw walletError;
 
-      // إضافة معاملة
-      const { error: transactionError } = await (supabase as any)
-        .from('transactions')
-        .insert({
-          user_id: user?.id,
-          wallet_id: wallets[0].id,
-          amount: depositAmount,
-          transaction_type: 'deposit',
-          description: 'إيداع في المحفظة',
-          status: 'completed'
-        });
+      // Create crypto address entry
+      const { error: addressError } = await supabase
+        .from('crypto_addresses')
+        .insert([
+          {
+            wallet_id: walletData.id,
+            cryptocurrency: newCryptocurrency,
+            address: mockAddress,
+            label: `المحفظة الرئيسية`,
+            is_active: true
+          }
+        ]);
 
-      if (transactionError) throw transactionError;
-
-      setAmount('');
-      fetchWalletData();
-      toast.success('تم الإيداع بنجاح');
+      if (addressError) throw addressError;
+      
+      toast({
+        title: "تم إنشاء المحفظة",
+        description: `تم إنشاء محفظة ${newCryptocurrency} بنجاح`
+      });
+      
+      fetchWallets();
+      fetchCryptoAddresses();
     } catch (error) {
-      console.error('Error processing deposit:', error);
-      toast.error('حدث خطأ في عملية الإيداع');
+      console.error('Error creating wallet:', error);
+      toast({
+        title: "خطأ في إنشاء المحفظة",
+        description: "حدث خطأ أثناء إنشاء المحفظة",
+        variant: "destructive"
+      });
     }
   };
 
-  const handleWithdraw = async () => {
-    if (!amount || !wallets[0]) return;
+  const generateMockAddress = (crypto: string): string => {
+    const prefixes: { [key: string]: string } = {
+      'BTC': '1',
+      'ETH': '0x',
+      'USDT': '0x',
+      'BNB': 'bnb',
+      'ADA': 'addr1',
+      'DOT': '1'
+    };
+    
+    const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let result = prefixes[crypto] || '1';
+    const length = crypto === 'ETH' || crypto === 'USDT' ? 40 : 30;
+    
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  const sendTransaction = async () => {
+    if (!amount || !receiverAddress || wallets.length === 0) {
+      toast({
+        title: "بيانات ناقصة",
+        description: "يرجى إدخال المبلغ وعنوان المستقبل",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
-      const withdrawAmount = parseFloat(amount);
-      
-      if (withdrawAmount > wallets[0].balance) {
-        toast.error('الرصيد غير كافي');
+      const sendAmount = parseFloat(amount);
+      const wallet = wallets[0];
+
+      if (sendAmount > wallet.balance) {
+        toast({
+          title: "رصيد غير كافي",
+          description: "الرصيد المتاح غير كافي لإجراء هذه المعاملة",
+          variant: "destructive"
+        });
         return;
       }
 
-      const newBalance = wallets[0].balance - withdrawAmount;
+      // Simulate transaction hash
+      const transactionHash = `0x${Math.random().toString(16).substring(2, 66)}`;
+      const gasFee = 0.001; // Mock gas fee
 
-      // تحديث الرصيد
-      const { error: walletError } = await (supabase as any)
+      // Update wallet balance
+      const newBalance = wallet.balance - sendAmount - gasFee;
+      const { error: walletError } = await supabase
         .from('wallets')
         .update({ balance: newBalance })
-        .eq('id', wallets[0].id);
+        .eq('id', wallet.id);
 
       if (walletError) throw walletError;
 
-      // إضافة معاملة
-      const { error: transactionError } = await (supabase as any)
+      // Create transaction record
+      const { error: transactionError } = await supabase
         .from('transactions')
-        .insert({
-          user_id: user?.id,
-          wallet_id: wallets[0].id,
-          amount: -withdrawAmount,
-          transaction_type: 'withdraw',
-          description: 'سحب من المحفظة',
-          status: 'completed'
-        });
+        .insert([
+          {
+            user_id: user?.id,
+            wallet_id: wallet.id,
+            amount: -sendAmount,
+            transaction_type: 'send',
+            description: `إرسال ${sendAmount} ${wallet.cryptocurrency} إلى ${receiverAddress.substring(0, 10)}...`,
+            status: 'completed',
+            transaction_hash: transactionHash,
+            network: wallet.cryptocurrency.toLowerCase(),
+            gas_fee: gasFee
+          }
+        ]);
 
       if (transactionError) throw transactionError;
 
-      setAmount('');
-      fetchWalletData();
-      toast.success('تم السحب بنجاح');
+      setAmount("");
+      setReceiverAddress("");
+      fetchWallets();
+      fetchTransactions();
+      
+      toast({
+        title: "تم إرسال المعاملة",
+        description: `تم إرسال ${sendAmount} ${wallet.cryptocurrency} بنجاح`
+      });
     } catch (error) {
-      console.error('Error processing withdrawal:', error);
-      toast.error('حدث خطأ في عملية السحب');
+      console.error('Error sending transaction:', error);
+      toast({
+        title: "خطأ في المعاملة",
+        description: "حدث خطأ أثناء إرسال المعاملة",
+        variant: "destructive"
+      });
     }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "تم النسخ",
+      description: "تم نسخ العنوان"
+    });
+  };
+
+  const getCryptoInfo = (crypto: string) => {
+    return SUPPORTED_CRYPTOCURRENCIES.find(c => c.value === crypto) || SUPPORTED_CRYPTOCURRENCIES[0];
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-primary/10 text-primary border-primary/20';
-      case 'pending': return 'bg-accent/10 text-accent border-accent/20';
-      case 'failed': return 'bg-destructive/10 text-destructive border-destructive/20';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'deposit': return 'text-green-500';
-      case 'withdraw': return 'text-red-500';
-      default: return 'text-muted-foreground';
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'failed': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   if (loading) {
     return (
-      <section className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 text-center">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="h-8 bg-muted rounded w-1/3 mx-auto"></div>
+          <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="h-32 bg-muted rounded"></div>
             <div className="h-32 bg-muted rounded"></div>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
     <>
       <Helmet>
-        <title>المحفظة — إدارة الأصول الرقمية</title>
-        <meta name="description" content="المحفظة (Wallet) لإدارة الأصول الرقمية بتصميم أسود وذهبي." />
+        <title>المحفظة الرقمية — Black & Gold Crypto</title>
+        <meta name="description" content="محفظة العملات الرقمية لإدارة وتداول البيتكوين والعملات المشفرة الأخرى." />
         <link rel="canonical" href={canonical} />
       </Helmet>
       
       <section className="container mx-auto px-4 py-16">
-        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">المحفظة</h1>
-        <p className="text-muted-foreground max-w-2xl mb-8">
-          إدارة أصولك الرقمية بكل سهولة وأمان.
-        </p>
-
-        {/* عرض الرصيد الحالي */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span>الرصيد الحالي</span>
-                <Badge variant="outline" className="bg-primary/10 text-primary">نشط</Badge>
-              </CardTitle>
-              <CardDescription>محفظتك الرقمية الرئيسية</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold mb-2">
-                {wallets[0]?.balance?.toLocaleString('ar-SA') || '0'} {wallets[0]?.currency || 'SAR'}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                عنوان المحفظة: {wallets[0]?.wallet_address || 'غير محدد'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>إحصائيات سريعة</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">إجمالي المعاملات</span>
-                <span className="font-medium">{transactions.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">نوع المحفظة</span>
-                <span className="font-medium">
-                  {wallets[0]?.wallet_type === 'digital' ? 'رقمية' : 'فيزيائية'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">الحالة</span>
-                <Badge variant="outline" className="bg-primary/10 text-primary">
-                  {wallets[0]?.is_active ? 'نشطة' : 'معطلة'}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-2">محفظة العملات الرقمية</h1>
+            <p className="text-muted-foreground">إدارة وتداول العملات المشفرة بأمان</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPrivateKeys(!showPrivateKeys)}
+            >
+              {showPrivateKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPrivateKeys ? "إخفاء" : "إظهار"} المفاتيح
+            </Button>
+          </div>
         </div>
 
-        <Tabs defaultValue="operations" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="operations">العمليات</TabsTrigger>
-            <TabsTrigger value="history">سجل المعاملات</TabsTrigger>
+        {/* إنشاء محفظة جديدة */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              إنشاء محفظة جديدة
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="crypto-select">اختر العملة الرقمية</Label>
+                <Select value={newCryptocurrency} onValueChange={setNewCryptocurrency}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUPPORTED_CRYPTOCURRENCIES.map((crypto) => (
+                      <SelectItem key={crypto.value} value={crypto.value}>
+                        <div className="flex items-center gap-2">
+                          <span className={crypto.color}>{crypto.icon}</span>
+                          {crypto.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-end">
+                <Button onClick={createWallet}>إنشاء محفظة</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* عرض المحافظ */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          {wallets.map((wallet) => {
+            const cryptoInfo = getCryptoInfo(wallet.cryptocurrency);
+            return (
+              <Card key={wallet.id} className="relative overflow-hidden">
+                <div className="absolute top-4 right-4">
+                  <span className={`text-2xl ${cryptoInfo.color}`}>{cryptoInfo.icon}</span>
+                </div>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <WalletIcon className="h-5 w-5" />
+                    {cryptoInfo.label}
+                  </CardTitle>
+                  <CardDescription>محفظة {wallet.cryptocurrency}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {wallet.balance.toFixed(8)} {wallet.cryptocurrency}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      ≈ ${(wallet.balance * 50000).toLocaleString()} USD
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">العنوان:</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(wallet.wallet_address || "")}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="font-mono text-xs break-all bg-muted p-2 rounded">
+                      {wallet.wallet_address}
+                    </p>
+                  </div>
+
+                  {showPrivateKeys && wallet.public_key && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">المفتاح العام:</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(wallet.public_key || "")}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="font-mono text-xs break-all bg-muted p-2 rounded">
+                        {wallet.public_key}
+                      </p>
+                    </div>
+                  )}
+
+                  <Badge 
+                    variant={wallet.is_active ? "default" : "secondary"}
+                    className="w-fit"
+                  >
+                    {wallet.is_active ? "نشطة" : "معطلة"}
+                  </Badge>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <Tabs defaultValue="send" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="send">إرسال</TabsTrigger>
+            <TabsTrigger value="receive">استقبال</TabsTrigger>
+            <TabsTrigger value="history">المعاملات</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="operations">
+          <TabsContent value="send">
             <Card>
               <CardHeader>
-                <CardTitle>العمليات المالية</CardTitle>
-                <CardDescription>إيداع أو سحب الأموال من محفظتك</CardDescription>
+                <CardTitle>إرسال العملة الرقمية</CardTitle>
+                <CardDescription>أرسل العملات المشفرة إلى عنوان آخر</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">المبلغ ({wallets[0]?.currency || 'SAR'})</Label>
+                  <Label htmlFor="amount">المبلغ</Label>
                   <Input
                     id="amount"
                     type="number"
-                    placeholder="أدخل المبلغ"
+                    step="0.00000001"
+                    placeholder="0.00000000"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-4">
-                  <Button onClick={handleDeposit} className="flex-1">إيداع</Button>
-                  <Button onClick={handleWithdraw} variant="outline" className="flex-1">سحب</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="receiver">عنوان المستقبل</Label>
+                  <Input
+                    id="receiver"
+                    placeholder="أدخل عنوان المحفظة"
+                    value={receiverAddress}
+                    onChange={(e) => setReceiverAddress(e.target.value)}
+                  />
                 </div>
+                <Button onClick={sendTransaction} className="w-full">
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  إرسال المعاملة
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="receive">
+            <Card>
+              <CardHeader>
+                <CardTitle>استقبال العملة الرقمية</CardTitle>
+                <CardDescription>استخدم هذا العنوان لاستقبال العملات المشفرة</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {wallets.length > 0 ? (
+                  <div className="text-center space-y-4">
+                    <QrCode className="h-32 w-32 mx-auto text-muted-foreground" />
+                    <div className="space-y-2">
+                      <p className="font-semibold">عنوان محفظة {wallets[0].cryptocurrency}</p>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={wallets[0].wallet_address || ""}
+                          readOnly
+                          className="font-mono"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => copyToClipboard(wallets[0].wallet_address || "")}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      أرسل فقط {wallets[0].cryptocurrency} إلى هذا العنوان
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    لا توجد محافظ متاحة
+                  </p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -308,7 +543,7 @@ const Wallet = () => {
             <Card>
               <CardHeader>
                 <CardTitle>سجل المعاملات</CardTitle>
-                <CardDescription>آخر 10 معاملات في محفظتك</CardDescription>
+                <CardDescription>آخر المعاملات في محافظك</CardDescription>
               </CardHeader>
               <CardContent>
                 {transactions.length === 0 ? (
@@ -321,13 +556,25 @@ const Wallet = () => {
                       <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="space-y-1">
                           <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(transaction.created_at).toLocaleDateString('ar-SA')}
-                          </p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>{new Date(transaction.created_at).toLocaleDateString('ar-SA')}</span>
+                            {transaction.transaction_hash && (
+                              <span className="font-mono">
+                                {transaction.transaction_hash.substring(0, 10)}...
+                              </span>
+                            )}
+                          </div>
+                          {transaction.gas_fee > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                              رسوم الشبكة: {transaction.gas_fee} {transaction.network?.toUpperCase()}
+                            </p>
+                          )}
                         </div>
                         <div className="text-right space-y-1">
-                          <p className={`font-medium ${getTypeColor(transaction.transaction_type)}`}>
-                            {transaction.amount > 0 ? '+' : ''}{transaction.amount.toLocaleString('ar-SA')} SAR
+                          <p className={`font-medium ${
+                            transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(8)}
                           </p>
                           <Badge variant="outline" className={getStatusColor(transaction.status)}>
                             {transaction.status === 'completed' ? 'مكتملة' : 
