@@ -38,13 +38,11 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
-              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-w-[160px]"><Link to="/wallet">المحفظة | Wallet</Link></Button>
-              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-w-[140px]"><Link to="/auth">دخول | Login</Link></Button>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-8 flex flex-col gap-8 max-w-lg">
+        <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
           {[
             { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet", href: "/wallet" },
             { src: "/lovable-uploads/45e37627-8629-45b2-ae38-13d37fbeb015.png", alt: "عنخ ذهبي - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },

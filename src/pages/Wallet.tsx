@@ -49,7 +49,8 @@ const SUPPORTED_CRYPTOCURRENCIES = [
   { value: 'USDT', label: 'Tether (USDT)', icon: '₮', color: 'text-green-500' },
   { value: 'BNB', label: 'Binance Coin (BNB)', icon: 'BNB', color: 'text-yellow-500' },
   { value: 'ADA', label: 'Cardano (ADA)', icon: 'ADA', color: 'text-blue-400' },
-  { value: 'DOT', label: 'Polkadot (DOT)', icon: 'DOT', color: 'text-pink-500' }
+  { value: 'DOT', label: 'Polkadot (DOT)', icon: 'DOT', color: 'text-pink-500' },
+  { value: 'SOL', label: 'Solana (SOL)', icon: '◎', color: 'text-purple-500' }
 ];
 
 const Wallet = () => {
@@ -202,12 +203,13 @@ const Wallet = () => {
       'USDT': '0x',
       'BNB': 'bnb',
       'ADA': 'addr1',
-      'DOT': '1'
+      'DOT': '1',
+      'SOL': ''
     };
     
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     let result = prefixes[crypto] || '1';
-    const length = crypto === 'ETH' || crypto === 'USDT' ? 40 : 30;
+    const length = crypto === 'ETH' || crypto === 'USDT' ? 40 : crypto === 'SOL' ? 44 : 30;
     
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -333,7 +335,7 @@ const Wallet = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-2">محفظة العملات الرقمية</h1>
