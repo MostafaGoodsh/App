@@ -32,9 +32,13 @@ const Index = () => {
                 FATE
               </div>
             </div>
-            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto">
+            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl mb-4 max-w-3xl mx-auto">
               محفظة آمنة وتوثيق هوية وتعلم العملات الرقمية<br />
               <span className="text-base md:text-lg lg:text-xl">Secure wallet, identity verification & crypto education</span>
+            </p>
+            <p className="text-white/70 text-base md:text-lg mb-6 max-w-2xl mx-auto">
+              انطلق في رحلتك نحو المستقبل الرقمي مع منصة متكاملة تجمع بين الأمان والابتكار<br />
+              <span className="text-primary/80">Start your journey towards the digital future with an integrated platform</span>
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
