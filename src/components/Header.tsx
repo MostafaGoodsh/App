@@ -15,7 +15,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-playfair text-xl font-bold">
-          منصة العملات الرقمية
+          منصة مصر
         </Link>
         <nav aria-label="التنقل الرئيسي">
           <NavigationMenu>
@@ -32,17 +32,17 @@ const Header = () => {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink to="/identity" className={navigationMenuTriggerStyle()}>
-                  توثيق الهوية (Identity)
+                   الهوية (Identity)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink to="/learning" className={navigationMenuTriggerStyle()}>
-                  التعلم (Learning)
+                  الحقيقة و العلم  (Learning)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink to="/surveys" className={navigationMenuTriggerStyle()}>
-                  الاستبيانات (Surveys)
+                التأهيل و الاستبيانات (Surveys)
                 </NavLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -50,7 +50,7 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-3">
           <Button asChild size="default" className="px-6">
-            <Link to="/early-access">انضم لنا</Link>
+            <Link to="/early-access">انضم الآن
           </Button>
           {user ? (
             <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>
