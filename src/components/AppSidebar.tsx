@@ -40,7 +40,7 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <div 
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-30"
         style={{
           backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
           backgroundSize: 'cover',
@@ -48,7 +48,7 @@ export function AppSidebar() {
           backgroundRepeat: 'no-repeat'
         }}
       />
-      <div className="absolute inset-0 bg-background/90" />
+      <div className="absolute inset-0 bg-background/70" />
       <div className="relative z-10">
         <SidebarHeader className="p-4">
           <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
