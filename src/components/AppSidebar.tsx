@@ -36,25 +36,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={`${!open && !isMobile ? "w-16" : "w-64"} relative`} 
+      className={!open && !isMobile ? "w-16" : "w-64"} 
       collapsible="icon"
+      style={{
+        backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundBlendMode: 'overlay',
+        backgroundColor: 'hsl(var(--background) / 0.95)'
+      }}
     >
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      <div className="absolute inset-0 bg-background/90" />
-      <div className="relative z-10">
-        <SidebarHeader className="p-4">
-          <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
-            {(!open && !isMobile) ? "مصر" : "منصة مصر"}
-          </Link>
-        </SidebarHeader>
+      <SidebarHeader className="p-4">
+        <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
+          {(!open && !isMobile) ? "مصر" : "منصة مصر"}
+        </Link>
+      </SidebarHeader>
 
         <SidebarContent>
           <SidebarGroup>
@@ -116,8 +112,7 @@ export function AppSidebar() {
               </Link>
             </Button>
           )}
-        </SidebarFooter>
-      </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
