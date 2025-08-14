@@ -35,19 +35,12 @@ export function AppSidebar() {
     isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50";
 
   return (
-    <Sidebar className={`${!open && !isMobile ? "w-16" : "w-64"} relative overflow-hidden`} collapsible="icon">
-      <img
-        src="/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png"
-        alt="هرم مصري عند الغروب - خلفية أسود وذهبي"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
-      />
-      <div className="absolute inset-0 bg-background/85" />
-      <div className="relative z-10 h-full flex flex-col">
-        <SidebarHeader className="p-4">
-          <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
-            {(!open && !isMobile) ? "مصر" : "منصة مصر"}
-          </Link>
-        </SidebarHeader>
+    <Sidebar className={!open && !isMobile ? "w-16" : "w-64"} collapsible="icon">
+      <SidebarHeader className="p-4">
+        <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
+          {(!open && !isMobile) ? "مصر" : "منصة مصر"}
+        </Link>
+      </SidebarHeader>
 
         <SidebarContent>
           <SidebarGroup>
@@ -109,8 +102,7 @@ export function AppSidebar() {
               </Link>
             </Button>
           )}
-        </SidebarFooter>
-      </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
