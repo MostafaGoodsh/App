@@ -11,7 +11,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[80vh] flex items-center justify-center bg-background">
+        <section className="relative min-h-[85vh] flex items-center justify-center bg-background">
           <img
             src="/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png"
             alt="هرم مصري عند الغروب - خلفية أسود وذهبي"
@@ -20,34 +20,43 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">
-              Crypto-MSR<br />
-              <span className="text-3xl md:text-4xl">محفظة العملات الرقمية الآمنة</span>
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+            <div className="flex items-center justify-center gap-8 mb-6">
+              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl rotate-180">
+                ORIGIN
+              </div>
+              <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold">
+                Crypto-MSR<br />
+                <span className="text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">محفظة العملات الرقمية الآمنة</span>
+              </h1>
+              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
+                FATE
+              </div>
+            </div>
+            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl mb-8 max-w-3xl mx-auto">
               محفظة آمنة وتوثيق هوية وتعلم العملات الرقمية<br />
-              <span className="text-base md:text-lg">Secure wallet, identity verification & crypto education</span>
+              <span className="text-base md:text-lg lg:text-xl">Secure wallet, identity verification & crypto education</span>
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <Button asChild size="lg"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/wallet">المحفظة | Wallet</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/auth">دخول | Login</Link></Button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-w-[160px]"><Link to="/wallet">المحفظة | Wallet</Link></Button>
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto min-w-[140px]"><Link to="/auth">دخول | Login</Link></Button>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 flex flex-col gap-6 max-w-md">
+        <section className="container mx-auto px-4 py-8 flex flex-col gap-8 max-w-lg">
           {[
             { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet", href: "/wallet" },
             { src: "/lovable-uploads/45e37627-8629-45b2-ae38-13d37fbeb015.png", alt: "عنخ ذهبي - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },
             { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning", href: "/learning" },
           ].map((card) => (
             <Link key={card.title} to={card.href} className="group">
-              <article className="relative overflow-hidden rounded-lg border border-border transition-transform hover:scale-105 cursor-pointer">
-                <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" loading="lazy" />
-                <div className="relative p-6 min-h-[220px] flex flex-col justify-end bg-gradient-to-t from-background/80 via-background/40 to-transparent">
-                  <h2 className="font-playfair text-2xl mb-2 group-hover:text-primary transition-colors">{card.title}</h2>
-                  <p className="text-sm text-muted-foreground">تجربة سلسة بتصميم أسود وذهبي مع لمسات لازوردية.</p>
+              <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+                <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-all duration-300" loading="lazy" />
+                <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                  <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">{card.title}</h2>
+                  <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">تجربة سلسة بتصميم أسود وذهبي مع لمسات لازوردية.</p>
+                  <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
                 </div>
               </article>
             </Link>
