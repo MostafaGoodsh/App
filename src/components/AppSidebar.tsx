@@ -36,20 +36,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={`${!open && !isMobile ? "w-16" : "w-64"} relative`} 
+      className={`${!open && !isMobile ? "w-16" : "w-64"}`} 
       collapsible="icon"
     >
-      <div 
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      <div className="absolute inset-0 bg-background/70" />
-      <div className="relative z-10">
         <SidebarHeader className="p-4">
           <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
             {(!open && !isMobile) ? "مصر" : "منصة مصر"}
@@ -117,7 +106,6 @@ export function AppSidebar() {
             </Button>
           )}
         </SidebarFooter>
-      </div>
     </Sidebar>
   );
 }
