@@ -50,7 +50,7 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-3">
           <Button asChild size="default" className="px-6">
-            <Link to="/early-access">انضم الآن
+            <Link to="/early-access">انضم الآن</Link>
           </Button>
           {user ? (
             <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>
