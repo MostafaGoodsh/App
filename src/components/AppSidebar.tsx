@@ -49,66 +49,66 @@ export function AppSidebar() {
           </Link>
         </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>التنقل الرئيسي</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => {
-                // Hide auth-required items if user is not logged in
-                if (item.requireAuth && !user) return null;
-                
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink to={item.url} className={getNavClass}>
-                        <item.icon className="h-4 w-4" />
-                        {(open || isMobile) && <span>{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>التنقل الرئيسي</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {menuItems.map((item) => {
+                  // Hide auth-required items if user is not logged in
+                  if (item.requireAuth && !user) return null;
+                  
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavClass}>
+                          <item.icon className="h-4 w-4" />
+                          {(open || isMobile) && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>الوصول المبكر</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink to="/early-access" className={getNavClass}>
-                    <Users className="h-4 w-4" />
-                    {(open || isMobile) && <span>انضم الآن</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>الوصول المبكر</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/early-access" className={getNavClass}>
+                      <Users className="h-4 w-4" />
+                      {(open || isMobile) && <span>انضم الآن</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        {user ? (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={signOut}
-            className="w-full justify-start"
-          >
-            <LogOut className="h-4 w-4" />
-            {(open || isMobile) && <span>تسجيل الخروج</span>}
-          </Button>
-        ) : (
-          <Button asChild variant="outline" size="sm" className="w-full justify-start">
-            <Link to="/auth">
-              <LogIn className="h-4 w-4" />
-              {(open || isMobile) && <span>تسجيل الدخول</span>}
-            </Link>
-          </Button>
-        )}
+        <SidebarFooter className="p-4">
+          {user ? (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={signOut}
+              className="w-full justify-start"
+            >
+              <LogOut className="h-4 w-4" />
+              {(open || isMobile) && <span>تسجيل الخروج</span>}
+            </Button>
+          ) : (
+            <Button asChild variant="outline" size="sm" className="w-full justify-start">
+              <Link to="/auth">
+                <LogIn className="h-4 w-4" />
+                {(open || isMobile) && <span>تسجيل الدخول</span>}
+              </Link>
+            </Button>
+          )}
         </SidebarFooter>
       </div>
     </Sidebar>
