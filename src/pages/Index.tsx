@@ -38,17 +38,19 @@ const Index = () => {
 
         <section className="container mx-auto px-4 py-12 grid md:grid-cols-3 gap-6">
           {[
-            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet" },
-            { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "توثيق الهوية | Identity" },
-            { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning" },
+            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet", href: "/wallet" },
+            { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },
+            { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning", href: "/learning" },
           ].map((card) => (
-            <article key={card.title} className="relative overflow-hidden rounded-lg border border-border">
-              <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-40" loading="lazy" />
-              <div className="relative p-6 min-h-[220px] flex flex-col justify-end bg-gradient-to-t from-background/80 via-background/40 to-transparent">
-                <h2 className="font-playfair text-2xl mb-2">{card.title}</h2>
-                <p className="text-sm text-muted-foreground">تجربة سلسة بتصميم أسود وذهبي مع لمسات لازوردية.</p>
-              </div>
-            </article>
+            <Link key={card.title} to={card.href} className="group">
+              <article className="relative overflow-hidden rounded-lg border border-border transition-transform hover:scale-105 cursor-pointer">
+                <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" loading="lazy" />
+                <div className="relative p-6 min-h-[220px] flex flex-col justify-end bg-gradient-to-t from-background/80 via-background/40 to-transparent">
+                  <h2 className="font-playfair text-2xl mb-2 group-hover:text-primary transition-colors">{card.title}</h2>
+                  <p className="text-sm text-muted-foreground">تجربة سلسة بتصميم أسود وذهبي مع لمسات لازوردية.</p>
+                </div>
+              </article>
+            </Link>
           ))}
         </section>
 
