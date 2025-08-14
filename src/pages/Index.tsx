@@ -20,25 +20,35 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
-              Crypto-MSR
-            </h1>
-            <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-6">
-              محفظة العملات الرقمية الآمنة
-            </p>
-            
-            <div className="mb-6">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">
-                Origin & Fate
-              </h2>
-              <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
-                الأصل و المصير
-              </p>
-            </div>
+            <div className="flex items-center justify-center gap-8 mb-6">
+              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl rotate-180">
+                ORIGIN
+              </div>
+              <div className="flex-1">
+                <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
+                  Crypto-MSR
+                </h1>
+                <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-6">
+                  محفظة العملات الرقمية الآمنة
+                </p>
+                
+                <div className="mb-6">
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">
+                    Origin & Fate
+                  </h2>
+                  <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
+                    الأصل و المصير
+                  </p>
+                </div>
 
-            <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
-              From Egypt With Love
-            </p>
+                <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
+                  From Egypt With Love
+                </p>
+              </div>
+              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
+                FATE
+              </div>
+            </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
