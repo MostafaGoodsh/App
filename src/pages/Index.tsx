@@ -33,8 +33,10 @@ const Index = () => {
                 </p>
                 
                 <div className="mb-6">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">
-                    Origin & Fate
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">
+                    Origin<br />
+                    &<br />
+                    Fate
                   </h2>
                   <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
                     الأصل و المصير
