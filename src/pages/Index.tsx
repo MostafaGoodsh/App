@@ -6,8 +6,8 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>منصة العملات الرقمية - تصميم أسود وذهبي</title>
-        <meta name="description" content="محفظة جاهزة، توثيق هوية، قائمة بيضاء، وصول مبكر، واستبيانات ضمن منصة تعليمية تفاعلية." />
+        <title>CryptoVault | محفظة العملات الرقمية</title>
+        <meta name="description" content="منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification" />
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
@@ -20,23 +20,27 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">منصة العملات الرقمية — رحلة بين الأصل و المصير</h1>
+            <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">
+              CryptoVault<br />
+              <span className="text-3xl md:text-4xl">محفظة العملات الرقمية الآمنة</span>
+            </h1>
             <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-              محفظة جاهزة، توثيق الهوية، قائمة بيضاء للوصول المبكر، واستبيانات ضمن منصة تعليمية تفاعلية.
+              محفظة آمنة وتوثيق هوية وتعلم العملات الرقمية<br />
+              <span className="text-base md:text-lg">Secure wallet, identity verification & crypto education</span>
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Button asChild size="lg"><Link to="/early-access">انضم لنا (Early Access)</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/wallet">المحفظة (Wallet)</Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/auth">تسجيل الدخول</Link></Button>
+              <Button asChild size="lg"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/wallet">المحفظة | Wallet</Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/auth">دخول | Login</Link></Button>
             </div>
           </div>
         </section>
 
         <section className="container mx-auto px-4 py-12 grid md:grid-cols-3 gap-6">
           {[
-            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة" },
-            { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "الهوية والقائمة البيضاء" },
-            { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "تعليم تفاعلي" },
+            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet" },
+            { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "توثيق الهوية | Identity" },
+            { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning" },
           ].map((card) => (
             <article key={card.title} className="relative overflow-hidden rounded-lg border border-border">
               <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-40" loading="lazy" />
