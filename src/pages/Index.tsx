@@ -24,10 +24,10 @@ const Index = () => {
               <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl rotate-180">
                 ORIGIN
               </div>
-              <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold">
-                Crypto-MSR<br />
-                <span className="text-3xl md:text-4xl lg:text-5xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">محفظة العملات الرقمية الآمنة</span>
-              </h1>
+            <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90">
+              Crypto-MSR<br />
+              <span className="text-3xl md:text-4xl lg:text-5xl text-primary">محفظة العملات الرقمية الآمنة</span>
+            </h1>
               <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
                 FATE
               </div>
