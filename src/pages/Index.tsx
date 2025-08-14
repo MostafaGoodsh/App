@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>CryptoVault | محفظة العملات الرقمية</title>
+        <title>Crypto-MSR | محفظة العملات الرقمية</title>
         <meta name="description" content="منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification" />
         <link rel="canonical" href={canonical} />
       </Helmet>
@@ -21,7 +21,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
             <h1 className="font-playfair text-4xl md:text-6xl font-bold mb-6">
-              CryptoVault<br />
+              Crypto-MSR<br />
               <span className="text-3xl md:text-4xl">محفظة العملات الرقمية الآمنة</span>
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-2xl mx-auto">
@@ -36,10 +36,10 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-12 grid md:grid-cols-3 gap-6">
+        <section className="container mx-auto px-4 py-12 flex flex-col gap-6 max-w-md">
           {[
             { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet", href: "/wallet" },
-            { src: "/lovable-uploads/109a2672-ce6d-4b3b-9e14-10a92facf011.png", alt: "نسر ذهبي مصري - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },
+            { src: "/lovable-uploads/45e37627-8629-45b2-ae38-13d37fbeb015.png", alt: "عنخ ذهبي - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },
             { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning", href: "/learning" },
           ].map((card) => (
             <Link key={card.title} to={card.href} className="group">
