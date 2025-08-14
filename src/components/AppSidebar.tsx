@@ -35,7 +35,17 @@ export function AppSidebar() {
     isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50";
 
   return (
-    <Sidebar className={!open && !isMobile ? "w-16" : "w-64"} collapsible="icon">
+    <Sidebar 
+      className={!open && !isMobile ? "w-16" : "w-64"} 
+      collapsible="icon"
+      style={{
+        backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundBlendMode: 'overlay',
+        backgroundColor: 'hsl(var(--background) / 0.9)'
+      }}
+    >
       <SidebarHeader className="p-4">
         <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
           {(!open && !isMobile) ? "مصر" : "منصة مصر"}
