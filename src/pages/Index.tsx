@@ -20,26 +20,26 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <div className="flex items-center justify-center gap-8 mb-6">
-              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl rotate-180">
-                ORIGIN
-              </div>
-            <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90">
-              Crypto-MSR<br />
-              <span className="text-3xl md:text-4xl lg:text-5xl text-primary">محفظة العملات الرقمية الآمنة</span>
+            <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
+              Crypto-MSR
             </h1>
-              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
-                FATE
-              </div>
+            <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-6">
+              محفظة العملات الرقمية الآمنة
+            </p>
+            
+            <div className="mb-6">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2">
+                Origin & Fate
+              </h2>
+              <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
+                الأصل و المصير
+              </p>
             </div>
-            <p className="text-muted-foreground text-lg md:text-xl lg:text-2xl mb-4 max-w-3xl mx-auto">
-              محفظة آمنة وتوثيق هوية وتعلم العملات الرقمية<br />
-              <span className="text-base md:text-lg lg:text-xl">Secure wallet, identity verification & crypto education</span>
+
+            <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
+              From Egypt With Love
             </p>
-            <p className="text-white/70 text-base md:text-lg mb-6 max-w-2xl mx-auto">
-              انطلق في رحلتك نحو المستقبل الرقمي مع منصة متكاملة تجمع بين الأمان والابتكار<br />
-              <span className="text-primary/80">Start your journey towards the digital future with an integrated platform</span>
-            </p>
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
             </div>
