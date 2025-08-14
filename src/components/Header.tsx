@@ -48,14 +48,14 @@ const Header = () => {
             </NavigationMenuList>
           </NavigationMenu>
         </nav>
-        <div className="flex items-center gap-2">
-          <Button asChild size="sm">
-            <Link to="/early-access">انضم لنا (Early Access)</Link>
+        <div className="flex items-center gap-3">
+          <Button asChild size="default" className="px-6">
+            <Link to="/early-access">انضم لنا</Link>
           </Button>
           {user ? (
-            <Button size="sm" variant="outline" onClick={signOut}>تسجيل الخروج</Button>
+            <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>
           ) : (
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="default" variant="outline" className="px-6">
               <Link to="/auth">تسجيل الدخول</Link>
             </Button>
           )}

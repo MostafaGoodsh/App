@@ -93,7 +93,7 @@ const Auth = () => {
               <Label htmlFor="password">كلمة المرور</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button size="lg" type="submit" disabled={isSubmitting}>
+            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? 'جاري الدخول...' : 'دخول'}
             </Button>
           </form>
@@ -111,7 +111,7 @@ const Auth = () => {
               <Label htmlFor="password">كلمة المرور</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
-            <Button size="lg" type="submit" disabled={isSubmitting}>
+            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
             </Button>
           </form>
