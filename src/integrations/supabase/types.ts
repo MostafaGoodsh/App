@@ -338,6 +338,42 @@ export type Database = {
           },
         ]
       }
+      transactions_audit: {
+        Row: {
+          access_reason: string | null
+          access_type: string
+          accessed_at: string
+          accessed_by: string
+          id: string
+          ip_address: unknown | null
+          masked_data: boolean | null
+          transaction_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          access_reason?: string | null
+          access_type: string
+          accessed_at?: string
+          accessed_by: string
+          id?: string
+          ip_address?: unknown | null
+          masked_data?: boolean | null
+          transaction_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          access_reason?: string | null
+          access_type?: string
+          accessed_at?: string
+          accessed_by?: string
+          id?: string
+          ip_address?: unknown | null
+          masked_data?: boolean | null
+          transaction_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed_at: string | null
@@ -447,9 +483,68 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      transactions_admin_secure: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          fee_status: string | null
+          id: string | null
+          masked_data: Json | null
+          network: string | null
+          status: string | null
+          transaction_type: string | null
+          user_id: string | null
+          wallet_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          fee_status?: never
+          id?: string | null
+          masked_data?: never
+          network?: string | null
+          status?: string | null
+          transaction_type?: string | null
+          user_id?: string | null
+          wallet_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          fee_status?: never
+          id?: string | null
+          masked_data?: never
+          network?: string | null
+          status?: string | null
+          transaction_type?: string | null
+          user_id?: string | null
+          wallet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_secure_transaction_export: {
+        Args: {
+          p_access_reason: string
+          p_date_from?: string
+          p_date_to?: string
+        }
+        Returns: {
+          avg_amount_range: string
+          network_distribution: Json
+          total_volume_range: string
+          transaction_count: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -460,6 +555,15 @@ export type Database = {
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      mask_transaction_data: {
+        Args: {
+          p_amount: number
+          p_reference_id: string
+          p_transaction_hash: string
+          p_wallet_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {
