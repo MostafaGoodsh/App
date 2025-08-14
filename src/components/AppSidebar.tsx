@@ -19,9 +19,9 @@ import { signOut } from "@/lib/auth";
 
 const menuItems = [
   { title: "الرئيسية", url: "/", icon: Home },
+  { title: "التعلم", url: "/learning", icon: BookOpen },
   { title: "المحفظة", url: "/wallet", icon: Wallet, requireAuth: true },
   { title: "الهوية", url: "/identity", icon: Users, requireAuth: true },
-  { title: "التعلم", url: "/learning", icon: BookOpen },
   { title: "الاستبيانات", url: "/surveys", icon: ClipboardList, requireAuth: true },
 ];
 
@@ -43,7 +43,7 @@ export function AppSidebar() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundBlendMode: 'overlay',
-        backgroundColor: 'hsl(var(--background) / 0.9)'
+        backgroundColor: 'hsl(var(--background) / 0.95)'
       }}
     >
       <SidebarHeader className="p-4">
