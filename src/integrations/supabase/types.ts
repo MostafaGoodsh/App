@@ -220,6 +220,54 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_audit: {
+        Row: {
+          access_type: string
+          accessed_at: string
+          accessed_by: string
+          fields_accessed: string[] | null
+          id: string
+          ip_address: unknown | null
+          profile_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          access_type: string
+          accessed_at?: string
+          accessed_by: string
+          fields_accessed?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          profile_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_at?: string
+          accessed_by?: string
+          fields_accessed?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          profile_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_audit_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_audit_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_admin_secure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_responses: {
         Row: {
           completed_at: string
@@ -483,6 +531,22 @@ export type Database = {
       }
     }
     Views: {
+      profiles_admin_secure: {
+        Row: {
+          access_count: number | null
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          last_accessed: string | null
+          masked_email: string | null
+          masked_phone: string | null
+          preferred_language: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       transactions_admin_secure: {
         Row: {
           created_at: string | null
@@ -532,6 +596,15 @@ export type Database = {
       }
     }
     Functions: {
+      get_secure_profile_export: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avg_profile_age_days: number
+          profiles_with_email: number
+          profiles_with_phone: number
+          total_profiles: number
+        }[]
+      }
       get_secure_transaction_export: {
         Args: {
           p_access_reason: string
@@ -555,6 +628,13 @@ export type Database = {
       is_admin: {
         Args: { _user_id: string }
         Returns: boolean
+      }
+      mask_contact_info: {
+        Args: { email: string; phone: string }
+        Returns: {
+          masked_email: string
+          masked_phone: string
+        }[]
       }
       mask_transaction_data: {
         Args: {
