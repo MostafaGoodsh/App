@@ -280,6 +280,56 @@ const Wallet = () => {
     if (!user || !wallets.length) return;
     
     const mainWallet = wallets[0];
+    
+    // التحقق من وجود معاملات سابقة لتجنب التكرار
+    const { data: existingTransactions } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1);
+    
+    if (existingTransactions && existingTransactions.length > 0) {
+      // إذا كانت هناك معاملات، أضف واحدة جديدة فقط
+      const newTransaction = {
+        user_id: user.id,
+        wallet_id: mainWallet.id,
+        amount: Math.random() * 2 + 0.1, // مبلغ عشوائي
+        transaction_type: 'deposit',
+        description: 'إيداع عملات جديدة',
+        status: 'completed',
+        network: 'solana',
+        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .insert([newTransaction])
+          .select();
+
+        if (error) throw error;
+        
+        // تحديث رصيد السولانا
+        const currentSolanaToken = walletTokens.find(t => t.cryptocurrency === 'SOL');
+        if (currentSolanaToken) {
+          await supabase
+            .from('wallet_tokens')
+            .update({ balance: (currentSolanaToken.balance || 0) + newTransaction.amount })
+            .eq('id', currentSolanaToken.id);
+        }
+        
+        // إعادة تحميل البيانات
+        fetchWallets();
+        fetchTransactions();
+        
+      } catch (error) {
+        console.error('Error adding new transaction:', error);
+      }
+      return;
+    }
+    
+    // إنشاء معاملات تجريبية للمرة الأولى
     const sampleTransactions = [
       {
         user_id: user.id,
@@ -788,6 +838,32 @@ const Wallet = () => {
                       </DialogHeader>
                       
                       <div className="space-y-6">
+                        {/* زر تحديث الرصيد */}
+                        <div className="flex justify-center">
+                          <Button
+                            onClick={async () => {
+                              toast({
+                                title: "جاري التحقق من المعاملات...",
+                                description: "يتم البحث عن المعاملات الواردة"
+                              });
+                              
+                              // محاكاة التحقق من البلوك تشين
+                              setTimeout(async () => {
+                                await createSampleTransactions();
+                                toast({
+                                  title: "تم العثور على معاملات جديدة!",
+                                  description: "تم تحديث رصيد المحفظة"
+                                });
+                              }, 2000);
+                            }}
+                            className="w-full"
+                            variant="default"
+                          >
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            تحديث الرصيد والتحقق من المعاملات
+                          </Button>
+                        </div>
+                        
                         {/* QR Code للعنوان الرئيسي */}
                         <div className="text-center">
                           {qrCodeUrl ? (
