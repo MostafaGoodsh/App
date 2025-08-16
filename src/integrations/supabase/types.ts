@@ -145,8 +145,54 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_comments: {
+        Row: {
+          comment: string
+          content_id: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          content_id: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          content_id?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "learning_content"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "learning_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_content: {
         Row: {
+          comments_count: number | null
           content: string | null
           content_type: string | null
           created_at: string
@@ -154,11 +200,15 @@ export type Database = {
           difficulty_level: string | null
           id: string
           is_published: boolean | null
+          likes_count: number | null
+          media_type: string | null
+          media_urls: string[] | null
           tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          comments_count?: number | null
           content?: string | null
           content_type?: string | null
           created_at?: string
@@ -166,11 +216,15 @@ export type Database = {
           difficulty_level?: string | null
           id?: string
           is_published?: boolean | null
+          likes_count?: number | null
+          media_type?: string | null
+          media_urls?: string[] | null
           tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          comments_count?: number | null
           content?: string | null
           content_type?: string | null
           created_at?: string
@@ -178,11 +232,43 @@ export type Database = {
           difficulty_level?: string | null
           id?: string
           is_published?: boolean | null
+          likes_count?: number | null
+          media_type?: string | null
+          media_urls?: string[] | null
           tags?: string[] | null
           title?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      learning_likes: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_likes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "learning_content"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
