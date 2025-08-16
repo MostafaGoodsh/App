@@ -13,7 +13,9 @@ import Identity from "./pages/Identity";
 import Learning from "./pages/Learning";
 import Surveys from "./pages/Surveys";
 import Auth from "./pages/Auth";
+import KYCAdmin from "./pages/KYCAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
+import RequireAdmin from "./components/auth/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
               <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
               <Route path="learning" element={<Learning />} />
               <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
+              <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

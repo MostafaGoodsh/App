@@ -645,6 +645,14 @@ export type Database = {
         }
         Returns: Json
       }
+      update_kyc_status: {
+        Args: {
+          admin_notes?: string
+          new_status: string
+          verification_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
