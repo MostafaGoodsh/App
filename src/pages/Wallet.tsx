@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Wallet as WalletIcon, Plus, ArrowUpDown, Copy, Eye, EyeOff, Bitcoin, Coins, QrCode } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QRCodeGenerator from "qrcode";
 
 interface Wallet {
   id: string;
@@ -65,6 +66,7 @@ const Wallet = () => {
   const [newCryptocurrency, setNewCryptocurrency] = useState("BTC");
   const [amount, setAmount] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
   useEffect(() => {
     if (user) {
@@ -73,6 +75,28 @@ const Wallet = () => {
       fetchCryptoAddresses();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (wallets.length > 0 && wallets[0].wallet_address) {
+      generateQRCode(wallets[0].wallet_address);
+    }
+  }, [wallets]);
+
+  const generateQRCode = async (address: string) => {
+    try {
+      const qrDataURL = await QRCodeGenerator.toDataURL(address, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      setQrCodeUrl(qrDataURL);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
 
   const fetchWallets = async () => {
     try {
@@ -528,35 +552,59 @@ const Wallet = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="receive">
+           <TabsContent value="receive">
             <Card>
               <CardHeader>
                 <CardTitle>استقبال العملة الرقمية</CardTitle>
                 <CardDescription>استخدم هذا العنوان لاستقبال العملات المشفرة</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 {wallets.length > 0 ? (
-                  <div className="text-center space-y-4">
-                    <QrCode className="h-32 w-32 mx-auto text-muted-foreground" />
-                    <div className="space-y-2">
-                      <p className="font-semibold">عنوان محفظة {wallets[0].cryptocurrency}</p>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={wallets[0].wallet_address || ""}
-                          readOnly
-                          className="font-mono"
+                  <div className="text-center space-y-6">
+                    {/* QR Code */}
+                    <div className="flex justify-center">
+                      {qrCodeUrl ? (
+                        <img 
+                          src={qrCodeUrl} 
+                          alt="QR Code لعنوان المحفظة" 
+                          className="border rounded-lg shadow-sm bg-white p-2"
                         />
-                        <Button
-                          variant="outline"
-                          onClick={() => copyToClipboard(wallets[0].wallet_address || "")}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
+                      ) : (
+                        <div className="w-48 h-48 border rounded-lg flex items-center justify-center bg-muted">
+                          <QrCode className="h-16 w-16 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Wallet Info */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <p className="font-semibold text-lg">محفظة {wallets[0].cryptocurrency}</p>
+                        <div className="flex items-center gap-2 max-w-md mx-auto">
+                          <Input
+                            value={wallets[0].wallet_address || ""}
+                            readOnly
+                            className="font-mono text-center"
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => copyToClipboard(wallets[0].wallet_address || "")}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Instructions */}
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                        <p className="font-medium text-sm">تعليمات الاستقبال:</p>
+                        <ul className="text-sm text-muted-foreground space-y-1">
+                          <li>• أرسل فقط {wallets[0].cryptocurrency} إلى هذا العنوان</li>
+                          <li>• تأكد من العنوان قبل الإرسال</li>
+                          <li>• امسح رمز QR أو انسخ العنوان</li>
+                        </ul>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      أرسل فقط {wallets[0].cryptocurrency} إلى هذا العنوان
-                    </p>
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
