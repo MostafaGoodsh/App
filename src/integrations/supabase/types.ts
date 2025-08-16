@@ -351,6 +351,63 @@ export type Database = {
           },
         ]
       }
+      pending_deposits: {
+        Row: {
+          amount: number
+          confirmations: number | null
+          created_at: string
+          cryptocurrency: string
+          detected_at: string
+          from_address: string
+          id: string
+          network: string
+          processed_at: string | null
+          required_confirmations: number | null
+          status: string
+          to_address: string
+          transaction_hash: string | null
+          updated_at: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          confirmations?: number | null
+          created_at?: string
+          cryptocurrency: string
+          detected_at?: string
+          from_address: string
+          id?: string
+          network: string
+          processed_at?: string | null
+          required_confirmations?: number | null
+          status?: string
+          to_address: string
+          transaction_hash?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          confirmations?: number | null
+          created_at?: string
+          cryptocurrency?: string
+          detected_at?: string
+          from_address?: string
+          id?: string
+          network?: string
+          processed_at?: string | null
+          required_confirmations?: number | null
+          status?: string
+          to_address?: string
+          transaction_hash?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

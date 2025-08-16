@@ -71,6 +71,23 @@ interface Transaction {
   created_at: string;
 }
 
+interface PendingDeposit {
+  id: string;
+  user_id: string;
+  wallet_id: string;
+  from_address: string;
+  to_address: string;
+  amount: number;
+  cryptocurrency: string;
+  network: string;
+  transaction_hash: string | null;
+  confirmations: number;
+  required_confirmations: number;
+  status: 'pending' | 'confirmed' | 'failed';
+  detected_at: string;
+  processed_at?: string;
+}
+
 const SUPPORTED_CRYPTOCURRENCIES = [
   { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', color: 'text-orange-500' },
   { value: 'ETH', label: 'Ethereum (ETH)', icon: 'Ξ', color: 'text-blue-500' },
@@ -99,6 +116,7 @@ const Wallet = () => {
   const [customTokens, setCustomTokens] = useState<CustomToken[]>([]);
   const [cryptoAddresses, setCryptoAddresses] = useState<CryptoAddress[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [pendingDeposits, setPendingDeposits] = useState<PendingDeposit[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPrivateKeys, setShowPrivateKeys] = useState(false);
   
@@ -126,6 +144,7 @@ const Wallet = () => {
       fetchTransactions();
       fetchCryptoAddresses();
       fetchCustomTokens();
+      fetchPendingDeposits();
     }
   }, [user]);
 
@@ -255,6 +274,99 @@ const Wallet = () => {
       });
     }
     setLoading(false);
+  };
+
+  const fetchPendingDeposits = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pending_deposits')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('detected_at', { ascending: false });
+
+      if (error) throw error;
+      setPendingDeposits((data || []) as PendingDeposit[]);
+    } catch (error) {
+      console.error('Error fetching pending deposits:', error);
+    }
+  };
+
+  const simulateIncomingDeposit = async (walletAddress: string, amount: number, crypto: string, network: string) => {
+    try {
+      // العثور على المحفظة المطابقة للعنوان
+      const targetWallet = wallets.find(w => w.wallet_address === walletAddress);
+      if (!targetWallet) {
+        toast({
+          title: "عنوان غير صحيح",
+          description: "لم يتم العثور على محفظة بهذا العنوان",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // إنشاء إيداع معلق
+      const { data: depositData, error: depositError } = await supabase
+        .from('pending_deposits')
+        .insert([
+          {
+            user_id: user?.id,
+            wallet_id: targetWallet.id,
+            from_address: generateRealAddress(crypto), // عنوان المرسل (وهمي)
+            to_address: walletAddress,
+            amount: amount,
+            cryptocurrency: crypto,
+            network: network,
+            transaction_hash: `0x${Math.random().toString(16).substring(2, 66)}`,
+            confirmations: 0,
+            required_confirmations: 3,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
+
+      if (depositError) throw depositError;
+
+      toast({
+        title: "تم اكتشاف إيداع واردة",
+        description: `تم اكتشاف إيداع ${amount} ${crypto} في انتظار التأكيد`
+      });
+
+      // محاكاة تأكيد المعاملة بعد 5 ثوان
+      setTimeout(async () => {
+        try {
+          const { error: confirmError } = await supabase
+            .from('pending_deposits')
+            .update({ 
+              status: 'confirmed',
+              confirmations: 3 
+            })
+            .eq('id', depositData.id);
+
+          if (!confirmError) {
+            toast({
+              title: "تم تأكيد الإيداع",
+              description: `تم تأكيد إيداع ${amount} ${crypto} وإضافته إلى رصيدك`
+            });
+            
+            fetchWallets();
+            fetchTransactions();
+            fetchPendingDeposits();
+          }
+        } catch (error) {
+          console.error('Error confirming deposit:', error);
+        }
+      }, 5000);
+
+      fetchPendingDeposits();
+    } catch (error) {
+      console.error('Error simulating deposit:', error);
+      toast({
+        title: "خطأ في المحاكاة",
+        description: "حدث خطأ أثناء محاكاة الإيداع",
+        variant: "destructive"
+      });
+    }
   };
 
   const createMultiNetworkWallet = async () => {
@@ -1173,6 +1285,106 @@ const Wallet = () => {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* الإيداعات المعلقة */}
+                    {pendingDeposits.length > 0 && (
+                      <div className="space-y-4">
+                        <h4 className="font-semibold">الإيداعات المعلقة</h4>
+                        <div className="space-y-3">
+                          {pendingDeposits.filter(d => d.status === 'pending').map((deposit) => (
+                            <div key={deposit.id} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                              <div>
+                                <p className="font-medium">{deposit.amount} {deposit.cryptocurrency}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  من {deposit.from_address.substring(0, 10)}...
+                                </p>
+                                <p className="text-xs text-yellow-600">
+                                  التأكيدات: {deposit.confirmations}/{deposit.required_confirmations}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="bg-yellow-100">
+                                معلق
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* محاكاة استقبال الأموال */}
+                    <div className="space-y-4 border-t pt-6">
+                      <h4 className="font-semibold">محاكاة استقبال الأموال</h4>
+                      <p className="text-sm text-muted-foreground">
+                        لأغراض التجربة - محاكاة استقبال أموال من محفظة خارجية
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="space-y-2">
+                          <Label>المبلغ</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="1.0"
+                            id="sim-amount"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>العملة</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر العملة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SUPPORTED_CRYPTOCURRENCIES.map((crypto) => (
+                                <SelectItem key={crypto.value} value={crypto.value}>
+                                  {crypto.icon} {crypto.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>الشبكة</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر الشبكة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SUPPORTED_NETWORKS.map((network) => (
+                                <SelectItem key={network.value} value={network.value}>
+                                  <span className={network.color}>{network.label}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => {
+                          const amountInput = document.getElementById('sim-amount') as HTMLInputElement;
+                          const amount = parseFloat(amountInput?.value || '0');
+                          
+                          if (amount > 0 && wallets.length > 0) {
+                            simulateIncomingDeposit(
+                              wallets[0].wallet_address || '', 
+                              amount, 
+                              'BTC', 
+                              'bitcoin'
+                            );
+                            amountInput.value = '';
+                          } else {
+                            toast({
+                              title: "بيانات ناقصة",
+                              description: "يرجى إدخال مبلغ صحيح",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                        className="w-full"
+                        variant="outline"
+                      >
+                        محاكاة إيداع وارد
+                      </Button>
                     </div>
 
                     {/* تعليمات الاستقبال */}
