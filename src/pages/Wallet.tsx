@@ -189,22 +189,42 @@ const WalletFixed = () => {
   // التحقق من وجود Phantom Wallet
   useEffect(() => {
     const checkPhantomWallet = () => {
-      if (typeof window !== 'undefined' && window.solana && window.solana.isPhantom) {
-        setPhantomWallet(window.solana);
+      // التحقق المتقدم من محفظة Phantom
+      const provider = (window as any)?.phantom?.solana || window.solana;
+      
+      if (provider && (provider.isPhantom || provider._metamask?.isUnlocked !== undefined)) {
+        console.log('Phantom Wallet detected!', provider);
+        setPhantomWallet(provider);
+        
         // التحقق من الاتصال المسبق
-        window.solana.connect({ onlyIfTrusted: true })
+        provider.connect({ onlyIfTrusted: true })
           .then((response: any) => {
             setPhantomConnected(true);
             setPhantomPublicKey(response.publicKey.toString());
             fetchPhantomBalance(response.publicKey.toString());
           })
           .catch(() => {
-            // لم يتم الاتصال مسبقاً
+            console.log('Not previously connected');
           });
+      } else {
+        console.log('Phantom Wallet not found');
       }
     };
 
+    // التحقق المباشر
     checkPhantomWallet();
+    
+    // التحقق المتأخر للتأكد من تحميل المحفظة
+    const timer = setTimeout(checkPhantomWallet, 1000);
+    
+    // الاستماع لأحداث تحميل المحفظة
+    const handleLoad = () => checkPhantomWallet();
+    window.addEventListener('load', handleLoad);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('load', handleLoad);
+    };
   }, []);
 
   const generateQRCode = async (address: string) => {
