@@ -294,9 +294,9 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: Math.random() * 2 + 0.1, // مبلغ عشوائي
-        transaction_type: 'credit',
+        transaction_type: 'receive',
         description: 'إيداع عملات جديدة',
-        status: 'completed',
+        status: 'confirmed',
         network: 'solana',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date().toISOString()
@@ -335,9 +335,9 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 0.5,
-        transaction_type: 'credit',
+        transaction_type: 'receive',
         description: 'استقبال عملات سولانا',
-        status: 'completed',
+        status: 'confirmed',
         network: 'solana',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // منذ ساعتين
@@ -346,9 +346,9 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 1.2,
-        transaction_type: 'credit',
+        transaction_type: 'receive',
         description: 'استقبال عملات إيثيريوم',
-        status: 'completed',
+        status: 'confirmed',
         network: 'ethereum',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // منذ يوم
@@ -357,9 +357,9 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 0.001,
-        transaction_type: 'credit',
+        transaction_type: 'receive',
         description: 'استقبال بيتكوين',
-        status: 'completed',
+        status: 'confirmed',
         network: 'bitcoin',
         transaction_hash: `${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // منذ 3 أيام
@@ -391,7 +391,7 @@ const Wallet = () => {
     
     // تحديث الرصيد الرئيسي للمحفظة
     const totalDeposits = transactions
-      .filter(t => t.transaction_type === 'credit')
+      .filter(t => t.transaction_type === 'receive')
       .reduce((sum, t) => sum + t.amount, 0);
     
     try {
