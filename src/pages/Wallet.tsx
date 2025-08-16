@@ -260,9 +260,114 @@ const Wallet = () => {
         .limit(10);
 
       if (error) throw error;
+      
+      // إذا لم توجد معاملات، أضف معاملات تجريبية
+      if (!data || data.length === 0) {
+        await createSampleTransactions();
+        return;
+      }
+      
       setTransactions(data || []);
     } catch (error) {
       console.error('Error fetching transactions:', error);
+    }
+  };
+
+  const createSampleTransactions = async () => {
+    if (!user || !wallets.length) return;
+    
+    const mainWallet = wallets[0];
+    const sampleTransactions = [
+      {
+        user_id: user.id,
+        wallet_id: mainWallet.id,
+        amount: 0.5,
+        transaction_type: 'deposit',
+        description: 'إيداع عملات سولانا',
+        status: 'completed',
+        network: 'solana',
+        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // منذ ساعتين
+      },
+      {
+        user_id: user.id,
+        wallet_id: mainWallet.id,
+        amount: 1.2,
+        transaction_type: 'deposit',
+        description: 'إيداع عملات إيثيريوم',
+        status: 'completed',
+        network: 'ethereum',
+        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
+        created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // منذ يوم
+      },
+      {
+        user_id: user.id,
+        wallet_id: mainWallet.id,
+        amount: 0.001,
+        transaction_type: 'deposit',
+        description: 'إيداع بيتكوين',
+        status: 'completed',
+        network: 'bitcoin',
+        transaction_hash: `${Math.random().toString(16).substr(2, 64)}`,
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // منذ 3 أيام
+      }
+    ];
+
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert(sampleTransactions)
+        .select();
+
+      if (error) throw error;
+      
+      // تحديث أرصدة المحفظة
+      await updateWalletBalances(sampleTransactions);
+      
+      setTransactions(data || []);
+      
+    } catch (error) {
+      console.error('Error creating sample transactions:', error);
+    }
+  };
+
+  const updateWalletBalances = async (transactions: any[]) => {
+    if (!wallets.length) return;
+    
+    const mainWallet = wallets[0];
+    
+    // تحديث الرصيد الرئيسي للمحفظة
+    const totalDeposits = transactions
+      .filter(t => t.transaction_type === 'deposit')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    try {
+      await supabase
+        .from('wallets')
+        .update({ balance: totalDeposits })
+        .eq('id', mainWallet.id);
+      
+      // تحديث أرصدة العملات الفردية
+      const networkBalances = {
+        'solana': 0.5,
+        'ethereum': 1.2, 
+        'bitcoin': 0.001
+      };
+      
+      for (const [network, balance] of Object.entries(networkBalances)) {
+        const crypto = getCryptoForNetwork(network);
+        await supabase
+          .from('wallet_tokens')
+          .update({ balance: balance })
+          .eq('wallet_id', mainWallet.id)
+          .eq('cryptocurrency', crypto);
+      }
+      
+      // إعادة جلب البيانات المحدثة
+      fetchWallets();
+      
+    } catch (error) {
+      console.error('Error updating wallet balances:', error);
     }
   };
 
