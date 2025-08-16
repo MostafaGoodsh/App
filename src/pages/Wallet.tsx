@@ -294,7 +294,7 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: Math.random() * 2 + 0.1, // مبلغ عشوائي
-        transaction_type: 'receive',
+        transaction_type: 'credit',
         description: 'إيداع عملات جديدة',
         status: 'completed',
         network: 'solana',
@@ -335,7 +335,7 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 0.5,
-        transaction_type: 'receive',
+        transaction_type: 'credit',
         description: 'استقبال عملات سولانا',
         status: 'completed',
         network: 'solana',
@@ -346,7 +346,7 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 1.2,
-        transaction_type: 'receive',
+        transaction_type: 'credit',
         description: 'استقبال عملات إيثيريوم',
         status: 'completed',
         network: 'ethereum',
@@ -357,7 +357,7 @@ const Wallet = () => {
         user_id: user.id,
         wallet_id: mainWallet.id,
         amount: 0.001,
-        transaction_type: 'receive',
+        transaction_type: 'credit',
         description: 'استقبال بيتكوين',
         status: 'completed',
         network: 'bitcoin',
@@ -391,7 +391,7 @@ const Wallet = () => {
     
     // تحديث الرصيد الرئيسي للمحفظة
     const totalDeposits = transactions
-      .filter(t => t.transaction_type === 'receive')
+      .filter(t => t.transaction_type === 'credit')
       .reduce((sum, t) => sum + t.amount, 0);
     
     try {
