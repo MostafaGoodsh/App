@@ -864,9 +864,9 @@ const Wallet = () => {
                                     <span>
                                       {token.cryptocurrency || token.token?.symbol}
                                     </span>
-                                    <span className="text-muted-foreground">
-                                      {token.balance}
-                                    </span>
+                                     <span className="text-muted-foreground">
+                                       {(token.balance || 0).toFixed(2)}
+                                     </span>
                                   </div>
                                 </SelectItem>
                               ))}
@@ -1012,7 +1012,7 @@ const Wallet = () => {
                            onClick={() => {
                              toast({
                                title: "تفاصيل العملة",
-                               description: `العملة: ${token.cryptocurrency || token.token?.name}\nالشبكة: ${token.network}\nالرصيد: ${token.balance}\nمعرف العملة: ${token.id}\nالعقد: ${token.contract_address || 'غير محدد'}`
+                               description: `العملة: ${token.cryptocurrency || token.token?.name}\nالشبكة: ${token.network}\nالرصيد: ${(token.balance || 0).toFixed(2)}\nمعرف العملة: ${token.id}\nالعقد: ${token.contract_address || 'غير محدد'}`
                              });
                            }}
                          >
@@ -1031,7 +1031,7 @@ const Wallet = () => {
                            </div>
                            <div className="text-right">
                              <p className="font-semibold">
-                               {token.balance} {token.cryptocurrency || token.token?.symbol}
+                               {(token.balance || 0).toFixed(2)} {token.cryptocurrency || token.token?.symbol}
                              </p>
                              <p className="text-xs text-muted-foreground">
                                اضغط للتفاصيل
@@ -1096,12 +1096,12 @@ const Wallet = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-semibold ${
-                        transaction.transaction_type === 'send' ? 'text-red-600' : 'text-green-600'
-                      }`}>
-                        {transaction.transaction_type === 'send' ? '-' : '+'}
-                        {transaction.amount}
-                      </p>
+                       <p className={`font-semibold ${
+                         transaction.transaction_type === 'send' ? 'text-red-600' : 'text-green-600'
+                       }`}>
+                         {transaction.transaction_type === 'send' ? '-' : '+'}
+                         {(transaction.amount || 0).toFixed(2)}
+                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(transaction.created_at).toLocaleString('ar-EG')}
                       </p>
