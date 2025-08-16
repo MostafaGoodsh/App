@@ -1,12 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAppContent } from "@/hooks/useAppContent";
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
+  const { getContent, loading } = useAppContent();
   return (
     <>
       <Helmet>
-        <title>Crypto-MSR | محفظة العملات الرقمية</title>
+        <title>{getContent('app_name', 'Crypto-MSR')} | محفظة العملات الرقمية</title>
         <meta name="description" content="منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification" />
         <link rel="canonical" href={canonical} />
       </Helmet>
@@ -26,10 +28,10 @@ const Index = () => {
               </div>
               <div className="flex-1">
                 <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
-                  Crypto-MSR
+                  {getContent('app_name', 'Crypto-MSR')}
                 </h1>
                 <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-6">
-                  محفظة العملات الرقمية الآمنة
+                  {getContent('hero_subtitle', 'محفظة العملات الرقمية الآمنة')}
                 </p>
                 
                 <div className="mb-6">
@@ -53,7 +55,9 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]"><Link to="/early-access">انضم الآن | Join Now</Link></Button>
+              <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]">
+                <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
+              </Button>
             </div>
           </div>
         </section>

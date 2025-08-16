@@ -31,6 +31,7 @@ const adminMenuItems = [
   { title: "إدارة الهوية", url: "/admin/kyc", icon: Shield },
   { title: "إدارة الاستبيانات", url: "/admin/surveys", icon: ClipboardList },
   { title: "إدارة التعلم", url: "/admin/learning", icon: BookOpen },
+  { title: "إدارة محتوى التطبيق", url: "/admin/content", icon: Settings },
 ];
 
 export function AppSidebar() {

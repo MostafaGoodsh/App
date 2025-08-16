@@ -8,14 +8,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
+import { useAppContent } from "@/hooks/useAppContent";
 
 const Header = () => {
   const { user } = useAuth();
+  const { getContent } = useAppContent();
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="font-playfair text-base font-bold">
-          منصة مصر
+          {getContent('app_name', 'منصة مصر')}
         </Link>
         <nav aria-label="التنقل الرئيسي">
           <NavigationMenu>
@@ -50,7 +52,7 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-3">
           <Button asChild size="default" className="px-6">
-            <Link to="/early-access">انضم الآن</Link>
+            <Link to="/early-access">{getContent('hero_cta', 'انضم الآن')}</Link>
           </Button>
           {user ? (
             <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>

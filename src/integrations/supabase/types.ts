@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_content: {
+        Row: {
+          alt_text: string | null
+          content_key: string
+          content_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          position_order: number | null
+          text_content: string | null
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string | null
+          content_key: string
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          position_order?: number | null
+          text_content?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string | null
+          content_key?: string
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          position_order?: number | null
+          text_content?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crypto_addresses: {
         Row: {
           address: string
