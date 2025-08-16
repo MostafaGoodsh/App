@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn } from "lucide-react";
+import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 const menuItems = [
   { title: "الرئيسية", url: "/", icon: Home },
@@ -25,11 +27,45 @@ const menuItems = [
   { title: "الاستبيانات", url: "/surveys", icon: ClipboardList, requireAuth: true },
 ];
 
+const adminMenuItems = [
+  { title: "إدارة الهوية", url: "/admin/kyc", icon: Shield },
+  { title: "إدارة الاستبيانات", url: "/admin/surveys", icon: ClipboardList },
+  { title: "إدارة التعلم", url: "/admin/learning", icon: BookOpen },
+];
+
 export function AppSidebar() {
   const { open, isMobile } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
   const currentPath = location.pathname;
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc("is_admin", {
+          _user_id: user.id,
+        });
+
+        if (error) {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data);
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50";
@@ -84,6 +120,26 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          {isAdmin && (
+            <SidebarGroup>
+              <SidebarGroupLabel>لوحة التحكم</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavClass}>
+                          <item.icon className="h-4 w-4" />
+                          {(open || isMobile) && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
         </SidebarContent>
 
         <SidebarFooter className="p-4">
