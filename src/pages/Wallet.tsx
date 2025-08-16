@@ -20,6 +20,16 @@ import * as QRCodeGenerator from 'qrcode';
 // Declare window interface for Phantom Wallet
 declare global {
   interface Window {
+    phantom?: {
+      solana?: {
+        isPhantom?: boolean;
+        connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString(): string } }>;
+        disconnect: () => Promise<void>;
+        request: (opts: { method: string; params?: any }) => Promise<any>;
+        on: (event: string, callback: (args: any) => void) => void;
+        off: (event: string, callback: (args: any) => void) => void;
+      };
+    };
     solana?: {
       isPhantom?: boolean;
       connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString(): string } }>;
@@ -189,14 +199,27 @@ const WalletFixed = () => {
   // التحقق من وجود Phantom Wallet
   useEffect(() => {
     const checkPhantomWallet = () => {
-      // التحقق المتقدم من محفظة Phantom
-      const provider = (window as any)?.phantom?.solana || window.solana;
+      // طرق متعددة للتحقق من Phantom
+      const phantom = window.phantom?.solana;
+      const solana = window.solana;
       
-      if (provider && (provider.isPhantom || provider._metamask?.isUnlocked !== undefined)) {
-        console.log('Phantom Wallet detected!', provider);
-        setPhantomWallet(provider);
-        
-        // التحقق من الاتصال المسبق
+      console.log('Checking for Phantom...', { phantom, solana, isPhantom: solana?.isPhantom });
+      
+      if (phantom?.isPhantom) {
+        console.log('Phantom found via window.phantom.solana');
+        setPhantomWallet(phantom);
+      } else if (solana?.isPhantom) {
+        console.log('Phantom found via window.solana');
+        setPhantomWallet(solana);
+      } else {
+        console.log('Phantom not detected');
+        setPhantomWallet(null);
+        return;
+      }
+      
+      // إذا تم العثور على المحفظة، تحقق من الاتصال المسبق
+      const provider = phantom || solana;
+      if (provider) {
         provider.connect({ onlyIfTrusted: true })
           .then((response: any) => {
             setPhantomConnected(true);
@@ -206,24 +229,21 @@ const WalletFixed = () => {
           .catch(() => {
             console.log('Not previously connected');
           });
-      } else {
-        console.log('Phantom Wallet not found');
       }
     };
 
-    // التحقق المباشر
+    // التحقق الفوري
     checkPhantomWallet();
     
-    // التحقق المتأخر للتأكد من تحميل المحفظة
-    const timer = setTimeout(checkPhantomWallet, 1000);
-    
-    // الاستماع لأحداث تحميل المحفظة
-    const handleLoad = () => checkPhantomWallet();
-    window.addEventListener('load', handleLoad);
+    // التحقق بعد تأخير قصير
+    const timer1 = setTimeout(checkPhantomWallet, 100);
+    const timer2 = setTimeout(checkPhantomWallet, 500);
+    const timer3 = setTimeout(checkPhantomWallet, 1000);
     
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('load', handleLoad);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
     };
   }, []);
 
