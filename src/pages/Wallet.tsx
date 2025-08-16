@@ -196,55 +196,17 @@ const WalletFixed = () => {
     }
   }, [wallets]);
 
-  // التحقق من وجود Phantom Wallet
+  // بساطة التحقق من Phantom
   useEffect(() => {
-    const checkPhantomWallet = () => {
-      // طرق متعددة للتحقق من Phantom
-      const phantom = window.phantom?.solana;
-      const solana = window.solana;
-      
-      console.log('Checking for Phantom...', { phantom, solana, isPhantom: solana?.isPhantom });
-      
-      if (phantom?.isPhantom) {
-        console.log('Phantom found via window.phantom.solana');
-        setPhantomWallet(phantom);
-      } else if (solana?.isPhantom) {
-        console.log('Phantom found via window.solana');
-        setPhantomWallet(solana);
-      } else {
-        console.log('Phantom not detected');
-        setPhantomWallet(null);
-        return;
-      }
-      
-      // إذا تم العثور على المحفظة، تحقق من الاتصال المسبق
-      const provider = phantom || solana;
-      if (provider) {
-        provider.connect({ onlyIfTrusted: true })
-          .then((response: any) => {
-            setPhantomConnected(true);
-            setPhantomPublicKey(response.publicKey.toString());
-            fetchPhantomBalance(response.publicKey.toString());
-          })
-          .catch(() => {
-            console.log('Not previously connected');
-          });
+    const checkPhantom = () => {
+      const provider = window.solana || window.phantom?.solana;
+      if (provider?.isPhantom) {
+        setPhantomWallet(provider);
       }
     };
-
-    // التحقق الفوري
-    checkPhantomWallet();
     
-    // التحقق بعد تأخير قصير
-    const timer1 = setTimeout(checkPhantomWallet, 100);
-    const timer2 = setTimeout(checkPhantomWallet, 500);
-    const timer3 = setTimeout(checkPhantomWallet, 1000);
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-    };
+    checkPhantom();
+    setTimeout(checkPhantom, 1000);
   }, []);
 
   const generateQRCode = async (address: string) => {
