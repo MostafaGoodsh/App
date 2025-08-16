@@ -296,7 +296,7 @@ const Wallet = () => {
         amount: Math.random() * 2 + 0.1, // مبلغ عشوائي
         transaction_type: 'receive',
         description: 'إيداع عملات جديدة',
-        status: 'confirmed',
+        status: 'completed',
         network: 'solana',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date().toISOString()
@@ -337,7 +337,7 @@ const Wallet = () => {
         amount: 0.5,
         transaction_type: 'receive',
         description: 'استقبال عملات سولانا',
-        status: 'confirmed',
+        status: 'completed',
         network: 'solana',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // منذ ساعتين
@@ -348,7 +348,7 @@ const Wallet = () => {
         amount: 1.2,
         transaction_type: 'receive',
         description: 'استقبال عملات إيثيريوم',
-        status: 'confirmed',
+        status: 'completed',
         network: 'ethereum',
         transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // منذ يوم
@@ -359,7 +359,7 @@ const Wallet = () => {
         amount: 0.001,
         transaction_type: 'receive',
         description: 'استقبال بيتكوين',
-        status: 'confirmed',
+        status: 'completed',
         network: 'bitcoin',
         transaction_hash: `${Math.random().toString(16).substr(2, 64)}`,
         created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // منذ 3 أيام
