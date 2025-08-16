@@ -552,7 +552,7 @@ const Wallet = () => {
       'BNB': /^bnb[a-z0-9]{39}$|^0x[A-Fa-f0-9]{40}$/,
       'ADA': /^addr1[a-z0-9]{53,103}$/,
       'DOT': /^1[A-Za-z0-9]{46,47}$/,
-      'SOL': /^[A-Za-z0-9]{32,44}$/
+      'SOL': /^[1-9A-HJ-NP-Za-km-z]{44}$/ // Base58 encoded, exactly 44 characters
     };
     
     const pattern = patterns[crypto];
