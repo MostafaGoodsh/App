@@ -881,6 +881,149 @@ const Wallet = () => {
           </Card>
         )}
 
+        {/* Phantom Wallet Card - محفظة حقيقية دائماً متاحة */}
+        <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">P</span>
+                </div>
+                Phantom Wallet (Solana)
+              </CardTitle>
+              <CardDescription>
+                محفظة Solana الحقيقية - تجربة آمنة متصلة بالبلوك تشين
+              </CardDescription>
+            </div>
+            <div className="flex gap-2">
+              {phantomConnected ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const amount = window.prompt("أدخل مبلغ SOL للإرسال:");
+                      const address = window.prompt("أدخل عنوان المستقبل:");
+                      if (amount && address) {
+                        sendSolanaTransaction(address, parseFloat(amount));
+                      }
+                    }}
+                    className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    إرسال SOL
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={disconnectPhantomWallet}
+                    className="border-red-300 text-red-700 hover:bg-red-100"
+                  >
+                    قطع الاتصال
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={connectPhantomWallet}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-6"
+                >
+                  {phantomWallet ? "🔗 اتصال بـ Phantom" : "📥 تثبيت Phantom"}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          
+          <CardContent>
+            {phantomConnected ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-purple-200 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="text-3xl text-purple-600">◎</div>
+                    <div>
+                      <p className="font-semibold text-gray-900">رصيد SOL الحقيقي</p>
+                      <p className="text-sm text-purple-600 font-mono">
+                        العنوان: {phantomPublicKey.slice(0, 16)}...
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-xl text-gray-900">
+                      {phantomBalance.toFixed(4)} SOL
+                    </p>
+                    <p className="text-xs text-green-600 font-medium">
+                      ✅ من شبكة Solana الحقيقية
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="p-3 bg-green-100 rounded-lg border border-green-300">
+                    <div className="text-green-700 font-semibold">✓ متصل</div>
+                    <div className="text-sm text-green-600">محفظة حقيقية</div>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg border border-blue-300">
+                    <div className="text-blue-700 font-semibold">🔒 آمن</div>
+                    <div className="text-sm text-blue-600">مفاتيح محلية</div>
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-amber-100 rounded-lg border border-amber-300">
+                  <p className="text-sm text-amber-800">
+                    <strong>⚠️ تحذير:</strong> هذه محفظة حقيقية متصلة بشبكة Solana. 
+                    المعاملات حقيقية وستؤثر على رصيدك الفعلي!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                  <span className="text-white text-3xl font-bold">P</span>
+                </div>
+                
+                {phantomWallet ? (
+                  <>
+                    <h3 className="font-bold text-lg text-gray-900">محفظة Phantom متاحة! 🎉</h3>
+                    <p className="text-gray-600">
+                      اضغط <span className="font-semibold text-purple-600">"اتصال بـ Phantom"</span> للاتصال بمحفظتك الحقيقية
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-bold text-lg text-gray-900">قم بتثبيت محفظة Phantom</h3>
+                    <p className="text-gray-600 mb-4">
+                      للحصول على تجربة محفظة حقيقية وآمنة لشبكة Solana
+                    </p>
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open('https://phantom.app/', '_blank')}
+                        className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                      >
+                        📥 تحميل Phantom
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          toast({
+                            title: "تحقق من التثبيت",
+                            description: "يرجى تحديث الصفحة بعد تثبيت Phantom"
+                          });
+                          setTimeout(() => window.location.reload(), 2000);
+                        }}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        🔄 تحقق من التثبيت
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* عرض المحفظة والأرصدة */}
         {wallets.length > 0 && (
           <div className="grid gap-6 mb-6">
@@ -1228,31 +1371,10 @@ const Wallet = () => {
           </div>
         )}
 
-        {/* Phantom Wallet Card */}
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">P</span>
-                </div>
-                Phantom Wallet (Solana)
-              </CardTitle>
-              <CardDescription>
-                محفظة Solana الحقيقية - تجربة آمنة بدون مخاطر
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              {phantomConnected ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const amount = window.prompt("أدخل مبلغ SOL للإرسال:");
-                      const address = window.prompt("أدخل عنوان المستقبل:");
-                      if (amount && address) {
-                        sendSolanaTransaction(address, parseFloat(amount));
+          </div>
+        )}
+
+        {/* أرصدة العملات */}
                       }
                     }}
                   >
