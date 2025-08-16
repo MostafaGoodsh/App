@@ -264,9 +264,9 @@ const Wallet = () => {
 
       if (error) throw error;
       
-      // إذا لم توجد معاملات، أضف معاملات تجريبية
+      // إذا لم توجد معاملات، نعرض رسالة بدلاً من إنشاء معاملات وهمية
       if (!data || data.length === 0) {
-        await createSampleTransactions();
+        setTransactions([]);
         return;
       }
       
@@ -276,113 +276,7 @@ const Wallet = () => {
     }
   };
 
-  const createSampleTransactions = async () => {
-    if (!user || !wallets.length) return;
-    
-    const mainWallet = wallets[0];
-    
-    // التحقق من وجود معاملات سابقة لتجنب التكرار
-    const { data: existingTransactions } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('user_id', user.id)
-      .limit(1);
-    
-    if (existingTransactions && existingTransactions.length > 0) {
-      // إذا كانت هناك معاملات، أضف واحدة جديدة فقط
-      const newTransaction = {
-        user_id: user.id,
-        wallet_id: mainWallet.id,
-        amount: Math.random() * 2 + 0.1, // مبلغ عشوائي
-        transaction_type: 'receive',
-        description: 'إيداع عملات جديدة',
-        status: 'completed',
-        network: 'solana',
-        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
-        created_at: new Date().toISOString()
-      };
-
-      try {
-        const { data, error } = await supabase
-          .from('transactions')
-          .insert([newTransaction])
-          .select();
-
-        if (error) throw error;
-        
-        // تحديث رصيد السولانا
-        const currentSolanaToken = walletTokens.find(t => t.cryptocurrency === 'SOL');
-        if (currentSolanaToken) {
-          await supabase
-            .from('wallet_tokens')
-            .update({ balance: (currentSolanaToken.balance || 0) + newTransaction.amount })
-            .eq('id', currentSolanaToken.id);
-        }
-        
-        // إعادة تحميل البيانات
-        fetchWallets();
-        fetchTransactions();
-        
-      } catch (error) {
-        console.error('Error adding new transaction:', error);
-      }
-      return;
-    }
-    
-    // إنشاء معاملات تجريبية للمرة الأولى
-    const sampleTransactions = [
-      {
-        user_id: user.id,
-        wallet_id: mainWallet.id,
-        amount: 0.5,
-        transaction_type: 'receive',
-        description: 'استقبال عملات سولانا',
-        status: 'completed',
-        network: 'solana',
-        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
-        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // منذ ساعتين
-      },
-      {
-        user_id: user.id,
-        wallet_id: mainWallet.id,
-        amount: 1.2,
-        transaction_type: 'receive',
-        description: 'استقبال عملات إيثيريوم',
-        status: 'completed',
-        network: 'ethereum',
-        transaction_hash: `0x${Math.random().toString(16).substr(2, 64)}`,
-        created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // منذ يوم
-      },
-      {
-        user_id: user.id,
-        wallet_id: mainWallet.id,
-        amount: 0.001,
-        transaction_type: 'receive',
-        description: 'استقبال بيتكوين',
-        status: 'completed',
-        network: 'bitcoin',
-        transaction_hash: `${Math.random().toString(16).substr(2, 64)}`,
-        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // منذ 3 أيام
-      }
-    ];
-
-    try {
-      const { data, error } = await supabase
-        .from('transactions')
-        .insert(sampleTransactions)
-        .select();
-
-      if (error) throw error;
-      
-      // تحديث أرصدة المحفظة
-      await updateWalletBalances(sampleTransactions);
-      
-      setTransactions(data || []);
-      
-    } catch (error) {
-      console.error('Error creating sample transactions:', error);
-    }
-  };
+  // تم حذف دالة إنشاء المعاملات الوهمية
 
   const updateWalletBalances = async (transactions: any[]) => {
     if (!wallets.length) return;
@@ -849,10 +743,10 @@ const Wallet = () => {
                               
                               // محاكاة التحقق من البلوك تشين
                               setTimeout(async () => {
-                                await createSampleTransactions();
+                                await fetchTransactions();
                                 toast({
-                                  title: "تم العثور على معاملات جديدة!",
-                                  description: "تم تحديث رصيد المحفظة"
+                                  title: "تم التحقق من البلوك تشين",
+                                  description: "لا توجد معاملات جديدة"
                                 });
                               }, 2000);
                             }}
@@ -1108,32 +1002,44 @@ const Wallet = () => {
                 <div className="grid gap-4">
                   {/* عرض أرصدة العملات */}
                   <div className="grid gap-3">
-                    {walletTokens.map((token) => {
-                      const cryptoInfo = getCryptoInfo(token.cryptocurrency || token.token?.symbol || 'ETH');
-                      
-                      return (
-                        <div key={token.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className={`text-2xl ${cryptoInfo.color}`}>
-                              {cryptoInfo.icon}
-                            </div>
-                            <div>
-                              <p className="font-medium">
-                                {token.cryptocurrency || token.token?.name}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {token.network}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">
-                              {token.balance} {token.cryptocurrency || token.token?.symbol}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                     {walletTokens.map((token) => {
+                       const cryptoInfo = getCryptoInfo(token.cryptocurrency || token.token?.symbol || 'ETH');
+                       
+                       return (
+                         <button
+                           key={token.id} 
+                           className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors w-full text-left"
+                           onClick={() => {
+                             toast({
+                               title: "تفاصيل العملة",
+                               description: `العملة: ${token.cryptocurrency || token.token?.name}\nالشبكة: ${token.network}\nالرصيد: ${token.balance}\nمعرف العملة: ${token.id}\nالعقد: ${token.contract_address || 'غير محدد'}`
+                             });
+                           }}
+                         >
+                           <div className="flex items-center gap-3">
+                             <div className={`text-2xl ${cryptoInfo.color}`}>
+                               {cryptoInfo.icon}
+                             </div>
+                             <div>
+                               <p className="font-medium">
+                                 {token.cryptocurrency || token.token?.name}
+                               </p>
+                               <p className="text-sm text-muted-foreground">
+                                 {token.network}
+                               </p>
+                             </div>
+                           </div>
+                           <div className="text-right">
+                             <p className="font-semibold">
+                               {token.balance} {token.cryptocurrency || token.token?.symbol}
+                             </p>
+                             <p className="text-xs text-muted-foreground">
+                               اضغط للتفاصيل
+                             </p>
+                           </div>
+                         </button>
+                       );
+                     })}
                   </div>
                 </div>
               </CardContent>
@@ -1150,13 +1056,10 @@ const Wallet = () => {
                 variant="outline" 
                 size="sm"
                 onClick={() => {
-                  if (wallets.length > 0) {
-                    createSampleTransactions();
-                    toast({
-                      title: "تم إضافة معاملات تجريبية",
-                      description: "تم إضافة معاملات سولانا وعملات أخرى لعرض الأرصدة"
-                    });
-                  }
+                  toast({
+                    title: "معاملات تجريبية",
+                    description: "لا يمكن إضافة معاملات تجريبية. يتم استقبال المعاملات تلقائياً من البلوك تشين."
+                  });
                 }}
               >
                 <Plus className="h-4 w-4 mr-2" />
