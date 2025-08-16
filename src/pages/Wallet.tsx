@@ -460,14 +460,31 @@ const Wallet = () => {
 
       if (addressError) throw addressError;
 
-      // إنشاء wallet tokens للعملات الرئيسية
+      // إنشاء wallet tokens للعملات الرئيسية مع أرصدة تجريبية
       const walletTokensToInsert = mainNetworks.map(network => {
         const crypto = getCryptoForNetwork(network);
+        // إضافة أرصدة تجريبية للعرض
+        let testBalance = 0;
+        switch (crypto) {
+          case 'BTC':
+            testBalance = 0.05421; // Bitcoin
+            break;
+          case 'ETH':
+            testBalance = 1.2834; // Ethereum
+            break;
+          case 'SOL':
+            testBalance = 15.67; // Solana
+            break;
+          case 'MATIC':
+            testBalance = 250.89; // Polygon
+            break;
+        }
+        
         return {
           wallet_id: walletData.id,
           cryptocurrency: crypto,
           network: network,
-          balance: 0,
+          balance: testBalance,
           is_active: true
         };
       });
@@ -477,10 +494,47 @@ const Wallet = () => {
         .insert(walletTokensToInsert);
 
       if (tokensError) throw tokensError;
+
+      // إضافة معاملات تجريبية للعرض
+      const testTransactions = [
+        {
+          user_id: user?.id,
+          wallet_id: walletData.id,
+          amount: 0.05421,
+          transaction_type: 'receive',
+          description: 'إيداع Bitcoin تجريبي',
+          status: 'completed',
+          network: 'bitcoin'
+        },
+        {
+          user_id: user?.id,
+          wallet_id: walletData.id,
+          amount: 1.2834,
+          transaction_type: 'receive',
+          description: 'إيداع Ethereum تجريبي',
+          status: 'completed',
+          network: 'ethereum'
+        },
+        {
+          user_id: user?.id,
+          wallet_id: walletData.id,
+          amount: 15.67,
+          transaction_type: 'receive',
+          description: 'إيداع Solana تجريبي',
+          status: 'completed',
+          network: 'solana'
+        }
+      ];
+
+      const { error: transactionsError } = await supabase
+        .from('transactions')
+        .insert(testTransactions);
+
+      if (transactionsError) console.error('Error creating test transactions:', transactionsError);
       
       toast({
         title: "تم إنشاء المحفظة الرئيسية",
-        description: "تم إنشاء محفظتك بعناوين حقيقية للشبكات الرئيسية"
+        description: "تم إنشاء محفظتك بعناوين حقيقية الشكل وأرصدة تجريبية للشبكات الرئيسية"
       });
       
       fetchWallets();
