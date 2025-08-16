@@ -460,42 +460,97 @@ const Wallet = () => {
       return;
     }
 
+    // التحقق من صحة عنوان العقد
+    if (!validateContractAddress(contractAddress, selectedNetwork)) {
+      toast({
+        title: "عنوان عقد غير صحيح",
+        description: `عنوان العقد غير صحيح للشبكة ${selectedNetwork}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      // First, add the custom token to the database
-      const { data: tokenData, error: tokenError } = await supabase
+      console.log('Adding custom token:', {
+        contractAddress,
+        tokenName,
+        tokenSymbol,
+        selectedNetwork,
+        tokenDecimals
+      });
+
+      // التحقق من وجود العملة مسبقًا
+      const { data: existingToken, error: checkError } = await supabase
         .from('custom_tokens')
-        .insert([
-          {
-            contract_address: contractAddress,
-            name: tokenName,
-            symbol: tokenSymbol,
-            decimals: tokenDecimals,
-            network: selectedNetwork,
-            is_verified: false
-          }
-        ])
+        .select('id')
+        .eq('contract_address', contractAddress.toLowerCase())
+        .eq('network', selectedNetwork)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing token:', checkError);
+      }
+
+      if (existingToken) {
+        toast({
+          title: "عملة موجودة",
+          description: "هذه العملة موجودة بالفعل في هذه الشبكة",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // إضافة العملة المخصصة إلى قاعدة البيانات
+      const tokenData = {
+        contract_address: contractAddress.toLowerCase(),
+        name: tokenName.trim(),
+        symbol: tokenSymbol.toUpperCase().trim(),
+        decimals: tokenDecimals,
+        network: selectedNetwork,
+        is_verified: false
+      };
+
+      console.log('Inserting token data:', tokenData);
+
+      const { data: insertedToken, error: tokenError } = await supabase
+        .from('custom_tokens')
+        .insert([tokenData])
         .select()
         .single();
 
-      if (tokenError) throw tokenError;
+      if (tokenError) {
+        console.error('Token insertion error:', tokenError);
+        throw tokenError;
+      }
 
-      // Add token to the user's multi-network wallet
+      console.log('Token inserted successfully:', insertedToken);
+
+      // إضافة العملة إلى المحفظة متعددة الشبكات
       const multiNetworkWallet = wallets.find(w => w.is_multi_network);
       if (multiNetworkWallet) {
+        const walletTokenData = {
+          wallet_id: multiNetworkWallet.id,
+          token_id: insertedToken.id,
+          contract_address: contractAddress.toLowerCase(),
+          network: selectedNetwork,
+          balance: 0,
+          is_active: true
+        };
+
+        console.log('Adding token to wallet:', walletTokenData);
+
         const { error: walletTokenError } = await supabase
           .from('wallet_tokens')
-          .insert([
-            {
-              wallet_id: multiNetworkWallet.id,
-              token_id: tokenData.id,
-              contract_address: contractAddress,
-              network: selectedNetwork,
-              balance: 0,
-              is_active: true
-            }
-          ]);
+          .insert([walletTokenData]);
 
-        if (walletTokenError) throw walletTokenError;
+        if (walletTokenError) {
+          console.error('Wallet token error:', walletTokenError);
+          throw walletTokenError;
+        }
+      } else {
+        // إنشاء محفظة متعددة الشبكات إذا لم تكن موجودة
+        console.log('Creating multi-network wallet for custom token');
+        await createMultiNetworkWallet();
       }
 
       toast({
@@ -503,32 +558,49 @@ const Wallet = () => {
         description: `تم إضافة ${tokenSymbol} (${tokenName}) بنجاح`
       });
 
-      // Reset form and close dialog
+      // إعادة تعيين النموذج وإغلاق الحوار
       setContractAddress("");
       setTokenName("");
       setTokenSymbol("");
       setTokenDecimals(18);
       setIsAddTokenOpen(false);
       
+      // تحديث البيانات
       fetchWallets();
       fetchCustomTokens();
+
     } catch (error: any) {
       console.error('Error adding custom token:', error);
       
-      if (error.code === '23505') { // Unique constraint violation
-        toast({
-          title: "عملة موجودة",
-          description: "هذه العملة موجودة بالفعل في هذه الشبكة",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "خطأ في إضافة العملة",
-          description: "حدث خطأ أثناء إضافة العملة المخصصة",
-          variant: "destructive"
-        });
+      let errorMessage = "حدث خطأ أثناء إضافة العملة المخصصة";
+      
+      if (error.code === '23505') {
+        errorMessage = "هذه العملة موجودة بالفعل في هذه الشبكة";
+      } else if (error.code === '42501') {
+        errorMessage = "ليس لديك صلاحية لإضافة العملات المخصصة";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
+      
+      toast({
+        title: "خطأ في إضافة العملة",
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
+  };
+
+  const validateContractAddress = (address: string, network: string): boolean => {
+    const patterns: { [key: string]: RegExp } = {
+      'ethereum': /^0x[A-Fa-f0-9]{40}$/,
+      'binance': /^0x[A-Fa-f0-9]{40}$/,
+      'polygon': /^0x[A-Fa-f0-9]{40}$/,
+      'solana': /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+      'cardano': /^[A-Za-z0-9]{50,}$/
+    };
+    
+    const pattern = patterns[network];
+    return pattern ? pattern.test(address) : true;
   };
 
   const mergeWallets = async () => {
