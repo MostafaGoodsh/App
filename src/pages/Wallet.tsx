@@ -16,7 +16,6 @@ import {
   AlertCircle, Eye, EyeOff
 } from "lucide-react";
 import * as QRCodeGenerator from 'qrcode';
-import EthereumProvider from '@walletconnect/ethereum-provider';
 
 // Declare window interface for Phantom Wallet
 declare global {
@@ -173,11 +172,11 @@ const WalletFixed = () => {
   const [tokenDecimals, setTokenDecimals] = useState(18);
   const [selectedNetwork, setSelectedNetwork] = useState("ethereum");
 
-  // WalletConnect States
-  const [walletConnectProvider, setWalletConnectProvider] = useState<any>(null);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [connectedAddress, setConnectedAddress] = useState("");
-  const [connectedBalance, setConnectedBalance] = useState(0);
+  // Phantom Wallet States
+  const [phantomWallet, setPhantomWallet] = useState<any>(null);
+  const [phantomConnected, setPhantomConnected] = useState(false);
+  const [phantomBalance, setPhantomBalance] = useState(0);
+  const [phantomPublicKey, setPhantomPublicKey] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -197,37 +196,17 @@ const WalletFixed = () => {
     }
   }, [wallets]);
 
-  // Initialize WalletConnect
+  // بساطة التحقق من Phantom
   useEffect(() => {
-    const initWalletConnect = async () => {
-      try {
-        const provider = await EthereumProvider.init({
-          projectId: 'demo-project-id', // Replace with your project ID
-          chains: [1, 137, 56], // Ethereum, Polygon, BSC
-          showQrModal: true,
-          methods: [
-            'eth_sendTransaction',
-            'eth_signTransaction',
-            'eth_sign',
-            'personal_sign',
-            'eth_signTypedData',
-          ],
-          events: ['chainChanged', 'accountsChanged'],
-          metadata: {
-            name: 'المحفظة الرقمية',
-            description: 'محفظة للعملات الرقمية',
-            url: window.location.origin,
-            icons: ['https://walletconnect.com/walletconnect-logo.png']
-          }
-        });
-        
-        setWalletConnectProvider(provider);
-      } catch (error) {
-        console.error('Error initializing WalletConnect:', error);
+    const checkPhantom = () => {
+      const provider = window.solana || window.phantom?.solana;
+      if (provider?.isPhantom) {
+        setPhantomWallet(provider);
       }
     };
     
-    initWalletConnect();
+    checkPhantom();
+    setTimeout(checkPhantom, 1000);
   }, []);
 
   const generateQRCode = async (address: string) => {
@@ -362,57 +341,87 @@ const WalletFixed = () => {
     }
   };
 
-  // WalletConnect Functions
-  const connectWallet = async () => {
-    if (!walletConnectProvider) {
+  // Phantom Wallet Functions
+  const fetchPhantomBalance = async (publicKey: string) => {
+    try {
+      // محاكاة جلب الرصيد من شبكة سولانا
+      const balance = Math.random() * 10;
+      setPhantomBalance(balance);
+    } catch (error) {
+      console.error('Error fetching Phantom balance:', error);
+    }
+  };
+
+  const connectPhantomWallet = async () => {
+    if (!phantomWallet) {
       toast({
-        title: "WalletConnect غير متاح",
-        description: "جاري تحميل WalletConnect...",
+        title: "Phantom غير متاح",
+        description: "يرجى تثبيت محفظة Phantom أولاً",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      const accounts = await walletConnectProvider.enable();
-      if (accounts.length > 0) {
-        setIsWalletConnected(true);
-        setConnectedAddress(accounts[0]);
-        
-        // Get balance (simplified)
-        const balance = Math.random() * 5; // Demo balance
-        setConnectedBalance(balance);
-        
-        toast({
-          title: "تم الاتصال بالمحفظة",
-          description: `متصل بعنوان: ${accounts[0].slice(0, 16)}...`
-        });
-      }
+      const response = await phantomWallet.connect();
+      setPhantomConnected(true);
+      setPhantomPublicKey(response.publicKey.toString());
+      await fetchPhantomBalance(response.publicKey.toString());
+      
+      toast({
+        title: "تم الاتصال بـ Phantom",
+        description: `متصل بعنوان: ${response.publicKey.toString().slice(0, 16)}...`
+      });
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error('Error connecting to Phantom:', error);
       toast({
         title: "خطأ في الاتصال",
-        description: "فشل الاتصال بالمحفظة",
+        description: "فشل الاتصال بمحفظة Phantom",
         variant: "destructive"
       });
     }
   };
 
-  const disconnectWallet = async () => {
-    if (!walletConnectProvider) return;
+  const disconnectPhantomWallet = async () => {
+    if (!phantomWallet) return;
 
     try {
-      await walletConnectProvider.disconnect();
-      setIsWalletConnected(false);
-      setConnectedAddress("");
-      setConnectedBalance(0);
+      await phantomWallet.disconnect();
+      setPhantomConnected(false);
+      setPhantomPublicKey("");
+      setPhantomBalance(0);
       
       toast({
         title: "تم قطع الاتصال",
-        description: "تم قطع الاتصال مع المحفظة"
+        description: "تم قطع الاتصال مع محفظة Phantom"
       });
     } catch (error) {
-      console.error('Error disconnecting wallet:', error);
+      console.error('Error disconnecting from Phantom:', error);
+    }
+  };
+
+  const sendSolanaTransaction = async (to: string, amount: number) => {
+    if (!phantomWallet || !phantomConnected) {
+      toast({
+        title: "غير متصل",
+        description: "يرجى الاتصال بمحفظة Phantom أولاً",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "معاملة تجريبية",
+        description: `إرسال ${amount} SOL إلى ${to.slice(0, 16)}...`,
+      });
+    } catch (error) {
+      console.error('Error sending transaction:', error);
+      toast({
+        title: "خطأ في المعاملة",
+        description: "فشل في إرسال المعاملة",
+        variant: "destructive"
+      });
     }
   };
 
@@ -457,31 +466,72 @@ const WalletFixed = () => {
           </div>
         </div>
 
-        {/* WalletConnect Card - الطريقة الأساسية للاتصال */}
+        {/* Web3 Connection Section */}
         <Card className="mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-green-50">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <div>
               <CardTitle className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
                   <Wallet2 className="h-4 w-4 text-white" />
                 </div>
-                WalletConnect - اتصال عالمي
+                اتصال المحافظ
               </CardTitle>
               <CardDescription>
-                اتصل بأي محفظة رقمية (MetaMask, Trust Wallet, Phantom وغيرها)
+                اتصل بمحفظتك الرقمية لإدارة العملات المشفرة
+              </CardDescription>
+            </div>
+          </CardHeader>
+          
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-100 rounded-lg border border-blue-300">
+                <h3 className="font-semibold text-blue-900 mb-2">🔗 طرق الاتصال المتاحة:</h3>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <p>• محفظة Phantom (Solana) - أدناه</p>
+                  <p>• MetaMask - قريباً</p>
+                  <p>• WalletConnect - في التطوير</p>
+                  <p>• Trust Wallet - قريباً</p>
+                </div>
+              </div>
+              
+              <div className="p-4 bg-amber-100 rounded-lg border border-amber-300">
+                <h3 className="font-semibold text-amber-900 mb-2">⚡ نصائح للاتصال:</h3>
+                <div className="text-sm text-amber-700 space-y-1">
+                  <p>• تأكد من تثبيت المحفظة أولاً</p>
+                  <p>• استخدم المتصفح الداخلي للمحفظة</p>
+                  <p>• تحقق من شبكة البلوك تشين الصحيحة</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Phantom Wallet Card */}
+        <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">P</span>
+                </div>
+                Phantom Wallet (Solana)
+              </CardTitle>
+              <CardDescription>
+                محفظة Solana الرسمية للويب
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              {!isWalletConnected ? (
+              {!phantomConnected ? (
                 <Button
-                  onClick={connectWallet}
-                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-semibold px-6"
+                  onClick={connectPhantomWallet}
+                  disabled={!phantomWallet}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-6"
                 >
-                  🔗 اتصال بالمحفظة
+                  🔗 اتصال بـ Phantom
                 </Button>
               ) : (
                 <Button
-                  onClick={disconnectWallet}
+                  onClick={disconnectPhantomWallet}
                   variant="outline"
                   className="border-red-300 text-red-700 hover:bg-red-100"
                 >
@@ -493,15 +543,15 @@ const WalletFixed = () => {
           
           <CardContent>
             <div className="space-y-4">
-              {isWalletConnected ? (
+              {phantomConnected ? (
                 <div className="p-4 bg-green-100 rounded-lg border border-green-300">
-                  <p className="text-green-800 font-semibold">✅ متصل بالمحفظة!</p>
-                  <p className="text-sm text-green-600">العنوان: {connectedAddress}</p>
-                  <p className="text-sm text-green-600">الرصيد: {connectedBalance.toFixed(4)} ETH</p>
+                  <p className="text-green-800 font-semibold">✅ متصل بـ Phantom!</p>
+                  <p className="text-sm text-green-600">العنوان: {phantomPublicKey}</p>
+                  <p className="text-sm text-green-600">الرصيد: {phantomBalance.toFixed(4)} SOL</p>
                   <div className="flex gap-2 mt-3">
                     <Button
                       size="sm"
-                      onClick={() => copyToClipboard(connectedAddress)}
+                      onClick={() => copyToClipboard(phantomPublicKey)}
                       className="bg-green-600 hover:bg-green-700 text-white"
                     >
                       <Copy className="h-3 w-3 mr-1" />
@@ -511,26 +561,23 @@ const WalletFixed = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div className="p-4 bg-blue-100 rounded-lg border border-blue-300">
-                    <h3 className="font-semibold text-blue-900 mb-2">🔗 طريقة الاتصال:</h3>
-                    <div className="text-sm text-blue-700 space-y-1">
-                      <p>• اضغط على "اتصال بالمحفظة"</p>
-                      <p>• اختر محفظتك من القائمة</p>
-                      <p>• أو امسح QR Code من تطبيق المحفظة</p>
+                  {!phantomWallet ? (
+                    <div className="p-4 bg-red-100 rounded-lg border border-red-300">
+                      <h3 className="font-semibold text-red-900 mb-2">❌ Phantom غير مكتشف</h3>
+                      <div className="text-sm text-red-700 space-y-1">
+                        <p>• قم بتثبيت محفظة Phantom</p>
+                        <p>• أو افتح الموقع من داخل تطبيق Phantom</p>
+                        <p>• أو استخدم متصفح Phantom الداخلي</p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-4 bg-amber-100 rounded-lg border border-amber-300">
-                    <h3 className="font-semibold text-amber-900 mb-2">✨ المحافظ المدعومة:</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-amber-700">
-                      <p>• MetaMask</p>
-                      <p>• Trust Wallet</p>
-                      <p>• Phantom</p>
-                      <p>• Rainbow</p>
-                      <p>• Coinbase Wallet</p>
-                      <p>• +200 محفظة أخرى</p>
+                  ) : (
+                    <div className="p-4 bg-blue-100 rounded-lg border border-blue-300">
+                      <h3 className="font-semibold text-blue-900 mb-2">✅ Phantom متاح</h3>
+                      <p className="text-sm text-blue-700">
+                        تم اكتشاف محفظة Phantom، اضغط "اتصال" للمتابعة
+                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
