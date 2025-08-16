@@ -4,19 +4,24 @@ import { Link } from "react-router-dom";
 import { useAppContent } from "@/hooks/useAppContent";
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
-  const { getContent, loading } = useAppContent();
+  const { getContent, getAltText, loading } = useAppContent();
+  
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
+  }
+
   return (
     <>
       <Helmet>
         <title>{getContent('app_name', 'Crypto-MSR')} | محفظة العملات الرقمية</title>
-        <meta name="description" content="منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification" />
+        <meta name="description" content={getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification')} />
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
         <section className="relative min-h-[85vh] flex items-center justify-center bg-background">
           <img
-            src="/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png"
-            alt="هرم مصري عند الغروب - خلفية أسود وذهبي"
+            src={getContent('hero_background', '/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')}
+            alt={getAltText('hero_background', 'هرم مصري عند الغروب - خلفية أسود وذهبي')}
             className="absolute inset-0 w-full h-full object-cover opacity-60"
             loading="eager"
           />
@@ -24,7 +29,7 @@ const Index = () => {
           <div className="relative z-10 container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-8 mb-6">
               <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
-                ORIGIN
+                {getContent('hero_subtitle_origin', 'ORIGIN')}
               </div>
               <div className="flex-1">
                 <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
@@ -36,21 +41,24 @@ const Index = () => {
                 
                 <div className="mb-6">
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">
-                    Origin<br />
-                    &<br />
-                    Fate
+                    {getContent('hero_middle_title', 'Origin & Fate').split(' & ').map((part, index) => (
+                      <span key={index}>
+                        {part}
+                        {index === 0 && <><br />&<br /></>}
+                      </span>
+                    ))}
                   </h2>
                   <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
-                    الأصل و المصير
+                    {getContent('hero_middle_subtitle', 'الأصل و المصير')}
                   </p>
                 </div>
 
                 <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
-                  From Egypt With Love
+                  {getContent('hero_tagline', 'From Egypt With Love')}
                 </p>
               </div>
               <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
-                FATE
+                {getContent('hero_subtitle_fate', 'FATE')}
               </div>
             </div>
 
@@ -64,16 +72,40 @@ const Index = () => {
 
         <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
           {[
-            { src: "/lovable-uploads/8563c8f8-a309-40a5-a7d0-fca02071546e.png", alt: "قناع ذهبي مصري - سمة ذهبية مطفأة", title: "المحفظة | Wallet", href: "/wallet" },
-            { src: "/lovable-uploads/45e37627-8629-45b2-ae38-13d37fbeb015.png", alt: "عنخ ذهبي - هوية ووصول", title: "توثيق الهوية | Identity", href: "/identity" },
-            { src: "/lovable-uploads/e450db26-52c1-4840-9ce2-f2a921c190a3.png", alt: "عين داخل مثلث بأجنحة - منصة تعليمية", title: "التعلم | Learning", href: "/learning" },
+            { 
+              imageKey: 'wallet_card_image',
+              titleKey: 'wallet_card_title', 
+              descriptionKey: 'wallet_card_description',
+              href: "/wallet"
+            },
+            { 
+              imageKey: 'identity_card_image',
+              titleKey: 'identity_card_title', 
+              descriptionKey: 'identity_card_description',
+              href: "/identity"
+            },
+            { 
+              imageKey: 'learning_card_image',
+              titleKey: 'learning_card_title', 
+              descriptionKey: 'learning_card_description',
+              href: "/learning"
+            },
           ].map((card) => (
-            <Link key={card.title} to={card.href} className="group">
+            <Link key={card.titleKey} to={card.href} className="group">
               <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
-                <img src={card.src} alt={card.alt} className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-all duration-300" loading="lazy" />
+                <img 
+                  src={getContent(card.imageKey, '/lovable-uploads/placeholder.png')} 
+                  alt={getAltText(card.imageKey, 'صورة البطاقة')} 
+                  className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-all duration-300" 
+                  loading="lazy" 
+                />
                 <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-                  <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">{card.title}</h2>
-                  <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">تجربة سلسة بتصميم أسود وذهبي مع لمسات لازوردية.</p>
+                  <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+                    {getContent(card.titleKey, 'عنوان البطاقة')}
+                  </h2>
+                  <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+                    {getContent(card.descriptionKey, 'وصف البطاقة')}
+                  </p>
                   <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
                 </div>
               </article>
