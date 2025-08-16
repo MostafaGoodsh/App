@@ -136,7 +136,6 @@ const Wallet = () => {
   useEffect(() => {
     if (user) {
       fetchWallets();
-      fetchTransactions();
       fetchCryptoAddresses();
       fetchCustomTokens();
       fetchPendingDeposits();
@@ -144,8 +143,12 @@ const Wallet = () => {
   }, [user]);
 
   useEffect(() => {
-    if (wallets.length > 0 && wallets[0].wallet_address) {
-      generateQRCode(wallets[0].wallet_address);
+    if (wallets.length > 0) {
+      if (wallets[0].wallet_address) {
+        generateQRCode(wallets[0].wallet_address);
+      }
+      // جلب المعاملات بعد تحميل المحافظ
+      fetchTransactions();
     }
   }, [wallets]);
 
@@ -1063,12 +1066,30 @@ const Wallet = () => {
         )}
 
         {/* المعاملات الأخيرة */}
-        {transactions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>المعاملات الأخيرة</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>المعاملات الأخيرة</CardTitle>
+            {transactions.length === 0 && (
+              <Button
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  if (wallets.length > 0) {
+                    createSampleTransactions();
+                    toast({
+                      title: "تم إضافة معاملات تجريبية",
+                      description: "تم إضافة معاملات سولانا وعملات أخرى لعرض الأرصدة"
+                    });
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                إضافة معاملات تجريبية
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {transactions.length > 0 ? (
               <div className="space-y-3">
                 {transactions.map((transaction) => (
                   <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -1088,6 +1109,11 @@ const Wallet = () => {
                         <p className="text-sm text-muted-foreground">
                           {transaction.description}
                         </p>
+                        {transaction.transaction_hash && (
+                          <p className="text-xs text-muted-foreground font-mono">
+                            {transaction.network}: {transaction.transaction_hash.slice(0, 16)}...
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -1097,7 +1123,10 @@ const Wallet = () => {
                         {transaction.transaction_type === 'send' ? '-' : '+'}
                         {transaction.amount}
                       </p>
-                      <div className="flex items-center gap-2">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(transaction.created_at).toLocaleString('ar-EG')}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
                         <Badge variant={
                           transaction.status === 'completed' ? 'default' : 
                           transaction.status === 'pending' ? 'secondary' : 'destructive'
@@ -1113,9 +1142,20 @@ const Wallet = () => {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">لا توجد معاملات</p>
+                <p className="text-sm">
+                  لم يتم العثور على أي معاملات في محفظتك حتى الآن
+                </p>
+                <p className="text-sm mt-2">
+                  اضغط على "إضافة معاملات تجريبية" لعرض نموذج لكيفية ظهور المعاملات
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </section>
     </>
   );
