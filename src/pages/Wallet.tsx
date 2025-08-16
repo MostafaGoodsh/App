@@ -217,6 +217,21 @@ const Wallet = () => {
     return result;
   };
 
+  const validateAddress = (address: string, crypto: string): boolean => {
+    const patterns: { [key: string]: RegExp } = {
+      'BTC': /^[13][A-HJ-NP-Z0-9]{25,34}$|^bc1[a-z0-9]{39,59}$/,
+      'ETH': /^0x[A-Fa-f0-9]{40}$/,
+      'USDT': /^0x[A-Fa-f0-9]{40}$|^T[A-Za-z0-9]{33}$/,
+      'BNB': /^bnb[a-z0-9]{39}$|^0x[A-Fa-f0-9]{40}$/,
+      'ADA': /^addr1[a-z0-9]{53,103}$/,
+      'DOT': /^1[A-Za-z0-9]{46,47}$/,
+      'SOL': /^[A-Za-z0-9]{32,44}$/
+    };
+    
+    const pattern = patterns[crypto];
+    return pattern ? pattern.test(address) : true;
+  };
+
   const sendTransaction = async () => {
     if (!amount || !receiverAddress || wallets.length === 0) {
       toast({
@@ -227,9 +242,20 @@ const Wallet = () => {
       return;
     }
 
+    const wallet = wallets[0];
+    
+    // Validate receiver address format
+    if (!validateAddress(receiverAddress, wallet.cryptocurrency)) {
+      toast({
+        title: "عنوان غير صحيح",
+        description: `عنوان ${wallet.cryptocurrency} غير صحيح. يرجى التحقق من العنوان المُدخل`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const sendAmount = parseFloat(amount);
-      const wallet = wallets[0];
 
       if (sendAmount > wallet.balance) {
         toast({
