@@ -80,17 +80,35 @@ export default function LearningTimeline() {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the posts
+      const { data: postsData, error: postsError } = await supabase
         .from('learning_content')
-        .select(`
-          *,
-          profiles:created_by (full_name)
-        `)
+        .select('*')
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setPosts(data || []);
+      if (postsError) throw postsError;
+
+      // Then get profile data for each post
+      const postsWithProfiles = await Promise.all(
+        (postsData || []).map(async (post) => {
+          if (post.created_by) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('user_id', post.created_by)
+              .single();
+            
+            return {
+              ...post,
+              profile: profileData
+            };
+          }
+          return post;
+        })
+      );
+
+      setPosts(postsWithProfiles);
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
