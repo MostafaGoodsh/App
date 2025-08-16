@@ -94,6 +94,45 @@ export type Database = {
           },
         ]
       }
+      custom_tokens: {
+        Row: {
+          contract_address: string
+          created_at: string | null
+          decimals: number | null
+          id: string
+          is_verified: boolean | null
+          logo_url: string | null
+          name: string
+          network: string
+          symbol: string
+          updated_at: string | null
+        }
+        Insert: {
+          contract_address: string
+          created_at?: string | null
+          decimals?: number | null
+          id?: string
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name: string
+          network: string
+          symbol: string
+          updated_at?: string | null
+        }
+        Update: {
+          contract_address?: string
+          created_at?: string | null
+          decimals?: number | null
+          id?: string
+          is_verified?: boolean | null
+          logo_url?: string | null
+          name?: string
+          network?: string
+          symbol?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       early_access: {
         Row: {
           created_at: string
@@ -612,6 +651,57 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_tokens: {
+        Row: {
+          balance: number | null
+          contract_address: string | null
+          created_at: string | null
+          cryptocurrency: string | null
+          id: string
+          is_active: boolean | null
+          network: string
+          token_id: string | null
+          wallet_id: string
+        }
+        Insert: {
+          balance?: number | null
+          contract_address?: string | null
+          created_at?: string | null
+          cryptocurrency?: string | null
+          id?: string
+          is_active?: boolean | null
+          network: string
+          token_id?: string | null
+          wallet_id: string
+        }
+        Update: {
+          balance?: number | null
+          contract_address?: string | null
+          created_at?: string | null
+          cryptocurrency?: string | null
+          id?: string
+          is_active?: boolean | null
+          network?: string
+          token_id?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_wallet_tokens_wallet_id"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_tokens_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "custom_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallets: {
         Row: {
           balance: number | null
@@ -619,12 +709,15 @@ export type Database = {
           cryptocurrency: string | null
           id: string
           is_active: boolean | null
+          is_multi_network: boolean | null
           mnemonic_encrypted: string | null
+          networks: string[] | null
           private_key_encrypted: string | null
           public_key: string | null
           updated_at: string
           user_id: string
           wallet_address: string | null
+          wallet_name: string | null
           wallet_type: string | null
         }
         Insert: {
@@ -633,12 +726,15 @@ export type Database = {
           cryptocurrency?: string | null
           id?: string
           is_active?: boolean | null
+          is_multi_network?: boolean | null
           mnemonic_encrypted?: string | null
+          networks?: string[] | null
           private_key_encrypted?: string | null
           public_key?: string | null
           updated_at?: string
           user_id: string
           wallet_address?: string | null
+          wallet_name?: string | null
           wallet_type?: string | null
         }
         Update: {
@@ -647,12 +743,15 @@ export type Database = {
           cryptocurrency?: string | null
           id?: string
           is_active?: boolean | null
+          is_multi_network?: boolean | null
           mnemonic_encrypted?: string | null
+          networks?: string[] | null
           private_key_encrypted?: string | null
           public_key?: string | null
           updated_at?: string
           user_id?: string
           wallet_address?: string | null
+          wallet_name?: string | null
           wallet_type?: string | null
         }
         Relationships: []

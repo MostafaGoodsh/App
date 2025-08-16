@@ -22,6 +22,32 @@ interface Wallet {
   is_active: boolean;
   created_at: string;
   public_key?: string;
+  networks?: string[];
+  is_multi_network?: boolean;
+  wallet_name?: string;
+}
+
+interface WalletToken {
+  id: string;
+  wallet_id: string;
+  token_id?: string;
+  cryptocurrency?: string;
+  contract_address?: string;
+  network: string;
+  balance: number;
+  is_active: boolean;
+  custom_token?: CustomToken;
+}
+
+interface CustomToken {
+  id: string;
+  contract_address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  network: string;
+  logo_url?: string;
+  is_verified?: boolean;
 }
 
 interface CryptoAddress {
@@ -44,14 +70,24 @@ interface Transaction {
   created_at: string;
 }
 
+const SUPPORTED_NETWORKS = [
+  { value: 'bitcoin', label: 'Bitcoin', icon: '₿', color: 'text-orange-500' },
+  { value: 'ethereum', label: 'Ethereum', icon: 'Ξ', color: 'text-blue-500' },
+  { value: 'binance', label: 'Binance Smart Chain', icon: 'BNB', color: 'text-yellow-500' },
+  { value: 'polygon', label: 'Polygon', icon: '🔵', color: 'text-purple-500' },
+  { value: 'solana', label: 'Solana', icon: '◎', color: 'text-purple-400' },
+  { value: 'cardano', label: 'Cardano', icon: 'ADA', color: 'text-blue-400' },
+  { value: 'polkadot', label: 'Polkadot', icon: 'DOT', color: 'text-pink-500' }
+];
+
 const SUPPORTED_CRYPTOCURRENCIES = [
-  { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', color: 'text-orange-500' },
-  { value: 'ETH', label: 'Ethereum (ETH)', icon: 'Ξ', color: 'text-blue-500' },
-  { value: 'USDT', label: 'Tether (USDT)', icon: '₮', color: 'text-green-500' },
-  { value: 'BNB', label: 'Binance Coin (BNB)', icon: 'BNB', color: 'text-yellow-500' },
-  { value: 'ADA', label: 'Cardano (ADA)', icon: 'ADA', color: 'text-blue-400' },
-  { value: 'DOT', label: 'Polkadot (DOT)', icon: 'DOT', color: 'text-pink-500' },
-  { value: 'SOL', label: 'Solana (SOL)', icon: '◎', color: 'text-purple-500' }
+  { value: 'BTC', label: 'Bitcoin (BTC)', icon: '₿', color: 'text-orange-500', network: 'bitcoin' },
+  { value: 'ETH', label: 'Ethereum (ETH)', icon: 'Ξ', color: 'text-blue-500', network: 'ethereum' },
+  { value: 'USDT', label: 'Tether (USDT)', icon: '₮', color: 'text-green-500', network: 'ethereum' },
+  { value: 'BNB', label: 'Binance Coin (BNB)', icon: 'BNB', color: 'text-yellow-500', network: 'binance' },
+  { value: 'ADA', label: 'Cardano (ADA)', icon: 'ADA', color: 'text-blue-400', network: 'cardano' },
+  { value: 'DOT', label: 'Polkadot (DOT)', icon: 'DOT', color: 'text-pink-500', network: 'polkadot' },
+  { value: 'SOL', label: 'Solana (SOL)', icon: '◎', color: 'text-purple-500', network: 'solana' }
 ];
 
 const Wallet = () => {
@@ -59,6 +95,8 @@ const Wallet = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [wallets, setWallets] = useState<Wallet[]>([]);
+  const [walletTokens, setWalletTokens] = useState<WalletToken[]>([]);
+  const [customTokens, setCustomTokens] = useState<CustomToken[]>([]);
   const [cryptoAddresses, setCryptoAddresses] = useState<CryptoAddress[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,12 +105,18 @@ const Wallet = () => {
   const [amount, setAmount] = useState("");
   const [receiverAddress, setReceiverAddress] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [contractAddress, setContractAddress] = useState("");
+  const [selectedNetwork, setSelectedNetwork] = useState("ethereum");
+  const [isAddingCustomToken, setIsAddingCustomToken] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState<string>("");
 
   useEffect(() => {
     if (user) {
       fetchWallets();
       fetchTransactions();
       fetchCryptoAddresses();
+      fetchWalletTokens();
+      fetchCustomTokens();
     }
   }, [user]);
 
@@ -115,6 +159,49 @@ const Wallet = () => {
         description: "حدث خطأ أثناء جلب بيانات المحافظ",
         variant: "destructive"
       });
+    }
+  };
+
+  const fetchWalletTokens = async () => {
+    try {
+      const { data: walletsData, error: walletsError } = await supabase
+        .from('wallets')
+        .select('id')
+        .eq('user_id', user?.id);
+
+      if (walletsError) throw walletsError;
+
+      if (walletsData && walletsData.length > 0) {
+        const walletIds = walletsData.map(w => w.id);
+        const { data, error } = await supabase
+          .from('wallet_tokens')
+          .select(`
+            *,
+            custom_token:custom_tokens(*)
+          `)
+          .in('wallet_id', walletIds)
+          .eq('is_active', true);
+
+        if (error) throw error;
+        setWalletTokens(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching wallet tokens:', error);
+    }
+  };
+
+  const fetchCustomTokens = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('custom_tokens')
+        .select('*')
+        .eq('is_verified', true)
+        .order('name');
+
+      if (error) throw error;
+      setCustomTokens(data || []);
+    } catch (error) {
+      console.error('Error fetching custom tokens:', error);
     }
   };
 
@@ -165,22 +252,22 @@ const Wallet = () => {
     setLoading(false);
   };
 
-  const createWallet = async () => {
+  const createMultiNetworkWallet = async () => {
     try {
-      // Generate a mock address for demonstration
-      const mockAddress = generateMockAddress(newCryptocurrency);
-      
+      // Create a unified multi-network wallet
       const { data: walletData, error: walletError } = await supabase
         .from('wallets')
         .insert([
           {
             user_id: user?.id,
             wallet_type: 'crypto',
-            wallet_address: mockAddress,
+            wallet_address: null, // Multi-network wallets don't have single addresses
             balance: 0,
-            cryptocurrency: newCryptocurrency,
+            cryptocurrency: 'MULTI',
             is_active: true,
-            public_key: `pub_${mockAddress.substring(0, 10)}`
+            is_multi_network: true,
+            networks: SUPPORTED_NETWORKS.map(n => n.value),
+            wallet_name: 'المحفظة متعددة الشبكات'
           }
         ])
         .select()
@@ -188,33 +275,192 @@ const Wallet = () => {
 
       if (walletError) throw walletError;
 
-      // Create crypto address entry
-      const { error: addressError } = await supabase
-        .from('crypto_addresses')
+      // Add default cryptocurrencies to the wallet
+      const defaultTokens = SUPPORTED_CRYPTOCURRENCIES.map(crypto => ({
+        wallet_id: walletData.id,
+        cryptocurrency: crypto.value,
+        network: crypto.network,
+        balance: 0,
+        is_active: true
+      }));
+
+      const { error: tokensError } = await supabase
+        .from('wallet_tokens')
+        .insert(defaultTokens);
+
+      if (tokensError) throw tokensError;
+      
+      toast({
+        title: "تم إنشاء المحفظة",
+        description: "تم إنشاء المحفظة متعددة الشبكات بنجاح"
+      });
+      
+      fetchWallets();
+      fetchWalletTokens();
+    } catch (error) {
+      console.error('Error creating multi-network wallet:', error);
+      toast({
+        title: "خطأ في إنشاء المحفظة",
+        description: "حدث خطأ أثناء إنشاء المحفظة",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const addCustomToken = async () => {
+    if (!contractAddress || !selectedWalletId) {
+      toast({
+        title: "بيانات ناقصة",
+        description: "يرجى إدخال عنوان العقد واختيار المحفظة",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsAddingCustomToken(true);
+
+      // Check if token already exists
+      const { data: existingToken } = await supabase
+        .from('custom_tokens')
+        .select('*')
+        .eq('contract_address', contractAddress)
+        .eq('network', selectedNetwork)
+        .single();
+
+      let tokenId = existingToken?.id;
+
+      if (!existingToken) {
+        // For demo, create a mock token
+        const { data: newToken, error: tokenError } = await supabase
+          .from('custom_tokens')
+          .insert([
+            {
+              contract_address: contractAddress,
+              name: `Custom Token ${contractAddress.substring(0, 6)}`,
+              symbol: `CT${contractAddress.substring(2, 6).toUpperCase()}`,
+              decimals: 18,
+              network: selectedNetwork,
+              is_verified: false
+            }
+          ])
+          .select()
+          .single();
+
+        if (tokenError) throw tokenError;
+        tokenId = newToken.id;
+      }
+
+      // Add token to wallet
+      const { error: walletTokenError } = await supabase
+        .from('wallet_tokens')
         .insert([
           {
-            wallet_id: walletData.id,
-            cryptocurrency: newCryptocurrency,
-            address: mockAddress,
-            label: `المحفظة الرئيسية`,
+            wallet_id: selectedWalletId,
+            token_id: tokenId,
+            contract_address: contractAddress,
+            network: selectedNetwork,
+            balance: 0,
             is_active: true
           }
         ]);
 
-      if (addressError) throw addressError;
-      
+      if (walletTokenError) throw walletTokenError;
+
       toast({
-        title: "تم إنشاء المحفظة",
-        description: `تم إنشاء محفظة ${newCryptocurrency} بنجاح`
+        title: "تم إضافة الرمز المميز",
+        description: "تم إضافة الرمز المميز إلى المحفظة بنجاح"
       });
-      
-      fetchWallets();
-      fetchCryptoAddresses();
+
+      setContractAddress("");
+      fetchWalletTokens();
+      fetchCustomTokens();
     } catch (error) {
-      console.error('Error creating wallet:', error);
+      console.error('Error adding custom token:', error);
       toast({
-        title: "خطأ في إنشاء المحفظة",
-        description: "حدث خطأ أثناء إنشاء المحفظة",
+        title: "خطأ في إضافة الرمز المميز",
+        description: "حدث خطأ أثناء إضافة الرمز المميز",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingCustomToken(false);
+    }
+  };
+
+  const mergeWallets = async () => {
+    if (wallets.length < 2) {
+      toast({
+        title: "عدد محافظ غير كافي",
+        description: "تحتاج إلى محفظتين على الأقل للدمج",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a new multi-network wallet
+      const { data: mergedWallet, error: walletError } = await supabase
+        .from('wallets')
+        .insert([
+          {
+            user_id: user?.id,
+            wallet_type: 'crypto',
+            wallet_address: null,
+            balance: 0,
+            cryptocurrency: 'MULTI',
+            is_active: true,
+            is_multi_network: true,
+            networks: SUPPORTED_NETWORKS.map(n => n.value),
+            wallet_name: 'المحفظة المدمجة'
+          }
+        ])
+        .select()
+        .single();
+
+      if (walletError) throw walletError;
+
+      // Move all tokens from existing wallets to the merged wallet
+      const tokensToMove = [];
+      for (const wallet of wallets) {
+        if (wallet.balance > 0) {
+          tokensToMove.push({
+            wallet_id: mergedWallet.id,
+            cryptocurrency: wallet.cryptocurrency,
+            network: SUPPORTED_CRYPTOCURRENCIES.find(c => c.value === wallet.cryptocurrency)?.network || 'bitcoin',
+            balance: wallet.balance,
+            is_active: true
+          });
+        }
+      }
+
+      if (tokensToMove.length > 0) {
+        const { error: tokensError } = await supabase
+          .from('wallet_tokens')
+          .insert(tokensToMove);
+
+        if (tokensError) throw tokensError;
+      }
+
+      // Deactivate old wallets
+      const { error: deactivateError } = await supabase
+        .from('wallets')
+        .update({ is_active: false })
+        .in('id', wallets.map(w => w.id));
+
+      if (deactivateError) throw deactivateError;
+
+      toast({
+        title: "تم دمج المحافظ",
+        description: "تم دمج جميع المحافظ في محفظة واحدة متعددة الشبكات"
+      });
+
+      fetchWallets();
+      fetchWalletTokens();
+    } catch (error) {
+      console.error('Error merging wallets:', error);
+      toast({
+        title: "خطأ في دمج المحافظ",
+        description: "حدث خطأ أثناء دمج المحافظ",
         variant: "destructive"
       });
     }
@@ -403,82 +649,217 @@ const Wallet = () => {
           </div>
         </div>
 
-        {/* إنشاء محفظة جديدة */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              إنشاء محفظة جديدة
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Label htmlFor="crypto-select">اختر العملة الرقمية</Label>
-                <Select value={newCryptocurrency} onValueChange={setNewCryptocurrency}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUPPORTED_CRYPTOCURRENCIES.map((crypto) => (
-                      <SelectItem key={crypto.value} value={crypto.value}>
-                        <div className="flex items-center gap-2">
-                          <span className={crypto.color}>{crypto.icon}</span>
-                          {crypto.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end">
-                <Button onClick={createWallet}>إنشاء محفظة</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="create" className="mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="create">إنشاء محفظة</TabsTrigger>
+            <TabsTrigger value="add-token">إضافة رمز مميز</TabsTrigger>
+            <TabsTrigger value="merge">دمج المحافظ</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="create">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  إنشاء محفظة متعددة الشبكات
+                </CardTitle>
+                <CardDescription>محفظة واحدة تدعم جميع الشبكات والعملات الرقمية</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={createMultiNetworkWallet} className="w-full">
+                  <WalletIcon className="h-4 w-4 mr-2" />
+                  إنشاء محفظة متعددة الشبكات
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="add-token">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Coins className="h-5 w-5" />
+                  إضافة رمز مميز عبر عقد العملة
+                </CardTitle>
+                <CardDescription>أضف عملات مخصصة إلى محفظتك باستخدام عنوان العقد</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wallet-select">اختر المحفظة</Label>
+                  <Select value={selectedWalletId} onValueChange={setSelectedWalletId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="اختر المحفظة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {wallets.filter(w => w.is_multi_network).map((wallet) => (
+                        <SelectItem key={wallet.id} value={wallet.id}>
+                          {wallet.wallet_name || `محفظة ${wallet.cryptocurrency}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="network-select">اختر الشبكة</Label>
+                  <Select value={selectedNetwork} onValueChange={setSelectedNetwork}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUPPORTED_NETWORKS.map((network) => (
+                        <SelectItem key={network.value} value={network.value}>
+                          <div className="flex items-center gap-2">
+                            <span className={network.color}>{network.icon}</span>
+                            {network.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contract-address">عنوان العقد</Label>
+                  <Input
+                    id="contract-address"
+                    placeholder="0x..."
+                    value={contractAddress}
+                    onChange={(e) => setContractAddress(e.target.value)}
+                  />
+                </div>
+
+                <Button 
+                  onClick={addCustomToken} 
+                  className="w-full"
+                  disabled={isAddingCustomToken}
+                >
+                  {isAddingCustomToken ? "جاري الإضافة..." : "إضافة رمز مميز"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="merge">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ArrowUpDown className="h-5 w-5" />
+                  دمج المحافظ
+                </CardTitle>
+                <CardDescription>دمج جميع المحافظ في محفظة واحدة متعددة الشبكات</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      سيتم دمج {wallets.length} محفظة في محفظة واحدة متعددة الشبكات.
+                      سيتم الاحتفاظ بجميع الأرصدة والعملات.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={mergeWallets} 
+                    className="w-full"
+                    disabled={wallets.length < 2}
+                  >
+                    دمج المحافظ ({wallets.length})
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* عرض المحافظ */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="space-y-6 mb-8">
           {wallets.map((wallet) => {
-            const cryptoInfo = getCryptoInfo(wallet.cryptocurrency);
+            const walletTokensList = walletTokens.filter(t => t.wallet_id === wallet.id);
+            
             return (
               <Card key={wallet.id} className="relative overflow-hidden">
-                <div className="absolute top-4 right-4">
-                  <span className={`text-2xl ${cryptoInfo.color}`}>{cryptoInfo.icon}</span>
-                </div>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <WalletIcon className="h-5 w-5" />
-                    {cryptoInfo.label}
-                  </CardTitle>
-                  <CardDescription>محفظة {wallet.cryptocurrency}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {wallet.balance.toFixed(8)} {wallet.cryptocurrency}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      ≈ ${(wallet.balance * 50000).toLocaleString()} USD
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">العنوان:</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(wallet.wallet_address || "")}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <WalletIcon className="h-5 w-5" />
+                      <div>
+                        <CardTitle>{wallet.wallet_name || `محفظة ${wallet.cryptocurrency}`}</CardTitle>
+                        <CardDescription>
+                          {wallet.is_multi_network ? 'محفظة متعددة الشبكات' : `محفظة ${wallet.cryptocurrency}`}
+                        </CardDescription>
+                      </div>
                     </div>
-                    <p className="font-mono text-xs break-all bg-muted p-2 rounded">
-                      {wallet.wallet_address}
-                    </p>
+                    <Badge 
+                      variant={wallet.is_active ? "default" : "secondary"}
+                      className="w-fit"
+                    >
+                      {wallet.is_active ? "نشطة" : "معطلة"}
+                    </Badge>
                   </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {wallet.is_multi_network ? (
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">العملات والرموز المميزة:</h4>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {walletTokensList.map((token) => {
+                          const cryptoInfo = token.cryptocurrency 
+                            ? getCryptoInfo(token.cryptocurrency)
+                            : { icon: '🪙', color: 'text-gray-500', label: token.custom_token?.symbol || 'Unknown' };
+                          
+                          return (
+                            <div key={token.id} className="bg-muted/30 p-3 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-lg ${cryptoInfo.color}`}>{cryptoInfo.icon}</span>
+                                  <span className="font-medium">
+                                    {token.custom_token?.symbol || token.cryptocurrency}
+                                  </span>
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {SUPPORTED_NETWORKS.find(n => n.value === token.network)?.label || token.network}
+                                </Badge>
+                              </div>
+                              <p className="text-lg font-bold">
+                                {token.balance.toFixed(8)} {token.custom_token?.symbol || token.cryptocurrency}
+                              </p>
+                              {token.contract_address && (
+                                <p className="text-xs text-muted-foreground font-mono">
+                                  {token.contract_address.substring(0, 10)}...
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {wallet.balance.toFixed(8)} {wallet.cryptocurrency}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        ≈ ${(wallet.balance * 50000).toLocaleString()} USD
+                      </p>
+                    </div>
+                  )}
+
+                  {wallet.wallet_address && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">العنوان:</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(wallet.wallet_address || "")}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="font-mono text-xs break-all bg-muted p-2 rounded">
+                        {wallet.wallet_address}
+                      </p>
+                    </div>
+                  )}
 
                   {showPrivateKeys && wallet.public_key && (
                     <div className="space-y-2">
@@ -497,13 +878,6 @@ const Wallet = () => {
                       </p>
                     </div>
                   )}
-
-                  <Badge 
-                    variant={wallet.is_active ? "default" : "secondary"}
-                    className="w-fit"
-                  >
-                    {wallet.is_active ? "نشطة" : "معطلة"}
-                  </Badge>
                 </CardContent>
               </Card>
             );
