@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CheckCircle, XCircle, BookOpen, Calendar, Edit, Trash2, Tag } from "lucide-react";
+import LearningEditDialog from "./LearningEditDialog";
 
 interface LearningContent {
   id: string;
@@ -229,11 +230,12 @@ export default function LearningManagement() {
                 <Separator />
 
                 <div className="flex gap-2 justify-between items-center">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
-                      <Edit className="h-4 w-4 mr-2" />
-                      تحرير
-                    </Button>
+                <div className="flex gap-2">
+                    <LearningEditDialog 
+                      content={item} 
+                      onContentUpdated={fetchLearningContent}
+                      disabled={processingId === item.id}
+                    />
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

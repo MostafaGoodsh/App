@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CheckCircle, XCircle, ClipboardList, Calendar, Edit, Trash2 } from "lucide-react";
+import SurveyEditDialog from "./SurveyEditDialog";
 
 interface Survey {
   id: string;
@@ -189,11 +190,12 @@ export default function SurveysManagement() {
                 <Separator />
 
                 <div className="flex gap-2 justify-between items-center">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled>
-                      <Edit className="h-4 w-4 mr-2" />
-                      تحرير
-                    </Button>
+                <div className="flex gap-2">
+                    <SurveyEditDialog 
+                      survey={survey} 
+                      onSurveyUpdated={fetchSurveys}
+                      disabled={processingId === survey.id}
+                    />
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
