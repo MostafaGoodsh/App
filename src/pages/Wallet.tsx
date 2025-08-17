@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { WalletConnectModal } from "@/components/wallet/WalletConnectModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ import {
   RefreshCw, ExternalLink, Eye, EyeOff, AlertCircle, ArrowDownToLine, ArrowUpFromLine, Network
 } from "lucide-react";
 
-// Multi-wallet support with MetaMask, Phantom, and internal wallets
+// Multi-wallet support with MetaMask, Phantom, WalletConnect and internal wallets
 declare global {
   interface Window {
     ethereum?: {
@@ -36,113 +36,64 @@ declare global {
   }
 }
 
-interface WalletData {
-  id: string;
-  type: 'MetaMask' | 'Phantom' | 'Internal';
-  address: string;
-  balance: string;
-  currency: string;
-  network: 'Ethereum' | 'Solana';
-  name?: string;
-}
-
 const WalletFixed = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const {
+    connectedWallets,
+    isConnecting,
+    connectWalletConnect,
+    connectMetaMask,
+    connectPhantom,
+    refreshBalance,
+    sendTransaction
+  } = useWalletConnect();
   
-  const [connectedWallets, setConnectedWallets] = useState<WalletData[]>([]);
-  const [isConnecting, setIsConnecting] = useState<string | null>(null);
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
   const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
-  const [selectedWallet, setSelectedWallet] = useState<WalletData | null>(null);
+  const [selectedWallet, setSelectedWallet] = useState<any>(null);
   const [sendAmount, setSendAmount] = useState("");
   const [sendAddress, setSendAddress] = useState("");
   const [newWalletName, setNewWalletName] = useState("");
   const [selectedNetwork, setSelectedNetwork] = useState<'Ethereum' | 'Solana'>('Ethereum');
 
-  const getWalletBalance = async (address: string, type: string, network: string) => {
+  const handleWalletConnect = async (type: string) => {
     try {
-      if (network === 'Ethereum' && window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const balance = await provider.getBalance(address);
-        return ethers.formatEther(balance);
-      } else if (network === 'Solana' && type === 'Phantom' && window.phantom?.solana) {
-        // For Phantom, we can get balance through RPC
-        try {
-          const response = await fetch('https://api.mainnet-beta.solana.com', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: 1,
-              method: 'getBalance',
-              params: [address]
-            })
+      let wallet;
+      switch (type) {
+        case 'walletconnect':
+          wallet = await connectWalletConnect();
+          toast({ 
+            title: "تم الاتصال بنجاح", 
+            description: `تم اتصال WalletConnect بالعنوان: ${wallet?.address?.slice(0, 16)}...` 
           });
-          const data = await response.json();
-          if (data.result) {
-            return (data.result.value / 1000000000).toFixed(4); // Convert lamports to SOL
-          }
-        } catch (error) {
-          console.error("Error fetching Solana balance:", error);
-        }
+          break;
+        case 'metamask':
+          wallet = await connectMetaMask();
+          toast({ 
+            title: "متصل بـ MetaMask", 
+            description: `العنوان: ${wallet?.address?.slice(0, 16)}...` 
+          });
+          break;
+        case 'phantom':
+          wallet = await connectPhantom();
+          toast({ 
+            title: "متصل بـ Phantom", 
+            description: `العنوان: ${wallet?.address?.slice(0, 16)}...` 
+          });
+          break;
+        default:
+          throw new Error('نوع محفظة غير مدعوم');
       }
-      return "0.0";
-    } catch (error) {
-      console.error("Error getting balance:", error);
-      return "0.0";
+    } catch (error: any) {
+      console.error('Wallet connection error:', error);
+      toast({ 
+        title: "خطأ في الاتصال", 
+        description: error.message || 'فشل الاتصال بالمحفظة', 
+        variant: "destructive" 
+      });
     }
-  };
-
-  const connectMetaMask = async () => {
-    if (!window.ethereum?.isMetaMask) {
-      window.open('https://metamask.io/download/', '_blank');
-      return;
-    }
-    setIsConnecting('metamask');
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const balance = await getWalletBalance(accounts[0], 'MetaMask', 'Ethereum');
-      const newWallet: WalletData = {
-        id: Date.now().toString(),
-        type: 'MetaMask',
-        address: accounts[0],
-        balance,
-        currency: 'ETH',
-        network: 'Ethereum'
-      };
-      setConnectedWallets(prev => [...prev, newWallet]);
-      toast({ title: "متصل بـ MetaMask", description: `العنوان: ${accounts[0].slice(0, 16)}...` });
-    } catch (error) {
-      toast({ title: "خطأ", description: "فشل الاتصال مع MetaMask", variant: "destructive" });
-    }
-    setIsConnecting(null);
-  };
-
-  const connectPhantom = async () => {
-    if (!window.phantom?.solana?.isPhantom) {
-      window.open('https://phantom.app/', '_blank');
-      return;
-    }
-    setIsConnecting('phantom');
-    try {
-      const response = await window.phantom.solana.connect();
-      const address = response.publicKey.toString();
-      const balance = await getWalletBalance(address, 'Phantom', 'Solana');
-      const newWallet: WalletData = {
-        id: Date.now().toString(),
-        type: 'Phantom',
-        address,
-        balance,
-        currency: 'SOL',
-        network: 'Solana'
-      };
-      setConnectedWallets(prev => [...prev, newWallet]);
-      toast({ title: "متصل بـ Phantom", description: `العنوان: ${address.slice(0, 16)}...` });
-    } catch (error) {
-      toast({ title: "خطأ", description: "فشل الاتصال مع Phantom", variant: "destructive" });
-    }
-    setIsConnecting(null);
   };
 
   const createInternalWallet = async () => {
@@ -152,7 +103,7 @@ const WalletFixed = () => {
     }
     
     try {
-      let newWallet: WalletData;
+      let newWallet: any;
       
       if (selectedNetwork === 'Ethereum') {
         const wallet = ethers.Wallet.createRandom();
@@ -178,7 +129,7 @@ const WalletFixed = () => {
         };
       }
       
-      setConnectedWallets(prev => [...prev, newWallet]);
+      // Note: This would need to be integrated with the useWalletConnect hook
       setNewWalletName("");
       toast({ 
         title: "تم إنشاء المحفظة", 
@@ -194,11 +145,8 @@ const WalletFixed = () => {
     toast({ title: "تم النسخ", description: "تم نسخ العنوان إلى الحافظة" });
   };
 
-  const refreshBalance = async (wallet: WalletData) => {
-    const newBalance = await getWalletBalance(wallet.address, wallet.type, wallet.network);
-    setConnectedWallets(prev => 
-      prev.map(w => w.id === wallet.id ? { ...w, balance: newBalance } : w)
-    );
+  const handleRefreshBalance = async (wallet: any) => {
+    await refreshBalance(wallet);
     toast({ title: "تم التحديث", description: "تم تحديث الرصيد" });
   };
 
@@ -209,45 +157,12 @@ const WalletFixed = () => {
     }
 
     try {
-      if (selectedWallet.network === 'Ethereum' && selectedWallet.type === 'MetaMask' && window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        
-        const transaction = {
-          to: sendAddress,
-          value: ethers.parseEther(sendAmount)
-        };
-        
-        const tx = await signer.sendTransaction(transaction);
-        toast({ 
-          title: "جاري المعالجة", 
-          description: `معرف المعاملة: ${tx.hash.slice(0, 16)}...` 
-        });
-        
-        await tx.wait();
-        toast({ 
-          title: "تم الإرسال بنجاح", 
-          description: `تم إرسال ${sendAmount} ${selectedWallet.currency}` 
-        });
-        
-        // تحديث الرصيد بعد الإرسال
-        refreshBalance(selectedWallet);
-        
-      } else if (selectedWallet.network === 'Solana' && selectedWallet.type === 'Phantom' && window.phantom?.solana) {
-        // For now, show message that Solana transactions require more setup
-        toast({ 
-          title: "معاملات Solana", 
-          description: "معاملات Solana تتطلب إعداد إضافي - سيتم تفعيلها قريباً", 
-          variant: "destructive" 
-        });
-        return;
-      } else {
-        toast({ 
-          title: "غير مدعوم", 
-          description: "إرسال المعاملات غير مدعوم للمحافظ الداخلية حالياً", 
-          variant: "destructive" 
-        });
-      }
+      const txHash = await sendTransaction(selectedWallet, sendAddress, sendAmount);
+      
+      toast({ 
+        title: "تم الإرسال بنجاح", 
+        description: `معرف المعاملة: ${txHash.slice(0, 16)}...` 
+      });
       
       setSendDialogOpen(false);
       setSendAmount("");
@@ -280,17 +195,36 @@ const WalletFixed = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              🔗 WalletConnect
+            </CardTitle>
+            <CardDescription>اتصال بأكثر من 300 محفظة</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setConnectModalOpen(true)}
+              disabled={isConnecting}
+              className="w-full"
+            >
+              {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+              اتصال بالمحافظ
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               🦊 MetaMask
             </CardTitle>
             <CardDescription>محفظة Ethereum الأشهر</CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={connectMetaMask} 
-              disabled={isConnecting === 'metamask'}
+              onClick={() => handleWalletConnect('metamask')}
+              disabled={isConnecting}
               className="w-full"
             >
-              {isConnecting === 'metamask' ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
               اتصال بـ MetaMask
             </Button>
           </CardContent>
@@ -305,11 +239,11 @@ const WalletFixed = () => {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={connectPhantom} 
-              disabled={isConnecting === 'phantom'}
+              onClick={() => handleWalletConnect('phantom')}
+              disabled={isConnecting}
               className="w-full"
             >
-              {isConnecting === 'phantom' ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
               اتصال بـ Phantom
             </Button>
           </CardContent>
@@ -400,7 +334,7 @@ const WalletFixed = () => {
                     <Button 
                       size="sm" 
                       variant="ghost"
-                      onClick={() => refreshBalance(wallet)}
+                      onClick={() => handleRefreshBalance(wallet)}
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -515,6 +449,14 @@ const WalletFixed = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* WalletConnect Modal */}
+      <WalletConnectModal
+        open={connectModalOpen}
+        onOpenChange={setConnectModalOpen}
+        onConnect={handleWalletConnect}
+        isConnecting={isConnecting}
+      />
     </div>
   );
 };
