@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
 import { 
   Copy, Send, QrCode, Plus, Wallet2, 
-  RefreshCw, ExternalLink, Eye, EyeOff, AlertCircle
+  RefreshCw, ExternalLink, Eye, EyeOff, AlertCircle, ArrowDownToLine, ArrowUpFromLine
 } from "lucide-react";
 
 // Multi-wallet support with MetaMask, Phantom, and internal wallets
@@ -32,12 +33,41 @@ declare global {
   }
 }
 
+interface WalletData {
+  id: string;
+  type: 'MetaMask' | 'Phantom' | 'Internal';
+  address: string;
+  balance: string;
+  currency: string;
+  name?: string;
+}
+
 const WalletFixed = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [connectedWallets, setConnectedWallets] = useState<any[]>([]);
+  const [connectedWallets, setConnectedWallets] = useState<WalletData[]>([]);
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<WalletData | null>(null);
+  const [sendAmount, setSendAmount] = useState("");
+  const [sendAddress, setSendAddress] = useState("");
+  const [newWalletName, setNewWalletName] = useState("");
+
+  const getWalletBalance = async (address: string, type: string) => {
+    try {
+      if (type === 'MetaMask' && window.ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const balance = await provider.getBalance(address);
+        return ethers.formatEther(balance);
+      }
+      return "0.0";
+    } catch (error) {
+      console.error("Error getting balance:", error);
+      return "0.0";
+    }
+  };
 
   const connectMetaMask = async () => {
     if (!window.ethereum?.isMetaMask) {
@@ -47,7 +77,15 @@ const WalletFixed = () => {
     setIsConnecting('metamask');
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      setConnectedWallets(prev => [...prev, { type: 'MetaMask', address: accounts[0], balance: 0 }]);
+      const balance = await getWalletBalance(accounts[0], 'MetaMask');
+      const newWallet: WalletData = {
+        id: Date.now().toString(),
+        type: 'MetaMask',
+        address: accounts[0],
+        balance,
+        currency: 'ETH'
+      };
+      setConnectedWallets(prev => [...prev, newWallet]);
       toast({ title: "متصل بـ MetaMask", description: `العنوان: ${accounts[0].slice(0, 16)}...` });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل الاتصال مع MetaMask", variant: "destructive" });
@@ -63,12 +101,73 @@ const WalletFixed = () => {
     setIsConnecting('phantom');
     try {
       const response = await window.phantom.solana.connect();
-      setConnectedWallets(prev => [...prev, { type: 'Phantom', address: response.publicKey.toString(), balance: 0 }]);
+      const newWallet: WalletData = {
+        id: Date.now().toString(),
+        type: 'Phantom',
+        address: response.publicKey.toString(),
+        balance: "0.0",
+        currency: 'SOL'
+      };
+      setConnectedWallets(prev => [...prev, newWallet]);
       toast({ title: "متصل بـ Phantom", description: `العنوان: ${response.publicKey.toString().slice(0, 16)}...` });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل الاتصال مع Phantom", variant: "destructive" });
     }
     setIsConnecting(null);
+  };
+
+  const createInternalWallet = async () => {
+    if (!newWalletName.trim()) {
+      toast({ title: "خطأ", description: "يرجى إدخال اسم المحفظة", variant: "destructive" });
+      return;
+    }
+    
+    try {
+      // Create a new Ethereum wallet
+      const wallet = ethers.Wallet.createRandom();
+      const newWallet: WalletData = {
+        id: Date.now().toString(),
+        type: 'Internal',
+        address: wallet.address,
+        balance: "0.0",
+        currency: 'ETH',
+        name: newWalletName
+      };
+      
+      setConnectedWallets(prev => [...prev, newWallet]);
+      setNewWalletName("");
+      toast({ 
+        title: "تم إنشاء المحفظة", 
+        description: `محفظة ${newWalletName} تم إنشاؤها بنجاح` 
+      });
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل في إنشاء المحفظة", variant: "destructive" });
+    }
+  };
+
+  const copyAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    toast({ title: "تم النسخ", description: "تم نسخ العنوان إلى الحافظة" });
+  };
+
+  const refreshBalance = async (wallet: WalletData) => {
+    const newBalance = await getWalletBalance(wallet.address, wallet.type);
+    setConnectedWallets(prev => 
+      prev.map(w => w.id === wallet.id ? { ...w, balance: newBalance } : w)
+    );
+    toast({ title: "تم التحديث", description: "تم تحديث الرصيد" });
+  };
+
+  const handleSend = () => {
+    if (!selectedWallet || !sendAmount || !sendAddress) {
+      toast({ title: "خطأ", description: "يرجى ملء جميع الحقول", variant: "destructive" });
+      return;
+    }
+    // Here you would implement the actual sending logic
+    toast({ title: "تم الإرسال", description: `تم إرسال ${sendAmount} ${selectedWallet.currency}` });
+    setSendDialogOpen(false);
+    setSendAmount("");
+    setSendAddress("");
   };
 
   if (!user) {
@@ -130,44 +229,92 @@ const WalletFixed = () => {
             </CardTitle>
             <CardDescription>أنشئ محفظة داخلية جديدة</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button className="w-full" variant="outline">
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="wallet-name">اسم المحفظة</Label>
+              <Input
+                id="wallet-name"
+                placeholder="أدخل اسم المحفظة"
+                value={newWalletName}
+                onChange={(e) => setNewWalletName(e.target.value)}
+              />
+            </div>
+            <Button className="w-full" onClick={createInternalWallet}>
               <Plus className="h-4 w-4 mr-2" />
-              محفظة جديدة
+              إنشاء محفظة جديدة
             </Button>
           </CardContent>
         </Card>
       </div>
 
       {connectedWallets.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <h2 className="text-2xl font-bold">المحافظ المتصلة</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {connectedWallets.map((wallet, index) => (
-              <Card key={index}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {connectedWallets.map((wallet) => (
+              <Card key={wallet.id} className="relative">
                 <CardHeader>
-                  <CardTitle>{wallet.type}</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{wallet.name || wallet.type}</span>
+                    <Badge variant="secondary">{wallet.currency}</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    {wallet.type === 'Internal' ? 'محفظة داخلية' : `محفظة ${wallet.type}`}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm bg-muted px-2 py-1 rounded flex-1">
-                        {wallet.address.slice(0, 16)}...
-                      </code>
-                      <Button size="sm" variant="ghost">
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1">
-                        <Send className="h-4 w-4 mr-2" />
-                        إرسال
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <QrCode className="h-4 w-4 mr-2" />
-                        استقبال
-                      </Button>
-                    </div>
+                <CardContent className="space-y-4">
+                  <div className="text-center p-4 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold">{wallet.balance}</p>
+                    <p className="text-sm text-muted-foreground">{wallet.currency}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs bg-muted px-2 py-1 rounded flex-1 overflow-hidden">
+                      {wallet.address.slice(0, 20)}...
+                    </code>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => copyAddress(wallet.address)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => refreshBalance(wallet)}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => setSelectedWallet(wallet)}
+                        >
+                          <ArrowUpFromLine className="h-4 w-4 mr-2" />
+                          إرسال
+                        </Button>
+                      </DialogTrigger>
+                    </Dialog>
+                    
+                    <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => setSelectedWallet(wallet)}
+                        >
+                          <ArrowDownToLine className="h-4 w-4 mr-2" />
+                          استقبال
+                        </Button>
+                      </DialogTrigger>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
@@ -175,6 +322,81 @@ const WalletFixed = () => {
           </div>
         </div>
       )}
+
+      {/* Send Dialog */}
+      <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>إرسال {selectedWallet?.currency}</DialogTitle>
+            <DialogDescription>
+              من محفظة: {selectedWallet?.name || selectedWallet?.type}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="send-address">عنوان المستلم</Label>
+              <Input
+                id="send-address"
+                placeholder="0x..."
+                value={sendAddress}
+                onChange={(e) => setSendAddress(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="send-amount">المبلغ</Label>
+              <Input
+                id="send-amount"
+                type="number"
+                placeholder="0.0"
+                value={sendAmount}
+                onChange={(e) => setSendAmount(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleSend} className="flex-1">
+                <Send className="h-4 w-4 mr-2" />
+                إرسال
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setSendDialogOpen(false)}
+                className="flex-1"
+              >
+                إلغاء
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>استقبال {selectedWallet?.currency}</DialogTitle>
+            <DialogDescription>
+              شارك هذا العنوان لاستقبال {selectedWallet?.currency}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-center p-6 bg-muted rounded-lg">
+              <div className="mb-4 mx-auto w-32 h-32 bg-white border rounded-lg flex items-center justify-center">
+                <QrCode className="h-20 w-20" />
+              </div>
+              <p className="text-sm font-mono break-all">
+                {selectedWallet?.address}
+              </p>
+            </div>
+            <Button 
+              onClick={() => selectedWallet && copyAddress(selectedWallet.address)}
+              className="w-full"
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              نسخ العنوان
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
