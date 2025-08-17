@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
+import { Keypair } from "@solana/web3.js";
 import { 
   Copy, Send, QrCode, Plus, Wallet2, 
-  RefreshCw, ExternalLink, Eye, EyeOff, AlertCircle, ArrowDownToLine, ArrowUpFromLine
+  RefreshCw, ExternalLink, Eye, EyeOff, AlertCircle, ArrowDownToLine, ArrowUpFromLine, Network
 } from "lucide-react";
 
 // Multi-wallet support with MetaMask, Phantom, and internal wallets
@@ -39,6 +40,7 @@ interface WalletData {
   address: string;
   balance: string;
   currency: string;
+  network: 'Ethereum' | 'Solana';
   name?: string;
 }
 
@@ -54,6 +56,7 @@ const WalletFixed = () => {
   const [sendAmount, setSendAmount] = useState("");
   const [sendAddress, setSendAddress] = useState("");
   const [newWalletName, setNewWalletName] = useState("");
+  const [selectedNetwork, setSelectedNetwork] = useState<'Ethereum' | 'Solana'>('Ethereum');
 
   const getWalletBalance = async (address: string, type: string) => {
     try {
@@ -83,7 +86,8 @@ const WalletFixed = () => {
         type: 'MetaMask',
         address: accounts[0],
         balance,
-        currency: 'ETH'
+        currency: 'ETH',
+        network: 'Ethereum'
       };
       setConnectedWallets(prev => [...prev, newWallet]);
       toast({ title: "متصل بـ MetaMask", description: `العنوان: ${accounts[0].slice(0, 16)}...` });
@@ -106,7 +110,8 @@ const WalletFixed = () => {
         type: 'Phantom',
         address: response.publicKey.toString(),
         balance: "0.0",
-        currency: 'SOL'
+        currency: 'SOL',
+        network: 'Solana'
       };
       setConnectedWallets(prev => [...prev, newWallet]);
       toast({ title: "متصل بـ Phantom", description: `العنوان: ${response.publicKey.toString().slice(0, 16)}...` });
@@ -123,22 +128,37 @@ const WalletFixed = () => {
     }
     
     try {
-      // Create a new Ethereum wallet
-      const wallet = ethers.Wallet.createRandom();
-      const newWallet: WalletData = {
-        id: Date.now().toString(),
-        type: 'Internal',
-        address: wallet.address,
-        balance: "0.0",
-        currency: 'ETH',
-        name: newWalletName
-      };
+      let newWallet: WalletData;
+      
+      if (selectedNetwork === 'Ethereum') {
+        const wallet = ethers.Wallet.createRandom();
+        newWallet = {
+          id: Date.now().toString(),
+          type: 'Internal',
+          address: wallet.address,
+          balance: "0.0",
+          currency: 'ETH',
+          network: 'Ethereum',
+          name: newWalletName
+        };
+      } else {
+        const keypair = Keypair.generate();
+        newWallet = {
+          id: Date.now().toString(),
+          type: 'Internal',
+          address: keypair.publicKey.toString(),
+          balance: "0.0",
+          currency: 'SOL',
+          network: 'Solana',
+          name: newWalletName
+        };
+      }
       
       setConnectedWallets(prev => [...prev, newWallet]);
       setNewWalletName("");
       toast({ 
         title: "تم إنشاء المحفظة", 
-        description: `محفظة ${newWalletName} تم إنشاؤها بنجاح` 
+        description: `محفظة ${newWalletName} (${selectedNetwork}) تم إنشاؤها بنجاح` 
       });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل في إنشاء المحفظة", variant: "destructive" });
@@ -239,9 +259,31 @@ const WalletFixed = () => {
                 onChange={(e) => setNewWalletName(e.target.value)}
               />
             </div>
+            <div>
+              <Label htmlFor="network-select">اختر الشبكة</Label>
+              <Select value={selectedNetwork} onValueChange={(value: 'Ethereum' | 'Solana') => setSelectedNetwork(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الشبكة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Ethereum">
+                    <div className="flex items-center gap-2">
+                      <Network className="h-4 w-4" />
+                      Ethereum (ETH)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="Solana">
+                    <div className="flex items-center gap-2">
+                      <Network className="h-4 w-4" />
+                      Solana (SOL)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button className="w-full" onClick={createInternalWallet}>
               <Plus className="h-4 w-4 mr-2" />
-              إنشاء محفظة جديدة
+              إنشاء محفظة {selectedNetwork}
             </Button>
           </CardContent>
         </Card>
@@ -256,10 +298,13 @@ const WalletFixed = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>{wallet.name || wallet.type}</span>
-                    <Badge variant="secondary">{wallet.currency}</Badge>
+                    <div className="flex gap-1">
+                      <Badge variant="secondary">{wallet.currency}</Badge>
+                      <Badge variant="outline">{wallet.network}</Badge>
+                    </div>
                   </CardTitle>
                   <CardDescription>
-                    {wallet.type === 'Internal' ? 'محفظة داخلية' : `محفظة ${wallet.type}`}
+                    {wallet.type === 'Internal' ? `محفظة داخلية - ${wallet.network}` : `محفظة ${wallet.type} - ${wallet.network}`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
