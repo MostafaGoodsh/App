@@ -29,6 +29,8 @@ declare global {
         isPhantom?: boolean;
         connect: () => Promise<{ publicKey: { toString(): string } }>;
         disconnect: () => Promise<void>;
+        signAndSendTransaction?: (transaction: any) => Promise<{ signature: string }>;
+        signTransaction?: (transaction: any) => Promise<any>;
       };
     };
   }
@@ -58,12 +60,32 @@ const WalletFixed = () => {
   const [newWalletName, setNewWalletName] = useState("");
   const [selectedNetwork, setSelectedNetwork] = useState<'Ethereum' | 'Solana'>('Ethereum');
 
-  const getWalletBalance = async (address: string, type: string) => {
+  const getWalletBalance = async (address: string, type: string, network: string) => {
     try {
-      if (type === 'MetaMask' && window.ethereum) {
+      if (network === 'Ethereum' && window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const balance = await provider.getBalance(address);
         return ethers.formatEther(balance);
+      } else if (network === 'Solana' && type === 'Phantom' && window.phantom?.solana) {
+        // For Phantom, we can get balance through RPC
+        try {
+          const response = await fetch('https://api.mainnet-beta.solana.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBalance',
+              params: [address]
+            })
+          });
+          const data = await response.json();
+          if (data.result) {
+            return (data.result.value / 1000000000).toFixed(4); // Convert lamports to SOL
+          }
+        } catch (error) {
+          console.error("Error fetching Solana balance:", error);
+        }
       }
       return "0.0";
     } catch (error) {
@@ -80,7 +102,7 @@ const WalletFixed = () => {
     setIsConnecting('metamask');
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const balance = await getWalletBalance(accounts[0], 'MetaMask');
+      const balance = await getWalletBalance(accounts[0], 'MetaMask', 'Ethereum');
       const newWallet: WalletData = {
         id: Date.now().toString(),
         type: 'MetaMask',
@@ -105,16 +127,18 @@ const WalletFixed = () => {
     setIsConnecting('phantom');
     try {
       const response = await window.phantom.solana.connect();
+      const address = response.publicKey.toString();
+      const balance = await getWalletBalance(address, 'Phantom', 'Solana');
       const newWallet: WalletData = {
         id: Date.now().toString(),
         type: 'Phantom',
-        address: response.publicKey.toString(),
-        balance: "0.0",
+        address,
+        balance,
         currency: 'SOL',
         network: 'Solana'
       };
       setConnectedWallets(prev => [...prev, newWallet]);
-      toast({ title: "متصل بـ Phantom", description: `العنوان: ${response.publicKey.toString().slice(0, 16)}...` });
+      toast({ title: "متصل بـ Phantom", description: `العنوان: ${address.slice(0, 16)}...` });
     } catch (error) {
       toast({ title: "خطأ", description: "فشل الاتصال مع Phantom", variant: "destructive" });
     }
@@ -171,23 +195,72 @@ const WalletFixed = () => {
   };
 
   const refreshBalance = async (wallet: WalletData) => {
-    const newBalance = await getWalletBalance(wallet.address, wallet.type);
+    const newBalance = await getWalletBalance(wallet.address, wallet.type, wallet.network);
     setConnectedWallets(prev => 
       prev.map(w => w.id === wallet.id ? { ...w, balance: newBalance } : w)
     );
     toast({ title: "تم التحديث", description: "تم تحديث الرصيد" });
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!selectedWallet || !sendAmount || !sendAddress) {
       toast({ title: "خطأ", description: "يرجى ملء جميع الحقول", variant: "destructive" });
       return;
     }
-    // Here you would implement the actual sending logic
-    toast({ title: "تم الإرسال", description: `تم إرسال ${sendAmount} ${selectedWallet.currency}` });
-    setSendDialogOpen(false);
-    setSendAmount("");
-    setSendAddress("");
+
+    try {
+      if (selectedWallet.network === 'Ethereum' && selectedWallet.type === 'MetaMask' && window.ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        
+        const transaction = {
+          to: sendAddress,
+          value: ethers.parseEther(sendAmount)
+        };
+        
+        const tx = await signer.sendTransaction(transaction);
+        toast({ 
+          title: "جاري المعالجة", 
+          description: `معرف المعاملة: ${tx.hash.slice(0, 16)}...` 
+        });
+        
+        await tx.wait();
+        toast({ 
+          title: "تم الإرسال بنجاح", 
+          description: `تم إرسال ${sendAmount} ${selectedWallet.currency}` 
+        });
+        
+        // تحديث الرصيد بعد الإرسال
+        refreshBalance(selectedWallet);
+        
+      } else if (selectedWallet.network === 'Solana' && selectedWallet.type === 'Phantom' && window.phantom?.solana) {
+        // For now, show message that Solana transactions require more setup
+        toast({ 
+          title: "معاملات Solana", 
+          description: "معاملات Solana تتطلب إعداد إضافي - سيتم تفعيلها قريباً", 
+          variant: "destructive" 
+        });
+        return;
+      } else {
+        toast({ 
+          title: "غير مدعوم", 
+          description: "إرسال المعاملات غير مدعوم للمحافظ الداخلية حالياً", 
+          variant: "destructive" 
+        });
+      }
+      
+      setSendDialogOpen(false);
+      setSendAmount("");
+      setSendAddress("");
+      
+    } catch (error: any) {
+      console.error("Send transaction error:", error);
+      toast({ 
+        title: "فشل في الإرسال", 
+        description: error.message || "حدث خطأ أثناء الإرسال", 
+        variant: "destructive" 
+      });
+    }
   };
 
   if (!user) {
