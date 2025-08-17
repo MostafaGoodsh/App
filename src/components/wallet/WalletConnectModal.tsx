@@ -16,6 +16,14 @@ interface WalletOption {
 
 const walletOptions: WalletOption[] = [
   {
+    id: 'walletconnect',
+    name: 'WalletConnect',
+    icon: '🔗',
+    description: 'اتصال بأكثر من 300 محفظة',
+    type: 'walletconnect',
+    supported: true
+  },
+  {
     id: 'metamask',
     name: 'MetaMask',
     icon: '🦊',
@@ -32,36 +40,28 @@ const walletOptions: WalletOption[] = [
     supported: true
   },
   {
-    id: 'walletconnect',
-    name: 'WalletConnect',
-    icon: '🔗',
-    description: 'قريباً - اتصال بأكثر من 300 محفظة',
-    type: 'walletconnect',
-    supported: false
-  },
-  {
     id: 'tonwallet',
     name: 'Ton Wallet',
     icon: '💎',
-    description: 'قريباً - محفظة TON الرسمية',
+    description: 'محفظة TON الرسمية',
     type: 'walletconnect',
-    supported: false
+    supported: true
   },
   {
     id: 'bitget',
     name: 'Bitget Wallet',
     icon: '⚡',
-    description: 'قريباً - محفظة متعددة الشبكات',
+    description: 'محفظة متعددة الشبكات',
     type: 'walletconnect',
-    supported: false
+    supported: true
   },
   {
     id: 'okx',
     name: 'OKX Wallet',
     icon: '🏛️',
-    description: 'قريباً - محفظة OKX Web3',
+    description: 'محفظة OKX Web3',
     type: 'walletconnect',
-    supported: false
+    supported: true
   }
 ];
 
@@ -79,10 +79,6 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
   isConnecting
 }) => {
   const handleConnect = async (walletType: string) => {
-    if (!walletOptions.find(w => w.type === walletType)?.supported) {
-      return;
-    }
-    
     try {
       await onConnect(walletType);
       onOpenChange(false);
@@ -111,14 +107,14 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
               className={`cursor-pointer transition-all hover:shadow-md ${
                 !wallet.supported ? 'opacity-50' : ''
               }`}
-              onClick={() => wallet.supported && handleConnect(wallet.type)}
+              onClick={() => handleConnect(wallet.type)}
             >
               <CardContent className="flex items-center gap-4 p-4">
                 <div className="text-2xl">{wallet.icon}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{wallet.name}</h3>
-                    {!wallet.supported && (
+                    {!wallet.supported && wallet.id !== 'walletconnect' && wallet.id !== 'metamask' && wallet.id !== 'phantom' && (
                       <Badge variant="secondary" className="text-xs">
                         قريباً
                       </Badge>
@@ -128,7 +124,7 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
                     {wallet.description}
                   </p>
                 </div>
-                {isConnecting && wallet.supported && (
+                {isConnecting && (wallet.id === 'walletconnect' || wallet.id === 'metamask' || wallet.id === 'phantom') && (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 )}
               </CardContent>

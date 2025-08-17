@@ -311,7 +311,7 @@ const WalletFixed = () => {
                     </div>
                   </CardTitle>
                   <CardDescription>
-                    {wallet.type === 'Internal' ? `محفظة داخلية - ${wallet.network}` : `محفظة ${wallet.type} - ${wallet.network}`}
+                    {wallet.type === 'WalletConnect' ? `محفظة WalletConnect - ${wallet.network}` : `محفظة ${wallet.type} - ${wallet.network}`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

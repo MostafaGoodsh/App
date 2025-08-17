@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
+
+// Project ID للـ WalletConnect - احصل عليه من cloud.walletconnect.com 
+const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal';
+  type: 'WalletConnect' | 'MetaMask' | 'Phantom';
   address: string;
   balance: string;
   currency: string;
@@ -15,6 +19,7 @@ export interface ConnectedWallet {
 export const useWalletConnect = () => {
   const [connectedWallets, setConnectedWallets] = useState<ConnectedWallet[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [wcProvider, setWcProvider] = useState<any>(null);
 
   // Load saved wallets from localStorage
   useEffect(() => {
@@ -50,15 +55,61 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      // For now, just show message that WalletConnect integration is in progress
-      throw new Error('WalletConnect integration is coming soon. Please use MetaMask or Phantom for now.');
+      // Initialize WalletConnect provider
+      const provider = await EthereumProvider.init({
+        chains: [1, 56, 137], // Ethereum, BSC, Polygon
+        projectId,
+        showQrModal: true,
+        qrModalOptions: {
+          themeMode: 'dark',
+          themeVariables: {
+            '--wcm-z-index': '1000'
+          }
+        },
+        metadata: {
+          name: 'المحافظ الرقمية',
+          description: 'منصة إدارة المحافظ الرقمية',
+          url: window.location.origin,
+          icons: [window.location.origin + '/favicon.ico']
+        }
+      });
+
+      setWcProvider(provider);
+
+      // Connect to wallet
+      await provider.connect();
+      
+      const accounts = provider.accounts;
+      
+      if (accounts && accounts.length > 0) {
+        const address = accounts[0];
+        const balance = await getBalance(address, provider);
+        
+        const newWallet: ConnectedWallet = {
+          id: Date.now().toString(),
+          type: 'WalletConnect',
+          address,
+          balance,
+          currency: 'ETH',
+          network: 'Ethereum',
+          provider
+        };
+
+        setConnectedWallets(prev => {
+          const exists = prev.find(w => w.address === address && w.type === 'WalletConnect');
+          if (exists) return prev;
+          return [...prev, newWallet];
+        });
+
+        return newWallet;
+      }
     } catch (error) {
       console.error('WalletConnect connection error:', error);
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [getBalance]);
 
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum?.isMetaMask) {
