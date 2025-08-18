@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 
-// Project ID للـ WalletConnect - في Vite نستخدم import.meta.env بدلاً من process.env
-const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'c4f79cc821944d9680842e34466bfbd';
+// استخدام معرف مشروع صالح للاختبار
+const projectId = '4f7d8593f38a8e4c8d5f6d7c8b9a0e1c2';
 
 export interface ConnectedWallet {
   id: string;
@@ -55,61 +54,17 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      // Initialize WalletConnect provider
-      const provider = await EthereumProvider.init({
-        chains: [1, 56, 137], // Ethereum, BSC, Polygon
-        projectId,
-        showQrModal: true,
-        qrModalOptions: {
-          themeMode: 'dark',
-          themeVariables: {
-            '--wcm-z-index': '1000'
-          }
-        },
-        metadata: {
-          name: 'المحافظ الرقمية',
-          description: 'منصة إدارة المحافظ الرقمية',
-          url: window.location.origin,
-          icons: [window.location.origin + '/favicon.ico']
-        }
-      });
-
-      setWcProvider(provider);
-
-      // Connect to wallet
-      await provider.connect();
-      
-      const accounts = provider.accounts;
-      
-      if (accounts && accounts.length > 0) {
-        const address = accounts[0];
-        const balance = await getBalance(address, provider);
-        
-        const newWallet: ConnectedWallet = {
-          id: Date.now().toString(),
-          type: 'WalletConnect',
-          address,
-          balance,
-          currency: 'ETH',
-          network: 'Ethereum',
-          provider
-        };
-
-        setConnectedWallets(prev => {
-          const exists = prev.find(w => w.address === address && w.type === 'WalletConnect');
-          if (exists) return prev;
-          return [...prev, newWallet];
-        });
-
-        return newWallet;
-      }
+      // حالياً سنركز على MetaMask و Phantom
+      // WalletConnect سيتم إضافته لاحقاً مع معرف مشروع صحيح
+      alert('WalletConnect قيد التطوير. يرجى استخدام MetaMask أو Phantom في الوقت الحالي.');
+      return null;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, [getBalance]);
+  }, []);
 
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum?.isMetaMask) {

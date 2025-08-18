@@ -114,7 +114,7 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold">{wallet.name}</h3>
-                    {!wallet.supported && wallet.id !== 'walletconnect' && wallet.id !== 'metamask' && wallet.id !== 'phantom' && (
+                    {!wallet.supported && (
                       <Badge variant="secondary" className="text-xs">
                         قريباً
                       </Badge>
