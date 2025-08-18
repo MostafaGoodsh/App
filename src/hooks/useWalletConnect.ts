@@ -8,7 +8,7 @@ const projectId = '5cbecfb58785fd00d9c6f1825f993060';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect' | 'MetaMask' | 'Phantom';
+  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal';
   address: string;
   balance: string;
   currency: string;
@@ -150,15 +150,15 @@ export const useWalletConnect = () => {
   }, [getBalance, wcProvider]);
 
   const connectMetaMask = useCallback(async () => {
-    if (!window.ethereum?.isMetaMask) {
+    if (!(window as any).ethereum?.isMetaMask) {
       window.open('https://metamask.io/download/', '_blank');
       return;
     }
 
     setIsConnecting(true);
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      const balance = await getBalance(accounts[0], window.ethereum);
+      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+      const balance = await getBalance(accounts[0], (window as any).ethereum);
       
       const newWallet: ConnectedWallet = {
         id: Date.now().toString(),
@@ -167,7 +167,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'ETH',
         network: 'Ethereum',
-        provider: window.ethereum
+        provider: (window as any).ethereum
       };
 
       setConnectedWallets(prev => {
@@ -186,14 +186,14 @@ export const useWalletConnect = () => {
   }, [getBalance]);
 
   const connectPhantom = useCallback(async () => {
-    if (!window.phantom?.solana?.isPhantom) {
+    if (!(window as any).phantom?.solana?.isPhantom) {
       window.open('https://phantom.app/', '_blank');
       return;
     }
 
     setIsConnecting(true);
     try {
-      const response = await window.phantom.solana.connect();
+      const response = await (window as any).phantom.solana.connect();
       const address = response.publicKey.toString();
       
       // Get Solana balance
@@ -224,7 +224,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'SOL',
         network: 'Solana',
-        provider: window.phantom.solana
+        provider: (window as any).phantom.solana
       };
 
       setConnectedWallets(prev => {
@@ -284,6 +284,14 @@ export const useWalletConnect = () => {
     }
   }, [refreshBalance]);
 
+  const addInternalWallet = useCallback((wallet: ConnectedWallet) => {
+    setConnectedWallets(prev => {
+      const updated = [...prev, wallet];
+      localStorage.setItem('connectedWallets', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return {
     connectedWallets,
     isConnecting,
@@ -292,6 +300,7 @@ export const useWalletConnect = () => {
     connectPhantom,
     disconnectWallet,
     refreshBalance,
-    sendTransaction
+    sendTransaction,
+    addInternalWallet
   };
 };

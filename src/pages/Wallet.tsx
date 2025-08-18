@@ -16,7 +16,8 @@ const WalletFixed = () => {
     connectPhantom,
     refreshBalance,
     sendTransaction,
-    disconnectWallet
+    disconnectWallet,
+    addInternalWallet
   } = useWalletConnect();
 
   const handleWalletConnect = async (type: string) => {
@@ -115,6 +116,7 @@ const WalletFixed = () => {
       <WalletConnectionSection
         isConnecting={isConnecting}
         onWalletConnect={handleWalletConnect}
+        onAddInternalWallet={addInternalWallet}
       />
 
       {/* Connected Wallets Grid */}
