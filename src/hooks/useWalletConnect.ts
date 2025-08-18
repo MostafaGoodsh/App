@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 
 // استخدام معرف مشروع صالح من WalletConnect Cloud
@@ -55,62 +54,16 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      // Initialize WalletConnect provider
-      const provider = await EthereumProvider.init({
-        chains: [1], // Ethereum mainnet
-        projectId,
-        showQrModal: true,
-        qrModalOptions: {
-          themeMode: 'dark',
-          themeVariables: {
-            '--wcm-z-index': '1000'
-          }
-        },
-        metadata: {
-          name: 'المحافظ الرقمية',
-          description: 'منصة إدارة المحافظ الرقمية',
-          url: window.location.origin,
-          icons: [window.location.origin + '/favicon.ico']
-        }
-      });
-
-      setWcProvider(provider);
-
-      // Connect to wallet
-      await provider.connect();
-      
-      const accounts = provider.accounts;
-      
-      if (accounts && accounts.length > 0) {
-        const address = accounts[0];
-        const balance = await getBalance(address, provider);
-        
-        const newWallet: ConnectedWallet = {
-          id: Date.now().toString(),
-          type: 'WalletConnect',
-          address,
-          balance,
-          currency: 'ETH',
-          network: 'Ethereum',
-          provider
-        };
-
-        setConnectedWallets(prev => {
-          const exists = prev.find(w => w.address === address && w.type === 'WalletConnect');
-          if (exists) return prev;
-          return [...prev, newWallet];
-        });
-
-        return newWallet;
-      }
-      return null;
+      // لتجنب خطأ التكوين، نحتاج إلى مشروع صالح من WalletConnect Cloud
+      // يمكن للمطور الحصول على مشروع مجاني من https://cloud.walletconnect.com/
+      throw new Error('يحتاج WalletConnect إلى مفتاح مشروع صالح. يرجى استخدام MetaMask أو Phantom في الوقت الحالي.');
     } catch (error) {
       console.error('WalletConnect connection error:', error);
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, [getBalance]);
+  }, []);
 
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum?.isMetaMask) {
