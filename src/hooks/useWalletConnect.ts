@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-
-// للحصول على مفتاح مشروع مجاني، زر https://cloud.reown.com
-// إنشئ مشروع جديد واحصل على Project ID
-const projectId = '5cbecfb58785fd00d9c6f1825f993060';
+import { WALLETCONNECT_CONFIG, NETWORK_CONFIG } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
@@ -67,18 +64,13 @@ export const useWalletConnect = () => {
 
       // Initialize WalletConnect provider
       const provider = await EthereumProvider.init({
-        chains: [1], // Ethereum mainnet
-        projectId,
+        chains: WALLETCONNECT_CONFIG.chains,
+        optionalChains: [137], // Polygon as optional chain
+        projectId: WALLETCONNECT_CONFIG.projectId,
         showQrModal: true,
-        qrModalOptions: {
-          themeMode: 'dark',
-          themeVariables: {
-            '--wcm-z-index': '1000'
-          }
-        },
+        qrModalOptions: WALLETCONNECT_CONFIG.qrModalOptions,
         metadata: {
-          name: 'المحافظ الرقمية',
-          description: 'منصة إدارة المحافظ الرقمية',
+          ...WALLETCONNECT_CONFIG.metadata,
           url: window.location.origin,
           icons: [window.location.origin + '/favicon.ico']
         }
