@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 
-// Project ID صحيح للـ WalletConnect
-const projectId = 'c4f79cc821944d9680842e34466bfbd';
+// Project ID للـ WalletConnect - في Vite نستخدم import.meta.env بدلاً من process.env
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'c4f79cc821944d9680842e34466bfbd';
 
 export interface ConnectedWallet {
   id: string;
