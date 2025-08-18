@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 
 // للحصول على مفتاح مشروع مجاني، زر https://cloud.reown.com
 // إنشئ مشروع جديد واحصل على Project ID
-const projectId = 'demo_project_id_replace_with_real_one';
+const projectId = '5cbecfb58785fd00d9c6f1825f993060';
 
 export interface ConnectedWallet {
   id: string;
@@ -56,11 +56,6 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      // تحقق من وجود مفتاح مشروع صالح
-      if (projectId === 'demo_project_id_replace_with_real_one') {
-        throw new Error('يحتاج WalletConnect إلى مفتاح مشروع صالح. يرجى:\n\n1. زيارة https://cloud.reown.com\n2. إنشاء حساب مجاني\n3. إنشاء مشروع جديد\n4. نسخ Project ID\n5. استبدال المفتاح في useWalletConnect.ts');
-      }
-
       // Initialize WalletConnect provider
       const provider = await EthereumProvider.init({
         chains: [1], // Ethereum mainnet
