@@ -65,24 +65,37 @@ const WalletFixed = () => {
       switch (type) {
         case 'walletconnect':
           wallet = await connectWalletConnect();
-          toast({ 
-            title: "تم الاتصال بنجاح", 
-            description: `تم اتصال WalletConnect بالعنوان: ${wallet?.address?.slice(0, 16)}...` 
-          });
+          if (wallet) {
+            setConnectModalOpen(false); // إغلاق Modal بعد نجاح الاتصال
+            toast({ 
+              title: "تم الاتصال بنجاح", 
+              description: `تم اتصال WalletConnect بالعنوان: ${wallet.address.slice(0, 16)}...` 
+            });
+          } else {
+            throw new Error('فشل في الحصول على بيانات المحفظة');
+          }
           break;
         case 'metamask':
           wallet = await connectMetaMask();
-          toast({ 
-            title: "متصل بـ MetaMask", 
-            description: `العنوان: ${wallet?.address?.slice(0, 16)}...` 
-          });
+          if (wallet) {
+            toast({ 
+              title: "متصل بـ MetaMask", 
+              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
+            });
+          } else {
+            throw new Error('فشل في الاتصال بـ MetaMask');
+          }
           break;
         case 'phantom':
           wallet = await connectPhantom();
-          toast({ 
-            title: "متصل بـ Phantom", 
-            description: `العنوان: ${wallet?.address?.slice(0, 16)}...` 
-          });
+          if (wallet) {
+            toast({ 
+              title: "متصل بـ Phantom", 
+              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
+            });
+          } else {
+            throw new Error('فشل في الاتصال بـ Phantom');
+          }
           break;
         default:
           throw new Error('نوع محفظة غير مدعوم');
