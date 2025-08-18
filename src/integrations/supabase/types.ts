@@ -708,6 +708,47 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_security: {
+        Row: {
+          access_count: number | null
+          created_at: string | null
+          encryption_version: number | null
+          id: string
+          last_accessed: string | null
+          mnemonic_encrypted: string | null
+          private_key_encrypted: string | null
+          wallet_id: string
+        }
+        Insert: {
+          access_count?: number | null
+          created_at?: string | null
+          encryption_version?: number | null
+          id?: string
+          last_accessed?: string | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          wallet_id: string
+        }
+        Update: {
+          access_count?: number | null
+          created_at?: string | null
+          encryption_version?: number | null
+          id?: string
+          last_accessed?: string | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_security_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_tokens: {
         Row: {
           balance: number | null
@@ -815,6 +856,45 @@ export type Database = {
       }
     }
     Views: {
+      identity_verification_admin_secure: {
+        Row: {
+          created_at: string | null
+          document_info_masked: string | null
+          document_status: string | null
+          full_name: string | null
+          id: string | null
+          status: string | null
+          user_id: string | null
+          verification_notes: string | null
+          verification_type: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_info_masked?: never
+          document_status?: never
+          full_name?: string | null
+          id?: string | null
+          status?: string | null
+          user_id?: string | null
+          verification_notes?: string | null
+          verification_type?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_info_masked?: never
+          document_status?: never
+          full_name?: string | null
+          id?: string | null
+          status?: string | null
+          user_id?: string | null
+          verification_notes?: string | null
+          verification_type?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       profiles_admin_secure: {
         Row: {
           access_count: number | null
