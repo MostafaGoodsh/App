@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { WalletConnectModal } from "@/components/wallet/WalletConnectModal";
+import { WalletConnectSetup } from "@/components/wallet/WalletConnectSetup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -190,6 +191,9 @@ const WalletFixed = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">المحافظ الرقمية</h1>
+      
+      {/* WalletConnect Setup Instructions */}
+      <WalletConnectSetup />
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         <Card>
