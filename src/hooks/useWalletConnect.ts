@@ -56,6 +56,15 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
+      // Disconnect any existing provider first
+      if (wcProvider) {
+        try {
+          await wcProvider.disconnect();
+        } catch (e) {
+          console.warn('Error disconnecting existing provider:', e);
+        }
+      }
+
       // Initialize WalletConnect provider
       const provider = await EthereumProvider.init({
         chains: [1], // Ethereum mainnet
@@ -75,10 +84,28 @@ export const useWalletConnect = () => {
         }
       });
 
+      // Set up event listeners
+      provider.on('accountsChanged', (accounts: string[]) => {
+        if (accounts.length === 0) {
+          // Handle disconnection
+          setConnectedWallets(prev => prev.filter(w => w.type !== 'WalletConnect'));
+        }
+      });
+
+      provider.on('disconnect', () => {
+        setConnectedWallets(prev => prev.filter(w => w.type !== 'WalletConnect'));
+        setWcProvider(null);
+      });
+
       setWcProvider(provider);
 
-      // Connect to wallet
-      await provider.connect();
+      // Connect to wallet with timeout
+      const connectPromise = provider.connect();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connection timeout')), 60000)
+      );
+
+      await Promise.race([connectPromise, timeoutPromise]);
       
       const accounts = provider.accounts;
       
@@ -107,11 +134,20 @@ export const useWalletConnect = () => {
       return null;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
+      // Clean up on error
+      if (wcProvider) {
+        try {
+          await wcProvider.disconnect();
+        } catch (e) {
+          console.warn('Error cleaning up provider:', e);
+        }
+        setWcProvider(null);
+      }
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, [getBalance]);
+  }, [getBalance, wcProvider]);
 
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum?.isMetaMask) {
