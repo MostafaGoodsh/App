@@ -5,16 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Wallet,
-  Plus,
-  RefreshCw
-} from 'lucide-react';
+import { Wallet, Plus } from 'lucide-react';
 
 interface SimpleWalletConnectionProps {
   isConnecting: boolean;
-  onConnectMetaMask: () => Promise<void>;
-  onConnectPhantom: () => Promise<void>;
+  onConnectMetaMask: () => void;
+  onConnectPhantom: () => void;
   onCreateWallet: (data: { name: string; network: 'Ethereum' | 'Solana' }) => void;
 }
 
@@ -27,16 +23,6 @@ export const SimpleWalletConnection = ({
   const { toast } = useToast();
   const [newWalletName, setNewWalletName] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState<'Ethereum' | 'Solana'>('Ethereum');
-
-  const handleMetaMaskConnect = () => {
-    console.log('MetaMask button clicked');
-    onConnectMetaMask();
-  };
-
-  const handlePhantomConnect = () => {
-    console.log('Phantom button clicked');
-    onConnectPhantom();
-  };
 
   const handleCreateWallet = () => {
     if (!newWalletName.trim()) {
@@ -74,16 +60,15 @@ export const SimpleWalletConnection = ({
             محفظة Ethereum الأشهر
           </p>
           <Button
-            onClick={handleMetaMaskConnect}
+            onClick={() => {
+              console.log('MetaMask clicked');
+              onConnectMetaMask();
+            }}
             disabled={isConnecting}
             className="w-full"
             type="button"
           >
-            {isConnecting ? (
-              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Wallet className="h-4 w-4 mr-2" />
-            )}
+            <Wallet className="h-4 w-4 mr-2" />
             اتصال بـ MetaMask
           </Button>
         </CardContent>
@@ -101,16 +86,15 @@ export const SimpleWalletConnection = ({
             محفظة Solana الرائدة
           </p>
           <Button
-            onClick={handlePhantomConnect}
+            onClick={() => {
+              console.log('Phantom clicked');
+              onConnectPhantom();
+            }}
             disabled={isConnecting}
             className="w-full"
             type="button"
           >
-            {isConnecting ? (
-              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Wallet className="h-4 w-4 mr-2" />
-            )}
+            <Wallet className="h-4 w-4 mr-2" />
             اتصال بـ Phantom
           </Button>
         </CardContent>
@@ -148,7 +132,11 @@ export const SimpleWalletConnection = ({
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleCreateWallet} className="w-full" type="button">
+          <Button 
+            onClick={handleCreateWallet} 
+            className="w-full" 
+            type="button"
+          >
             <Plus className="h-4 w-4 mr-2" />
             إنشاء محفظة
           </Button>

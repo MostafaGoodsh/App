@@ -37,19 +37,23 @@ export const useSimpleWallet = () => {
   const connectMetaMask = useCallback(async () => {
     setIsConnecting(true);
     try {
-      if (!window.ethereum) {
-        throw new Error('MetaMask غير مثبت');
+      // Check if MetaMask is installed
+      if (typeof window.ethereum === 'undefined') {
+        throw new Error('يرجى تثبيت MetaMask أولاً');
       }
 
+      console.log('Connecting to MetaMask...');
       const accounts = await window.ethereum.request({ 
         method: 'eth_requestAccounts' 
       });
 
-      if (accounts.length === 0) {
-        throw new Error('لم يتم العثور على حسابات');
+      if (!accounts || accounts.length === 0) {
+        throw new Error('لم يتم العثور على حسابات MetaMask');
       }
 
       const address = accounts[0];
+      console.log('MetaMask connected:', address);
+      
       const newWallet: SimpleWallet = {
         id: `metamask-${Date.now()}`,
         name: 'MetaMask',
@@ -64,13 +68,16 @@ export const useSimpleWallet = () => {
       setWallets(prev => {
         const exists = prev.find(w => w.address === address && w.type === 'metamask');
         if (exists) {
+          console.log('MetaMask wallet already exists');
           return prev;
         }
+        console.log('Adding new MetaMask wallet');
         return [...prev, newWallet];
       });
 
       return newWallet;
     } catch (error: any) {
+      console.error('MetaMask connection error:', error);
       throw new Error(error.message || 'فشل في الاتصال بـ MetaMask');
     } finally {
       setIsConnecting(false);
@@ -80,12 +87,20 @@ export const useSimpleWallet = () => {
   const connectPhantom = useCallback(async () => {
     setIsConnecting(true);
     try {
-      if (!window.solana || !window.solana.isPhantom) {
-        throw new Error('Phantom غير مثبت');
+      // Check if Phantom is installed
+      if (typeof window.solana === 'undefined' || !window.solana.isPhantom) {
+        throw new Error('يرجى تثبيت Phantom أولاً');
       }
 
+      console.log('Connecting to Phantom...');
       const response = await window.solana.connect();
+      
+      if (!response.publicKey) {
+        throw new Error('فشل في الحصول على المفتاح العام');
+      }
+
       const address = response.publicKey.toString();
+      console.log('Phantom connected:', address);
 
       const newWallet: SimpleWallet = {
         id: `phantom-${Date.now()}`,
@@ -101,13 +116,16 @@ export const useSimpleWallet = () => {
       setWallets(prev => {
         const exists = prev.find(w => w.address === address && w.type === 'phantom');
         if (exists) {
+          console.log('Phantom wallet already exists');
           return prev;
         }
+        console.log('Adding new Phantom wallet');
         return [...prev, newWallet];
       });
 
       return newWallet;
     } catch (error: any) {
+      console.error('Phantom connection error:', error);
       throw new Error(error.message || 'فشل في الاتصال بـ Phantom');
     } finally {
       setIsConnecting(false);
