@@ -73,7 +73,9 @@ export const NetworkSwitcher = ({
       const network = supportedNetworks.find(n => n.id === networkId);
       await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network change
       
-      onNetworkChange(networkId);
+      // Pass the proper network name that matches wallet.network
+      const networkName = network?.name || networkId;
+      onNetworkChange(networkName);
       
       toast({
         title: "تم تبديل الشبكة",

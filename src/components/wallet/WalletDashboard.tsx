@@ -32,7 +32,7 @@ export const WalletDashboard = ({
     wallets.length > 0 ? wallets[0] : null
   );
   const [selectedNetwork, setSelectedNetwork] = useState<string>(
-    wallets.length > 0 ? wallets[0].network : 'Ethereum'
+    wallets.length > 0 ? wallets[0].network.toLowerCase() : 'ethereum'
   );
 
   if (wallets.length === 0) {
@@ -76,10 +76,18 @@ export const WalletDashboard = ({
   );
 
   const handleNetworkChange = (network: string) => {
+    console.log('Network change requested:', network);
+    console.log('Available wallets:', wallets.map(w => ({ network: w.network, address: w.address })));
+    
     setSelectedNetwork(network);
     const networkWallet = wallets.find(w => w.network.toLowerCase() === network.toLowerCase());
+    console.log('Found network wallet:', networkWallet);
+    
     if (networkWallet) {
       setSelectedWallet(networkWallet);
+    } else {
+      // If no wallet found for this network, keep the current selection but update the filter
+      setSelectedWallet(null);
     }
   };
 
