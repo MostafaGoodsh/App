@@ -8,9 +8,11 @@ import { EnhancedWalletCard } from "./EnhancedWalletCard";
 import { WalletOverview } from "./WalletOverview";
 import { QuickActions } from "./QuickActions";
 import { TransactionHistory } from "./TransactionHistory";
+import { NetworkSwitcher } from "./NetworkSwitcher";
+import { CurrencyExchange } from "./CurrencyExchange";
 import { 
   Wallet, TrendingUp, ArrowLeftRight, Network, 
-  Coins, Activity, BarChart3, Settings
+  Coins, Activity, BarChart3, Settings, Zap
 } from "lucide-react";
 
 interface WalletDashboardProps {
@@ -28,6 +30,9 @@ export const WalletDashboard = ({
 }: WalletDashboardProps) => {
   const [selectedWallet, setSelectedWallet] = useState<ConnectedWallet | null>(
     wallets.length > 0 ? wallets[0] : null
+  );
+  const [selectedNetwork, setSelectedNetwork] = useState<string>(
+    wallets.length > 0 ? wallets[0].network : 'Ethereum'
   );
 
   if (wallets.length === 0) {
@@ -65,6 +70,25 @@ export const WalletDashboard = ({
     return sum + (balance * rate);
   }, 0);
 
+  // Filter wallets by selected network
+  const networkWallets = wallets.filter(wallet => 
+    wallet.network.toLowerCase() === selectedNetwork.toLowerCase()
+  );
+
+  const handleNetworkChange = (network: string) => {
+    setSelectedNetwork(network);
+    const networkWallet = wallets.find(w => w.network.toLowerCase() === network.toLowerCase());
+    if (networkWallet) {
+      setSelectedWallet(networkWallet);
+    }
+  };
+
+  const handleSwap = async (fromToken: string, toToken: string, amount: string) => {
+    // Simulate swap functionality
+    console.log(`Swapping ${amount} ${fromToken} to ${toToken}`);
+    // Here you would implement actual swap logic
+  };
+
   return (
     <div className="space-y-6">
       {/* نظرة عامة */}
@@ -77,43 +101,60 @@ export const WalletDashboard = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Wallet className="w-5 h-5" />
-              المحافظ المتصلة ({wallets.length})
+              المحافظ المتصلة ({networkWallets.length})
             </CardTitle>
             <CardDescription>
-              اختر محفظة للتحكم بها
+              شبكة {selectedNetwork} • اختر محفظة للتحكم بها
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {wallets.map((wallet) => (
-              <div
-                key={wallet.id}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  selectedWallet?.id === wallet.id 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                }`}
-                onClick={() => setSelectedWallet(wallet)}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-sm">
-                      {wallet.name || wallet.type}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {wallet.address.slice(0, 16)}...
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">
-                      {wallet.balance} {wallet.currency}
-                    </p>
-                    <Badge variant="outline" className="text-xs">
-                      {wallet.network}
-                    </Badge>
+            {/* Network Filter */}
+            <div className="pb-3 border-b">
+              <NetworkSwitcher 
+                wallets={wallets}
+                selectedNetwork={selectedNetwork}
+                onNetworkChange={handleNetworkChange}
+              />
+            </div>
+            
+            {/* Wallet List for Selected Network */}
+            {networkWallets.length > 0 ? (
+              networkWallets.map((wallet) => (
+                <div
+                  key={wallet.id}
+                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                    selectedWallet?.id === wallet.id 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  }`}
+                  onClick={() => setSelectedWallet(wallet)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm">
+                        {wallet.name || wallet.type}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {wallet.address.slice(0, 16)}...
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">
+                        {wallet.balance} {wallet.currency}
+                      </p>
+                      <Badge variant="outline" className="text-xs">
+                        {wallet.network}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <Network className="w-8 h-8 mx-auto mb-2" />
+                <p className="text-sm">لا توجد محافظ على شبكة {selectedNetwork}</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -131,10 +172,14 @@ export const WalletDashboard = ({
 
               {/* التبويبات */}
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="details" className="flex items-center gap-2">
                     <Settings className="w-4 h-4" />
                     التفاصيل
+                  </TabsTrigger>
+                  <TabsTrigger value="exchange" className="flex items-center gap-2">
+                    <ArrowLeftRight className="w-4 h-4" />
+                    التبديل
                   </TabsTrigger>
                   <TabsTrigger value="transactions" className="flex items-center gap-2">
                     <Activity className="w-4 h-4" />
@@ -152,6 +197,14 @@ export const WalletDashboard = ({
                     onRefreshBalance={onRefreshBalance}
                     onSendTransaction={onSendTransaction}
                     onDisconnect={onDisconnect}
+                  />
+                </TabsContent>
+
+                <TabsContent value="exchange" className="space-y-4">
+                  <CurrencyExchange
+                    wallet={selectedWallet}
+                    availableTokens={[]}
+                    onSwap={handleSwap}
                   />
                 </TabsContent>
 
