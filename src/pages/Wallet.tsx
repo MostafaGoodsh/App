@@ -20,6 +20,14 @@ const WalletFixed = () => {
     addInternalWallet
   } = useWalletConnect();
 
+  // Debug logging
+  console.log('WalletFixed render:', {
+    connectedWalletsLength: connectedWallets.length,
+    connectedWallets,
+    isConnecting,
+    user: user ? 'exists' : 'null'
+  });
+
   const handleWalletConnect = async (type: string) => {
     try {
       let wallet;
