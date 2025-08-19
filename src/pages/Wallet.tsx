@@ -1,98 +1,49 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { WalletConnectSetup } from "@/components/wallet/WalletConnectSetup";
-import { WalletConnectionSection } from "@/components/wallet/WalletConnectionSection";
-import { ConnectedWalletsGrid } from "@/components/wallet/ConnectedWalletsGrid";
+import { useSimpleWallet } from "@/hooks/useSimpleWallet";
+import { SimpleWalletConnection } from "@/components/wallet/SimpleWalletConnection";
+import { SimpleWalletCard } from "@/components/wallet/SimpleWalletCard";
 import { useToast } from "@/hooks/use-toast";
 
 const WalletFixed = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const {
-    connectedWallets,
+    wallets,
     isConnecting,
-    connectWalletConnect,
     connectMetaMask,
     connectPhantom,
-    refreshBalance,
-    sendTransaction,
+    addInternalWallet,
     disconnectWallet,
-    addInternalWallet
-  } = useWalletConnect();
+    refreshBalance
+  } = useSimpleWallet();
 
-  const handleWalletConnect = async (type: string) => {
-    try {
-      let wallet;
-      switch (type) {
-        case 'walletconnect':
-          wallet = await connectWalletConnect();
-          if (wallet) {
-            toast({ 
-              title: "تم الاتصال بنجاح", 
-              description: `تم اتصال WalletConnect بالعنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الحصول على بيانات المحفظة');
-          }
-          break;
-        case 'metamask':
-          wallet = await connectMetaMask();
-          if (wallet) {
-            toast({ 
-              title: "متصل بـ MetaMask", 
-              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الاتصال بـ MetaMask');
-          }
-          break;
-        case 'phantom':
-          wallet = await connectPhantom();
-          if (wallet) {
-            toast({ 
-              title: "متصل بـ Phantom", 
-              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الاتصال بـ Phantom');
-          }
-          break;
-        default:
-          throw new Error('نوع محفظة غير مدعوم');
-      }
-    } catch (error: any) {
-      console.error('Wallet connection error:', error);
-      toast({ 
-        title: "خطأ في الاتصال", 
-        description: error.message || 'فشل الاتصال بالمحفظة', 
-        variant: "destructive" 
+  const handleConnectMetaMask = async () => {
+    const wallet = await connectMetaMask();
+    if (wallet) {
+      toast({
+        title: "تم الاتصال بنجاح",
+        description: `تم الاتصال بـ MetaMask: ${wallet.address.slice(0, 16)}...`
       });
     }
   };
 
-  const handleRefreshBalance = async (wallet: any) => {
-    try {
-      await refreshBalance(wallet);
-    } catch (error) {
-      console.error('Refresh balance error:', error);
-      throw error;
+  const handleConnectPhantom = async () => {
+    const wallet = await connectPhantom();
+    if (wallet) {
+      toast({
+        title: "تم الاتصال بنجاح", 
+        description: `تم الاتصال بـ Phantom: ${wallet.address.slice(0, 16)}...`
+      });
     }
   };
 
-  const handleSendTransaction = async (wallet: any, toAddress: string, amount: string) => {
-    try {
-      return await sendTransaction(wallet, toAddress, amount);
-    } catch (error) {
-      console.error('Send transaction error:', error);
-      throw error;
-    }
+  const handleCreateWallet = (walletData: { name: string; network: 'Ethereum' | 'Solana' }) => {
+    addInternalWallet(walletData);
   };
 
   const handleDisconnect = (walletId: string) => {
     disconnectWallet(walletId);
-    toast({ 
-      title: "تم قطع الاتصال", 
-      description: "تم قطع اتصال المحفظة بنجاح" 
+    toast({
+      title: "تم قطع الاتصال",
+      description: "تم قطع اتصال المحفظة بنجاح"
     });
   };
 
@@ -101,23 +52,40 @@ const WalletFixed = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">المحافظ الرقمية</h1>
       
-      {/* WalletConnect Setup Instructions */}
-      <WalletConnectSetup />
-      
       {/* Wallet Connection Section */}
-      <WalletConnectionSection
+      <SimpleWalletConnection
         isConnecting={isConnecting}
-        onWalletConnect={handleWalletConnect}
-        onAddInternalWallet={addInternalWallet}
+        onConnectMetaMask={handleConnectMetaMask}
+        onConnectPhantom={handleConnectPhantom}
+        onCreateWallet={handleCreateWallet}
       />
 
-      {/* Connected Wallets Grid */}
-      <ConnectedWalletsGrid
-        wallets={connectedWallets}
-        onRefreshBalance={handleRefreshBalance}
-        onSendTransaction={handleSendTransaction}
-        onDisconnect={handleDisconnect}
-      />
+      {/* Connected Wallets */}
+      {wallets.length === 0 ? (
+        <div className="text-center py-16 px-4">
+          <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold mb-2">لا توجد محافظ متصلة</h3>
+          <p className="text-muted-foreground">قم بتوصيل محفظة أو إنشاء محفظة جديدة أعلاه</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">المحافظ المتصلة ({wallets.length})</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {wallets.map((wallet) => (
+              <SimpleWalletCard
+                key={wallet.id}
+                wallet={wallet}
+                onRefresh={refreshBalance}
+                onDisconnect={handleDisconnect}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
