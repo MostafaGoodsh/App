@@ -483,13 +483,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "profiles_audit_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_admin_secure"
-            referencedColumns: ["id"]
-          },
         ]
       }
       survey_responses: {
@@ -708,6 +701,47 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_security: {
+        Row: {
+          access_count: number | null
+          created_at: string | null
+          encryption_version: number | null
+          id: string
+          last_accessed: string | null
+          mnemonic_encrypted: string | null
+          private_key_encrypted: string | null
+          wallet_id: string
+        }
+        Insert: {
+          access_count?: number | null
+          created_at?: string | null
+          encryption_version?: number | null
+          id?: string
+          last_accessed?: string | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          wallet_id: string
+        }
+        Update: {
+          access_count?: number | null
+          created_at?: string | null
+          encryption_version?: number | null
+          id?: string
+          last_accessed?: string | null
+          mnemonic_encrypted?: string | null
+          private_key_encrypted?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_security_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_tokens: {
         Row: {
           balance: number | null
@@ -815,71 +849,40 @@ export type Database = {
       }
     }
     Views: {
-      profiles_admin_secure: {
-        Row: {
-          access_count: number | null
-          avatar_url: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          last_accessed: string | null
-          masked_email: string | null
-          masked_phone: string | null
-          preferred_language: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      transactions_admin_secure: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          fee_status: string | null
-          id: string | null
-          masked_data: Json | null
-          network: string | null
-          status: string | null
-          transaction_type: string | null
-          user_id: string | null
-          wallet_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          fee_status?: never
-          id?: string | null
-          masked_data?: never
-          network?: string | null
-          status?: string | null
-          transaction_type?: string | null
-          user_id?: string | null
-          wallet_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          fee_status?: never
-          id?: string | null
-          masked_data?: never
-          network?: string | null
-          status?: string | null
-          transaction_type?: string | null
-          user_id?: string | null
-          wallet_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_wallet_id_fkey"
-            columns: ["wallet_id"]
-            isOneToOne: false
-            referencedRelation: "wallets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_identity_verification_admin_view: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          document_info_masked: string
+          document_status: string
+          full_name: string
+          id: string
+          status: string
+          user_id: string
+          verification_notes: string
+          verification_type: string
+          verified_at: string
+        }[]
+      }
+      get_profiles_admin_view: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          access_count: number
+          avatar_url: string
+          created_at: string
+          full_name: string
+          id: string
+          last_accessed: string
+          masked_email: string
+          masked_phone: string
+          preferred_language: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_secure_profile_export: {
         Args: Record<PropertyKey, never>
         Returns: {

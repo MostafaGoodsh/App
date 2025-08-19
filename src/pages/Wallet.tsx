@@ -16,8 +16,17 @@ const WalletFixed = () => {
     connectPhantom,
     refreshBalance,
     sendTransaction,
-    disconnectWallet
+    disconnectWallet,
+    addInternalWallet
   } = useWalletConnect();
+
+  // Debug logging
+  console.log('WalletFixed render:', {
+    connectedWalletsLength: connectedWallets.length,
+    connectedWallets,
+    isConnecting,
+    user: user ? 'exists' : 'null'
+  });
 
   const handleWalletConnect = async (type: string) => {
     try {
@@ -95,14 +104,6 @@ const WalletFixed = () => {
     });
   };
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">مطلوب تسجيل الدخول</h1>
-        <p className="text-muted-foreground">يرجى تسجيل الدخول للوصول إلى محفظتك</p>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -115,6 +116,7 @@ const WalletFixed = () => {
       <WalletConnectionSection
         isConnecting={isConnecting}
         onWalletConnect={handleWalletConnect}
+        onAddInternalWallet={addInternalWallet}
       />
 
       {/* Connected Wallets Grid */}
