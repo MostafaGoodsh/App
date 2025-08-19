@@ -28,28 +28,14 @@ export const SimpleWalletConnection = ({
   const [newWalletName, setNewWalletName] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState<'Ethereum' | 'Solana'>('Ethereum');
 
-  const handleMetaMaskConnect = async () => {
-    try {
-      await onConnectMetaMask();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في الاتصال',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
+  const handleMetaMaskConnect = () => {
+    console.log('MetaMask button clicked');
+    onConnectMetaMask();
   };
 
-  const handlePhantomConnect = async () => {
-    try {
-      await onConnectPhantom();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ في الاتصال',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
+  const handlePhantomConnect = () => {
+    console.log('Phantom button clicked');
+    onConnectPhantom();
   };
 
   const handleCreateWallet = () => {
@@ -91,6 +77,7 @@ export const SimpleWalletConnection = ({
             onClick={handleMetaMaskConnect}
             disabled={isConnecting}
             className="w-full"
+            type="button"
           >
             {isConnecting ? (
               <RefreshCw className="h-4 w-4 animate-spin mr-2" />
@@ -117,6 +104,7 @@ export const SimpleWalletConnection = ({
             onClick={handlePhantomConnect}
             disabled={isConnecting}
             className="w-full"
+            type="button"
           >
             {isConnecting ? (
               <RefreshCw className="h-4 w-4 animate-spin mr-2" />
@@ -160,7 +148,7 @@ export const SimpleWalletConnection = ({
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleCreateWallet} className="w-full">
+          <Button onClick={handleCreateWallet} className="w-full" type="button">
             <Plus className="h-4 w-4 mr-2" />
             إنشاء محفظة
           </Button>
