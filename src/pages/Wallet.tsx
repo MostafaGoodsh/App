@@ -1,12 +1,15 @@
-import { useAuth } from "@/hooks/useAuth";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { WalletConnectSetup } from "@/components/wallet/WalletConnectSetup";
+import { WalletDashboard } from "@/components/wallet/WalletDashboard";
 import { WalletConnectionSection } from "@/components/wallet/WalletConnectionSection";
-import { ConnectedWalletsGrid } from "@/components/wallet/ConnectedWalletsGrid";
+import { WalletConnectSetup } from "@/components/wallet/WalletConnectSetup";
+import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Wallet, Plus, Settings, Activity, BarChart3 
+} from "lucide-react";
 
 const WalletFixed = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
   const {
     connectedWallets,
@@ -98,26 +101,86 @@ const WalletFixed = () => {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">المحافظ الرقمية</h1>
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="text-center mb-8">
+        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          لوحة تحكم المحافظ الرقمية
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          إدارة شاملة ومتقدمة لمحافظك الرقمية مع ميزات التبادل والأمان
+        </p>
+      </div>
       
-      {/* WalletConnect Setup Instructions */}
-      <WalletConnectSetup />
-      
-      {/* Wallet Connection Section */}
-      <WalletConnectionSection
-        isConnecting={isConnecting}
-        onWalletConnect={handleWalletConnect}
-        onAddInternalWallet={addInternalWallet}
-      />
-
-      {/* Connected Wallets Grid */}
-      <ConnectedWalletsGrid
-        wallets={connectedWallets}
-        onRefreshBalance={handleRefreshBalance}
-        onSendTransaction={handleSendTransaction}
-        onDisconnect={handleDisconnect}
-      />
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            لوحة التحكم
+          </TabsTrigger>
+          <TabsTrigger value="connect" className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            إضافة محفظة
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            الإعدادات
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="dashboard" className="space-y-6">
+          <WalletDashboard
+            wallets={connectedWallets}
+            onRefreshBalance={handleRefreshBalance}
+            onSendTransaction={handleSendTransaction}
+            onDisconnect={handleDisconnect}
+          />
+        </TabsContent>
+        
+        <TabsContent value="connect" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="w-5 h-5" />
+                توصيل محفظة جديدة
+              </CardTitle>
+              <CardDescription>
+                اختر نوع المحفظة التي تريد توصيلها أو إنشاء محفظة داخلية جديدة
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WalletConnectSetup />
+              <WalletConnectionSection
+                isConnecting={isConnecting}
+                onWalletConnect={handleWalletConnect}
+                onAddInternalWallet={addInternalWallet}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                إعدادات المحافظ
+              </CardTitle>
+              <CardDescription>
+                تخصيص تفضيلاتك وإعدادات الأمان
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center py-8">
+                <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-2">إعدادات متقدمة</p>
+                <p className="text-sm text-muted-foreground">
+                  ستتوفر إعدادات إضافية قريباً لتحسين تجربة استخدام المحافظ
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
