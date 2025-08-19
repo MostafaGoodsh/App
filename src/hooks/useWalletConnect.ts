@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-import { WALLETCONNECT_CONFIG, NETWORK_CONFIG } from '@/config/wallet';
+
+// للحصول على مفتاح مشروع مجاني، زر https://cloud.reown.com
+// إنشئ مشروع جديد واحصل على Project ID
+const projectId = '5cbecfb58785fd00d9c6f1825f993060';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal';
+  type: 'WalletConnect' | 'MetaMask' | 'Phantom';
   address: string;
   balance: string;
   currency: string;
@@ -64,13 +67,18 @@ export const useWalletConnect = () => {
 
       // Initialize WalletConnect provider
       const provider = await EthereumProvider.init({
-        chains: WALLETCONNECT_CONFIG.chains,
-        optionalChains: [137], // Polygon as optional chain
-        projectId: WALLETCONNECT_CONFIG.projectId,
+        chains: [1], // Ethereum mainnet
+        projectId,
         showQrModal: true,
-        qrModalOptions: WALLETCONNECT_CONFIG.qrModalOptions,
+        qrModalOptions: {
+          themeMode: 'dark',
+          themeVariables: {
+            '--wcm-z-index': '1000'
+          }
+        },
         metadata: {
-          ...WALLETCONNECT_CONFIG.metadata,
+          name: 'المحافظ الرقمية',
+          description: 'منصة إدارة المحافظ الرقمية',
           url: window.location.origin,
           icons: [window.location.origin + '/favicon.ico']
         }
@@ -142,15 +150,15 @@ export const useWalletConnect = () => {
   }, [getBalance, wcProvider]);
 
   const connectMetaMask = useCallback(async () => {
-    if (!(window as any).ethereum?.isMetaMask) {
+    if (!window.ethereum?.isMetaMask) {
       window.open('https://metamask.io/download/', '_blank');
       return;
     }
 
     setIsConnecting(true);
     try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      const balance = await getBalance(accounts[0], (window as any).ethereum);
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const balance = await getBalance(accounts[0], window.ethereum);
       
       const newWallet: ConnectedWallet = {
         id: Date.now().toString(),
@@ -159,7 +167,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'ETH',
         network: 'Ethereum',
-        provider: (window as any).ethereum
+        provider: window.ethereum
       };
 
       setConnectedWallets(prev => {
@@ -178,14 +186,14 @@ export const useWalletConnect = () => {
   }, [getBalance]);
 
   const connectPhantom = useCallback(async () => {
-    if (!(window as any).phantom?.solana?.isPhantom) {
+    if (!window.phantom?.solana?.isPhantom) {
       window.open('https://phantom.app/', '_blank');
       return;
     }
 
     setIsConnecting(true);
     try {
-      const response = await (window as any).phantom.solana.connect();
+      const response = await window.phantom.solana.connect();
       const address = response.publicKey.toString();
       
       // Get Solana balance
@@ -216,7 +224,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'SOL',
         network: 'Solana',
-        provider: (window as any).phantom.solana
+        provider: window.phantom.solana
       };
 
       setConnectedWallets(prev => {
@@ -276,14 +284,6 @@ export const useWalletConnect = () => {
     }
   }, [refreshBalance]);
 
-  const addInternalWallet = useCallback((wallet: ConnectedWallet) => {
-    setConnectedWallets(prev => {
-      const updated = [...prev, wallet];
-      localStorage.setItem('connectedWallets', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
   return {
     connectedWallets,
     isConnecting,
@@ -292,7 +292,6 @@ export const useWalletConnect = () => {
     connectPhantom,
     disconnectWallet,
     refreshBalance,
-    sendTransaction,
-    addInternalWallet
+    sendTransaction
   };
 };

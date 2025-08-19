@@ -15,10 +15,9 @@ import {
 interface WalletConnectionSectionProps {
   isConnecting: boolean;
   onWalletConnect: (type: string) => Promise<void>;
-  onAddInternalWallet: (wallet: any) => void;
 }
 
-export const WalletConnectionSection = ({ isConnecting, onWalletConnect, onAddInternalWallet }: WalletConnectionSectionProps) => {
+export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: WalletConnectionSectionProps) => {
   const { toast } = useToast();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [newWalletName, setNewWalletName] = useState("");
@@ -65,9 +64,6 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect, onAddIn
           name: newWalletName
         };
       }
-      
-      // Add the wallet to connected wallets
-      onAddInternalWallet(newWallet);
       
       setNewWalletName("");
       toast({ 

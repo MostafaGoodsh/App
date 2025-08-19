@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MainLayout from "./layouts/MainLayout";
@@ -25,34 +24,32 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <ErrorBoundary>
-      <HelmetProvider>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                <Route path="/" element={<MainLayout />}>
-                  <Route index element={<Index />} />
-                  <Route path="auth" element={<Auth />} />
-                  <Route path="wallet" element={<Wallet />} />
-                  <Route path="early-access" element={<EarlyAccess />} />
-                  <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
-                  <Route path="learning" element={<Learning />} />
-                  <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
-                  <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
-                  <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
-                  <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
-                  <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </TooltipProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
-      </HelmetProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Index />} />
+                <Route path="auth" element={<Auth />} />
+                <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+                <Route path="early-access" element={<EarlyAccess />} />
+                <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
+                <Route path="learning" element={<Learning />} />
+                <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
+                <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
+                <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
+                <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
+                <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </TooltipProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 
