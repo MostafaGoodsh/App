@@ -31,9 +31,13 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-  // Save wallets to localStorage
+  // Save wallets to localStorage (without provider objects)
   useEffect(() => {
-    localStorage.setItem('connectedWallets', JSON.stringify(connectedWallets));
+    const walletsToSave = connectedWallets.map(wallet => ({
+      ...wallet,
+      provider: undefined // Remove provider to avoid DataCloneError
+    }));
+    localStorage.setItem('connectedWallets', JSON.stringify(walletsToSave));
   }, [connectedWallets]);
 
   const getBalance = useCallback(async (address: string, provider?: any) => {
@@ -277,11 +281,7 @@ export const useWalletConnect = () => {
   }, [refreshBalance]);
 
   const addInternalWallet = useCallback((wallet: ConnectedWallet) => {
-    setConnectedWallets(prev => {
-      const updated = [...prev, wallet];
-      localStorage.setItem('connectedWallets', JSON.stringify(updated));
-      return updated;
-    });
+    setConnectedWallets(prev => [...prev, wallet]);
   }, []);
 
   return {
