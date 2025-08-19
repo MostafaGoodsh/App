@@ -96,14 +96,6 @@ const WalletFixed = () => {
     });
   };
 
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">مطلوب تسجيل الدخول</h1>
-        <p className="text-muted-foreground">يرجى تسجيل الدخول للوصول إلى محفظتك</p>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
