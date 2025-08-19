@@ -16,21 +16,37 @@ const WalletFixed = () => {
   } = useSimpleWallet();
 
   const handleConnectMetaMask = async () => {
-    const wallet = await connectMetaMask();
-    if (wallet) {
+    try {
+      const wallet = await connectMetaMask();
+      if (wallet) {
+        toast({
+          title: "تم الاتصال بنجاح",
+          description: `تم الاتصال بـ MetaMask: ${wallet.address.slice(0, 16)}...`
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "تم الاتصال بنجاح",
-        description: `تم الاتصال بـ MetaMask: ${wallet.address.slice(0, 16)}...`
+        title: "خطأ في الاتصال",
+        description: error.message || "فشل في الاتصال بـ MetaMask",
+        variant: "destructive"
       });
     }
   };
 
   const handleConnectPhantom = async () => {
-    const wallet = await connectPhantom();
-    if (wallet) {
+    try {
+      const wallet = await connectPhantom();
+      if (wallet) {
+        toast({
+          title: "تم الاتصال بنجاح", 
+          description: `تم الاتصال بـ Phantom: ${wallet.address.slice(0, 16)}...`
+        });
+      }
+    } catch (error: any) {
       toast({
-        title: "تم الاتصال بنجاح", 
-        description: `تم الاتصال بـ Phantom: ${wallet.address.slice(0, 16)}...`
+        title: "خطأ في الاتصال",
+        description: error.message || "فشل في الاتصال بـ Phantom",
+        variant: "destructive"
       });
     }
   };
