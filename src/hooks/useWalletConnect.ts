@@ -24,7 +24,9 @@ export const useWalletConnect = () => {
     const savedWallets = localStorage.getItem('connectedWallets');
     if (savedWallets) {
       try {
-        setConnectedWallets(JSON.parse(savedWallets));
+        const loadedWallets = JSON.parse(savedWallets);
+        console.log('Loading wallets from localStorage:', loadedWallets);
+        setConnectedWallets(loadedWallets);
       } catch (error) {
         console.error('Error loading saved wallets:', error);
       }

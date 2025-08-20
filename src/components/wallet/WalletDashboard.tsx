@@ -105,11 +105,23 @@ export const WalletDashboard = ({
 
   const handleNetworkChange = (network: string) => {
     console.log('Network change requested:', network);
-    console.log('Available wallets:', wallets.map(w => ({ network: w.network, address: w.address, balance: w.balance })));
+    console.log('Available wallets:', wallets.map(w => ({ 
+      id: w.id, 
+      type: w.type,
+      network: w.network, 
+      address: w.address, 
+      balance: w.balance,
+      currency: w.currency
+    })));
     
     setSelectedNetwork(network);
     const networkWallet = wallets.find(w => getNetworkId(w.network) === network.toLowerCase());
     console.log('Found network wallet:', networkWallet);
+    
+    // Show all wallets and their network mappings
+    wallets.forEach(w => {
+      console.log(`Wallet ${w.type}: network="${w.network}" -> mapped to "${getNetworkId(w.network)}" (looking for "${network.toLowerCase()}")`);
+    });
     
     if (networkWallet) {
       setSelectedWallet(networkWallet);
