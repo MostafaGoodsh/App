@@ -80,12 +80,14 @@ export const WalletDashboard = ({
 
   // Filter wallets by selected network - ensure proper matching
   const getNetworkId = (networkName: string) => {
+    // Direct mapping from actual wallet network names to display IDs
     const networkMapping: { [key: string]: string } = {
       'Ethereum': 'ethereum',
       'Solana': 'solana', 
       'Polygon': 'polygon',
       'BSC': 'bsc'
     };
+    console.log('Mapping network:', networkName, 'to:', networkMapping[networkName] || networkName.toLowerCase());
     return networkMapping[networkName] || networkName.toLowerCase();
   };
   

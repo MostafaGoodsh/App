@@ -61,11 +61,15 @@ export const NetworkSwitcher = ({
 
   const getNetworkWallets = (networkId: string) => {
     return wallets.filter(wallet => {
-      const walletNetworkId = wallet.network.toLowerCase() === 'ethereum' ? 'ethereum' :
-                              wallet.network.toLowerCase() === 'solana' ? 'solana' :
-                              wallet.network.toLowerCase() === 'polygon' ? 'polygon' :
-                              wallet.network.toLowerCase() === 'bsc' ? 'bsc' :
-                              wallet.network.toLowerCase();
+      // Direct mapping from actual wallet network names (Ethereum, Solana) to network IDs
+      const networkMapping: { [key: string]: string } = {
+        'Ethereum': 'ethereum',
+        'Solana': 'solana', 
+        'Polygon': 'polygon',
+        'BSC': 'bsc'
+      };
+      const walletNetworkId = networkMapping[wallet.network] || wallet.network.toLowerCase();
+      console.log('NetworkSwitcher filtering:', { walletNetwork: wallet.network, walletNetworkId, networkId, matches: walletNetworkId === networkId });
       return walletNetworkId === networkId;
     });
   };
