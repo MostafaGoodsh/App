@@ -51,14 +51,10 @@ const WalletFixed = () => {
           break;
         case 'phantom':
           wallet = await connectPhantom();
-          if (wallet) {
-            toast({ 
-              title: "متصل بـ Phantom", 
-              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الاتصال بـ Phantom');
-          }
+          toast({ 
+            title: "متصل بـ Phantom", 
+            description: `العنوان: ${wallet.address.slice(0, 16)}...` 
+          });
           break;
         default:
           throw new Error('نوع محفظة غير مدعوم');

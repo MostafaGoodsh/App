@@ -185,8 +185,7 @@ export const useWalletConnect = () => {
 
   const connectPhantom = useCallback(async () => {
     if (!(window as any).phantom?.solana?.isPhantom) {
-      window.open('https://phantom.app/', '_blank');
-      return;
+      throw new Error('Phantom wallet not installed. Please install Phantom wallet from phantom.app');
     }
 
     setIsConnecting(true);
