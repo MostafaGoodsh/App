@@ -70,9 +70,19 @@ export const WalletDashboard = ({
     return sum + (balance * rate);
   }, 0);
 
-  // Filter wallets by selected network
+  // Filter wallets by selected network - map network names to IDs
+  const getNetworkId = (networkName: string) => {
+    const networkMapping: { [key: string]: string } = {
+      'Ethereum': 'ethereum',
+      'Solana': 'solana', 
+      'Polygon': 'polygon',
+      'BSC': 'bsc'
+    };
+    return networkMapping[networkName] || networkName.toLowerCase();
+  };
+  
   const networkWallets = wallets.filter(wallet => 
-    wallet.network.toLowerCase() === selectedNetwork.toLowerCase()
+    getNetworkId(wallet.network) === selectedNetwork.toLowerCase()
   );
 
   const handleNetworkChange = (network: string) => {
