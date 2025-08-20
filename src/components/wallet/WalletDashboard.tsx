@@ -31,9 +31,17 @@ export const WalletDashboard = ({
   const [selectedWallet, setSelectedWallet] = useState<ConnectedWallet | null>(
     wallets.length > 0 ? wallets[0] : null
   );
-  const [selectedNetwork, setSelectedNetwork] = useState<string>(
-    wallets.length > 0 ? wallets[0].network.toLowerCase() : 'ethereum'
-  );
+  const [selectedNetwork, setSelectedNetwork] = useState<string>(() => {
+    if (wallets.length > 0) {
+      const firstWallet = wallets[0];
+      return firstWallet.network.toLowerCase() === 'ethereum' ? 'ethereum' :
+             firstWallet.network.toLowerCase() === 'solana' ? 'solana' :
+             firstWallet.network.toLowerCase() === 'polygon' ? 'polygon' :
+             firstWallet.network.toLowerCase() === 'bsc' ? 'bsc' :
+             'ethereum';
+    }
+    return 'ethereum';
+  });
 
   if (wallets.length === 0) {
     return (
@@ -70,7 +78,7 @@ export const WalletDashboard = ({
     return sum + (balance * rate);
   }, 0);
 
-  // Filter wallets by selected network - map network names to IDs
+  // Filter wallets by selected network - ensure proper matching
   const getNetworkId = (networkName: string) => {
     const networkMapping: { [key: string]: string } = {
       'Ethereum': 'ethereum',
@@ -81,22 +89,30 @@ export const WalletDashboard = ({
     return networkMapping[networkName] || networkName.toLowerCase();
   };
   
-  const networkWallets = wallets.filter(wallet => 
-    getNetworkId(wallet.network) === selectedNetwork.toLowerCase()
-  );
+  const networkWallets = wallets.filter(wallet => {
+    const walletNetworkId = getNetworkId(wallet.network);
+    const selectedNetworkId = selectedNetwork.toLowerCase();
+    console.log('Filtering wallet:', { 
+      walletNetwork: wallet.network, 
+      walletNetworkId, 
+      selectedNetworkId, 
+      matches: walletNetworkId === selectedNetworkId 
+    });
+    return walletNetworkId === selectedNetworkId;
+  });
 
   const handleNetworkChange = (network: string) => {
     console.log('Network change requested:', network);
-    console.log('Available wallets:', wallets.map(w => ({ network: w.network, address: w.address })));
+    console.log('Available wallets:', wallets.map(w => ({ network: w.network, address: w.address, balance: w.balance })));
     
     setSelectedNetwork(network);
-    const networkWallet = wallets.find(w => w.network.toLowerCase() === network.toLowerCase());
+    const networkWallet = wallets.find(w => getNetworkId(w.network) === network.toLowerCase());
     console.log('Found network wallet:', networkWallet);
     
     if (networkWallet) {
       setSelectedWallet(networkWallet);
     } else {
-      // If no wallet found for this network, keep the current selection but update the filter
+      // If no wallet found for this network, clear selection
       setSelectedWallet(null);
     }
   };

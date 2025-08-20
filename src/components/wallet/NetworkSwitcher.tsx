@@ -60,11 +60,14 @@ export const NetworkSwitcher = ({
   const [isChanging, setIsChanging] = useState(false);
 
   const getNetworkWallets = (networkId: string) => {
-    return wallets.filter(wallet => 
-      wallet.network.toLowerCase() === networkId ||
-      (networkId === 'ethereum' && wallet.network === 'Ethereum') ||
-      (networkId === 'solana' && wallet.network === 'Solana')
-    );
+    return wallets.filter(wallet => {
+      const walletNetworkId = wallet.network.toLowerCase() === 'ethereum' ? 'ethereum' :
+                              wallet.network.toLowerCase() === 'solana' ? 'solana' :
+                              wallet.network.toLowerCase() === 'polygon' ? 'polygon' :
+                              wallet.network.toLowerCase() === 'bsc' ? 'bsc' :
+                              wallet.network.toLowerCase();
+      return walletNetworkId === networkId;
+    });
   };
 
   const handleNetworkChange = async (networkId: string) => {
