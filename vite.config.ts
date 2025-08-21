@@ -17,13 +17,13 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "buffer": "buffer"
     },
   },
   define: {
     global: 'globalThis',
+    'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer']
+    include: ['buffer', '@solana/web3.js']
   }
 }));

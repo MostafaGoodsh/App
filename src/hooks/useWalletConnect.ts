@@ -5,7 +5,7 @@ import { WALLETCONNECT_CONFIG, NETWORK_CONFIG } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal';
+  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal' | 'Squads';
   address: string;
   balance: string;
   currency: string;
@@ -239,6 +239,64 @@ export const useWalletConnect = () => {
     }
   }, []);
 
+  const connectSquads = useCallback(async () => {
+    // Check if SquadsX extension is available
+    if (!(window as any).squads?.isSquads) {
+      throw new Error('SquadsX wallet not installed. Please install SquadsX extension from chrome web store');
+    }
+
+    setIsConnecting(true);
+    try {
+      const response = await (window as any).squads.connect();
+      const address = response.publicKey.toString();
+      
+      // Get Solana balance for multisig wallet
+      let balance = "0.0";
+      try {
+        const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'getBalance',
+            params: [address]
+          })
+        });
+        const data = await solanaResponse.json();
+        if (data.result) {
+          balance = (data.result.value / 1000000000).toFixed(4);
+        }
+      } catch (error) {
+        console.error("Error fetching Squads balance:", error);
+      }
+
+      const newWallet: ConnectedWallet = {
+        id: Date.now().toString(),
+        type: 'Squads' as any,
+        address,
+        balance,
+        currency: 'SOL',
+        network: 'Solana',
+        name: 'Squads MultiSig',
+        provider: (window as any).squads
+      };
+
+      setConnectedWallets(prev => {
+        const exists = prev.find(w => w.address === address && w.type === 'Squads');
+        if (exists) return prev;
+        return [...prev, newWallet];
+      });
+
+      return newWallet;
+    } catch (error) {
+      console.error('Squads connection error:', error);
+      throw error;
+    } finally {
+      setIsConnecting(false);
+    }
+  }, []);
+
   const disconnectWallet = useCallback((walletId: string) => {
     setConnectedWallets(prev => prev.filter(w => w.id !== walletId));
   }, []);
@@ -291,6 +349,7 @@ export const useWalletConnect = () => {
     connectWalletConnect,
     connectMetaMask,
     connectPhantom,
+    connectSquads,
     disconnectWallet,
     refreshBalance,
     sendTransaction,

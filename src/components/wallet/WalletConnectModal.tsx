@@ -10,7 +10,7 @@ interface WalletOption {
   name: string;
   icon: string;
   description: string;
-  type: 'walletconnect' | 'metamask' | 'phantom';
+  type: 'walletconnect' | 'metamask' | 'phantom' | 'squads';
   supported: boolean;
 }
 
@@ -37,6 +37,14 @@ const walletOptions: WalletOption[] = [
     icon: '👻',
     description: 'محفظة Solana الرائدة',
     type: 'phantom',
+    supported: true
+  },
+  {
+    id: 'squads',
+    name: 'SquadsX',
+    icon: '🛡️',
+    description: 'محفظة Solana متعددة التوقيع',
+    type: 'squads',
     supported: true
   },
   {
@@ -124,7 +132,7 @@ export const WalletConnectModal: React.FC<WalletConnectModalProps> = ({
                     {wallet.description}
                   </p>
                 </div>
-                {isConnecting && (wallet.id === 'walletconnect' || wallet.id === 'metamask' || wallet.id === 'phantom') && (
+                {isConnecting && (wallet.id === 'walletconnect' || wallet.id === 'metamask' || wallet.id === 'phantom' || wallet.id === 'squads') && (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 )}
               </CardContent>
