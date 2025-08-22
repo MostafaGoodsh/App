@@ -141,6 +141,25 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect, onAddIn
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            🛡️ SquadsX
+          </CardTitle>
+          <CardDescription>محفظة Solana متعددة التوقيع</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            onClick={() => onWalletConnect('squads')}
+            disabled={isConnecting}
+            className="w-full"
+          >
+            {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+            اتصال بـ SquadsX
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             ➕ إنشاء محفظة
           </CardTitle>
           <CardDescription>أنشئ محفظة داخلية جديدة</CardDescription>

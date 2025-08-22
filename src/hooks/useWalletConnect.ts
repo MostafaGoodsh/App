@@ -185,7 +185,9 @@ export const useWalletConnect = () => {
 
   const connectPhantom = useCallback(async () => {
     if (!(window as any).phantom?.solana?.isPhantom) {
-      throw new Error('Phantom wallet not installed. Please install Phantom wallet from phantom.app');
+      // Open Phantom installation page
+      window.open('https://phantom.app/', '_blank');
+      throw new Error('Phantom wallet not installed. Please install Phantom wallet and refresh the page.');
     }
 
     setIsConnecting(true);
@@ -242,7 +244,9 @@ export const useWalletConnect = () => {
   const connectSquads = useCallback(async () => {
     // Check if SquadsX extension is available
     if (!(window as any).squads?.isSquads) {
-      throw new Error('SquadsX wallet not installed. Please install SquadsX extension from chrome web store');
+      // Open Chrome Web Store for SquadsX
+      window.open('https://chrome.google.com/webstore/detail/squads-multisig/mccoklppdpbhceiflcjmapojohpphage', '_blank');
+      throw new Error('SquadsX wallet not installed. Please install SquadsX extension and refresh the page.');
     }
 
     setIsConnecting(true);
