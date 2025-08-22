@@ -192,28 +192,49 @@ export const useWalletConnect = () => {
 
     setIsConnecting(true);
     try {
-      const response = await (window as any).phantom.solana.connect();
+      // Request connection with specific permissions
+      const response = await (window as any).phantom.solana.connect({ onlyIfTrusted: false });
       const address = response.publicKey.toString();
       
-      // Get Solana balance
+      console.log('Phantom connected:', address);
+      
+      // Verify connection by checking if we can sign a message
+      const provider = (window as any).phantom.solana;
+      if (!provider.isConnected) {
+        throw new Error('Phantom connection failed');
+      }
+      
+      // Get Solana balance using the connected provider
       let balance = "0.0";
       try {
-        const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getBalance',
-            params: [address]
-          })
-        });
-        const data = await solanaResponse.json();
-        if (data.result) {
-          balance = (data.result.value / 1000000000).toFixed(4);
-        }
+        const connection = new (await import('@solana/web3.js')).Connection(
+          'https://api.mainnet-beta.solana.com',
+          'confirmed'
+        );
+        const publicKey = new (await import('@solana/web3.js')).PublicKey(address);
+        const balanceResponse = await connection.getBalance(publicKey);
+        balance = (balanceResponse / 1000000000).toFixed(4);
       } catch (error) {
         console.error("Error fetching Solana balance:", error);
+        // Fallback to RPC call
+        try {
+          const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBalance',
+              params: [address]
+            })
+          });
+          const data = await solanaResponse.json();
+          if (data.result) {
+            balance = (data.result.value / 1000000000).toFixed(4);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback balance fetch failed:", fallbackError);
+        }
       }
 
       const newWallet: ConnectedWallet = {
@@ -223,7 +244,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'SOL',
         network: 'Solana',
-        provider: (window as any).phantom.solana
+        provider: provider
       };
 
       setConnectedWallets(prev => {
@@ -254,25 +275,45 @@ export const useWalletConnect = () => {
       const response = await (window as any).squads.connect();
       const address = response.publicKey.toString();
       
-      // Get Solana balance for multisig wallet
+      console.log('SquadsX connected:', address);
+      
+      // Verify connection
+      const provider = (window as any).squads;
+      if (!provider.isConnected) {
+        throw new Error('SquadsX connection failed');
+      }
+      
+      // Get Solana balance for multisig wallet using web3.js
       let balance = "0.0";
       try {
-        const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'getBalance',
-            params: [address]
-          })
-        });
-        const data = await solanaResponse.json();
-        if (data.result) {
-          balance = (data.result.value / 1000000000).toFixed(4);
-        }
+        const connection = new (await import('@solana/web3.js')).Connection(
+          'https://api.mainnet-beta.solana.com',
+          'confirmed'
+        );
+        const publicKey = new (await import('@solana/web3.js')).PublicKey(address);
+        const balanceResponse = await connection.getBalance(publicKey);
+        balance = (balanceResponse / 1000000000).toFixed(4);
       } catch (error) {
         console.error("Error fetching Squads balance:", error);
+        // Fallback to RPC call
+        try {
+          const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'getBalance',
+              params: [address]
+            })
+          });
+          const data = await solanaResponse.json();
+          if (data.result) {
+            balance = (data.result.value / 1000000000).toFixed(4);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback balance fetch failed:", fallbackError);
+        }
       }
 
       const newWallet: ConnectedWallet = {
@@ -283,7 +324,7 @@ export const useWalletConnect = () => {
         currency: 'SOL',
         network: 'Solana',
         name: 'Squads MultiSig',
-        provider: (window as any).squads
+        provider: provider
       };
 
       setConnectedWallets(prev => {
