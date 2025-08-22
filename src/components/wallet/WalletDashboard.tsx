@@ -10,6 +10,7 @@ import { QuickActions } from "./QuickActions";
 import { TransactionHistory } from "./TransactionHistory";
 import { NetworkSwitcher } from "./NetworkSwitcher";
 import { CurrencyExchange } from "./CurrencyExchange";
+import { SolanaTokenList } from "./SolanaTokenList";
 import { 
   Wallet, TrendingUp, ArrowLeftRight, Network, 
   Coins, Activity, BarChart3, Settings, Zap
@@ -220,10 +221,14 @@ export const WalletDashboard = ({
 
               {/* التبويبات */}
               <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                   <TabsTrigger value="details" className="flex items-center gap-2">
                     <Settings className="w-4 h-4" />
                     التفاصيل
+                  </TabsTrigger>
+                  <TabsTrigger value="tokens" className="flex items-center gap-2">
+                    <Coins className="w-4 h-4" />
+                    العملات
                   </TabsTrigger>
                   <TabsTrigger value="exchange" className="flex items-center gap-2">
                     <ArrowLeftRight className="w-4 h-4" />
@@ -246,6 +251,10 @@ export const WalletDashboard = ({
                     onSendTransaction={onSendTransaction}
                     onDisconnect={onDisconnect}
                   />
+                </TabsContent>
+
+                <TabsContent value="tokens" className="space-y-4">
+                  <SolanaTokenList wallet={selectedWallet} />
                 </TabsContent>
 
                 <TabsContent value="exchange" className="space-y-4">
