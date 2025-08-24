@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CameraCapture } from "@/components/ui/camera-capture";
 
 interface IdentityVerification {
   id: string;
@@ -77,6 +78,7 @@ const Identity = () => {
   const [documentBackFile, setDocumentBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -600,7 +602,51 @@ const Identity = () => {
                   {/* Selfie */}
                   <div className="space-y-2">
                     <Label htmlFor="selfieDocument">صورة شخصية مع حمل الوثيقة *</Label>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center max-w-md mx-auto">
+                    <div className="space-y-3">
+                      {selfieFile ? (
+                        <div className="border-2 border-dashed border-green-300 rounded-lg p-4 text-center max-w-md mx-auto">
+                          <div className="space-y-2">
+                            <Camera className="h-8 w-8 mx-auto text-green-500" />
+                            <p className="text-sm text-green-600">{selfieFile.name}</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelfieFile(null)}
+                              className="mt-2"
+                            >
+                              إزالة الصورة
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 max-w-md mx-auto">
+                          <div className="space-y-3 text-center">
+                            <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">اختر طريقة إضافة الصورة</p>
+                            <div className="flex gap-2 justify-center">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCameraOpen(true)}
+                                className="flex items-center gap-2"
+                              >
+                                <Camera className="h-4 w-4" />
+                                فتح الكاميرا
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => document.getElementById('selfieDocument')?.click()}
+                                className="flex items-center gap-2"
+                              >
+                                <Upload className="h-4 w-4" />
+                                رفع صورة
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
                       <input
                         id="selfieDocument"
                         type="file"
@@ -608,19 +654,6 @@ const Identity = () => {
                         onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
                         className="hidden"
                       />
-                      <label htmlFor="selfieDocument" className="cursor-pointer">
-                        {selfieFile ? (
-                          <div className="space-y-2">
-                            <Camera className="h-8 w-8 mx-auto text-green-500" />
-                            <p className="text-sm text-green-600">{selfieFile.name}</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">اضغط لالتقاط أو رفع صورة</p>
-                          </div>
-                        )}
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -742,6 +775,13 @@ const Identity = () => {
           )}
         </div>
       </section>
+      
+      <CameraCapture
+        isOpen={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={(file) => setSelfieFile(file)}
+        title="التقاط صورة شخصية مع الوثيقة"
+      />
     </>
   );
 };
