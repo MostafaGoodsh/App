@@ -28,6 +28,7 @@ const menuItems = [
 ];
 
 const adminMenuItems = [
+  { title: "إدارة المستخدمين", url: "/admin/users", icon: Users },
   { title: "إدارة الهوية", url: "/admin/kyc", icon: Shield },
   { title: "إدارة الاستبيانات", url: "/admin/surveys", icon: ClipboardList },
   { title: "إدارة التعلم", url: "/admin/learning", icon: BookOpen },

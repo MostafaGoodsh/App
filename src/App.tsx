@@ -18,6 +18,7 @@ import KYCAdmin from "./pages/KYCAdmin";
 import SurveysAdmin from "./pages/SurveysAdmin";
 import LearningAdmin from "./pages/LearningAdmin";
 import ContentAdmin from "./pages/ContentAdmin";
+import UsersAdmin from "./pages/UsersAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
 
@@ -41,6 +42,7 @@ const App = () => {
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
                   <Route path="learning" element={<Learning />} />
                   <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
+                  <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
