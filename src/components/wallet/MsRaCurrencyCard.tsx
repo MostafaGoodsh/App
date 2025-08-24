@@ -108,11 +108,11 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       return;
     }
 
-    // Basic Solana address validation
-    if (solanaAddress.length < 32 || solanaAddress.length > 44) {
+    // Basic Solana address validation (Solana addresses are typically 32-44 characters)
+    if (solanaAddress.length < 32 || solanaAddress.length > 44 || !/^[1-9A-HJ-NP-Za-km-z]+$/.test(solanaAddress)) {
       toast({
         title: "خطأ",
-        description: "عنوان Solana غير صحيح",
+        description: "عنوان Solana غير صحيح. يجب أن يكون بين 32-44 حرف ويحتوي على أحرف وأرقام صحيحة فقط",
         variant: "destructive"
       });
       return;
@@ -120,13 +120,37 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
     setIsSubmitting(true);
     try {
-      // Update profile with Solana address (using phone field temporarily)
-      const { error } = await supabase
+      // Check if user has profile first
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .update({ phone: solanaAddress })
-        .eq('user_id', user?.id);
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
 
-      if (error) throw error;
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+
+      if (!profile) {
+        // Create profile if it doesn't exist
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user?.id,
+            email: user?.email,
+            phone: solanaAddress
+          });
+
+        if (createError) throw createError;
+      } else {
+        // Update existing profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ phone: solanaAddress })
+          .eq('user_id', user?.id);
+
+        if (updateError) throw updateError;
+      }
 
       setIsRegistered(true);
       toast({
@@ -136,8 +160,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
     } catch (error) {
       console.error('Error registering Solana address:', error);
       toast({
-        title: "خطأ",
-        description: "فشل في تسجيل عنوان Solana",
+        title: "خطأ في التسجيل",
+        description: "حدث خطأ أثناء تسجيل العنوان. يرجى المحاولة مرة أخرى",
         variant: "destructive"
       });
     } finally {
@@ -245,7 +269,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (
-          <div className="space-y-4">
+          <div className="bg-white/80 p-4 rounded-lg space-y-4">
             <div className="flex items-center gap-2 text-amber-600">
               <Wallet className="w-4 h-4" />
               <span className="font-medium">تسجيل عنوان Solana</span>
@@ -257,12 +281,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 placeholder="ادخل عنوان محفظة Solana..."
                 value={solanaAddress}
                 onChange={(e) => setSolanaAddress(e.target.value)}
-                className="font-mono"
+                className="font-mono text-sm"
               />
             </div>
             <Button 
               onClick={handleRegisterSolanaAddress}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !solanaAddress.trim()}
               className="w-full"
             >
               {isSubmitting ? "جاري التسجيل..." : "تسجيل العنوان"}
