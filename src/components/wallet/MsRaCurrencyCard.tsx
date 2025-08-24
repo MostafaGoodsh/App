@@ -73,6 +73,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
     }
   }, [user, isVerified]);
 
+  // Force refresh when component mounts
+  useEffect(() => {
+    if (user) {
+      loadUserMiningData();
+    }
+  }, [user]);
+
   const loadUserMiningData = async () => {
     try {
       const { data: profile } = await supabase
