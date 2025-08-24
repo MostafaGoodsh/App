@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { CheckCircle, XCircle, Clock, User, FileText, Calendar } from "lucide-react";
+import { CheckCircle, XCircle, Clock, User, FileText, Calendar, Image, ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface KYCRequest {
   id: string;
@@ -19,6 +20,9 @@ interface KYCRequest {
   address: string;
   document_type: string;
   document_number: string;
+  document_front_url: string;
+  document_back_url: string;
+  selfie_url: string;
   status: string;
   verification_notes: string;
   created_at: string;
@@ -211,6 +215,120 @@ export default function KYCManagement() {
                     <p className="font-medium truncate" title={request.address}>
                       {request.address || "غير محدد"}
                     </p>
+                  </div>
+                </div>
+
+                {/* Document Images Section */}
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">الوثائق والصور المرفوعة</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Document Front */}
+                    {request.document_front_url ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">الوثيقة - الوجه الأمامي</p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="relative cursor-pointer group">
+                              <img 
+                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
+                                alt="الوثيقة - الوجه الأمامي"
+                                className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
+                                <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogTitle>الوثيقة - الوجه الأمامي</DialogTitle>
+                            <img 
+                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
+                              alt="الوثيقة - الوجه الأمامي"
+                              className="w-full max-h-[80vh] object-contain rounded-lg"
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    ) : (
+                      <div className="h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <Image className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground">لم يتم رفع الوجه الأمامي</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Document Back */}
+                    {request.document_back_url ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">الوثيقة - الوجه الخلفي</p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="relative cursor-pointer group">
+                              <img 
+                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_back_url}`}
+                                alt="الوثيقة - الوجه الخلفي"
+                                className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
+                                <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogTitle>الوثيقة - الوجه الخلفي</DialogTitle>
+                            <img 
+                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_back_url}`}
+                              alt="الوثيقة - الوجه الخلفي"
+                              className="w-full max-h-[80vh] object-contain rounded-lg"
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    ) : (
+                      <div className="h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <Image className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground">لم يتم رفع الوجه الخلفي</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Selfie */}
+                    {request.selfie_url ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">صورة شخصية (سيلفي)</p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="relative cursor-pointer group">
+                              <img 
+                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
+                                alt="صورة شخصية"
+                                className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
+                                <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogTitle>الصورة الشخصية</DialogTitle>
+                            <img 
+                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
+                              alt="صورة شخصية"
+                              className="w-full max-h-[80vh] object-contain rounded-lg"
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    ) : (
+                      <div className="h-32 border-2 border-dashed border-muted-foreground/25 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <User className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                          <p className="text-xs text-muted-foreground">لم يتم رفع الصورة الشخصية</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
