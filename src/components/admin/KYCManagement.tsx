@@ -233,6 +233,13 @@ export default function KYCManagement() {
                                 src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
                                 alt="الوثيقة - الوجه الأمامي"
                                 className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                                onError={(e) => {
+                                  console.error('Failed to load document front image:', request.document_front_url);
+                                  console.error('Full URL:', `https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`);
+                                }}
+                                onLoad={() => {
+                                  console.log('Document front image loaded successfully:', request.document_front_url);
+                                }}
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
                                 <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -248,6 +255,9 @@ export default function KYCManagement() {
                               src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
                               alt="الوثيقة - الوجه الأمامي"
                               className="w-full max-h-[80vh] object-contain rounded-lg"
+                              onError={(e) => {
+                                console.error('Failed to load document front image in dialog:', request.document_front_url);
+                              }}
                             />
                           </DialogContent>
                         </Dialog>
@@ -311,6 +321,13 @@ export default function KYCManagement() {
                                 src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
                                 alt="صورة شخصية"
                                 className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                                onError={(e) => {
+                                  console.error('Failed to load selfie image:', request.selfie_url);
+                                  console.error('Full URL:', `https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`);
+                                }}
+                                onLoad={() => {
+                                  console.log('Selfie image loaded successfully:', request.selfie_url);
+                                }}
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
                                 <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -326,6 +343,9 @@ export default function KYCManagement() {
                               src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
                               alt="صورة شخصية"
                               className="w-full max-h-[80vh] object-contain rounded-lg"
+                              onError={(e) => {
+                                console.error('Failed to load selfie image in dialog:', request.selfie_url);
+                              }}
                             />
                           </DialogContent>
                         </Dialog>
