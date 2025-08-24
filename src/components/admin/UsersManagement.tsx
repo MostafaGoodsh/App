@@ -27,6 +27,7 @@ interface UserData {
   full_name: string;
   masked_email: string;
   masked_phone: string;
+  solana_address: string | null;
   preferred_language: string;
   created_at: string;
   updated_at: string;
@@ -72,6 +73,7 @@ const UsersManagement = () => {
         const verification = verificationsData?.find((v: any) => v.user_id === profile.user_id);
         return {
           ...profile,
+          solana_address: profile.solana_address || null,
           verification_status: verification?.status || null,
           verification_type: verification?.verification_type || null,
           verified_at: verification?.verified_at || null,
@@ -180,6 +182,7 @@ const UsersManagement = () => {
                     <TableHead>الاسم الكامل</TableHead>
                     <TableHead>البريد الإلكتروني</TableHead>
                     <TableHead>رقم الهاتف</TableHead>
+                    <TableHead>عنوان Solana</TableHead>
                     <TableHead>اللغة المفضلة</TableHead>
                     <TableHead>حالة التحقق</TableHead>
                     <TableHead>تاريخ التسجيل</TableHead>
@@ -197,6 +200,15 @@ const UsersManagement = () => {
                       </TableCell>
                       <TableCell>
                         {user.masked_phone || "غير محدد"}
+                      </TableCell>
+                      <TableCell>
+                        {user.solana_address ? (
+                          <div className="font-mono text-xs">
+                            {user.solana_address.slice(0, 6)}...{user.solana_address.slice(-4)}
+                          </div>
+                        ) : (
+                          "غير مسجل"
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">

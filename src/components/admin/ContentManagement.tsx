@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pencil, Plus, Image, FileText, Upload, X } from "lucide-react";
+import { Pencil, Plus, Image, FileText, Upload, X, Zap } from "lucide-react";
 
 interface AppContent {
   id: string;
@@ -237,10 +237,11 @@ export default function ContentManagement() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">نص</SelectItem>
-                    <SelectItem value="image">صورة</SelectItem>
-                  </SelectContent>
+                 <SelectContent>
+                   <SelectItem value="text">نص</SelectItem>
+                   <SelectItem value="image">صورة</SelectItem>
+                   <SelectItem value="msra_mining_card">كارت التعدين Ms-Ra</SelectItem>
+                 </SelectContent>
                 </Select>
               </div>
 
@@ -255,6 +256,15 @@ export default function ContentManagement() {
                     rows={4}
                     required
                   />
+                </div>
+              ) : formData.content_type === 'msra_mining_card' ? (
+                <div className="text-center p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    كارت التعدين Ms-Ra سيتم عرضه تلقائياً
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    لا يحتاج إلى محتوى إضافي
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -318,6 +328,8 @@ export default function ContentManagement() {
               <CardTitle className="flex items-center gap-2">
                 {content.content_type === 'text' ? 
                   <FileText className="h-4 w-4" /> : 
+                  content.content_type === 'msra_mining_card' ?
+                  <Zap className="h-4 w-4" /> :
                   <Image className="h-4 w-4" />
                 }
                 {content.content_key}
@@ -334,6 +346,12 @@ export default function ContentManagement() {
             <CardContent>
               {content.content_type === 'text' ? (
                 <p className="text-muted-foreground">{content.text_content}</p>
+              ) : content.content_type === 'msra_mining_card' ? (
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+                  <p className="text-sm font-medium">كارت التعدين Ms-Ra</p>
+                  <p className="text-xs text-muted-foreground">يعرض نظام التعدين والعناوين المسجلة</p>
+                </div>
               ) : (
                 <div>
                   {content.image_url && (
