@@ -79,7 +79,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (profile?.phone) { // Using phone field to store Solana address temporarily
         setSolanaAddress(profile.phone);
@@ -99,7 +99,10 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   };
 
   const handleRegisterSolanaAddress = async () => {
+    console.log('Starting Solana address registration...', { solanaAddress, userId: user?.id });
+    
     if (!solanaAddress.trim()) {
+      console.log('Error: Empty Solana address');
       toast({
         title: "خطأ",
         description: "يرجى إدخال عنوان Solana صحيح",
@@ -120,18 +123,24 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
     setIsSubmitting(true);
     try {
+      console.log('Checking user profile...');
+      
       // Check if user has profile first
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      console.log('Profile query result:', { profile, profileError });
+
+      if (profileError) {
+        console.error('Profile query error:', profileError);
         throw profileError;
       }
 
       if (!profile) {
+        console.log('Creating new profile...');
         // Create profile if it doesn't exist
         const { error: createError } = await supabase
           .from('profiles')
@@ -141,14 +150,17 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             phone: solanaAddress
           });
 
+        console.log('Profile creation result:', { createError });
         if (createError) throw createError;
       } else {
+        console.log('Updating existing profile...');
         // Update existing profile
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ phone: solanaAddress })
           .eq('user_id', user?.id);
 
+        console.log('Profile update result:', { updateError });
         if (updateError) throw updateError;
       }
 
