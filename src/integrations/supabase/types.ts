@@ -882,6 +882,7 @@ export type Database = {
           masked_email: string
           masked_phone: string
           preferred_language: string
+          solana_address: string
           updated_at: string
           user_id: string
         }[]
