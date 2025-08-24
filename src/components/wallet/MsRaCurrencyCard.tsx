@@ -237,14 +237,14 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   if (!isVerified) {
     return (
-      <Card className="relative overflow-hidden border-2 border-dashed border-muted-foreground/25">
+      <Card className="relative overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-10"
           style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
         />
         <CardHeader className="relative z-10">
           <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-amber-500" />
+            <Zap className="w-5 h-5 text-primary" />
             العملة القادمة - Ms-Ra
           </CardTitle>
           <CardDescription>
@@ -267,14 +267,14 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   }
 
   return (
-    <Card className="relative overflow-hidden border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50">
+    <Card className="relative overflow-hidden">
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20"
+        className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
       />
       <CardHeader className="relative z-10">
         <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-amber-500" />
+          <Zap className="w-5 h-5 text-primary" />
           العملة القادمة - Ms-Ra
           <Badge variant="secondary" className="ml-auto">
             <CheckCircle className="w-4 h-4 mr-1" />
@@ -288,8 +288,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (
-          <div className="bg-white/80 p-4 rounded-lg space-y-4">
-            <div className="flex items-center gap-2 text-amber-600">
+          <div className="bg-card/80 p-4 rounded-lg space-y-4 border border-border">
+            <div className="flex items-center gap-2 text-primary">
               <Wallet className="w-4 h-4" />
               <span className="font-medium">تسجيل عنوان Solana</span>
             </div>
@@ -314,12 +314,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         ) : (
           <>
             {/* Balance Display */}
-            <div className="bg-white/80 p-4 rounded-lg">
+            <div className="bg-card/80 p-4 rounded-lg border border-border">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">رصيد Ms-Ra</span>
-                <TrendingUp className="w-4 h-4 text-green-500" />
+                <TrendingUp className="w-4 h-4 text-primary" />
               </div>
-              <div className="text-2xl font-bold text-amber-600">
+              <div className="text-2xl font-bold text-primary">
                 {msRaBalance.toFixed(2)} MS-RA
               </div>
             </div>
@@ -329,7 +329,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             {/* Mining Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" />
+                <Zap className="w-4 h-4 text-primary" />
                 <span className="font-medium">مؤشر التعدين EVM</span>
               </div>
               
@@ -356,7 +356,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <Button 
                 onClick={handleStartMining}
                 disabled={miningProgress < 100}
-                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                className="w-full"
               >
                 <Zap className="w-4 h-4 mr-2" />
                 {miningProgress >= 100 ? "بدء التعدين" : "انتظر 24 ساعة"}
@@ -364,12 +364,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             </div>
 
             {/* Registered Address Display */}
-            <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2 text-green-700 mb-1">
+            <div className="bg-card/80 p-3 rounded-lg border border-border">
+              <div className="flex items-center gap-2 text-primary mb-1">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">عنوان Solana مسجل</span>
               </div>
-              <p className="text-xs text-green-600 font-mono break-all">
+              <p className="text-xs text-muted-foreground font-mono break-all">
                 {solanaAddress}
               </p>
             </div>
