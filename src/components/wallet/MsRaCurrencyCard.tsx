@@ -81,8 +81,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         .eq('user_id', user?.id)
         .maybeSingle();
 
-      if (profile?.phone) { // Using phone field to store Solana address temporarily
-        setSolanaAddress(profile.phone);
+      if (profile?.solana_address) {
+        setSolanaAddress(profile.solana_address);
         setIsRegistered(true);
       }
 
@@ -147,7 +147,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           .insert({
             user_id: user?.id,
             email: user?.email,
-            phone: solanaAddress
+            solana_address: solanaAddress
           });
 
         console.log('Profile creation result:', { createError });
@@ -157,7 +157,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         // Update existing profile
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ phone: solanaAddress })
+          .update({ solana_address: solanaAddress })
           .eq('user_id', user?.id);
 
         console.log('Profile update result:', { updateError });
