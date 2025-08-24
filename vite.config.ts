@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      buffer: 'buffer',
     },
   },
   define: {
@@ -24,6 +25,16 @@ export default defineConfig(({ mode }) => ({
     'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer', '@solana/web3.js']
+    include: ['buffer', '@solana/web3.js', '@solana/spl-token']
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        globals: {
+          buffer: 'Buffer'
+        }
+      }
+    }
   }
-}));
+}))
