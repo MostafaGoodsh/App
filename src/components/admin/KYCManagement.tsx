@@ -61,11 +61,20 @@ export default function KYCManagement() {
   const updateKYCStatus = async (verificationId: string, newStatus: string, notes?: string) => {
     setProcessingId(verificationId);
     try {
-      const { error } = await supabase.rpc("update_kyc_status", {
-        verification_id: verificationId,
-        new_status: newStatus,
-        admin_notes: notes || adminNotes,
-      });
+      const updateData: any = {
+        status: newStatus,
+        verification_notes: notes || adminNotes,
+        updated_at: new Date().toISOString()
+      };
+
+      if (newStatus === 'approved') {
+        updateData.verified_at = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('identity_verification')
+        .update(updateData)
+        .eq('id', verificationId);
 
       if (error) throw error;
 

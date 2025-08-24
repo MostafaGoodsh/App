@@ -73,6 +73,10 @@ const Identity = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [documentType, setDocumentType] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
+  const [documentFrontFile, setDocumentFrontFile] = useState<File | null>(null);
+  const [documentBackFile, setDocumentBackFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -106,7 +110,7 @@ const Identity = () => {
         setDocumentNumber(data.document_number || "");
 
         // Set appropriate step based on status
-        if (data.status === 'pending' || data.status === 'verified') {
+        if (data.status === 'pending' || data.status === 'verified' || data.status === 'approved') {
           setCurrentStep(2);
         } else if (data.document_type) {
           setCurrentStep(1);
@@ -178,6 +182,18 @@ const Identity = () => {
     setSubmitting(false);
   };
 
+  const uploadFileToStorage = async (file: File, path: string) => {
+    const { data, error } = await supabase.storage
+      .from('identity-documents')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+    return data.path;
+  };
+
   const submitDocuments = async () => {
     if (!documentType || !documentNumber) {
       toast({
@@ -188,18 +204,63 @@ const Identity = () => {
       return;
     }
 
+    if (!documentFrontFile || !selfieFile) {
+      toast({
+        title: "الوثائق مطلوبة",
+        description: "يرجى رفع صورة الوثيقة والصورة الشخصية",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
+      setUploadProgress(20);
+      
+      // Upload files
+      const timestamp = Date.now();
+      const userId = user?.id;
+      
+      const frontPath = await uploadFileToStorage(
+        documentFrontFile, 
+        `${userId}/front_${timestamp}.${documentFrontFile.name.split('.').pop()}`
+      );
+      
+      setUploadProgress(50);
+      
+      let backPath = null;
+      if (documentBackFile) {
+        backPath = await uploadFileToStorage(
+          documentBackFile, 
+          `${userId}/back_${timestamp}.${documentBackFile.name.split('.').pop()}`
+        );
+      }
+      
+      setUploadProgress(70);
+      
+      const selfiePath = await uploadFileToStorage(
+        selfieFile, 
+        `${userId}/selfie_${timestamp}.${selfieFile.name.split('.').pop()}`
+      );
+      
+      setUploadProgress(90);
+
+      // Update database
       const { error } = await supabase
         .from('identity_verification')
         .update({
           document_type: documentType,
           document_number: documentNumber,
+          document_front_url: frontPath,
+          document_back_url: backPath,
+          selfie_url: selfiePath,
           status: 'pending'
         })
         .eq('id', verification?.id);
 
       if (error) throw error;
+
+      setUploadProgress(100);
 
       toast({
         title: "تم إرسال الطلب",
@@ -212,16 +273,18 @@ const Identity = () => {
       console.error('Error submitting documents:', error);
       toast({
         title: "خطأ في الإرسال",
-        description: "حدث خطأ أثناء إرسال الوثائق",
+        description: "حدث خطأ أثناء رفع الوثائق",
         variant: "destructive"
       });
     }
     setSubmitting(false);
+    setUploadProgress(0);
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'verified': return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'verified':
+      case 'approved': return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'pending': return <Clock className="h-5 w-5 text-yellow-500" />;
       case 'rejected': return <XCircle className="h-5 w-5 text-red-500" />;
       default: return <FileText className="h-5 w-5 text-gray-500" />;
@@ -230,7 +293,8 @@ const Identity = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'verified': return 'تم التحقق';
+      case 'verified':
+      case 'approved': return 'تم التحقق';
       case 'pending': return 'قيد المراجعة';
       case 'rejected': return 'مرفوض';
       case 'draft': return 'مسودة';
@@ -240,7 +304,8 @@ const Identity = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'verified': return 'bg-green-100 text-green-800 border-green-200';
+      case 'verified':
+      case 'approved': return 'bg-green-100 text-green-800 border-green-200';
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
       case 'draft': return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -474,6 +539,107 @@ const Identity = () => {
                   </div>
                 </div>
 
+                {/* File Upload Section */}
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Front Document */}
+                    <div className="space-y-2">
+                      <Label htmlFor="frontDocument">صورة الوثيقة - الوجه الأمامي *</Label>
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center">
+                        <input
+                          id="frontDocument"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setDocumentFrontFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                        <label htmlFor="frontDocument" className="cursor-pointer">
+                          {documentFrontFile ? (
+                            <div className="space-y-2">
+                              <FileImage className="h-8 w-8 mx-auto text-green-500" />
+                              <p className="text-sm text-green-600">{documentFrontFile.name}</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">اضغط لرفع الصورة</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Back Document */}
+                    <div className="space-y-2">
+                      <Label htmlFor="backDocument">صورة الوثيقة - الوجه الخلفي (اختياري)</Label>
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center">
+                        <input
+                          id="backDocument"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setDocumentBackFile(e.target.files?.[0] || null)}
+                          className="hidden"
+                        />
+                        <label htmlFor="backDocument" className="cursor-pointer">
+                          {documentBackFile ? (
+                            <div className="space-y-2">
+                              <FileImage className="h-8 w-8 mx-auto text-green-500" />
+                              <p className="text-sm text-green-600">{documentBackFile.name}</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                              <p className="text-sm text-muted-foreground">اضغط لرفع الصورة</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Selfie */}
+                  <div className="space-y-2">
+                    <Label htmlFor="selfieDocument">صورة شخصية مع حمل الوثيقة *</Label>
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center max-w-md mx-auto">
+                      <input
+                        id="selfieDocument"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                      />
+                      <label htmlFor="selfieDocument" className="cursor-pointer">
+                        {selfieFile ? (
+                          <div className="space-y-2">
+                            <Camera className="h-8 w-8 mx-auto text-green-500" />
+                            <p className="text-sm text-green-600">{selfieFile.name}</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Camera className="h-8 w-8 mx-auto text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">اضغط لالتقاط أو رفع صورة</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {uploadProgress > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>جاري الرفع...</span>
+                      <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="bg-muted/50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">متطلبات الوثائق:</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
@@ -481,6 +647,8 @@ const Identity = () => {
                     <li>• صورة واضحة للوجه الخلفي للوثيقة (إذا كان يحتوي على معلومات)</li>
                     <li>• صورة شخصية (سيلفي) مع حمل الوثيقة</li>
                     <li>• تأكد من وضوح جميع المعلومات وعدم وجود انعكاس للضوء</li>
+                    <li>• حجم الملف الأقصى: 5 ميجابايت لكل صورة</li>
+                    <li>• الصيغ المدعومة: JPG, PNG, JPEG</li>
                   </ul>
                 </div>
 
