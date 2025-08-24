@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CheckCircle, XCircle, Clock, User, FileText, Calendar, Image, ZoomIn } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface KYCRequest {
   id: string;
@@ -241,6 +241,9 @@ export default function KYCManagement() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogTitle>الوثيقة - الوجه الأمامي</DialogTitle>
+                            <DialogDescription>
+                              عرض الوثيقة الرسمية - الوجه الأمامي لـ {request.full_name}
+                            </DialogDescription>
                             <img 
                               src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
                               alt="الوثيقة - الوجه الأمامي"
@@ -277,6 +280,9 @@ export default function KYCManagement() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogTitle>الوثيقة - الوجه الخلفي</DialogTitle>
+                            <DialogDescription>
+                              عرض الوثيقة الرسمية - الوجه الخلفي لـ {request.full_name}
+                            </DialogDescription>
                             <img 
                               src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_back_url}`}
                               alt="الوثيقة - الوجه الخلفي"
@@ -313,6 +319,9 @@ export default function KYCManagement() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogTitle>الصورة الشخصية</DialogTitle>
+                            <DialogDescription>
+                              عرض الصورة الشخصية (السيلفي) لـ {request.full_name}
+                            </DialogDescription>
                             <img 
                               src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
                               alt="صورة شخصية"
