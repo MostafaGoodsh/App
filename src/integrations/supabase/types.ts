@@ -351,6 +351,69 @@ export type Database = {
           },
         ]
       }
+      mining_history: {
+        Row: {
+          account_strength: number
+          amount_mined: number
+          created_at: string
+          hour_timestamp: string
+          id: string
+          level_number: number
+          mining_rate: number
+          user_id: string
+        }
+        Insert: {
+          account_strength: number
+          amount_mined: number
+          created_at?: string
+          hour_timestamp: string
+          id?: string
+          level_number: number
+          mining_rate: number
+          user_id: string
+        }
+        Update: {
+          account_strength?: number
+          amount_mined?: number
+          created_at?: string
+          hour_timestamp?: string
+          id?: string
+          level_number?: number
+          mining_rate?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mining_levels: {
+        Row: {
+          created_at: string
+          id: number
+          level_name: string
+          level_number: number
+          mining_rate_per_hour: number
+          required_account_strength: number
+          upgrade_cost: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          level_name: string
+          level_number: number
+          mining_rate_per_hour: number
+          required_account_strength: number
+          upgrade_cost?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          level_name?: string
+          level_number?: number
+          mining_rate_per_hour?: number
+          required_account_strength?: number
+          upgrade_cost?: number | null
+        }
+        Relationships: []
+      }
       pending_deposits: {
         Row: {
           amount: number
@@ -642,6 +705,53 @@ export type Database = {
         }
         Relationships: []
       }
+      user_mining_profiles: {
+        Row: {
+          account_strength: number
+          created_at: string
+          current_level: number
+          id: string
+          is_mining_active: boolean
+          last_mining_update: string
+          mining_rate_per_hour: number
+          total_mined: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_strength?: number
+          created_at?: string
+          current_level?: number
+          id?: string
+          is_mining_active?: boolean
+          last_mining_update?: string
+          mining_rate_per_hour?: number
+          total_mined?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_strength?: number
+          created_at?: string
+          current_level?: number
+          id?: string
+          is_mining_active?: boolean
+          last_mining_update?: string
+          mining_rate_per_hour?: number
+          total_mined?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_mining_profiles_current_level_fkey"
+            columns: ["current_level"]
+            isOneToOne: false
+            referencedRelation: "mining_levels"
+            referencedColumns: ["level_number"]
+          },
+        ]
+      }
       user_progress: {
         Row: {
           completed_at: string | null
@@ -855,6 +965,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_account_strength: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       get_identity_verification_admin_view: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -943,6 +1057,10 @@ export type Database = {
           verification_id: string
         }
         Returns: boolean
+      }
+      update_mining_progress: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

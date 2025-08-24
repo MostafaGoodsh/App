@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings } from "lucide-react";
+import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Pickaxe } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,7 @@ const menuItems = [
   { title: "الرئيسية", url: "/", icon: Home },
   { title: "التعلم", url: "/learning", icon: BookOpen },
   { title: "المحفظة", url: "/wallet", icon: Wallet, requireAuth: true },
+  { title: "التعدين", url: "/mining", icon: Pickaxe, requireAuth: true },
   { title: "الهوية", url: "/identity", icon: Users, requireAuth: true },
   { title: "الاستبيانات", url: "/surveys", icon: ClipboardList, requireAuth: true },
 ];

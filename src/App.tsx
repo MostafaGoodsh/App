@@ -13,6 +13,7 @@ import EarlyAccess from "./pages/EarlyAccess";
 import Identity from "./pages/Identity";
 import Learning from "./pages/Learning";
 import Surveys from "./pages/Surveys";
+import Mining from "./pages/Mining";
 import Auth from "./pages/Auth";
 import KYCAdmin from "./pages/KYCAdmin";
 import SurveysAdmin from "./pages/SurveysAdmin";
@@ -38,6 +39,7 @@ const App = () => {
                   <Route index element={<Index />} />
                   <Route path="auth" element={<Auth />} />
                   <Route path="wallet" element={<Wallet />} />
+                  <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
                   <Route path="learning" element={<Learning />} />
