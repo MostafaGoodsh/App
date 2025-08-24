@@ -194,8 +194,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   if (!isVerified) {
     return (
-      <Card className="border-2 border-dashed border-muted-foreground/25">
-        <CardHeader>
+      <Card className="relative overflow-hidden border-2 border-dashed border-muted-foreground/25">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-10"
+          style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
+        />
+        <CardHeader className="relative z-10">
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-500" />
             العملة القادمة - Ms-Ra
@@ -204,7 +208,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             عملة رقمية جديدة مع نظام تعدين مبتكر
           </CardDescription>
         </CardHeader>
-        <CardContent className="text-center py-8">
+        <CardContent className="relative z-10 text-center py-8">
           <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
           <h3 className="text-lg font-semibold mb-2">مطلوب تحقيق الهوية</h3>
           <p className="text-muted-foreground mb-4">
@@ -220,8 +224,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   }
 
   return (
-    <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50">
-      <CardHeader>
+    <Card className="relative overflow-hidden border-2 border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/50">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
+      />
+      <CardHeader className="relative z-10">
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-amber-500" />
           العملة القادمة - Ms-Ra
@@ -234,7 +242,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (
           <div className="space-y-4">

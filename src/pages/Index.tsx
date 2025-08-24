@@ -2,9 +2,39 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAppContent } from "@/hooks/useAppContent";
+import { MsRaCurrencyCard } from "@/components/wallet/MsRaCurrencyCard";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
+
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
+  const { user } = useAuth();
+  const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const { getContent, getAltText, loading } = useAppContent();
+
+  // Check identity verification status
+  useEffect(() => {
+    const checkVerificationStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const { data } = await supabase
+          .from('identity_verification')
+          .select('status')
+          .eq('user_id', user.id)
+          .eq('status', 'approved')
+          .single();
+        
+        setIsIdentityVerified(!!data);
+      } catch (error) {
+        console.error('Error checking verification status:', error);
+      }
+    };
+
+    checkVerificationStatus();
+  }, [user]);
+
   
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
@@ -111,6 +141,13 @@ const Index = () => {
               </article>
             </Link>
           ))}
+        </section>
+        
+        {/* Ms-Ra Currency Section */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto max-w-4xl">
+            <MsRaCurrencyCard isVerified={isIdentityVerified} />
+          </div>
         </section>
 
         <div className="sr-only">

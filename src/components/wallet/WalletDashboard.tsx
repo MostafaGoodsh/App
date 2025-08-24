@@ -11,7 +11,6 @@ import { TransactionHistory } from "./TransactionHistory";
 import { NetworkSwitcher } from "./NetworkSwitcher";
 import { CurrencyExchange } from "./CurrencyExchange";
 import { SolanaTokenList } from "./SolanaTokenList";
-import { MsRaCurrencyCard } from "./MsRaCurrencyCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -47,29 +46,6 @@ export const WalletDashboard = ({
     }
     return 'ethereum';
   });
-  const [isIdentityVerified, setIsIdentityVerified] = useState(false);
-
-  // Check identity verification status
-  useEffect(() => {
-    const checkVerificationStatus = async () => {
-      if (!user) return;
-      
-      try {
-        const { data } = await supabase
-          .from('identity_verification')
-          .select('status')
-          .eq('user_id', user.id)
-          .eq('status', 'approved')
-          .single();
-        
-        setIsIdentityVerified(!!data);
-      } catch (error) {
-        console.error('Error checking verification status:', error);
-      }
-    };
-
-    checkVerificationStatus();
-  }, [user]);
 
   if (wallets.length === 0) {
     return (
@@ -169,9 +145,6 @@ export const WalletDashboard = ({
     <div className="space-y-6">
       {/* نظرة عامة */}
       <WalletOverview wallets={wallets} totalValue={totalValue} />
-      
-      {/* Ms-Ra Currency Card */}
-      <MsRaCurrencyCard isVerified={isIdentityVerified} />
       
       {/* الواجهة الرئيسية */}
       <div className="grid lg:grid-cols-3 gap-6">
