@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useAppContent } from "@/hooks/useAppContent";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -26,12 +27,18 @@ interface MsRaCurrencyCardProps {
 export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { getContentItem } = useAppContent();
   const [solanaAddress, setSolanaAddress] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [miningProgress, setMiningProgress] = useState(0);
   const [lastMiningTime, setLastMiningTime] = useState<Date | null>(null);
   const [msRaBalance, setMsRaBalance] = useState(0);
+
+  // Get custom content from admin panel
+  const msRaContent = getContentItem('msra_mining_card_main');
+  const cardTitle = msRaContent?.text_content || 'العملة القادمة - Ms-Ra';
+  const cardBackground = msRaContent?.image_url || '/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png';
 
   // Mining timer effect (24-hour cycle)
   useEffect(() => {
@@ -240,12 +247,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       <Card className="relative overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-10"
-          style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
+          style={{ backgroundImage: `url(${cardBackground})` }}
         />
         <CardHeader className="relative z-10">
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            العملة القادمة - Ms-Ra
+            {cardTitle}
           </CardTitle>
           <CardDescription>
             عملة رقمية جديدة مع نظام تعدين مبتكر
@@ -270,12 +277,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
     <Card className="relative overflow-hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-10"
-        style={{ backgroundImage: "url(/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png)" }}
+        style={{ backgroundImage: `url(${cardBackground})` }}
       />
       <CardHeader className="relative z-10">
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary" />
-          العملة القادمة - Ms-Ra
+          {cardTitle}
           <Badge variant="secondary" className="ml-auto">
             <CheckCircle className="w-4 h-4 mr-1" />
             مفعل

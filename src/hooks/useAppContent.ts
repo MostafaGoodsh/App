@@ -46,7 +46,16 @@ export const useAppContent = () => {
   const getContent = (key: string, fallback = '') => {
     const item = content[key];
     if (!item) return fallback;
-    return item.content_type === 'text' ? item.text_content || fallback : item.image_url || fallback;
+    
+    if (item.content_type === 'text' || item.content_type === 'msra_mining_card') {
+      return item.text_content || fallback;
+    }
+    
+    return item.image_url || fallback;
+  };
+
+  const getContentItem = (key: string) => {
+    return content[key] || null;
   };
 
   const getAltText = (key: string, fallback = '') => {
@@ -58,6 +67,7 @@ export const useAppContent = () => {
     content,
     loading,
     getContent,
+    getContentItem,
     getAltText,
     refetch: fetchContent
   };

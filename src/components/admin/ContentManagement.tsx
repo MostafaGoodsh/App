@@ -93,14 +93,14 @@ export default function ContentManagement() {
     try {
       let imageUrl = formData.image_url;
       
-      if (selectedFile && formData.content_type === 'image') {
+      if (selectedFile && (formData.content_type === 'image' || formData.content_type === 'msra_mining_card')) {
         imageUrl = await uploadImage(selectedFile);
       }
 
       const contentData = {
         ...formData,
-        image_url: formData.content_type === 'image' ? imageUrl : null,
-        text_content: formData.content_type === 'text' ? formData.text_content : null,
+        image_url: (formData.content_type === 'image' || formData.content_type === 'msra_mining_card') ? imageUrl : null,
+        text_content: (formData.content_type === 'text' || formData.content_type === 'msra_mining_card') ? formData.text_content : null,
         created_by: user.id
       };
 
@@ -258,13 +258,50 @@ export default function ContentManagement() {
                   />
                 </div>
               ) : formData.content_type === 'msra_mining_card' ? (
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    كارت التعدين Ms-Ra سيتم عرضه تلقائياً
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    لا يحتاج إلى محتوى إضافي
-                  </p>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="card_title">عنوان الكارت</Label>
+                    <Input
+                      id="card_title"
+                      value={formData.text_content}
+                      onChange={(e) => setFormData({...formData, text_content: e.target.value})}
+                      placeholder="مثال: تعدين Ms-Ra"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="card_background">صورة خلفية الكارت</Label>
+                    <Input
+                      id="card_background"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    />
+                    
+                    {formData.image_url && (
+                      <div className="relative">
+                        <img src={formData.image_url} alt="خلفية الكارت" className="w-full h-32 object-cover rounded" />
+                      </div>
+                    )}
+                    
+                    <div>
+                      <Label htmlFor="card_alt_text">وصف صورة الخلفية</Label>
+                      <Input
+                        id="card_alt_text"
+                        value={formData.alt_text}
+                        onChange={(e) => setFormData({...formData, alt_text: e.target.value})}
+                        placeholder="وصف خلفية كارت التعدين..."
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <p className="text-sm font-medium">معاينة كارت التعدين Ms-Ra</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formData.text_content || "عنوان الكارت"}
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -347,10 +384,19 @@ export default function ContentManagement() {
               {content.content_type === 'text' ? (
                 <p className="text-muted-foreground">{content.text_content}</p>
               ) : content.content_type === 'msra_mining_card' ? (
-                <div className="text-center p-4 bg-primary/10 rounded-lg">
-                  <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">كارت التعدين Ms-Ra</p>
-                  <p className="text-xs text-muted-foreground">يعرض نظام التعدين والعناوين المسجلة</p>
+                <div>
+                  {content.image_url && (
+                    <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                  )}
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
+                    <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+                    <p className="text-sm font-medium">
+                      {content.text_content || "كارت التعدين Ms-Ra"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {content.alt_text || "يعرض نظام التعدين والعناوين المسجلة"}
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <div>
