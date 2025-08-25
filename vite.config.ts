@@ -23,8 +23,6 @@ export default defineConfig(({ mode }) => ({
   define: {
     global: 'globalThis',
     'process.env': {},
-    // Ensure Buffer is available in the global scope
-    'globalThis.Buffer': 'globalThis.Buffer || Buffer'
   },
   optimizeDeps: {
     include: ['buffer'],
