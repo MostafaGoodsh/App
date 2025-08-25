@@ -25,11 +25,11 @@ export default defineConfig(({ mode }) => ({
     'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer'],
-    exclude: ['@solana/web3.js', '@solana/spl-token']
+    include: ['buffer', '@solana/web3.js', '@solana/spl-token']
   },
   build: {
     rollupOptions: {
+      external: [],
       output: {
         globals: {
           buffer: 'Buffer'
