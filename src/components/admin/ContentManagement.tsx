@@ -131,7 +131,10 @@ export default function ContentManagement() {
 
       setShowDialog(false);
       resetForm();
-      fetchContents();
+      await fetchContents();
+      
+      // Force refresh of app content
+      window.dispatchEvent(new CustomEvent('app-content-updated'));
     } catch (error) {
       console.error('Error saving content:', error);
       toast({

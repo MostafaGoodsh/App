@@ -41,6 +41,21 @@ export const useAppContent = () => {
 
   useEffect(() => {
     fetchContent();
+    
+    // Listen for real-time updates
+    const subscription = supabase
+      .channel('app_content_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'app_content' },
+        () => {
+          fetchContent();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const getContent = (key: string, fallback = '') => {
