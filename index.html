@@ -24,6 +24,7 @@
   <body>
     <div id="root"></div>
     <script>
+      // Essential polyfills that must be available before any modules load
       if (typeof global === 'undefined') {
         var global = globalThis;
       }
