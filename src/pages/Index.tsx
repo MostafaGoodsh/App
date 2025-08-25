@@ -57,11 +57,8 @@ const Index = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
           <div className="relative z-10 container mx-auto px-4 text-center">
-            <div className="flex items-center justify-center gap-8 mb-6">
-              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
-                {getContent('hero_subtitle_origin', 'ORIGIN')}
-              </div>
-              <div className="flex-1">
+            <div className="flex items-center justify-center mb-6">
+              <div className="text-center">
                 <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
@@ -86,9 +83,6 @@ const Index = () => {
                 <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
                   {getContent('hero_tagline', 'From Egypt With Love')}
                 </p>
-              </div>
-              <div className="text-sm md:text-base font-playfair text-primary/80 writing-mode-vertical-rl">
-                {getContent('hero_subtitle_fate', 'FATE')}
               </div>
             </div>
 
