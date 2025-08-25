@@ -16,31 +16,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useAppContent } from "@/hooks/useAppContent";
 
-const menuItems = [
-  { title: "الرئيسية", url: "/", icon: Home },
-  { title: "التعلم", url: "/learning", icon: BookOpen },
-  { title: "المحفظة", url: "/wallet", icon: Wallet, requireAuth: true },
-  { title: "التعدين", url: "/mining", icon: Pickaxe, requireAuth: true },
-  { title: "الهوية", url: "/identity", icon: Users, requireAuth: true },
-  { title: "الاستبيانات", url: "/surveys", icon: ClipboardList, requireAuth: true },
+const useMenuItems = (getContent: (key: string, fallback?: string) => string) => [
+  { title: getContent("sidebar_home", "الرئيسية"), url: "/", icon: Home },
+  { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
+  { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
+  { title: getContent("sidebar_mining", "التعدين"), url: "/mining", icon: Pickaxe, requireAuth: true },
+  { title: getContent("sidebar_identity", "الهوية"), url: "/identity", icon: Users, requireAuth: true },
+  { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
 ];
 
-const adminMenuItems = [
-  { title: "إدارة المستخدمين", url: "/admin/users", icon: Users },
-  { title: "إدارة الهوية", url: "/admin/kyc", icon: Shield },
-  { title: "إدارة الاستبيانات", url: "/admin/surveys", icon: ClipboardList },
-  { title: "إدارة التعلم", url: "/admin/learning", icon: BookOpen },
-  { title: "إدارة محتوى التطبيق", url: "/admin/content", icon: Settings },
+const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
+  { title: getContent("admin_users_management", "إدارة المستخدمين"), url: "/admin/users", icon: Users },
+  { title: getContent("admin_kyc_management", "إدارة الهوية"), url: "/admin/kyc", icon: Shield },
+  { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },
+  { title: getContent("admin_learning_management", "إدارة التعلم"), url: "/admin/learning", icon: BookOpen },
+  { title: getContent("admin_content_management", "إدارة محتوى التطبيق"), url: "/admin/content", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { open, isMobile } = useSidebar();
   const location = useLocation();
   const { user, isAdmin } = useAuth();
+  const { getContent } = useAppContent();
   const currentPath = location.pathname;
+
+  const menuItems = useMenuItems(getContent);
+  const adminMenuItems = useAdminMenuItems(getContent);
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50";
@@ -52,13 +55,13 @@ export function AppSidebar() {
     >
         <SidebarHeader className="p-4">
           <Link to="/" className="font-playfair text-lg font-bold flex items-center gap-2">
-            {(!open && !isMobile) ? "مصر" : "منصة مصر"}
+            {(!open && !isMobile) ? getContent("app_name", "مصر") : getContent("app_platform_name", "منصة مصر")}
           </Link>
         </SidebarHeader>
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>التنقل الرئيسي</SidebarGroupLabel>
+            <SidebarGroupLabel>{getContent("sidebar_main_navigation", "التنقل الرئيسي")}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => {
@@ -81,14 +84,14 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel>الوصول المبكر</SidebarGroupLabel>
+            <SidebarGroupLabel>{getContent("sidebar_early_access", "الوصول المبكر")}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/early-access" className={getNavClass}>
                       <Users className="h-4 w-4" />
-                      {(open || isMobile) && <span>انضم الآن</span>}
+                      {(open || isMobile) && <span>{getContent("sidebar_join_now", "انضم الآن")}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -98,7 +101,7 @@ export function AppSidebar() {
 
           {isAdmin && (
             <SidebarGroup>
-              <SidebarGroupLabel>لوحة التحكم</SidebarGroupLabel>
+              <SidebarGroupLabel>{getContent("sidebar_admin_panel", "لوحة التحكم")}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {adminMenuItems.map((item) => (
@@ -126,13 +129,13 @@ export function AppSidebar() {
               className="w-full justify-start"
             >
               <LogOut className="h-4 w-4" />
-              {(open || isMobile) && <span>تسجيل الخروج</span>}
+              {(open || isMobile) && <span>{getContent("sidebar_logout", "تسجيل الخروج")}</span>}
             </Button>
           ) : (
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
               <Link to="/auth">
                 <LogIn className="h-4 w-4" />
-                {(open || isMobile) && <span>تسجيل الدخول</span>}
+                {(open || isMobile) && <span>{getContent("sidebar_login", "تسجيل الدخول")}</span>}
               </Link>
             </Button>
           )}

@@ -1,8 +1,11 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { useAppContent } from "@/hooks/useAppContent";
 
 const MainLayout = () => {
+  const { getContent } = useAppContent();
+  
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen bg-background text-foreground flex w-full">
@@ -20,7 +23,7 @@ const MainLayout = () => {
           >
             <SidebarTrigger />
             <div className="ml-4 font-playfair text-lg font-bold">
-              Crypto-MSR
+              {getContent("app_name", "Crypto-MSR")}
             </div>
           </header>
           <main className="flex-1">
