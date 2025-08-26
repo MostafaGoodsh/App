@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       buffer: 'buffer',
+      crypto: 'crypto-browserify',
+      stream: 'stream-browserify',
+      util: 'util'
     },
   },
   define: {
@@ -25,8 +28,8 @@ export default defineConfig(({ mode }) => ({
     'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer'],
-    exclude: ['@solana/web3.js', '@solana/spl-token']
+    include: ['buffer', 'eventemitter3'],
+    exclude: ['@solana/web3.js', '@solana/spl-token', '@walletconnect/ethereum-provider']
   },
   build: {
     rollupOptions: {
