@@ -68,12 +68,7 @@ const Index = () => {
                 
                 <div className="mb-6">
                   <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">
-                    {getContent('hero_middle_title', 'Origin & Fate').split(' & ').map((part, index) => (
-                      <span key={index}>
-                        {part}
-                        {index === 0 && <><br />&<br /></>}
-                      </span>
-                    ))}
+                    {getContent('hero_middle_title', 'Origin & Fate').replace(' & ', ' ')}
                   </h2>
                   <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
                     {getContent('hero_middle_subtitle', 'الأصل و المصير')}

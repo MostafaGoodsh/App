@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppContent } from "@/hooks/useAppContent";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { 
   Zap, 
   Clock, 
@@ -17,7 +18,8 @@ import {
   Shield, 
   CheckCircle,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  ExternalLink
 } from "lucide-react";
 
 interface MsRaCurrencyCardProps {
@@ -27,6 +29,7 @@ interface MsRaCurrencyCardProps {
 export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { getContentItem } = useAppContent();
   const [solanaAddress, setSolanaAddress] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
@@ -244,7 +247,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   if (!isVerified) {
     return (
-      <Card className="relative overflow-hidden">
+      <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" onClick={() => navigate('/identity')}>
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-10"
           style={{ backgroundImage: `url(${cardBackground})` }}
@@ -253,6 +256,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
             {cardTitle}
+            <ExternalLink className="w-4 h-4 ml-auto text-muted-foreground" />
           </CardTitle>
           <CardDescription>
             عملة رقمية جديدة مع نظام تعدين مبتكر
@@ -274,7 +278,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   }
 
   return (
-    <Card className="relative overflow-hidden">
+    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" onClick={() => navigate('/mining')}>
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${cardBackground})` }}
@@ -287,11 +291,37 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             <CheckCircle className="w-4 h-4 mr-1" />
             مفعل
           </Badge>
+          <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
         <CardDescription>
           عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة
         </CardDescription>
       </CardHeader>
+      
+      {/* Quick Stats Preview */}
+      <div className="relative z-10 px-6 pb-2">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="bg-card/50 p-3 rounded-lg border border-border/50">
+            <div className="flex items-center gap-2 text-primary mb-1">
+              <TrendingUp className="w-4 h-4" />
+              <span className="font-medium">الرصيد</span>
+            </div>
+            <div className="text-lg font-bold">
+              {msRaBalance.toFixed(1)} MS-RA
+            </div>
+          </div>
+          <div className="bg-card/50 p-3 rounded-lg border border-border/50">
+            <div className="flex items-center gap-2 text-primary mb-1">
+              <Clock className="w-4 h-4" />
+              <span className="font-medium">التعدين التالي</span>
+            </div>
+            <div className="text-sm">
+              {getTimeUntilNextMining()}
+            </div>
+            <Progress value={miningProgress} className="h-1 mt-2" />
+          </div>
+        </div>
+      </div>
       <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (
