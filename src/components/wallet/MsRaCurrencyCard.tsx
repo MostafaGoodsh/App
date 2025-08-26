@@ -299,26 +299,29 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       </CardHeader>
       
       {/* Quick Stats Preview */}
-      <div className="relative z-10 px-6 pb-2">
+      <div className="relative z-10 px-6 pb-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="bg-card/50 p-3 rounded-lg border border-border/50">
-            <div className="flex items-center gap-2 text-primary mb-1">
+          <div className="bg-primary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-2 text-primary mb-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="font-medium">الرصيد</span>
+              <span className="font-medium">الرصيد الحالي</span>
             </div>
-            <div className="text-lg font-bold">
-              {msRaBalance.toFixed(1)} MS-RA
+            <div className="text-xl font-bold text-primary">
+              {msRaBalance > 0 ? msRaBalance.toFixed(1) : "0.0"} MS-RA
             </div>
           </div>
-          <div className="bg-card/50 p-3 rounded-lg border border-border/50">
-            <div className="flex items-center gap-2 text-primary mb-1">
+          <div className="bg-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-secondary/20">
+            <div className="flex items-center gap-2 text-secondary-foreground mb-2">
               <Clock className="w-4 h-4" />
               <span className="font-medium">التعدين التالي</span>
             </div>
-            <div className="text-sm">
+            <div className="text-sm font-medium text-secondary-foreground mb-2">
               {getTimeUntilNextMining()}
             </div>
-            <Progress value={miningProgress} className="h-1 mt-2" />
+            <Progress 
+              value={miningProgress} 
+              className="h-2 bg-secondary/20" 
+            />
           </div>
         </div>
       </div>
