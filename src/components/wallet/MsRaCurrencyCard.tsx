@@ -298,33 +298,37 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         </CardDescription>
       </CardHeader>
       
-      {/* Quick Stats Preview */}
-      <div className="relative z-10 px-6 pb-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="bg-primary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
-            <div className="flex items-center gap-2 text-primary mb-2">
-              <TrendingUp className="w-4 h-4" />
-              <span className="font-medium">الرصيد الحالي</span>
+      {/* Mining Progress Preview */}
+      {isRegistered && (
+        <div className="relative z-10 px-6 pb-4">
+          <div className="bg-card/80 backdrop-blur-sm p-4 rounded-lg border border-border">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-primary" />
+                <span className="font-medium">تقدم التعدين</span>
+              </div>
+              <Badge variant={miningProgress >= 100 ? "default" : "secondary"} className="text-xs">
+                {miningProgress >= 100 ? "جاهز" : "في الانتظار"}
+              </Badge>
             </div>
-            <div className="text-xl font-bold text-primary">
-              {msRaBalance > 0 ? msRaBalance.toFixed(1) : "0.0"} MS-RA
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">التقدم: {miningProgress.toFixed(0)}%</span>
+                <span className="text-muted-foreground">{getTimeUntilNextMining()}</span>
+              </div>
+              <Progress value={miningProgress} className="h-2" />
             </div>
-          </div>
-          <div className="bg-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-secondary/20">
-            <div className="flex items-center gap-2 text-secondary-foreground mb-2">
-              <Clock className="w-4 h-4" />
-              <span className="font-medium">التعدين التالي</span>
-            </div>
-            <div className="text-sm font-medium text-secondary-foreground mb-2">
-              {getTimeUntilNextMining()}
-            </div>
-            <Progress 
-              value={miningProgress} 
-              className="h-2 bg-secondary/20" 
-            />
+            
+            {msRaBalance > 0 && (
+              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
+                <TrendingUp className="w-4 h-4 text-primary" />
+                <span className="text-sm text-primary font-medium">{msRaBalance.toFixed(1)} MS-RA</span>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
       <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (
