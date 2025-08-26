@@ -92,6 +92,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   const loadUserMiningData = async () => {
     try {
+      console.log('Loading mining data for user:', user?.id);
+      
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -101,14 +103,30 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       if (profile?.solana_address) {
         setSolanaAddress(profile.solana_address);
         setIsRegistered(true);
+        console.log('User registered with Solana address:', profile.solana_address);
       }
 
       // Load mining data (simulate with localStorage for now)
       const savedMiningData = localStorage.getItem(`msra_mining_${user?.id}`);
+      console.log('Saved mining data:', savedMiningData);
+      
       if (savedMiningData) {
         const data = JSON.parse(savedMiningData);
+        console.log('Parsed mining data:', data);
         setLastMiningTime(new Date(data.lastMiningTime));
         setMsRaBalance(data.balance || 0);
+        console.log('Set balance to:', data.balance || 0);
+      } else {
+        console.log('No saved mining data found, initializing...');
+        // Initialize with some default data for testing
+        const initialData = {
+          lastMiningTime: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(), // 23 hours ago
+          balance: 15.5
+        };
+        localStorage.setItem(`msra_mining_${user?.id}`, JSON.stringify(initialData));
+        setLastMiningTime(new Date(initialData.lastMiningTime));
+        setMsRaBalance(initialData.balance);
+        console.log('Initialized mining data:', initialData);
       }
     } catch (error) {
       console.error('Error loading mining data:', error);
