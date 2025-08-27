@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pencil, Plus, Image, FileText, Upload, X, Zap } from "lucide-react";
+import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer } from "lucide-react";
 
 interface AppContent {
   id: string;
@@ -394,7 +394,7 @@ export default function ContentManagement() {
                    content.content_type === 'msra_mining_card' ?
                    <Zap className="h-4 w-4" /> :
                    content.content_type === 'hero_button' ?
-                   <Button className="h-4 w-4" /> :
+                   <MousePointer className="h-4 w-4" /> :
                    <Image className="h-4 w-4" />
                  }
                 {content.content_key}
