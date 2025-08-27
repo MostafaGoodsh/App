@@ -72,7 +72,7 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4">
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
               </Button>
