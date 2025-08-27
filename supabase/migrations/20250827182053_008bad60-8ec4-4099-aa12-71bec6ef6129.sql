@@ -1,0 +1,44 @@
+-- Fix functions with mutable search paths by adding security definer and proper search path
+CREATE OR REPLACE FUNCTION public.update_likes_count()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.learning_content 
+    SET likes_count = likes_count + 1 
+    WHERE id = NEW.content_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.learning_content 
+    SET likes_count = likes_count - 1 
+    WHERE id = OLD.content_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.update_comments_count()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.learning_content 
+    SET comments_count = comments_count + 1 
+    WHERE id = NEW.content_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.learning_content 
+    SET comments_count = comments_count - 1 
+    WHERE id = OLD.content_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$function$;
