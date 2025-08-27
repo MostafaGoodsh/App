@@ -14,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSignIn = async (e: React.FormEvent) => {
@@ -44,7 +45,7 @@ const Auth = () => {
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: { full_name: fullName }
+          data: { full_name: fullName, phone: phone }
         }
       });
       if (error) throw error;
@@ -56,6 +57,7 @@ const Auth = () => {
         await (supabase as any).from('profiles').upsert({
           user_id: data.session.user.id,
           full_name: fullName || null,
+          phone: phone || null,
           email,
         });
       }
@@ -102,6 +104,10 @@ const Auth = () => {
             <div className="space-y-2">
               <Label htmlFor="fullName">الاسم الكامل</Label>
               <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">رقم الهاتف</Label>
+              <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+20 XXX XXX XXXX" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>

@@ -247,6 +247,7 @@ export default function ContentManagement() {
                    <SelectItem value="text">نص</SelectItem>
                    <SelectItem value="image">صورة</SelectItem>
                    <SelectItem value="msra_mining_card">كارت التعدين Ms-Ra</SelectItem>
+                   <SelectItem value="hero_button">أزرار الصفحة الرئيسية</SelectItem>
                  </SelectContent>
                 </Select>
               </div>
@@ -307,9 +308,28 @@ export default function ContentManagement() {
                     <p className="text-xs text-muted-foreground">
                       {formData.text_content || "عنوان الكارت"}
                     </p>
-                  </div>
-                </div>
-              ) : (
+                   </div>
+                 </div>
+               ) : formData.content_type === 'hero_button' ? (
+                 <div className="space-y-4">
+                   <div>
+                     <Label htmlFor="button_text">نص الزر</Label>
+                     <Input
+                       id="button_text"
+                       value={formData.text_content}
+                       onChange={(e) => setFormData({...formData, text_content: e.target.value})}
+                       placeholder="مثال: انضم الآن | Join Now"
+                     />
+                   </div>
+                   
+                   <div className="text-center p-4 bg-primary/10 rounded-lg">
+                     <p className="text-sm font-medium">معاينة الزر</p>
+                     <div className="mt-2 px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
+                       {formData.text_content || "نص الزر"}
+                     </div>
+                   </div>
+                 </div>
+               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="image_file">رفع صورة</Label>
                   <Input
@@ -369,12 +389,14 @@ export default function ContentManagement() {
           <Card key={content.id}>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                {content.content_type === 'text' ? 
-                  <FileText className="h-4 w-4" /> : 
-                  content.content_type === 'msra_mining_card' ?
-                  <Zap className="h-4 w-4" /> :
-                  <Image className="h-4 w-4" />
-                }
+                 {content.content_type === 'text' ? 
+                   <FileText className="h-4 w-4" /> : 
+                   content.content_type === 'msra_mining_card' ?
+                   <Zap className="h-4 w-4" /> :
+                   content.content_type === 'hero_button' ?
+                   <Button className="h-4 w-4" /> :
+                   <Image className="h-4 w-4" />
+                 }
                 {content.content_key}
               </CardTitle>
               <div className="flex gap-2">
@@ -401,10 +423,16 @@ export default function ContentManagement() {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {content.alt_text || "يعرض نظام التعدين والعناوين المسجلة"}
-                    </p>
-                  </div>
-                </div>
-              ) : (
+                     </p>
+                   </div>
+                 </div>
+               ) : content.content_type === 'hero_button' ? (
+                 <div className="text-center p-4 bg-primary/10 rounded-lg">
+                   <div className="px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
+                     {content.text_content || "نص الزر"}
+                   </div>
+                 </div>
+               ) : (
                 <div>
                   {content.image_url && (
                     <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />

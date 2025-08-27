@@ -73,8 +73,17 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="w-full sm:w-auto min-w-[200px]">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
+              </Button>
+              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
+                {getContent('hero_cta_2', 'قريباً | Coming Soon')}
+              </Button>
+              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
+                {getContent('hero_cta_3', 'قريباً | Coming Soon')}
+              </Button>
+              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
+                {getContent('hero_cta_4', 'قريباً | Coming Soon')}
               </Button>
             </div>
           </div>
