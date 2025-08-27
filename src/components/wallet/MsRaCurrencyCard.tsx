@@ -40,24 +40,16 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   // Get custom content from admin panel
   const msRaContent = getContentItem('msra_mining_card_main');
-  const cardTitle = msRaContent?.text_content || 'العملة القادمة - Ms-Ra';
+  const cardTitle = msRaContent?.text_content || 'Ms-Ra Mining | تعدين مس رع';
   const cardBackground = msRaContent?.image_url || '/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png';
 
   // Mining timer effect (24-hour cycle)
   useEffect(() => {
-    if (!isVerified || !isRegistered) return;
+    if (!isVerified || !isRegistered || !lastMiningTime) return;
 
     const checkMiningStatus = () => {
       const now = new Date();
-      const lastMining = lastMiningTime;
-      
-      if (!lastMining) {
-        // First time mining
-        setMiningProgress(0);
-        return;
-      }
-
-      const timeDiff = now.getTime() - lastMining.getTime();
+      const timeDiff = now.getTime() - lastMiningTime.getTime();
       const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
       
       if (timeDiff >= twentyFourHours) {
@@ -65,25 +57,18 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         setMiningProgress(100);
       } else {
         // Calculate progress
-        const progress = (timeDiff / twentyFourHours) * 100;
+        const progress = Math.min((timeDiff / twentyFourHours) * 100, 100);
         setMiningProgress(progress);
       }
     };
 
     checkMiningStatus();
-    const interval = setInterval(checkMiningStatus, 60000); // Check every minute
+    const interval = setInterval(checkMiningStatus, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
   }, [isVerified, isRegistered, lastMiningTime]);
 
-  // Load user's Solana address and mining data
-  useEffect(() => {
-    if (user && isVerified) {
-      loadUserMiningData();
-    }
-  }, [user, isVerified]);
-
-  // Force refresh when component mounts
+  // Load user's mining data (combined effect)
   useEffect(() => {
     if (user) {
       loadUserMiningData();
@@ -271,24 +256,30 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           style={{ backgroundImage: `url(${cardBackground})` }}
         />
         <CardHeader className="relative z-10">
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
-            {cardTitle}
-            <ExternalLink className="w-4 h-4 ml-auto text-muted-foreground" />
+          <CardTitle className="flex items-center gap-2 text-center w-full flex-col mb-2">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary" />
+              {cardTitle}
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div className="text-lg text-primary font-normal">
+              Origin & Fate | الأصل و المصير
+            </div>
           </CardTitle>
-          <CardDescription>
-            عملة رقمية جديدة مع نظام تعدين مبتكر
+          <CardDescription className="text-center">
+            <div className="mb-2">عملة رقمية جديدة مع نظام تعدين مبتكر</div>
+            <div className="text-sm italic text-muted-foreground/80">From Egypt With Love</div>
           </CardDescription>
         </CardHeader>
         <CardContent className="relative z-10 text-center py-8">
           <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">مطلوب تحقيق الهوية</h3>
+          <h3 className="text-lg font-semibold mb-2">Identity Verification Required | مطلوب تحقيق الهوية</h3>
           <p className="text-muted-foreground mb-4">
             يجب إكمال عملية تحقيق الهوية للوصول إلى ميزة تعدين Ms-Ra
           </p>
           <Badge variant="outline" className="px-4 py-2">
             <AlertCircle className="w-4 h-4 mr-2" />
-            في انتظار التحقق
+            Pending Verification | في انتظار التحقق
           </Badge>
         </CardContent>
       </Card>
@@ -301,52 +292,45 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${cardBackground})` }}
       />
-      <CardHeader className="relative z-10">
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-primary" />
-          {cardTitle}
-          <Badge variant="secondary" className="ml-auto">
-            <CheckCircle className="w-4 h-4 mr-1" />
-            مفعل
-          </Badge>
-          <ExternalLink className="w-4 h-4 text-muted-foreground" />
-        </CardTitle>
-        <CardDescription>
-          عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة
-        </CardDescription>
-      </CardHeader>
-      
-      {/* Mining Progress Preview */}
-      {isRegistered && (
-        <div className="relative z-10 px-6 pb-4">
-          <div className="bg-card/80 backdrop-blur-sm p-4 rounded-lg border border-border">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="font-medium">تقدم التعدين</span>
-              </div>
-              <Badge variant={miningProgress >= 100 ? "default" : "secondary"} className="text-xs">
-                {miningProgress >= 100 ? "جاهز" : "في الانتظار"}
-              </Badge>
+        <CardHeader className="relative z-10">
+          <CardTitle className="flex items-center gap-2 text-center w-full flex-col mb-2">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary" />
+              {cardTitle}
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
             </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">التقدم: {miningProgress.toFixed(0)}%</span>
-                <span className="text-muted-foreground">{getTimeUntilNextMining()}</span>
+            <div className="text-lg text-primary font-normal">
+              Origin & Fate | الأصل و المصير
+            </div>
+          </CardTitle>
+          <CardDescription className="text-center">
+            <div className="mb-2">عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة</div>
+            <div className="text-sm italic text-muted-foreground/80">From Egypt With Love</div>
+          </CardDescription>
+        </CardHeader>
+        
+        {/* Mining Stats Always Visible */}
+        <div className="relative z-10 px-6 pb-4">
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Balance | الرصيد</div>
+                <div className="text-lg font-bold text-primary">{msRaBalance.toFixed(1)} MS-RA</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground mb-1">Progress | التقدم</div>
+                <div className="text-lg font-bold text-secondary">{miningProgress.toFixed(0)}%</div>
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="flex justify-between text-xs mb-1">
+                <span>Next Mining | التعدين التالي</span>
+                <span className="text-primary">{getTimeUntilNextMining()}</span>
               </div>
               <Progress value={miningProgress} className="h-2" />
             </div>
-            
-            {msRaBalance > 0 && (
-              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <span className="text-sm text-primary font-medium">{msRaBalance.toFixed(1)} MS-RA</span>
-              </div>
-            )}
           </div>
         </div>
-      )}
       <CardContent className="relative z-10 space-y-6">
         {/* Solana Address Registration */}
         {!isRegistered ? (

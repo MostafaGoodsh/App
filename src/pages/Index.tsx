@@ -66,18 +66,6 @@ const Index = () => {
                   {getContent('hero_subtitle', 'محفظة العملات الرقمية الآمنة')}
                 </p>
                 
-                <div className="mb-6">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-2 leading-tight">
-                    {getContent('hero_middle_title', 'Origin & Fate').replace(' & ', ' ')}
-                  </h2>
-                  <p className="text-xl md:text-2xl lg:text-3xl text-white/80">
-                    {getContent('hero_middle_subtitle', 'الأصل و المصير')}
-                  </p>
-                </div>
-
-                <p className="text-lg md:text-xl text-white/70 mb-8 italic font-light">
-                  {getContent('hero_tagline', 'From Egypt With Love')}
-                </p>
               </div>
             </div>
 
