@@ -351,6 +351,39 @@ export type Database = {
           },
         ]
       }
+      mfa_sessions: {
+        Row: {
+          challenge_code: string
+          created_at: string
+          expires_at: string
+          id: string
+          session_token: string
+          user_id: string
+          verified: boolean | null
+          wallet_id: string | null
+        }
+        Insert: {
+          challenge_code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token: string
+          user_id: string
+          verified?: boolean | null
+          wallet_id?: string | null
+        }
+        Update: {
+          challenge_code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_token?: string
+          user_id?: string
+          verified?: boolean | null
+          wallet_id?: string | null
+        }
+        Relationships: []
+      }
       mining_history: {
         Row: {
           account_strength: number
@@ -705,6 +738,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trusted_devices: {
+        Row: {
+          created_at: string
+          device_fingerprint: string
+          device_name: string | null
+          first_seen: string
+          id: string
+          is_trusted: boolean | null
+          last_used: string
+          trust_expires_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint: string
+          device_name?: string | null
+          first_seen?: string
+          id?: string
+          is_trusted?: boolean | null
+          last_used?: string
+          trust_expires_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string
+          device_name?: string | null
+          first_seen?: string
+          id?: string
+          is_trusted?: boolean | null
+          last_used?: string
+          trust_expires_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_mining_profiles: {
         Row: {
           account_strength: number
@@ -814,6 +883,51 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_access_audit: {
+        Row: {
+          access_type: string
+          accessed_at: string
+          block_reason: string | null
+          blocked: boolean | null
+          device_fingerprint: string | null
+          id: string
+          ip_address: unknown | null
+          mfa_verified: boolean | null
+          risk_score: number | null
+          user_agent: string | null
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          access_type: string
+          accessed_at?: string
+          block_reason?: string | null
+          blocked?: boolean | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          mfa_verified?: boolean | null
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          access_type?: string
+          accessed_at?: string
+          block_reason?: string | null
+          blocked?: boolean | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          mfa_verified?: boolean | null
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: []
+      }
       wallet_security: {
         Row: {
           access_count: number | null
@@ -854,6 +968,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallet_security_settings: {
+        Row: {
+          auto_lock_minutes: number | null
+          created_at: string
+          id: string
+          ip_whitelist: string[] | null
+          max_daily_access: number | null
+          mfa_required: boolean | null
+          require_device_verification: boolean | null
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          auto_lock_minutes?: number | null
+          created_at?: string
+          id?: string
+          ip_whitelist?: string[] | null
+          max_daily_access?: number | null
+          mfa_required?: boolean | null
+          require_device_verification?: boolean | null
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          auto_lock_minutes?: number | null
+          created_at?: string
+          id?: string
+          ip_whitelist?: string[] | null
+          max_daily_access?: number | null
+          mfa_required?: boolean | null
+          require_device_verification?: boolean | null
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: []
       }
       wallet_tokens: {
         Row: {
@@ -969,6 +1119,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      create_wallet_mfa_session: {
+        Args: { p_wallet_id: string }
+        Returns: Json
+      }
       get_identity_verification_admin_view: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1050,6 +1204,19 @@ export type Database = {
         }
         Returns: Json
       }
+      register_trusted_device: {
+        Args: { p_device_fingerprint: string; p_device_name?: string }
+        Returns: Json
+      }
+      secure_wallet_access: {
+        Args: {
+          p_access_type: string
+          p_device_fingerprint?: string
+          p_mfa_token?: string
+          p_wallet_id: string
+        }
+        Returns: Json
+      }
       update_kyc_status: {
         Args: {
           admin_notes?: string
@@ -1060,6 +1227,15 @@ export type Database = {
       }
       update_mining_progress: {
         Args: { p_user_id: string }
+        Returns: Json
+      }
+      validate_wallet_access: {
+        Args: {
+          p_access_type: string
+          p_device_fingerprint?: string
+          p_ip_address?: unknown
+          p_wallet_id: string
+        }
         Returns: Json
       }
     }
