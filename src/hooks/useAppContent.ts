@@ -42,19 +42,31 @@ export const useAppContent = () => {
   useEffect(() => {
     fetchContent();
     
-    // Listen for real-time updates
+    // Listen for real-time updates from Supabase
     const subscription = supabase
       .channel('app_content_changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'app_content' },
         () => {
+          console.log('Real-time content update detected');
           fetchContent();
         }
       )
       .subscribe();
 
+    // Listen for custom events from content management
+    const handleCustomUpdate = () => {
+      console.log('Custom content update event received');
+      fetchContent();
+    };
+
+    window.addEventListener('app-content-updated', handleCustomUpdate);
+    window.addEventListener('app-content-refresh', handleCustomUpdate);
+
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('app-content-updated', handleCustomUpdate);
+      window.removeEventListener('app-content-refresh', handleCustomUpdate);
     };
   }, []);
 
