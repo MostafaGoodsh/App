@@ -255,7 +255,7 @@ export default function ContentManagement() {
         <div className="flex gap-2">
           <Button 
             variant="outline" 
-            onClick={() => fetchContents()}
+            onClick={fetchContents}
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -263,10 +263,7 @@ export default function ContentManagement() {
           </Button>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button onClick={() => {
-                resetForm();
-                setShowDialog(true);
-              }}>
+              <Button onClick={resetForm}>
                 <Plus className="h-4 w-4 mr-2" />
                 إضافة محتوى جديد
               </Button>
@@ -449,10 +446,7 @@ export default function ContentManagement() {
             <p className="text-sm text-muted-foreground mb-4">
               ابدأ بإضافة محتوى جديد لتطبيقك
             </p>
-            <Button onClick={() => {
-              resetForm();
-              setShowDialog(true);
-            }}>
+            <Button onClick={() => setShowDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               إضافة المحتوى الأول
             </Button>
