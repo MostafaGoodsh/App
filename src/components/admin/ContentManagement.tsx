@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer } from "lucide-react";
+import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer, RefreshCw, Eye, EyeOff } from "lucide-react";
 
 interface AppContent {
   id: string;
@@ -48,13 +48,16 @@ export default function ContentManagement() {
   }, []);
 
   const fetchContents = async () => {
+    setLoading(true);
     try {
+      console.log('Fetching content management data...');
       const { data, error } = await supabase
         .from('app_content')
         .select('*')
         .order('position_order', { ascending: true });
 
       if (error) throw error;
+      console.log('Content management data loaded:', data?.length || 0, 'items');
       setContents(data || []);
     } catch (error) {
       console.error('Error fetching contents:', error);
@@ -66,6 +69,16 @@ export default function ContentManagement() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchContents();
+    // Trigger refresh on frontend
+    window.dispatchEvent(new CustomEvent('app-content-updated'));
+    toast({
+      title: "تم التحديث",
+      description: "تم تحديث قائمة المحتوى بنجاح"
+    });
   };
 
   const uploadImage = async (file: File): Promise<string> => {
@@ -135,6 +148,11 @@ export default function ContentManagement() {
       
       // Force refresh of app content
       window.dispatchEvent(new CustomEvent('app-content-updated'));
+      
+      // Add slight delay to ensure the event is processed
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Error saving content:', error);
       toast({
@@ -189,12 +207,41 @@ export default function ContentManagement() {
         description: "تم حذف المحتوى بنجاح"
       });
       
-      fetchContents();
+      await fetchContents();
+      // Force refresh of app content
+      window.dispatchEvent(new CustomEvent('app-content-updated'));
     } catch (error) {
       console.error('Error deleting content:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ في حذف المحتوى",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const toggleContentStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('app_content')
+        .update({ is_active: !currentStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "تم التحديث",
+        description: `تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} المحتوى`
+      });
+      
+      await fetchContents();
+      // Force refresh of app content
+      window.dispatchEvent(new CustomEvent('app-content-updated'));
+    } catch (error) {
+      console.error('Error toggling content status:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تحديث حالة المحتوى",
         variant: "destructive"
       });
     }
@@ -208,24 +255,29 @@ export default function ContentManagement() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">إدارة محتوى التطبيق</h1>
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              إضافة محتوى جديد
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {editingContent ? 'تعديل المحتوى' : 'إضافة محتوى جديد'}
-              </DialogTitle>
-              <DialogDescription>
-                {editingContent ? 'تعديل محتوى موجود في التطبيق' : 'إضافة محتوى جديد للتطبيق'}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            تحديث
+          </Button>
+          <Dialog open={showDialog} onOpenChange={setShowDialog}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                إضافة محتوى جديد
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingContent ? 'تعديل المحتوى' : 'إضافة محتوى جديد'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingContent ? 'تعديل محتوى موجود في التطبيق' : 'إضافة محتوى جديد للتطبيق'}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="content_key">مفتاح المحتوى</Label>
                 <Input
@@ -376,13 +428,24 @@ export default function ContentManagement() {
                 <Label htmlFor="is_active">نشط</Label>
               </div>
 
-              <Button type="submit" className="w-full">
-                {editingContent ? 'تحديث' : 'إنشاء'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <Button type="submit" className="w-full">
+                  {editingContent ? 'تحديث' : 'إنشاء'}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
+
+      {contents.length === 0 && !loading && (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground mb-4">لا توجد محتويات حالياً</p>
+          <Button onClick={() => setShowDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            إضافة أول محتوى
+          </Button>
+        </div>
+      )}
 
       <div className="grid gap-4">
         {contents.map((content) => (
@@ -400,6 +463,14 @@ export default function ContentManagement() {
                 {content.content_key}
               </CardTitle>
               <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => toggleContentStatus(content.id, content.is_active)}
+                  title={content.is_active ? 'إلغاء تفعيل' : 'تفعيل'}
+                >
+                  {content.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => handleEdit(content)}>
                   <Pencil className="h-4 w-4" />
                 </Button>

@@ -17,7 +17,9 @@ export const useAppContent = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchContent = async () => {
+    setLoading(true);
     try {
+      console.log('Fetching app content...');
       const { data, error } = await supabase
         .from('app_content')
         .select('*')
@@ -31,6 +33,7 @@ export const useAppContent = () => {
         return acc;
       }, {} as Record<string, AppContent>);
 
+      console.log('Content loaded:', Object.keys(contentMap));
       setContent(contentMap);
     } catch (error) {
       console.error('Error fetching app content:', error);
@@ -47,14 +50,24 @@ export const useAppContent = () => {
       .channel('app_content_changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'app_content' },
-        () => {
+        (payload) => {
+          console.log('Content changed:', payload);
           fetchContent();
         }
       )
       .subscribe();
 
+    // Listen for custom events
+    const handleContentUpdate = () => {
+      console.log('Custom content update event received');
+      fetchContent();
+    };
+
+    window.addEventListener('app-content-updated', handleContentUpdate);
+
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('app-content-updated', handleContentUpdate);
     };
   }, []);
 
