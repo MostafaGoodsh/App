@@ -102,4 +102,28 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Arabic text alignment and direction */
+  .arabic-text {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .arabic-content {
+    direction: rtl;
+  }
+  
+  .arabic-content * {
+    text-align: right;
+  }
+  
+  /* Honor personalities grid */
+  .personality-card {
+    transition: all 0.3s ease;
+  }
+  
+  .personality-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
 }
