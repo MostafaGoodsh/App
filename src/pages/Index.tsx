@@ -77,13 +77,16 @@ const Index = () => {
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
               </Button>
               <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_2', 'قريباً | Coming Soon')}
+                {getContent('hero_cta_2', 'آخر التحديثات | Updates')}
               </Button>
               <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_3', 'قريباً | Coming Soon')}
+                {getContent('hero_cta_3', 'MSR stable coin')}
               </Button>
               <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_4', 'قريباً | Coming Soon')}
+                {getContent('hero_cta_4', 'MSR-RWA real world assets')}
+              </Button>
+              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
+                {getContent('hero_cta_5', 'Call out')}
               </Button>
             </div>
           </div>
@@ -115,7 +118,7 @@ const Index = () => {
                 <img 
                   src={getContent(card.imageKey, '/lovable-uploads/placeholder.png')} 
                   alt={getAltText(card.imageKey, 'صورة البطاقة')} 
-                  className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-all duration-300" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
                   loading="lazy" 
                 />
                 <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
