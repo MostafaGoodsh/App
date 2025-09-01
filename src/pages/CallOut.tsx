@@ -90,12 +90,13 @@ const CallOut = () => {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Megaphone className="w-8 h-8 text-primary" />
               <h1 className="text-3xl md:text-4xl font-bold arabic-text">
-                قائمة الاستدعاء الشرفية
+                نداء التقدير والإلهام
               </h1>
             </div>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto arabic-text">
-              نكرم هنا الشخصيات العامة المصرية والعربية والعالمية التي تمثل القيم الأخلاقية والعقائدية النبيلة 
-              والتي نتطلع إلى محاكاة مسيرتها المضيئة في التقدم والإبداع والأخلاق الحميدة
+              منصة لتكريم وتقدير الشخصيات الملهمة والمؤثرة في مجتمعنا العربي والعالمي، 
+              الذين أضاءوا طريق التقدم والتميز في مختلف المجالات، ونسعى لنشر إنجازاتهم 
+              وقصص نجاحهم لتكون مصدر إلهام للأجيال القادمة
             </p>
           </div>
 
