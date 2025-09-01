@@ -121,14 +121,19 @@ const RWA = () => {
                 </div>
               </div>
 
-              <div className="text-center pt-6">
-                <Button disabled className="mr-2">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  استكشف الأصول (قريباً)
-                </Button>
-                <Button variant="outline" disabled>
-                  ابدأ الاستثمار (قريباً)
-                </Button>
+              <div className="text-center pt-6 space-y-4">
+                <p className="text-muted-foreground">
+                  {getContent('rwa_status', 'المنصة قيد التطوير ويتم العمل على إطلاقها قريباً')}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                  <Button disabled className="mr-2">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    استكشف الأصول (قريباً)
+                  </Button>
+                  <Button variant="outline" disabled>
+                    ابدأ الاستثمار (قريباً)
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

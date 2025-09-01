@@ -296,19 +296,31 @@ export default function ContentManagement() {
                     <SelectValue />
                   </SelectTrigger>
                  <SelectContent>
-                   <SelectItem value="text">نص</SelectItem>
+                   <SelectItem value="text">نص عام</SelectItem>
                    <SelectItem value="image">صورة</SelectItem>
-                   <SelectItem value="msra_mining_card">كارت التعدين Ms-Ra</SelectItem>
+                   <SelectItem value="hero_content">محتوى الصفحة الرئيسية</SelectItem>
                    <SelectItem value="hero_button">أزرار الصفحة الرئيسية</SelectItem>
+                   <SelectItem value="msra_mining_card">كارت التعدين Ms-Ra</SelectItem>
+                   <SelectItem value="wallet_card">كارت المحفظة</SelectItem>
+                   <SelectItem value="learning_card">كارت التعلم والمعرفة</SelectItem>
                    <SelectItem value="updates_content">محتوى صفحة التحديثات</SelectItem>
                    <SelectItem value="stable_coin_content">محتوى صفحة العملة المستقرة</SelectItem>
                    <SelectItem value="rwa_content">محتوى صفحة الأصول الحقيقية</SelectItem>
                    <SelectItem value="call_out_content">محتوى صفحة المجتمع</SelectItem>
+                   <SelectItem value="sidebar_content">محتوى الشريط الجانبي</SelectItem>
+                   <SelectItem value="admin_content">محتوى لوحة الإدارة</SelectItem>
                  </SelectContent>
                 </Select>
               </div>
 
-              {formData.content_type === 'text' ? (
+              {(formData.content_type === 'text' || 
+                formData.content_type === 'hero_content' || 
+                formData.content_type === 'updates_content' || 
+                formData.content_type === 'stable_coin_content' || 
+                formData.content_type === 'rwa_content' || 
+                formData.content_type === 'call_out_content' || 
+                formData.content_type === 'sidebar_content' || 
+                formData.content_type === 'admin_content') ? (
                 <div>
                   <Label htmlFor="text_content">المحتوى النصي</Label>
                   <Textarea
@@ -366,10 +378,12 @@ export default function ContentManagement() {
                     </p>
                    </div>
                  </div>
-               ) : formData.content_type === 'hero_button' ? (
+                ) : (formData.content_type === 'hero_button' || 
+                     formData.content_type === 'wallet_card' || 
+                     formData.content_type === 'learning_card') ? (
                  <div className="space-y-4">
                    <div>
-                     <Label htmlFor="button_text">نص الزر</Label>
+                     <Label htmlFor="button_text">نص الزر/الكارت</Label>
                      <Input
                        id="button_text"
                        value={formData.text_content}
@@ -378,10 +392,40 @@ export default function ContentManagement() {
                      />
                    </div>
                    
+                   {(formData.content_type === 'wallet_card' || formData.content_type === 'learning_card') && (
+                     <div className="space-y-2">
+                       <Label htmlFor="card_image">صورة الكارت</Label>
+                       <Input
+                         id="card_image"
+                         type="file"
+                         accept="image/*"
+                         onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                       />
+                       
+                       {formData.image_url && (
+                         <div className="relative">
+                           <img src={formData.image_url} alt="صورة الكارت" className="w-full h-32 object-cover rounded" />
+                         </div>
+                       )}
+                       
+                       <div>
+                         <Label htmlFor="card_alt_text">وصف صورة الكارت</Label>
+                         <Input
+                           id="card_alt_text"
+                           value={formData.alt_text}
+                           onChange={(e) => setFormData({...formData, alt_text: e.target.value})}
+                           placeholder="وصف صورة الكارت..."
+                         />
+                       </div>
+                     </div>
+                   )}
+                   
                    <div className="text-center p-4 bg-primary/10 rounded-lg">
-                     <p className="text-sm font-medium">معاينة الزر</p>
+                     <p className="text-sm font-medium">
+                       معاينة {formData.content_type === 'hero_button' ? 'الزر' : 'الكارت'}
+                     </p>
                      <div className="mt-2 px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
-                       {formData.text_content || "نص الزر"}
+                       {formData.text_content || "نص العنصر"}
                      </div>
                    </div>
                  </div>
