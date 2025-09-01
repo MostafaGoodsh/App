@@ -75,10 +75,25 @@ export const useAppContent = () => {
     const item = content[key];
     if (!item) return fallback;
     
-    if (item.content_type === 'text' || item.content_type === 'msra_mining_card') {
+    // For text-based content types, return text_content
+    if (
+      item.content_type === 'text' || 
+      item.content_type === 'msra_mining_card' ||
+      item.content_type === 'hero_content' ||
+      item.content_type === 'hero_button' ||
+      item.content_type === 'wallet_card' ||
+      item.content_type === 'learning_card' ||
+      item.content_type === 'updates_content' ||
+      item.content_type === 'stable_coin_content' ||
+      item.content_type === 'rwa_content' ||
+      item.content_type === 'call_out_content' ||
+      item.content_type === 'sidebar_content' ||
+      item.content_type === 'admin_content'
+    ) {
       return item.text_content || fallback;
     }
     
+    // For image content, return image_url
     return item.image_url || fallback;
   };
 

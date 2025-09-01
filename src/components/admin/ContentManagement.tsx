@@ -528,8 +528,21 @@ export default function ContentManagement() {
               </div>
             </CardHeader>
             <CardContent>
-              {content.content_type === 'text' ? (
-                <p className="text-muted-foreground">{content.text_content}</p>
+              {/* Text-based content types */}
+              {(content.content_type === 'text' || 
+                content.content_type === 'hero_content' ||
+                content.content_type === 'updates_content' ||
+                content.content_type === 'stable_coin_content' ||
+                content.content_type === 'rwa_content' ||
+                content.content_type === 'call_out_content' ||
+                content.content_type === 'sidebar_content' ||
+                content.content_type === 'admin_content') ? (
+                <div>
+                  <p className="text-muted-foreground">{content.text_content}</p>
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    النوع: {content.content_type}
+                  </div>
+                </div>
               ) : content.content_type === 'msra_mining_card' ? (
                 <div>
                   {content.image_url && (
@@ -545,10 +558,20 @@ export default function ContentManagement() {
                      </p>
                    </div>
                  </div>
-               ) : content.content_type === 'hero_button' ? (
-                 <div className="text-center p-4 bg-primary/10 rounded-lg">
-                   <div className="px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
-                     {content.text_content || "نص الزر"}
+               ) : (content.content_type === 'hero_button' ||
+                     content.content_type === 'wallet_card' ||
+                     content.content_type === 'learning_card') ? (
+                 <div>
+                   {content.image_url && (
+                     <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                   )}
+                   <div className="text-center p-4 bg-primary/10 rounded-lg">
+                     <div className="px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
+                       {content.text_content || "نص العنصر"}
+                     </div>
+                     <p className="text-xs text-muted-foreground mt-2">
+                       النوع: {content.content_type}
+                     </p>
                    </div>
                  </div>
                ) : (
