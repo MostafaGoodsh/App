@@ -76,17 +76,17 @@ const Index = () => {
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
               </Button>
-              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_2', 'آخر التحديثات | Updates')}
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+                <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
               </Button>
-              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_3', 'MSR stable coin')}
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+                <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR stable coin')}</Link>
               </Button>
-              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_4', 'MSR-RWA real world assets')}
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA real world assets')}</Link>
               </Button>
-              <Button size="lg" variant="outline" disabled className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white/60 cursor-not-allowed">
-                {getContent('hero_cta_5', 'Call out')}
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+                <Link to="/call-out">{getContent('hero_cta_5', 'Call out')}</Link>
               </Button>
             </div>
           </div>
@@ -94,6 +94,12 @@ const Index = () => {
 
         <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
           {[
+            { 
+              imageKey: 'learning_card_image',
+              titleKey: 'learning_card_title', 
+              descriptionKey: 'learning_card_description',
+              href: "/learning"
+            },
             { 
               imageKey: 'wallet_card_image',
               titleKey: 'wallet_card_title', 
@@ -105,12 +111,6 @@ const Index = () => {
               titleKey: 'identity_card_title', 
               descriptionKey: 'identity_card_description',
               href: "/identity"
-            },
-            { 
-              imageKey: 'learning_card_image',
-              titleKey: 'learning_card_title', 
-              descriptionKey: 'learning_card_description',
-              href: "/learning"
             },
           ].map((card) => (
             <Link key={card.titleKey} to={card.href} className="group">

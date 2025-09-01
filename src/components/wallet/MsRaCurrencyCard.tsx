@@ -40,7 +40,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   // Get custom content from admin panel
   const msRaContent = getContentItem('msra_mining_card_main');
-  const cardTitle = msRaContent?.text_content || 'Ms-Ra Mining | تعدين مس رع';
+  const cardTitle = msRaContent?.text_content || '$MsRa Mining';
   const cardBackground = msRaContent?.image_url || '/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png';
 
   // Mining timer effect (24-hour cycle)

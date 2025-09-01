@@ -22,6 +22,10 @@ import ContentAdmin from "./pages/ContentAdmin";
 import UsersAdmin from "./pages/UsersAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
+import Updates from "./pages/Updates";
+import StableCoin from "./pages/StableCoin";
+import RWA from "./pages/RWA";
+import CallOut from "./pages/CallOut";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +48,10 @@ const App = () => {
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
                   <Route path="learning" element={<Learning />} />
                   <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
+                  <Route path="updates" element={<Updates />} />
+                  <Route path="stable-coin" element={<StableCoin />} />
+                  <Route path="rwa" element={<RWA />} />
+                  <Route path="call-out" element={<CallOut />} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
