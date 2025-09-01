@@ -300,10 +300,10 @@ export default function ContentManagement() {
                    <SelectItem value="image">صورة</SelectItem>
                    <SelectItem value="msra_mining_card">كارت التعدين Ms-Ra</SelectItem>
                    <SelectItem value="hero_button">أزرار الصفحة الرئيسية</SelectItem>
-                   <SelectItem value="hero_cta_updates">آخر التحديثات | Updates</SelectItem>
-                   <SelectItem value="msr_stable_coin">MSR stable coin</SelectItem>
-                   <SelectItem value="msr_rwa">MSR-RWA real world assets</SelectItem>
-                   <SelectItem value="call_out">Call out</SelectItem>
+                   <SelectItem value="updates_content">محتوى صفحة التحديثات</SelectItem>
+                   <SelectItem value="stable_coin_content">محتوى صفحة العملة المستقرة</SelectItem>
+                   <SelectItem value="rwa_content">محتوى صفحة الأصول الحقيقية</SelectItem>
+                   <SelectItem value="call_out_content">محتوى صفحة المجتمع</SelectItem>
                  </SelectContent>
                 </Select>
               </div>
