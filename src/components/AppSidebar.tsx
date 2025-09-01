@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Pickaxe } from "lucide-react";
+import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Pickaxe, Zap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +33,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },
   { title: getContent("admin_learning_management", "إدارة التعلم"), url: "/admin/learning", icon: BookOpen },
   { title: getContent("admin_content_management", "إدارة محتوى التطبيق"), url: "/admin/content", icon: Settings },
+  { title: getContent("admin_mining_levels_management", "إدارة مستويات التعدين"), url: "/admin/mining-levels", icon: Zap },
 ];
 
 export function AppSidebar() {

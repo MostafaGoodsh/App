@@ -83,7 +83,7 @@ const Index = () => {
                 <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR stable coin')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA real world assets')}</Link>
+                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
                 <Link to="/call-out">{getContent('hero_cta_5', 'Call out')}</Link>

@@ -26,6 +26,7 @@ import Updates from "./pages/Updates";
 import StableCoin from "./pages/StableCoin";
 import RWA from "./pages/RWA";
 import CallOut from "./pages/CallOut";
+import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => {
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
+                  <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
