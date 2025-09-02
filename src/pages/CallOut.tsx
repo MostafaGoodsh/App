@@ -90,13 +90,12 @@ const CallOut = () => {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Megaphone className="w-8 h-8 text-primary" />
               <h1 className="text-3xl md:text-4xl font-bold arabic-text">
-                نداء التقدير والإلهام
+                Call out | استدعاء شرفي 
               </h1>
             </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto arabic-text">
-              منصة لتكريم وتقدير الشخصيات الملهمة والمؤثرة في مجتمعنا العربي والعالمي، 
-              الذين أضاءوا طريق التقدم والتميز في مختلف المجالات، ونسعى لنشر إنجازاتهم 
-              وقصص نجاحهم لتكون مصدر إلهام للأجيال القادمة
+            <p className="text-xl text-muted-foreground max-w-3
+              العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.
+            Faith and morals are our point of distinction and uniqueness, so we created this section specifically to send invitations for honorary summons to every influential person around the world and everyone who adopts and serves our faith and goals. We are happy to have you on the honorary summons list and we are honored by your acceptance.
             </p>
           </div>
 
