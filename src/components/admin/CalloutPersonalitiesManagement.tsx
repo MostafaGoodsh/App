@@ -29,9 +29,10 @@ const CalloutPersonalitiesManagement = () => {
   const [personalities, setPersonalities] = useState<CalloutPersonality[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
   const [editingPersonality, setEditingPersonality] = useState<CalloutPersonality | null>(null);
   
-  // Form state
+  // Form state for personalities
   const [formData, setFormData] = useState({
     name: "",
     title: "",
@@ -41,6 +42,12 @@ const CalloutPersonalitiesManagement = () => {
     is_featured: false,
     display_order: 0,
     is_active: true
+  });
+
+  // Form state for page content
+  const [contentData, setContentData] = useState({
+    title: "نداء التقدير والإلهام",
+    intro: "العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك."
   });
 
   const categories = [
@@ -100,6 +107,33 @@ const CalloutPersonalitiesManagement = () => {
       toast.error('فشل في حفظ البيانات');
     }
   };
+
+  const handleContentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Store content in localStorage for now
+      localStorage.setItem('callout_content', JSON.stringify(contentData));
+      toast.success('تم حفظ محتوى الصفحة بنجاح');
+      setIsContentDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving content:', error);
+      toast.error('فشل في حفظ المحتوى');
+    }
+  };
+
+  // Load content from localStorage on component mount
+  useEffect(() => {
+    const savedContent = localStorage.getItem('callout_content');
+    if (savedContent) {
+      try {
+        const parsedContent = JSON.parse(savedContent);
+        setContentData(parsedContent);
+      } catch (error) {
+        console.error('Error parsing saved content:', error);
+      }
+    }
+  }, []);
 
   const handleEdit = (personality: CalloutPersonality) => {
     setEditingPersonality(personality);
@@ -177,6 +211,60 @@ const CalloutPersonalitiesManagement = () => {
           <p className="text-muted-foreground">إدارة الشخصيات المكرمة في قائمة الاستدعاء</p>
         </div>
         
+        <div className="flex gap-2">
+          <Dialog open={isContentDialogOpen} onOpenChange={setIsContentDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" />
+                تعديل العنوان والمقدمة
+              </Button>
+            </DialogTrigger>
+            
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>تعديل محتوى الصفحة</DialogTitle>
+                <DialogDescription>
+                  تعديل العنوان والمقدمة الخاصة بصفحة الاستدعاء الشرفي
+                </DialogDescription>
+              </DialogHeader>
+              
+              <form onSubmit={handleContentSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">عنوان الصفحة</label>
+                  <Input
+                    value={contentData.title}
+                    onChange={(e) => setContentData({ ...contentData, title: e.target.value })}
+                    placeholder="عنوان الصفحة"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">المقدمة</label>
+                  <Textarea
+                    value={contentData.intro}
+                    onChange={(e) => setContentData({ ...contentData, intro: e.target.value })}
+                    placeholder="النص التعريفي للصفحة"
+                    rows={6}
+                    required
+                  />
+                </div>
+                
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsContentDialogOpen(false)}>
+                    إلغاء
+                  </Button>
+                  <Button type="submit">
+                    حفظ التغييرات
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
