@@ -93,9 +93,10 @@ const CallOut = () => {
                 Call out | استدعاء شرفي 
               </h1>
             </div>
-            <p className="text-xl text-muted-foreground max-w-3
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto arabic-text">
               العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.
-            Faith and morals are our point of distinction and uniqueness, so we created this section specifically to send invitations for honorary summons to every influential person around the world and everyone who adopts and serves our faith and goals. We are happy to have you on the honorary summons list and we are honored by your acceptance.
+              <br /><br />
+              Faith and morals are our point of distinction and uniqueness, so we created this section specifically to send invitations for honorary summons to every influential person around the world and everyone who adopts and serves our faith and goals. We are happy to have you on the honorary summons list and we are honored by your acceptance.
             </p>
           </div>
 
