@@ -28,6 +28,7 @@ import RWA from "./pages/RWA";
 import CallOut from "./pages/CallOut";
 import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
 import CalloutPersonalitiesAdmin from "./pages/CalloutPersonalitiesAdmin";
+import UpdatesAdmin from "./pages/UpdatesAdmin";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => {
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
+                  <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
