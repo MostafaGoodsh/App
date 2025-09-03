@@ -27,18 +27,20 @@ interface Survey {
 }
 
 interface SurveyEditDialogProps {
-  survey: Survey;
+  survey?: Survey;
   onSurveyUpdated: () => Promise<void>;
   disabled?: boolean;
 }
 
 export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: SurveyEditDialogProps) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState(survey.title);
-  const [description, setDescription] = useState(survey.description || "");
-  const [questions, setQuestions] = useState<Question[]>(survey.questions || []);
+  const [title, setTitle] = useState(survey?.title || "");
+  const [description, setDescription] = useState(survey?.description || "");
+  const [questions, setQuestions] = useState<Question[]>(survey?.questions || []);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  
+  const isCreateMode = !survey;
 
   const addQuestion = () => {
     const newQuestion: Question = {
@@ -108,22 +110,40 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("surveys")
-        .update({
-          title: title.trim(),
-          description: description.trim() || null,
-          questions: questions as any,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", survey.id);
+      if (isCreateMode) {
+        const { error } = await supabase
+          .from("surveys")
+          .insert({
+            title: title.trim(),
+            description: description.trim() || null,
+            questions: questions as any,
+            is_active: false
+          });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "تم الحفظ",
-        description: "تم تحديث الاستبيان بنجاح",
-      });
+        toast({
+          title: "تم الإنشاء",
+          description: "تم إنشاء الاستبيان بنجاح",
+        });
+      } else {
+        const { error } = await supabase
+          .from("surveys")
+          .update({
+            title: title.trim(),
+            description: description.trim() || null,
+            questions: questions as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", survey!.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "تم الحفظ",
+          description: "تم تحديث الاستبيان بنجاح",
+        });
+      }
 
       setOpen(false);
       await onSurveyUpdated();
@@ -131,7 +151,7 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
       toast({
         variant: "destructive",
         title: "خطأ",
-        description: "فشل في تحديث الاستبيان",
+        description: isCreateMode ? "فشل في إنشاء الاستبيان" : "فشل في تحديث الاستبيان",
       });
     } finally {
       setLoading(false);
@@ -140,9 +160,15 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
 
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
-      setTitle(survey.title);
-      setDescription(survey.description || "");
-      setQuestions(survey.questions || []);
+      if (survey) {
+        setTitle(survey.title);
+        setDescription(survey.description || "");
+        setQuestions(survey.questions || []);
+      } else {
+        setTitle("");
+        setDescription("");
+        setQuestions([]);
+      }
     }
     setOpen(newOpen);
   };
@@ -150,14 +176,14 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled}>
-          <Edit className="h-4 w-4 mr-2" />
-          تحرير
+        <Button variant={isCreateMode ? "default" : "outline"} size="sm" disabled={disabled}>
+          {isCreateMode ? <Plus className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+          {isCreateMode ? "إنشاء استبيان جديد" : "تحرير"}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>تحرير الاستبيان</DialogTitle>
+          <DialogTitle>{isCreateMode ? "إنشاء استبيان جديد" : "تحرير الاستبيان"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -288,7 +314,7 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
               إلغاء
             </Button>
             <Button onClick={handleSave} disabled={loading}>
-              {loading ? "جاري الحفظ..." : "حفظ"}
+              {loading ? (isCreateMode ? "جاري الإنشاء..." : "جاري الحفظ...") : (isCreateMode ? "إنشاء" : "حفظ")}
             </Button>
           </div>
         </div>

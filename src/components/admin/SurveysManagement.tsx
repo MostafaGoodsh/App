@@ -132,8 +132,15 @@ export default function SurveysManagement() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">إدارة الاستبيانات</h1>
-        <p className="text-muted-foreground">إدارة وتحرير الاستبيانات</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">إدارة الاستبيانات</h1>
+            <p className="text-muted-foreground">إدارة وتحرير الاستبيانات</p>
+          </div>
+          <SurveyEditDialog 
+            onSurveyUpdated={fetchSurveys}
+          />
+        </div>
       </div>
 
       <div className="grid gap-4">
