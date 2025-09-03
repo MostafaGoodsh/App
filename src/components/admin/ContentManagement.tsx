@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer, RefreshCw, Eye, EyeOff, Building, Coins } from "lucide-react";
 
 interface AppContent {
   id: string;
@@ -250,6 +251,10 @@ export default function ContentManagement() {
   if (loading) {
     return <div className="flex justify-center p-8">جاري التحميل...</div>;
   }
+
+  const rwaContents = contents.filter(c => c.content_type === 'rwa_content');
+  const stableCoinContents = contents.filter(c => c.content_type === 'stable_coin_content');
+  const otherContents = contents.filter(c => c.content_type !== 'rwa_content' && c.content_type !== 'stable_coin_content');
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -495,103 +500,391 @@ export default function ContentManagement() {
         </div>
       )}
 
-      <div className="grid gap-4">
-        {contents.map((content) => (
-          <Card key={content.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                 {content.content_type === 'text' ? 
-                   <FileText className="h-4 w-4" /> : 
-                   content.content_type === 'msra_mining_card' ?
-                   <Zap className="h-4 w-4" /> :
-                   content.content_type === 'hero_button' ?
-                   <MousePointer className="h-4 w-4" /> :
-                   <Image className="h-4 w-4" />
-                 }
-                {content.content_key}
-              </CardTitle>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => toggleContentStatus(content.id, content.is_active)}
-                  title={content.is_active ? 'إلغاء تفعيل' : 'تفعيل'}
-                >
-                  {content.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleEdit(content)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(content.id)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* Text-based content types */}
-              {(content.content_type === 'text' || 
-                content.content_type === 'hero_content' ||
-                content.content_type === 'updates_content' ||
-                content.content_type === 'stable_coin_content' ||
-                content.content_type === 'rwa_content' ||
-                content.content_type === 'call_out_content' ||
-                content.content_type === 'sidebar_content' ||
-                content.content_type === 'admin_content') ? (
-                <div>
-                  <p className="text-muted-foreground">{content.text_content}</p>
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    النوع: {content.content_type}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">جميع المحتويات</TabsTrigger>
+          <TabsTrigger value="rwa" className="flex items-center gap-2">
+            <Building className="h-4 w-4" />
+            محتوى RWA
+          </TabsTrigger>
+          <TabsTrigger value="stablecoin" className="flex items-center gap-2">
+            <Coins className="h-4 w-4" />
+            محتوى العملة المستقرة
+          </TabsTrigger>
+          <TabsTrigger value="other">محتويات أخرى</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all" className="mt-6">
+          <div className="grid gap-4">
+            {contents.map((content) => (
+              <Card key={content.id}>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                     {content.content_type === 'text' ? 
+                       <FileText className="h-4 w-4" /> : 
+                       content.content_type === 'msra_mining_card' ?
+                       <Zap className="h-4 w-4" /> :
+                       content.content_type === 'hero_button' ?
+                       <MousePointer className="h-4 w-4" /> :
+                       <Image className="h-4 w-4" />
+                     }
+                    {content.content_key}
+                  </CardTitle>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => toggleContentStatus(content.id, content.is_active)}
+                      title={content.is_active ? 'إلغاء تفعيل' : 'تفعيل'}
+                    >
+                      {content.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(content)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(content.id)}>
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
-              ) : content.content_type === 'msra_mining_card' ? (
-                <div>
-                  {content.image_url && (
-                    <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
-                  )}
-                  <div className="text-center p-4 bg-primary/10 rounded-lg">
-                    <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
-                    <p className="text-sm font-medium">
-                      {content.text_content || "كارت التعدين Ms-Ra"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {content.alt_text || "يعرض نظام التعدين والعناوين المسجلة"}
-                     </p>
-                   </div>
-                 </div>
-               ) : (content.content_type === 'hero_button' ||
-                     content.content_type === 'wallet_card' ||
-                     content.content_type === 'learning_card') ? (
-                 <div>
-                   {content.image_url && (
-                     <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
-                   )}
-                   <div className="text-center p-4 bg-primary/10 rounded-lg">
-                     <div className="px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
-                       {content.text_content || "نص العنصر"}
+                </CardHeader>
+                <CardContent>
+                  {/* Text-based content types */}
+                  {(content.content_type === 'text' || 
+                    content.content_type === 'hero_content' ||
+                    content.content_type === 'updates_content' ||
+                    content.content_type === 'stable_coin_content' ||
+                    content.content_type === 'rwa_content' ||
+                    content.content_type === 'call_out_content' ||
+                    content.content_type === 'sidebar_content' ||
+                    content.content_type === 'admin_content') ? (
+                    <div>
+                      <p className="text-muted-foreground">{content.text_content}</p>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        النوع: {content.content_type}
+                      </div>
+                    </div>
+                  ) : content.content_type === 'msra_mining_card' ? (
+                    <div>
+                      {content.image_url && (
+                        <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                      )}
+                      <div className="text-center p-4 bg-primary/10 rounded-lg">
+                        <Zap className="w-8 h-8 mx-auto mb-2 text-primary" />
+                        <p className="text-sm font-medium">
+                          {content.text_content || "كارت التعدين Ms-Ra"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {content.alt_text || "يعرض نظام التعدين والعناوين المسجلة"}
+                         </p>
+                       </div>
                      </div>
-                     <p className="text-xs text-muted-foreground mt-2">
-                       النوع: {content.content_type}
-                     </p>
-                   </div>
-                 </div>
-               ) : (
-                <div>
-                  {content.image_url && (
-                    <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                   ) : (content.content_type === 'hero_button' ||
+                         content.content_type === 'wallet_card' ||
+                         content.content_type === 'learning_card') ? (
+                     <div>
+                       {content.image_url && (
+                         <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                       )}
+                       <div className="text-center p-4 bg-primary/10 rounded-lg">
+                         <div className="px-4 py-2 border border-primary/30 rounded bg-transparent text-primary">
+                           {content.text_content || "نص العنصر"}
+                         </div>
+                         <p className="text-xs text-muted-foreground mt-2">
+                           النوع: {content.content_type}
+                         </p>
+                       </div>
+                     </div>
+                   ) : (
+                    <div>
+                      {content.image_url && (
+                        <img src={content.image_url} alt={content.alt_text} className="w-32 h-32 object-cover rounded mb-2" />
+                      )}
+                      <p className="text-sm text-muted-foreground">{content.alt_text}</p>
+                    </div>
                   )}
-                  <p className="text-sm text-muted-foreground">{content.alt_text}</p>
-                </div>
-              )}
-              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                <span>الترتيب: {content.position_order}</span>
-                <span className={content.is_active ? "text-green-600" : "text-red-600"}>
-                  {content.is_active ? "نشط" : "غير نشط"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <span>الترتيب: {content.position_order}</span>
+                    <span className={content.is_active ? "text-green-600" : "text-red-600"}>
+                      {content.is_active ? "نشط" : "غير نشط"}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="rwa" className="mt-6">
+          <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Building className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">إدارة محتوى الأصول الحقيقية (RWA)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              إدارة النصوص والمحتوى الخاص بصفحة الأصول الحقيقية المرموزة
+            </p>
+          </div>
+          <div className="grid gap-4">
+            {rwaContents.length > 0 ? rwaContents.map((content) => (
+              <Card key={content.id} className="border-primary/20">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Building className="h-4 w-4" />
+                        {content.content_key}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          {content.content_type}
+                        </span>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">
+                          #{content.position_order}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleContentStatus(content.id, content.is_active)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {content.is_active ? 
+                          <Eye className="h-4 w-4 text-green-600" /> : 
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        }
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(content)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(content.id)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {content.content_type === 'image' && content.image_url && (
+                    <div className="mb-3">
+                      <img 
+                        src={content.image_url} 
+                        alt={content.alt_text || 'صورة'} 
+                        className="w-full h-32 object-cover rounded border"
+                      />
+                      {content.alt_text && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          النص البديل: {content.alt_text}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {content.text_content && (
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {content.text_content.length > 200 
+                        ? `${content.text_content.substring(0, 200)}...` 
+                        : content.text_content
+                      }
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )) : (
+              <Card className="border-dashed border-2 border-primary/30">
+                <CardContent className="text-center py-8">
+                  <Building className="w-12 h-12 mx-auto mb-4 text-primary/60" />
+                  <p className="text-muted-foreground">لا يوجد محتوى RWA حتى الآن</p>
+                  <p className="text-sm text-muted-foreground mt-1">أضف محتوى جديد من نوع "rwa_content"</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="stablecoin" className="mt-6">
+          <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Coins className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">إدارة محتوى العملة المستقرة</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              إدارة النصوص والمحتوى الخاص بصفحة العملة المستقرة MSR
+            </p>
+          </div>
+          <div className="grid gap-4">
+            {stableCoinContents.length > 0 ? stableCoinContents.map((content) => (
+              <Card key={content.id} className="border-primary/20">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Coins className="h-4 w-4" />
+                        {content.content_key}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          {content.content_type}
+                        </span>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">
+                          #{content.position_order}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleContentStatus(content.id, content.is_active)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {content.is_active ? 
+                          <Eye className="h-4 w-4 text-green-600" /> : 
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        }
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(content)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(content.id)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {content.content_type === 'image' && content.image_url && (
+                    <div className="mb-3">
+                      <img 
+                        src={content.image_url} 
+                        alt={content.alt_text || 'صورة'} 
+                        className="w-full h-32 object-cover rounded border"
+                      />
+                      {content.alt_text && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          النص البديل: {content.alt_text}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {content.text_content && (
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {content.text_content.length > 200 
+                        ? `${content.text_content.substring(0, 200)}...` 
+                        : content.text_content
+                      }
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )) : (
+              <Card className="border-dashed border-2 border-primary/30">
+                <CardContent className="text-center py-8">
+                  <Coins className="w-12 h-12 mx-auto mb-4 text-primary/60" />
+                  <p className="text-muted-foreground">لا يوجد محتوى العملة المستقرة حتى الآن</p>
+                  <p className="text-sm text-muted-foreground mt-1">أضف محتوى جديد من نوع "stable_coin_content"</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="other" className="mt-6">
+          <div className="grid gap-4">
+            {otherContents.map((content) => (
+              <Card key={content.id}>
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">{content.content_key}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs bg-muted px-2 py-1 rounded">
+                          {content.content_type}
+                        </span>
+                        <span className="text-xs bg-muted px-2 py-1 rounded">
+                          #{content.position_order}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleContentStatus(content.id, content.is_active)}
+                        className="h-8 w-8 p-0"
+                      >
+                        {content.is_active ? 
+                          <Eye className="h-4 w-4 text-green-600" /> : 
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        }
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(content)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(content.id)}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {content.content_type === 'image' && content.image_url && (
+                    <div className="mb-3">
+                      <img 
+                        src={content.image_url} 
+                        alt={content.alt_text || 'صورة'} 
+                        className="w-full h-32 object-cover rounded border"
+                      />
+                      {content.alt_text && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          النص البديل: {content.alt_text}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {content.text_content && (
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {content.text_content.length > 200 
+                        ? `${content.text_content.substring(0, 200)}...` 
+                        : content.text_content
+                      }
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
