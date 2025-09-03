@@ -38,6 +38,38 @@ export default function KYCManagement() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Helper function to get image URL
+  const getImageUrl = (imagePath: string | null | undefined): string | null => {
+    if (!imagePath) return null;
+    
+    // If it's already a full URL, return it
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // Construct the public URL
+    return `https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${imagePath}`;
+  };
+
+  // Helper function to get signed URL as fallback
+  const getSignedUrl = async (imagePath: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('identity-documents')
+        .createSignedUrl(imagePath, 3600); // 1 hour expiry
+
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return null;
+      }
+      
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error creating signed URL:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     fetchKYCRequests();
   }, []);
@@ -230,12 +262,19 @@ export default function KYCManagement() {
                           <DialogTrigger asChild>
                             <div className="relative cursor-pointer group">
                               <img 
-                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
+                                src={getImageUrl(request.document_front_url) || ''}
                                 alt="الوثيقة - الوجه الأمامي"
                                 className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
-                                onError={(e) => {
-                                  console.error('Failed to load document front image:', request.document_front_url);
-                                  console.error('Full URL:', `https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`);
+                                onError={async (e) => {
+                                  console.error('Failed to load document front image with public URL, trying signed URL:', request.document_front_url);
+                                  if (request.document_front_url) {
+                                    const signedUrl = await getSignedUrl(request.document_front_url);
+                                    if (signedUrl) {
+                                      (e.target as HTMLImageElement).src = signedUrl;
+                                    } else {
+                                      console.error('Failed to get signed URL for:', request.document_front_url);
+                                    }
+                                  }
                                 }}
                                 onLoad={() => {
                                   console.log('Document front image loaded successfully:', request.document_front_url);
@@ -252,11 +291,17 @@ export default function KYCManagement() {
                               عرض الوثيقة الرسمية - الوجه الأمامي لـ {request.full_name}
                             </DialogDescription>
                             <img 
-                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_front_url}`}
+                              src={getImageUrl(request.document_front_url) || ''}
                               alt="الوثيقة - الوجه الأمامي"
                               className="w-full max-h-[80vh] object-contain rounded-lg"
-                              onError={(e) => {
-                                console.error('Failed to load document front image in dialog:', request.document_front_url);
+                              onError={async (e) => {
+                                console.error('Failed to load document front image in dialog with public URL, trying signed URL:', request.document_front_url);
+                                if (request.document_front_url) {
+                                  const signedUrl = await getSignedUrl(request.document_front_url);
+                                  if (signedUrl) {
+                                    (e.target as HTMLImageElement).src = signedUrl;
+                                  }
+                                }
                               }}
                             />
                           </DialogContent>
@@ -279,9 +324,18 @@ export default function KYCManagement() {
                           <DialogTrigger asChild>
                             <div className="relative cursor-pointer group">
                               <img 
-                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_back_url}`}
+                                src={getImageUrl(request.document_back_url) || ''}
                                 alt="الوثيقة - الوجه الخلفي"
                                 className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
+                                onError={async (e) => {
+                                  console.error('Failed to load document back image with public URL, trying signed URL:', request.document_back_url);
+                                  if (request.document_back_url) {
+                                    const signedUrl = await getSignedUrl(request.document_back_url);
+                                    if (signedUrl) {
+                                      (e.target as HTMLImageElement).src = signedUrl;
+                                    }
+                                  }
+                                }}
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg flex items-center justify-center transition-all">
                                 <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -294,9 +348,18 @@ export default function KYCManagement() {
                               عرض الوثيقة الرسمية - الوجه الخلفي لـ {request.full_name}
                             </DialogDescription>
                             <img 
-                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.document_back_url}`}
+                              src={getImageUrl(request.document_back_url) || ''}
                               alt="الوثيقة - الوجه الخلفي"
                               className="w-full max-h-[80vh] object-contain rounded-lg"
+                              onError={async (e) => {
+                                console.error('Failed to load document back image in dialog with public URL, trying signed URL:', request.document_back_url);
+                                if (request.document_back_url) {
+                                  const signedUrl = await getSignedUrl(request.document_back_url);
+                                  if (signedUrl) {
+                                    (e.target as HTMLImageElement).src = signedUrl;
+                                  }
+                                }
+                              }}
                             />
                           </DialogContent>
                         </Dialog>
@@ -318,12 +381,19 @@ export default function KYCManagement() {
                           <DialogTrigger asChild>
                             <div className="relative cursor-pointer group">
                               <img 
-                                src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
+                                src={getImageUrl(request.selfie_url) || ''}
                                 alt="صورة شخصية"
                                 className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary/50 transition-colors"
-                                onError={(e) => {
-                                  console.error('Failed to load selfie image:', request.selfie_url);
-                                  console.error('Full URL:', `https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`);
+                                onError={async (e) => {
+                                  console.error('Failed to load selfie image with public URL, trying signed URL:', request.selfie_url);
+                                  if (request.selfie_url) {
+                                    const signedUrl = await getSignedUrl(request.selfie_url);
+                                    if (signedUrl) {
+                                      (e.target as HTMLImageElement).src = signedUrl;
+                                    } else {
+                                      console.error('Failed to get signed URL for selfie:', request.selfie_url);
+                                    }
+                                  }
                                 }}
                                 onLoad={() => {
                                   console.log('Selfie image loaded successfully:', request.selfie_url);
@@ -340,11 +410,17 @@ export default function KYCManagement() {
                               عرض الصورة الشخصية (السيلفي) لـ {request.full_name}
                             </DialogDescription>
                             <img 
-                              src={`https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/identity-documents/${request.selfie_url}`}
+                              src={getImageUrl(request.selfie_url) || ''}
                               alt="صورة شخصية"
                               className="w-full max-h-[80vh] object-contain rounded-lg"
-                              onError={(e) => {
-                                console.error('Failed to load selfie image in dialog:', request.selfie_url);
+                              onError={async (e) => {
+                                console.error('Failed to load selfie image in dialog with public URL, trying signed URL:', request.selfie_url);
+                                if (request.selfie_url) {
+                                  const signedUrl = await getSignedUrl(request.selfie_url);
+                                  if (signedUrl) {
+                                    (e.target as HTMLImageElement).src = signedUrl;
+                                  }
+                                }
                               }}
                             />
                           </DialogContent>
