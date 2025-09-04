@@ -29,6 +29,7 @@ import CallOut from "./pages/CallOut";
 import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
 import CalloutPersonalitiesAdmin from "./pages/CalloutPersonalitiesAdmin";
 import UpdatesAdmin from "./pages/UpdatesAdmin";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => {
                   <Route path="stable-coin" element={<StableCoin />} />
                   <Route path="rwa" element={<RWA />} />
                   <Route path="call-out" element={<CallOut />} />
+                  <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
