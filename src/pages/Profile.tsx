@@ -191,10 +191,7 @@ export default function Profile() {
                   <Button 
                     variant="outline" 
                     className="arabic-text"
-                    onClick={() => {
-                      // TODO: Implement privacy settings dialog
-                      alert('ميزة إعدادات الخصوصية ستكون متاحة قريباً\nPrivacy settings feature will be available soon');
-                    }}
+                    onClick={() => window.location.href = '/profile?tab=edit'}
                   >
                     إعدادات | Settings
                   </Button>
@@ -211,8 +208,11 @@ export default function Profile() {
                     variant="outline" 
                     className="arabic-text"
                     onClick={() => {
-                      // TODO: Implement security settings dialog
-                      alert('ميزة إعدادات الأمان ستكون متاحة قريباً\nSecurity settings feature will be available soon');
+                      const toast = (window as any).showToast || console.log;
+                      toast({
+                        title: "ميزة الأمان | Security Feature",
+                        description: "سيتم إضافة هذه الميزة قريباً | This feature will be added soon"
+                      });
                     }}
                   >
                     إعدادات | Settings
@@ -230,8 +230,11 @@ export default function Profile() {
                     variant="outline" 
                     className="arabic-text"
                     onClick={() => {
-                      // TODO: Implement notification settings dialog
-                      alert('ميزة إعدادات الإشعارات ستكون متاحة قريباً\nNotification settings feature will be available soon');
+                      const toast = (window as any).showToast || console.log;
+                      toast({
+                        title: "ميزة الإشعارات | Notifications Feature", 
+                        description: "سيتم إضافة هذه الميزة قريباً | This feature will be added soon"
+                      });
                     }}
                   >
                     إعدادات | Settings
