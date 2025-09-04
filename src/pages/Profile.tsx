@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,9 +17,15 @@ import { useProfile } from '@/hooks/useProfile';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
 import { SocialLinks } from '@/components/profile/SocialLinks';
+import { PrivacySettingsDialog } from '@/components/profile/PrivacySettingsDialog';
+import { SecuritySettingsDialog } from '@/components/profile/SecuritySettingsDialog';
+import { NotificationSettingsDialog } from '@/components/profile/NotificationSettingsDialog';
 
 export default function Profile() {
   const { profile, loading } = useProfile();
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
 
   if (loading) {
     return (
@@ -191,7 +198,7 @@ export default function Profile() {
                   <Button 
                     variant="outline" 
                     className="arabic-text"
-                    onClick={() => window.location.href = '/profile?tab=edit'}
+                    onClick={() => setPrivacyDialogOpen(true)}
                   >
                     إعدادات | Settings
                   </Button>
@@ -207,13 +214,7 @@ export default function Profile() {
                   <Button 
                     variant="outline" 
                     className="arabic-text"
-                    onClick={() => {
-                      const toast = (window as any).showToast || console.log;
-                      toast({
-                        title: "ميزة الأمان | Security Feature",
-                        description: "سيتم إضافة هذه الميزة قريباً | This feature will be added soon"
-                      });
-                    }}
+                    onClick={() => setSecurityDialogOpen(true)}
                   >
                     إعدادات | Settings
                   </Button>
@@ -229,13 +230,7 @@ export default function Profile() {
                   <Button 
                     variant="outline" 
                     className="arabic-text"
-                    onClick={() => {
-                      const toast = (window as any).showToast || console.log;
-                      toast({
-                        title: "ميزة الإشعارات | Notifications Feature", 
-                        description: "سيتم إضافة هذه الميزة قريباً | This feature will be added soon"
-                      });
-                    }}
+                    onClick={() => setNotificationDialogOpen(true)}
                   >
                     إعدادات | Settings
                   </Button>
@@ -245,6 +240,20 @@ export default function Profile() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Settings Dialogs */}
+      <PrivacySettingsDialog 
+        open={privacyDialogOpen} 
+        onOpenChange={setPrivacyDialogOpen} 
+      />
+      <SecuritySettingsDialog 
+        open={securityDialogOpen} 
+        onOpenChange={setSecurityDialogOpen} 
+      />
+      <NotificationSettingsDialog 
+        open={notificationDialogOpen} 
+        onOpenChange={setNotificationDialogOpen} 
+      />
     </div>
   );
 }
