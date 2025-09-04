@@ -86,9 +86,11 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="arabic-text">تحرير البروفايل الشخصي</CardTitle>
+        <CardTitle className="arabic-text">
+          تحرير البروفايل الشخصي | Edit Personal Profile
+        </CardTitle>
         <CardDescription className="arabic-text">
-          قم بتحديث معلوماتك الشخصية وروابط التواصل الاجتماعي
+          قم بتحديث معلوماتك الشخصية وروابط التواصل الاجتماعي | Update your personal information and social media links
         </CardDescription>
       </CardHeader>
       
@@ -98,7 +100,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold arabic-text flex items-center gap-2">
               <User className="w-5 h-5" />
-              المعلومات الأساسية
+              المعلومات الأساسية | Basic Information
             </h3>
             
             <div className="grid gap-4 md:grid-cols-2">
@@ -173,7 +175,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
           {/* Social Media Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold arabic-text">روابط التواصل الاجتماعي</h3>
+            <h3 className="text-lg font-semibold arabic-text">
+              روابط التواصل الاجتماعي | Social Media Links
+            </h3>
             
             <div className="grid gap-4">
               <div>

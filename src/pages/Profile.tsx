@@ -49,9 +49,11 @@ export default function Profile() {
   return (
     <div className="container max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold arabic-text mb-2">البروفايل الشخصي</h1>
+        <h1 className="text-3xl font-bold arabic-text mb-2">
+          البروفايل الشخصي | Personal Profile
+        </h1>
         <p className="text-muted-foreground arabic-text">
-          إدارة معلوماتك الشخصية وإعدادات الحساب
+          إدارة معلوماتك الشخصية وإعدادات الحساب | Manage your personal information and account settings
         </p>
       </div>
 
@@ -61,19 +63,19 @@ export default function Profile() {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="arabic-text">
             <User className="w-4 h-4 ml-2" />
-            نظرة عامة
+            نظرة عامة | Overview
           </TabsTrigger>
           <TabsTrigger value="edit" className="arabic-text">
             <Edit className="w-4 h-4 ml-2" />
-            تحرير
+            تحرير | Edit
           </TabsTrigger>
           <TabsTrigger value="activity" className="arabic-text">
             <Activity className="w-4 h-4 ml-2" />
-            النشاط
+            النشاط | Activity
           </TabsTrigger>
           <TabsTrigger value="settings" className="arabic-text">
             <Settings className="w-4 h-4 ml-2" />
-            الإعدادات
+            الإعدادات | Settings
           </TabsTrigger>
         </TabsList>
 
@@ -82,7 +84,9 @@ export default function Profile() {
             {/* Profile Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="arabic-text">معلومات الملف الشخصي</CardTitle>
+                <CardTitle className="arabic-text">
+                  معلومات الملف الشخصي | Profile Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -118,7 +122,9 @@ export default function Profile() {
             {/* Account Stats */}
             <Card>
               <CardHeader>
-                <CardTitle className="arabic-text">إحصائيات الحساب</CardTitle>
+                <CardTitle className="arabic-text">
+                  إحصائيات الحساب | Account Statistics
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-center">
@@ -145,9 +151,11 @@ export default function Profile() {
         <TabsContent value="activity">
           <Card>
             <CardHeader>
-              <CardTitle className="arabic-text">سجل النشاط</CardTitle>
+              <CardTitle className="arabic-text">
+                سجل النشاط | Activity Log
+              </CardTitle>
               <CardDescription className="arabic-text">
-                تتبع نشاطاتك الأخيرة على المنصة
+                تتبع نشاطاتك الأخيرة على المنصة | Track your recent activities on the platform
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -162,41 +170,72 @@ export default function Profile() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle className="arabic-text">إعدادات الحساب</CardTitle>
+              <CardTitle className="arabic-text">
+                إعدادات الحساب | Account Settings
+              </CardTitle>
               <CardDescription className="arabic-text">
-                إدارة إعدادات الخصوصية والأمان
+                إدارة إعدادات الخصوصية والأمان | Manage privacy and security settings
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">إعدادات الخصوصية</h3>
+                    <h3 className="font-medium arabic-text">
+                      إعدادات الخصوصية | Privacy Settings
+                    </h3>
                     <p className="text-sm text-muted-foreground arabic-text">
-                      التحكم في من يمكنه رؤية معلوماتك
+                      التحكم في من يمكنه رؤية معلوماتك | Control who can see your information
                     </p>
                   </div>
-                  <Button variant="outline" className="arabic-text">إعدادات</Button>
+                  <Button 
+                    variant="outline" 
+                    className="arabic-text"
+                    onClick={() => {
+                      // TODO: Implement privacy settings dialog
+                      alert('ميزة إعدادات الخصوصية ستكون متاحة قريباً\nPrivacy settings feature will be available soon');
+                    }}
+                  >
+                    إعدادات | Settings
+                  </Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">الأمان</h3>
+                    <h3 className="font-medium arabic-text">الأمان | Security</h3>
                     <p className="text-sm text-muted-foreground arabic-text">
-                      تغيير كلمة المرور والمصادقة الثنائية
+                      تغيير كلمة المرور والمصادقة الثنائية | Change password and two-factor authentication
                     </p>
                   </div>
-                  <Button variant="outline" className="arabic-text">إعدادات</Button>
+                  <Button 
+                    variant="outline" 
+                    className="arabic-text"
+                    onClick={() => {
+                      // TODO: Implement security settings dialog
+                      alert('ميزة إعدادات الأمان ستكون متاحة قريباً\nSecurity settings feature will be available soon');
+                    }}
+                  >
+                    إعدادات | Settings
+                  </Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">الإشعارات</h3>
+                    <h3 className="font-medium arabic-text">الإشعارات | Notifications</h3>
                     <p className="text-sm text-muted-foreground arabic-text">
-                      إدارة تفضيلات الإشعارات
+                      إدارة تفضيلات الإشعارات | Manage notification preferences
                     </p>
                   </div>
-                  <Button variant="outline" className="arabic-text">إعدادات</Button>
+                  <Button 
+                    variant="outline" 
+                    className="arabic-text"
+                    onClick={() => {
+                      // TODO: Implement notification settings dialog
+                      alert('ميزة إعدادات الإشعارات ستكون متاحة قريباً\nNotification settings feature will be available soon');
+                    }}
+                  >
+                    إعدادات | Settings
+                  </Button>
                 </div>
               </div>
             </CardContent>

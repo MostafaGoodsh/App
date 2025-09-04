@@ -20,13 +20,13 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('يرجى اختيار ملف صورة صالح');
+      alert('يرجى اختيار ملف صورة صالح | Please select a valid image file');
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      alert('حجم الملف يجب أن يكون أقل من 5 ميجابايت');
+      alert('حجم الملف يجب أن يكون أقل من 5 ميجابايت | File size must be less than 5MB');
       return;
     }
 
@@ -34,13 +34,17 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
     try {
       await uploadAvatar(file);
       setSelectedFile(null);
+      // Reset the input to allow uploading the same file again
+      event.target.value = '';
     } catch (error) {
       setSelectedFile(null);
+      // Reset the input on error too
+      event.target.value = '';
     }
   };
 
   const handleDeleteAvatar = async () => {
-    if (window.confirm('هل أنت متأكد من حذف الصورة الشخصية؟')) {
+    if (window.confirm('هل أنت متأكد من حذف الصورة الشخصية؟ | Are you sure you want to delete your profile picture?')) {
       await deleteAvatar();
     }
   };
@@ -115,7 +119,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           
           {uploading && (
             <p className="text-sm text-primary mt-2 arabic-text">
-              جاري رفع الصورة...
+              جاري رفع الصورة... | Uploading image...
             </p>
           )}
         </div>

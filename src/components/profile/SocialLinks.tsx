@@ -57,7 +57,9 @@ export function SocialLinks({ profile }: SocialLinksProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="arabic-text">روابط التواصل</CardTitle>
+        <CardTitle className="arabic-text">
+          روابط التواصل | Social Links
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3">
