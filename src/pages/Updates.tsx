@@ -59,7 +59,7 @@ const Updates = () => {
         <meta name="description" content="تابع آخر التحديثات والإعلانات في منصة Crypto-MSR" />
       </Helmet>
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 arabic-text">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -77,16 +77,18 @@ const Updates = () => {
           <div className="space-y-6">
             {updates.length > 0 ? (
               updates.map((update, index) => (
-                <Card key={update.id}>
+                <Card key={update.id} className="arabic-content">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 arabic-content">
                         <Calendar className="w-5 h-5 text-primary" />
-                        {update.content_key.includes('title') ? update.text_content : 'تحديث جديد'}
+                        <span className="text-right">
+                          {update.content_key.includes('title') ? update.text_content : 'تحديث جديد'}
+                        </span>
                       </CardTitle>
                       {index === 0 && <Badge variant="secondary">جديد</Badge>}
                     </div>
-                    <CardDescription>
+                    <CardDescription className="text-right arabic-content">
                       {new Date(update.created_at).toLocaleDateString('ar-EG', {
                         year: 'numeric',
                         month: 'long',
@@ -94,19 +96,19 @@ const Updates = () => {
                       })}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
+                  <CardContent className="arabic-content">
+                    <p className="text-muted-foreground mb-4 text-right leading-relaxed">
                       {update.text_content}
                     </p>
-                    <div className="flex items-center gap-2 text-primary">
-                      <ExternalLink className="w-4 h-4" />
+                    <div className="flex items-center gap-2 text-primary justify-end">
                       <span className="text-sm">اقرأ المزيد</span>
+                      <ExternalLink className="w-4 h-4" />
                     </div>
                   </CardContent>
                 </Card>
               ))
             ) : (
-              <Card className="border-dashed border-2 border-primary/30">
+              <Card className="border-dashed border-2 border-primary/30 arabic-content">
                 <CardContent className="text-center py-12">
                   <Bell className="w-16 h-16 mx-auto mb-4 text-primary/60" />
                   <h3 className="text-xl font-semibold mb-2">لا توجد تحديثات حالياً</h3>
@@ -116,7 +118,7 @@ const Updates = () => {
             )}
 
             {/* Coming Soon Section */}
-            <Card className="border-dashed border-2 border-primary/30">
+            <Card className="border-dashed border-2 border-primary/30 arabic-content">
               <CardContent className="text-center py-12">
                 <Bell className="w-16 h-16 mx-auto mb-4 text-primary/60" />
                 <h3 className="text-xl font-semibold mb-2">
