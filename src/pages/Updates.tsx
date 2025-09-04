@@ -29,10 +29,8 @@ const Updates = () => {
       const { data, error } = await supabase
         .from('app_content')
         .select('*')
-        .eq('content_type', 'text')
+        .eq('content_type', 'updates_content')
         .eq('is_active', true)
-        .like('content_key', '%update_%')
-        .not('content_key', 'in', '("updates_title","updates_description")')
         .order('position_order', { ascending: false });
 
       if (error) throw error;
