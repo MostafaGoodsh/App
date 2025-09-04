@@ -3,9 +3,50 @@ import { useAppContent } from "@/hooks/useAppContent";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Calendar, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface UpdateItem {
+  id: string;
+  content_key: string;
+  text_content: string;
+  position_order: number;
+  created_at: string;
+  is_active: boolean;
+}
 
 const Updates = () => {
-  const { getContent, loading } = useAppContent();
+  const { getContent, loading: contentLoading } = useAppContent();
+  const [updates, setUpdates] = useState<UpdateItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUpdates();
+  }, []);
+
+  const fetchUpdates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_content')
+        .select('*')
+        .eq('content_type', 'text')
+        .eq('is_active', true)
+        .like('content_key', '%update_%')
+        .not('content_key', 'in', '("updates_title","updates_description")')
+        .order('position_order', { ascending: false });
+
+      if (error) throw error;
+      setUpdates(data || []);
+    } catch (error) {
+      console.error('Error fetching updates:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || contentLoading) {
+    return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
+  }
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
@@ -34,46 +75,45 @@ const Updates = () => {
 
           {/* Updates Content */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    {getContent('update_1_title', 'تحديث المنصة v2.0')}
-                  </CardTitle>
-                  <Badge variant="secondary">جديد</Badge>
-                </div>
-                <CardDescription>
-                  {getContent('update_1_date', '1 سبتمبر 2025')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  {getContent('update_1_content', 'تم إطلاق التحديث الجديد للمنصة مع تحسينات في الأداء وواجهة المستخدم الجديدة.')}
-                </p>
-                <div className="flex items-center gap-2 text-primary">
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="text-sm">اقرأ المزيد</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  {getContent('update_2_title', 'إضافة ميزات جديدة للتعدين')}
-                </CardTitle>
-                <CardDescription>
-                  {getContent('update_2_date', '25 أغسطس 2025')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  {getContent('update_2_content', 'تحسينات جديدة على نظام التعدين مع إضافة مؤشرات أداء محسّنة.')}
-                </p>
-              </CardContent>
-            </Card>
+            {updates.length > 0 ? (
+              updates.map((update, index) => (
+                <Card key={update.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-primary" />
+                        {update.content_key.includes('title') ? update.text_content : 'تحديث جديد'}
+                      </CardTitle>
+                      {index === 0 && <Badge variant="secondary">جديد</Badge>}
+                    </div>
+                    <CardDescription>
+                      {new Date(update.created_at).toLocaleDateString('ar-EG', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      {update.text_content}
+                    </p>
+                    <div className="flex items-center gap-2 text-primary">
+                      <ExternalLink className="w-4 h-4" />
+                      <span className="text-sm">اقرأ المزيد</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="border-dashed border-2 border-primary/30">
+                <CardContent className="text-center py-12">
+                  <Bell className="w-16 h-16 mx-auto mb-4 text-primary/60" />
+                  <h3 className="text-xl font-semibold mb-2">لا توجد تحديثات حالياً</h3>
+                  <p className="text-muted-foreground">سيتم إضافة التحديثات هنا عند توفرها</p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Coming Soon Section */}
             <Card className="border-dashed border-2 border-primary/30">
