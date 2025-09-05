@@ -137,8 +137,8 @@ const MiningDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="mixed-text-xl text-2xl sm:text-3xl font-bold">لوحة التعدين | Mining Dashboard</h1>
-          <p className="mixed-text text-sm sm:text-base text-muted-foreground">تتبع تقدم التعدين وقوة حسابك | Track mining progress and account strength</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">لوحة التعدين</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">تتبع تقدم التعدين وقوة حسابك</p>
         </div>
         <Button
           onClick={handleToggleMining}
@@ -149,12 +149,14 @@ const MiningDashboard = () => {
           {profile?.is_mining_active ? (
             <>
               <Pause className="h-4 w-4 mr-2" />
-              <span className="mixed-text-responsive">إيقاف التعدين | Stop Mining</span>
+              <span className="hidden sm:inline">إيقاف التعدين</span>
+              <span className="sm:hidden">إيقاف</span>
             </>
           ) : (
             <>
               <Play className="h-4 w-4 mr-2" />
-              <span className="mixed-text-responsive">بدء التعدين | Start Mining</span>
+              <span className="hidden sm:inline">بدء التعدين</span>
+              <span className="sm:hidden">بدء</span>
             </>
           )}
         </Button>
@@ -165,8 +167,9 @@ const MiningDashboard = () => {
         {/* Total Mined */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="mixed-text text-xs sm:text-sm font-medium">
-              إجمالي التعدين | Total Mined
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">إجمالي التعدين</span>
+              <span className="sm:hidden">التعدين</span>
             </CardTitle>
             <Coins className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
           </CardHeader>
@@ -181,8 +184,9 @@ const MiningDashboard = () => {
         {/* Mining Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="mixed-text text-xs sm:text-sm font-medium">
-              معدل التعدين | Mining Rate
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">معدل التعدين</span>
+              <span className="sm:hidden">المعدل</span>
             </CardTitle>
             <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
@@ -197,8 +201,9 @@ const MiningDashboard = () => {
         {/* Account Strength */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="mixed-text text-xs sm:text-sm font-medium">
-              قوة الحساب | Account Strength
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">قوة الحساب</span>
+              <span className="sm:hidden">القوة</span>
             </CardTitle>
             <Target className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
           </CardHeader>
@@ -213,8 +218,9 @@ const MiningDashboard = () => {
         {/* Current Level */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="mixed-text text-xs sm:text-sm font-medium">
-              المستوى الحالي | Current Level
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">المستوى الحالي</span>
+              <span className="sm:hidden">المستوى</span>
             </CardTitle>
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
@@ -232,9 +238,9 @@ const MiningDashboard = () => {
       {/* Mining Status */}
       <Card>
         <CardHeader>
-          <CardTitle className="mixed-text flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            حالة التعدين | Mining Status
+            حالة التعدين
           </CardTitle>
         </CardHeader>
         <CardContent>

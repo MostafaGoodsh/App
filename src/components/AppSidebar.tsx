@@ -19,27 +19,27 @@ import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
 
 const useMenuItems = (getContent: (key: string, fallback?: string) => string) => [
-  { title: "الرئيسية | Home", url: "/", icon: Home },
-  { title: "التعلم | Learning", url: "/learning", icon: BookOpen },
-  { title: "المحفظة | Wallet", url: "/wallet", icon: Wallet, requireAuth: true },
-  { title: "التعدين | Mining", url: "/mining", icon: Pickaxe, requireAuth: true },
-  { title: "الهوية | Identity", url: "/identity", icon: Users, requireAuth: true },
-  { title: "الاستبيانات | Surveys", url: "/surveys", icon: ClipboardList, requireAuth: true },
-  { title: "البروفايل | Profile", url: "/profile", icon: User, requireAuth: true },
+  { title: getContent("sidebar_home", "الرئيسية"), url: "/", icon: Home },
+  { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
+  { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
+  { title: getContent("sidebar_mining", "التعدين"), url: "/mining", icon: Pickaxe, requireAuth: true },
+  { title: getContent("sidebar_identity", "الهوية"), url: "/identity", icon: Users, requireAuth: true },
+  { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
+  { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
 ];
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
-  { title: "إدارة المستخدمين | Users", url: "/admin/users", icon: Users },
-  { title: "إدارة الهوية | KYC", url: "/admin/kyc", icon: Shield },
-  { title: "إدارة الاستبيانات | Surveys", url: "/admin/surveys", icon: ClipboardList },
-  { title: "إجابات الاستبيانات | Responses", url: "/admin/survey-responses", icon: ClipboardList },
-  { title: "إدارة التعلم | Learning", url: "/admin/learning", icon: BookOpen },
-  { title: "إدارة المحتوى | Content", url: "/admin/content", icon: Settings },
-  { title: "إدارة التحديثات | Updates", url: "/admin/updates", icon: Settings },
-  { title: "مستويات التعدين | Mining Levels", url: "/admin/mining-levels", icon: Zap },
-  { title: "قائمة الشرف | Call Out", url: "/admin/callout-personalities", icon: Star },
-  { title: "إحصائيات التفاعل | Stats", url: "/admin/engagement-stats", icon: TrendingUp },
-  { title: "المهام اليومية | Daily Tasks", url: "/admin/daily-tasks", icon: Calendar },
+  { title: getContent("admin_users_management", "إدارة المستخدمين"), url: "/admin/users", icon: Users },
+  { title: getContent("admin_kyc_management", "إدارة الهوية"), url: "/admin/kyc", icon: Shield },
+  { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },
+  { title: "إجابات الاستبيانات", url: "/admin/survey-responses", icon: ClipboardList },
+  { title: getContent("admin_learning_management", "إدارة التعلم"), url: "/admin/learning", icon: BookOpen },
+  { title: getContent("admin_content_management", "إدارة محتوى التطبيق"), url: "/admin/content", icon: Settings },
+  { title: getContent("admin_updates_management", "إدارة التحديثات"), url: "/admin/updates", icon: Settings },
+  { title: getContent("admin_mining_levels_management", "إدارة مستويات التعدين"), url: "/admin/mining-levels", icon: Zap },
+  { title: getContent("admin_callout_personalities_management", "قائمة الاستدعاء الشرفية"), url: "/admin/callout-personalities", icon: Star },
+  { title: "إحصائيات التفاعل", url: "/admin/engagement-stats", icon: TrendingUp },
+  { title: "المهام اليومية", url: "/admin/daily-tasks", icon: Calendar },
 ];
 
 export function AppSidebar() {
@@ -68,7 +68,7 @@ export function AppSidebar() {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel className="mixed-text">التنقل الرئيسي | Main Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel>{getContent("sidebar_main_navigation", "التنقل الرئيسي")}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => {
@@ -80,7 +80,7 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild>
                         <NavLink to={item.url} className={getNavClass}>
                           <item.icon className="h-4 w-4" />
-                          {(open || isMobile) && <span className="mixed-text">{item.title}</span>}
+                          {(open || isMobile) && <span>{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -91,14 +91,14 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel className="mixed-text">الوصول المبكر | Early Access</SidebarGroupLabel>
+            <SidebarGroupLabel>{getContent("sidebar_early_access", "الوصول المبكر")}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <NavLink to="/early-access" className={getNavClass}>
                       <Users className="h-4 w-4" />
-                      {(open || isMobile) && <span className="mixed-text">انضم الآن | Join Now</span>}
+                      {(open || isMobile) && <span>{getContent("sidebar_join_now", "انضم الآن")}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -108,7 +108,7 @@ export function AppSidebar() {
 
           {isAdmin && (
             <SidebarGroup>
-              <SidebarGroupLabel className="mixed-text">لوحة التحكم | Admin Panel</SidebarGroupLabel>
+              <SidebarGroupLabel>{getContent("sidebar_admin_panel", "لوحة التحكم")}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {adminMenuItems.map((item) => (
@@ -116,7 +116,7 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild>
                         <NavLink to={item.url} className={getNavClass}>
                           <item.icon className="h-4 w-4" />
-                          {(open || isMobile) && <span className="mixed-text">{item.title}</span>}
+                          {(open || isMobile) && <span>{item.title}</span>}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -136,13 +136,13 @@ export function AppSidebar() {
               className="w-full justify-start"
             >
               <LogOut className="h-4 w-4" />
-              {(open || isMobile) && <span className="mixed-text">تسجيل الخروج | Sign Out</span>}
+              {(open || isMobile) && <span>{getContent("sidebar_logout", "تسجيل الخروج")}</span>}
             </Button>
           ) : (
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
               <Link to="/auth">
                 <LogIn className="h-4 w-4" />
-                {(open || isMobile) && <span className="mixed-text">تسجيل الدخول | Sign In</span>}
+                {(open || isMobile) && <span>{getContent("sidebar_login", "تسجيل الدخول")}</span>}
               </Link>
             </Button>
           )}
