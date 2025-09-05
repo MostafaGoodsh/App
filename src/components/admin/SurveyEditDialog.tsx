@@ -111,13 +111,16 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
     setLoading(true);
     try {
       if (isCreateMode) {
+        const { data: userData } = await supabase.auth.getUser();
+        
         const { error } = await supabase
           .from("surveys")
           .insert({
             title: title.trim(),
             description: description.trim() || null,
             questions: questions as any,
-            is_active: false
+            is_active: false,
+            created_by: userData.user?.id
           });
 
         if (error) throw error;
