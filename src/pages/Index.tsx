@@ -81,13 +81,13 @@ const Index = () => {
                 <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR stable coin')}</Link>
+                <Link to="/call-out">{getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA')}</Link>
+                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/call-out">{getContent('hero_cta_5', 'Call out')}</Link>
+                <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
               </Button>
             </div>
           </div>

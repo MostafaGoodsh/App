@@ -15,7 +15,17 @@ const DailyTasks = () => {
         <meta name="description" content="أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي" />
       </Helmet>
       
-      <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
         {/* Hero Section */}
         <div className="text-center space-y-4">
           <h1 className="font-playfair text-4xl md:text-5xl font-bold arabic-text">
@@ -77,6 +87,8 @@ const DailyTasks = () => {
           onCompleteTask={completeTask}
           loading={loading}
         />
+          </div>
+        </div>
       </div>
     </>
   );

@@ -19,7 +19,17 @@ const StableCoin = () => {
         <meta name="description" content="تعرف على عملة MSR الثابتة المدعومة بالأصول المصرية" />
       </Helmet>
       
-      <main className="container mx-auto px-4 py-8 arabic-content">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <main className="container mx-auto px-4 py-8 arabic-content">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -115,7 +125,9 @@ const StableCoin = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+          </main>
+        </div>
+      </div>
     </>
   );
 };

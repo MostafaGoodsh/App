@@ -12,7 +12,17 @@ export default function Learning() {
         <link rel="canonical" href={canonical} />
       </Helmet>
       
-      <section className="py-8 arabic-content">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <section className="py-8 arabic-content">
         <div className="container mx-auto px-4 mb-8 text-center">
           <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 arabic-text">منصة التعلم التفاعلية</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto arabic-text">
@@ -21,7 +31,9 @@ export default function Learning() {
         </div>
         
         <LearningTimeline />
-      </section>
+          </section>
+        </div>
+      </div>
     </>
   );
 }

@@ -75,7 +75,17 @@ const Auth = () => {
         <meta name="description" content="تسجيل الدخول أو إنشاء حساب للوصول إلى المحفظة وتوثيق الهوية والاستبيانات." />
         <link rel="canonical" href={canonical} />
       </Helmet>
-      <section className="container mx-auto px-4 py-16 max-w-md">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <section className="container mx-auto px-4 py-16 max-w-md">
         <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">
           {mode === 'signin' ? 'تسجيل الدخول' : 'إنشاء حساب'}
         </h1>
@@ -122,7 +132,9 @@ const Auth = () => {
             </Button>
           </form>
         )}
-      </section>
+          </section>
+        </div>
+      </div>
     </>
   );
 };

@@ -83,7 +83,17 @@ const CallOut = () => {
         <meta name="description" content="قائمة استدعاء شرفية للشخصيات العامة المصرية والعربية المتسقة مع قيم وأهداف المنصة" />
       </Helmet>
       
-      <main className="container mx-auto px-4 py-8 arabic-content">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <main className="container mx-auto px-4 py-8 arabic-content">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
@@ -283,7 +293,9 @@ const CallOut = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+          </main>
+        </div>
+      </div>
     </>
   );
 };
