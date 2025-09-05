@@ -67,10 +67,10 @@ export default function Profile() {
     <div className="container max-w-4xl mx-auto p-6 arabic-content">
       <div className="mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 arabic-text">
-          البروفايل الشخصي
+          البروفايل
         </h1>
         <p className="text-sm text-muted-foreground arabic-text">
-          إدارة معلوماتك الشخصية وإعدادات الحساب
+          إدارة معلوماتك وإعداداتك
         </p>
       </div>
 

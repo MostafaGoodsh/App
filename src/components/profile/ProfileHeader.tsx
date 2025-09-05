@@ -104,7 +104,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           />
         </div>
         
-        <div className="text-center md:text-right flex-1 min-w-0">
+        <div className="text-center flex-1 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold mb-2 truncate">
             {profile.full_name || 'المستخدم'}
           </h1>
