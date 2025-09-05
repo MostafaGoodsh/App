@@ -95,36 +95,47 @@ export const useProfile = () => {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileName = `avatar.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
       
-      console.log('Upload filename:', fileName);
+      console.log('Upload file path:', filePath);
       
       // Delete old avatar if exists
       if (profile?.avatar_url) {
-        const oldPath = profile.avatar_url.split('/').pop();
-        if (oldPath && oldPath !== fileName) {
-          console.log('Removing old avatar:', `${user.id}/${oldPath}`);
-          await supabase.storage
-            .from('avatars')
-            .remove([`${user.id}/${oldPath}`]);
+        const urlParts = profile.avatar_url.split('/');
+        const oldFileName = urlParts[urlParts.length - 1];
+        const oldPath = `${user.id}/${oldFileName}`;
+        
+        console.log('Removing old avatar:', oldPath);
+        const { error: deleteError } = await supabase.storage
+          .from('avatars')
+          .remove([oldPath]);
+          
+        if (deleteError) {
+          console.log('Delete error (ignoring):', deleteError);
         }
       }
 
       console.log('Uploading to storage...');
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file, { upsert: true });
+        .upload(filePath, file, { 
+          upsert: true,
+          contentType: file.type
+        });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
-      console.log('Upload successful, getting public URL...');
+      console.log('Upload successful:', data);
+      
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
 
       console.log('Public URL:', publicUrl);
       
@@ -133,11 +144,22 @@ export const useProfile = () => {
       
       console.log('Profile updated successfully');
       return publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
+      
+      // More specific error messages
+      let errorMessage = "فشل في رفع الصورة";
+      if (error.message?.includes('row-level security')) {
+        errorMessage = "خطأ في أذونات النظام - يرجى المحاولة مرة أخرى";
+      } else if (error.message?.includes('size')) {
+        errorMessage = "حجم الملف كبير جداً";
+      } else if (error.message?.includes('format')) {
+        errorMessage = "نوع الملف غير مدعوم";
+      }
+      
       toast({
         title: "خطأ",
-        description: "فشل في رفع الصورة",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;

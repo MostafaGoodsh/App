@@ -1292,6 +1292,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      upload_avatar: {
+        Args: { content_type?: string; file_data: string; file_name: string }
+        Returns: Json
+      }
       validate_wallet_access: {
         Args: {
           p_access_type: string
