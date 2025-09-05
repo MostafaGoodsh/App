@@ -357,6 +357,7 @@ export type Database = {
       }
       learning_content: {
         Row: {
+          category: string | null
           comments_count: number | null
           content: string | null
           content_type: string | null
@@ -373,6 +374,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           comments_count?: number | null
           content?: string | null
           content_type?: string | null
@@ -389,6 +391,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           comments_count?: number | null
           content?: string | null
           content_type?: string | null

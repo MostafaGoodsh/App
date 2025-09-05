@@ -55,15 +55,15 @@ export default function Learning() {
             </TabsList>
             
             <TabsContent value="crypto">
-              <LearningTimeline />
+              <LearningTimeline category="crypto" />
             </TabsContent>
             
             <TabsContent value="general">
-              <LearningTimeline />
+              <LearningTimeline category="general" />
             </TabsContent>
             
             <TabsContent value="divine">
-              <LearningTimeline />
+              <LearningTimeline category="divine" />
             </TabsContent>
           </Tabs>
         </div>

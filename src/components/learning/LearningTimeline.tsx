@@ -19,7 +19,8 @@ import {
   FileText,
   Plus,
   Upload,
-  X
+  X,
+  Mic
 } from "lucide-react";
 
 interface LearningPost {
@@ -35,6 +36,7 @@ interface LearningPost {
   tags: string[] | null;
   difficulty_level: string;
   is_published: boolean;
+  category: 'crypto' | 'general' | 'divine';
   profile?: {
     full_name: string;
   };
@@ -50,7 +52,7 @@ interface Comment {
   };
 }
 
-export default function LearningTimeline() {
+export default function LearningTimeline({ category = 'crypto' }: { category?: 'crypto' | 'general' | 'divine' }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [posts, setPosts] = useState<LearningPost[]>([]);
@@ -64,6 +66,7 @@ export default function LearningTimeline() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [tags, setTags] = useState("");
   const [difficulty, setDifficulty] = useState("beginner");
+  const [postCategory, setPostCategory] = useState(category);
   
   // Comments states
   const [comments, setComments] = useState<{ [key: string]: Comment[] }>({});
@@ -76,15 +79,16 @@ export default function LearningTimeline() {
     if (user) {
       fetchUserLikes();
     }
-  }, [user]);
+  }, [user, category]);
 
   const fetchPosts = async () => {
     try {
-      // First get the posts
+      // First get the posts filtered by category
       const { data: postsData, error: postsError } = await supabase
         .from('learning_content')
         .select('*')
         .eq('is_published', true)
+        .eq('category', category)
         .order('created_at', { ascending: false });
 
       if (postsError) throw postsError;
@@ -101,10 +105,14 @@ export default function LearningTimeline() {
             
             return {
               ...post,
+              category: post.category as 'crypto' | 'general' | 'divine',
               profile: profileData
             };
           }
-          return post;
+          return {
+            ...post,
+            category: post.category as 'crypto' | 'general' | 'divine'
+          };
         })
       );
 
@@ -185,6 +193,7 @@ export default function LearningTimeline() {
           media_type: mediaType,
           tags: tags ? tags.split(',').map(tag => tag.trim()) : null,
           difficulty_level: difficulty,
+          category: postCategory,
           created_by: user.id,
           is_published: true
         }]);
@@ -342,7 +351,8 @@ export default function LearningTimeline() {
     return (
       <div className="mt-4 space-y-2">
         {post.media_urls.map((url, index) => {
-          const isVideo = url.includes('.mp4') || url.includes('.webm');
+          const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.avi') || url.includes('.mov');
+          const isAudio = url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg') || url.includes('.m4a');
           
           if (isVideo) {
             return (
@@ -351,6 +361,15 @@ export default function LearningTimeline() {
                 src={url} 
                 controls 
                 className="w-full rounded-lg max-h-96"
+              />
+            );
+          } else if (isAudio) {
+            return (
+              <audio 
+                key={index}
+                src={url} 
+                controls 
+                className="w-full"
               />
             );
           } else {
@@ -415,21 +434,27 @@ export default function LearningTimeline() {
               <SelectTrigger>
                 <SelectValue placeholder="نوع المحتوى" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="text">نص</SelectItem>
-                <SelectItem value="image">صورة</SelectItem>
-                <SelectItem value="video">فيديو</SelectItem>
-                <SelectItem value="mixed">مختلط</SelectItem>
-              </SelectContent>
+                <SelectContent>
+                  <SelectItem value="text">نص</SelectItem>
+                  <SelectItem value="image">صورة</SelectItem>
+                  <SelectItem value="video">فيديو</SelectItem>
+                  <SelectItem value="audio">صوت</SelectItem>
+                  <SelectItem value="mixed">مختلط</SelectItem>
+                </SelectContent>
             </Select>
 
-            {(mediaType === "image" || mediaType === "video" || mediaType === "mixed") && (
+            {(mediaType === "image" || mediaType === "video" || mediaType === "audio" || mediaType === "mixed") && (
               <div className="space-y-2">
                 <label className="block text-sm font-medium">رفع الملفات</label>
                 <Input
                   type="file"
                   multiple
-                  accept={mediaType === "image" ? "image/*" : mediaType === "video" ? "video/*" : "image/*,video/*"}
+                  accept={
+                    mediaType === "image" ? "image/*" : 
+                    mediaType === "video" ? "video/*" : 
+                    mediaType === "audio" ? "audio/*" :
+                    "image/*,video/*,audio/*"
+                  }
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []);
                     setSelectedFiles(prev => [...prev, ...files]);
@@ -464,6 +489,17 @@ export default function LearningTimeline() {
                 <SelectItem value="beginner">مبتدئ</SelectItem>
                 <SelectItem value="intermediate">متوسط</SelectItem>
                 <SelectItem value="advanced">متقدم</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={postCategory} onValueChange={(value) => setPostCategory(value as 'crypto' | 'general' | 'divine')}>
+              <SelectTrigger>
+                <SelectValue placeholder="القسم" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="crypto">مالي Crypto</SelectItem>
+                <SelectItem value="general">عام General</SelectItem>
+                <SelectItem value="divine">ديني Divine</SelectItem>
               </SelectContent>
             </Select>
 
@@ -505,6 +541,7 @@ export default function LearningTimeline() {
                     <Badge variant="outline">
                       {post.media_type === 'image' ? <ImageIcon className="h-3 w-3" /> :
                        post.media_type === 'video' ? <Video className="h-3 w-3" /> :
+                       post.media_type === 'audio' ? <Mic className="h-3 w-3" /> :
                        <FileText className="h-3 w-3" />}
                     </Badge>
                   )}
