@@ -70,17 +70,26 @@ const MiningLevelsManagement = () => {
     if (!editingLevel || !editForm) return;
 
     try {
+      console.log('Updating mining level:', editingLevel, editForm);
+      
+      const updateData = {
+        level_name: editForm.level_name,
+        required_account_strength: Number(editForm.required_account_strength),
+        mining_rate_per_hour: Number(editForm.mining_rate_per_hour),
+        upgrade_cost: Number(editForm.upgrade_cost)
+      };
+      
+      console.log('Update data:', updateData);
+
       const { error } = await supabase
         .from('mining_levels')
-        .update({
-          level_name: editForm.level_name,
-          required_account_strength: editForm.required_account_strength,
-          mining_rate_per_hour: editForm.mining_rate_per_hour,
-          upgrade_cost: editForm.upgrade_cost
-        })
+        .update(updateData)
         .eq('id', editingLevel);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
       toast({
         title: "تم الحفظ",
@@ -89,7 +98,7 @@ const MiningLevelsManagement = () => {
 
       setEditingLevel(null);
       setEditForm({});
-      fetchLevels();
+      await fetchLevels();
     } catch (error) {
       console.error('Error updating mining level:', error);
       toast({

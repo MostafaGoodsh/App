@@ -57,16 +57,16 @@ const Updates = () => {
         <meta name="description" content="تابع آخر التحديثات والإعلانات في منصة Crypto-MSR" />
       </Helmet>
       
-      <main className="container mx-auto px-4 py-8 arabic-text">
+      <main className="container mx-auto px-4 py-8 arabic-content">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Bell className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold">
+              <h1 className="text-3xl md:text-4xl font-bold arabic-text">
                 {getContent('updates_title', 'آخر التحديثات | Latest Updates')}
               </h1>
             </div>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground arabic-text">
               {getContent('updates_description', 'تابع آخر الأخبار والتحديثات في منصة Crypto-MSR')}
             </p>
           </div>
@@ -78,15 +78,15 @@ const Updates = () => {
                 <Card key={update.id} className="arabic-content">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2 arabic-content">
+                    <CardTitle className="flex items-center gap-2 arabic-text">
                         <Calendar className="w-5 h-5 text-primary" />
-                        <span className="text-right">
+                        <span className="arabic-text">
                           {update.content_key.includes('title') ? update.text_content : 'تحديث جديد'}
                         </span>
                       </CardTitle>
                       {index === 0 && <Badge variant="secondary">جديد</Badge>}
                     </div>
-                    <CardDescription className="text-right arabic-content">
+                    <CardDescription className="arabic-text">
                       {new Date(update.created_at).toLocaleDateString('ar-EG', {
                         year: 'numeric',
                         month: 'long',
@@ -95,10 +95,10 @@ const Updates = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="arabic-content">
-                    <p className="text-muted-foreground mb-4 text-right leading-relaxed">
+                    <p className="text-muted-foreground mb-4 arabic-text leading-relaxed">
                       {update.text_content}
                     </p>
-                    <div className="flex items-center gap-2 text-primary justify-end">
+                    <div className="flex items-center gap-2 text-primary arabic-text">
                       <span className="text-sm">اقرأ المزيد</span>
                       <ExternalLink className="w-4 h-4" />
                     </div>
@@ -109,8 +109,8 @@ const Updates = () => {
               <Card className="border-dashed border-2 border-primary/30 arabic-content">
                 <CardContent className="text-center py-12">
                   <Bell className="w-16 h-16 mx-auto mb-4 text-primary/60" />
-                  <h3 className="text-xl font-semibold mb-2">لا توجد تحديثات حالياً</h3>
-                  <p className="text-muted-foreground">سيتم إضافة التحديثات هنا عند توفرها</p>
+                  <h3 className="text-xl font-semibold mb-2 arabic-text">لا توجد تحديثات حالياً</h3>
+                  <p className="text-muted-foreground arabic-text">سيتم إضافة التحديثات هنا عند توفرها</p>
                 </CardContent>
               </Card>
             )}
@@ -119,10 +119,10 @@ const Updates = () => {
             <Card className="border-dashed border-2 border-primary/30 arabic-content">
               <CardContent className="text-center py-12">
                 <Bell className="w-16 h-16 mx-auto mb-4 text-primary/60" />
-                <h3 className="text-xl font-semibold mb-2">
+                <h3 className="text-xl font-semibold mb-2 arabic-text">
                   {getContent('coming_soon_title', 'المزيد من التحديثات قريباً')}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground arabic-text">
                   {getContent('coming_soon_description', 'نعمل باستمرار على تطوير المنصة وإضافة ميزات جديدة')}
                 </p>
               </CardContent>
