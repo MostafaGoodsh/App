@@ -50,7 +50,17 @@ const Surveys = () => {
         <meta name="description" content="الاستبيانات (Surveys) لجمع آراء المستخدمين وتحسين التجربة." />
         <link rel="canonical" href={canonical} />
       </Helmet>
-      <section className="container mx-auto px-4 py-16 arabic-content">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <section className="container mx-auto px-4 py-16 arabic-content">
         <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6 arabic-text">الاستبيانات (Surveys)</h1>
         <p className="text-muted-foreground max-w-2xl mb-8 arabic-text">
           شاركنا آراءك وساهم في تحسين تجربة المستخدمين على منصتنا.
@@ -126,7 +136,9 @@ const Surveys = () => {
             ))}
           </div>
         )}
-      </section>
+          </section>
+        </div>
+      </div>
     </>
   );
 };

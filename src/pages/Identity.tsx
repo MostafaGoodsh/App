@@ -338,7 +338,17 @@ const Identity = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       
-      <section className="container mx-auto px-4 py-16">
+      <div 
+        className="min-h-screen"
+        style={{
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="min-h-screen bg-background/90">
+          <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -773,15 +783,17 @@ const Identity = () => {
               </CardContent>
             </Card>
           )}
+            </div>
+          </section>
+          
+          <CameraCapture
+            isOpen={cameraOpen}
+            onClose={() => setCameraOpen(false)}
+            onCapture={(file) => setSelfieFile(file)}
+            title="التقاط صورة شخصية مع الوثيقة"
+          />
         </div>
-      </section>
-      
-      <CameraCapture
-        isOpen={cameraOpen}
-        onClose={() => setCameraOpen(false)}
-        onCapture={(file) => setSelfieFile(file)}
-        title="التقاط صورة شخصية مع الوثيقة"
-      />
+      </div>
     </>
   );
 };
