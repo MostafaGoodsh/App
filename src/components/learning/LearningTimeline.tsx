@@ -281,7 +281,7 @@ export default function LearningTimeline() {
             
             return {
               ...comment,
-              profiles: profileData
+              profile: profileData
             };
           }
           return comment;
