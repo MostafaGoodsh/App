@@ -65,15 +65,6 @@ export default function Profile() {
 
   return (
     <div className="container max-w-4xl mx-auto p-6 arabic-content">
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 arabic-text">
-          البروفايل
-        </h1>
-        <p className="text-sm text-muted-foreground arabic-text">
-          إدارة معلوماتك وإعداداتك
-        </p>
-      </div>
-
       <ProfileHeader profile={profile} />
 
       <Tabs defaultValue="overview" className="space-y-6">
