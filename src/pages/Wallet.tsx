@@ -107,27 +107,27 @@ const WalletFixed = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="text-center mb-8">
-        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-          لوحة تحكم المحافظ الرقمية
+        <h1 className="mixed-text-xl font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          لوحة تحكم المحافظ الرقمية | Digital Wallets Dashboard
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          إدارة شاملة ومتقدمة لمحافظك الرقمية مع ميزات التبادل والأمان
+        <p className="mixed-text text-lg text-muted-foreground max-w-2xl mx-auto">
+          إدارة شاملة ومتقدمة لمحافظك الرقمية مع ميزات التبادل والأمان | Comprehensive management of your digital wallets with exchange and security features
         </p>
       </div>
       
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+          <TabsTrigger value="dashboard" className="mixed-text-responsive flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
-            لوحة التحكم
+            لوحة التحكم | Dashboard
           </TabsTrigger>
-          <TabsTrigger value="connect" className="flex items-center gap-2">
+          <TabsTrigger value="connect" className="mixed-text-responsive flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            إضافة محفظة
+            إضافة محفظة | Add Wallet
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
+          <TabsTrigger value="settings" className="mixed-text-responsive flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            الإعدادات
+            الإعدادات | Settings
           </TabsTrigger>
         </TabsList>
         
@@ -143,12 +143,12 @@ const WalletFixed = () => {
         <TabsContent value="connect" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="mixed-text flex items-center gap-2">
                 <Wallet className="w-5 h-5" />
-                توصيل محفظة جديدة
+                توصيل محفظة جديدة | Connect New Wallet
               </CardTitle>
-              <CardDescription>
-                اختر نوع المحفظة التي تريد توصيلها أو إنشاء محفظة داخلية جديدة
+              <CardDescription className="mixed-text">
+                اختر نوع المحفظة التي تريد توصيلها أو إنشاء محفظة داخلية جديدة | Choose the wallet type you want to connect or create a new internal wallet
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -165,20 +165,20 @@ const WalletFixed = () => {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="mixed-text flex items-center gap-2">
                 <Settings className="w-5 h-5" />
-                إعدادات المحافظ
+                إعدادات المحافظ | Wallet Settings
               </CardTitle>
-              <CardDescription>
-                تخصيص تفضيلاتك وإعدادات الأمان
+              <CardDescription className="mixed-text">
+                تخصيص تفضيلاتك وإعدادات الأمان | Customize your preferences and security settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center py-8">
                 <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-2">إعدادات متقدمة</p>
-                <p className="text-sm text-muted-foreground">
-                  ستتوفر إعدادات إضافية قريباً لتحسين تجربة استخدام المحافظ
+                <p className="mixed-text text-muted-foreground mb-2">إعدادات متقدمة | Advanced Settings</p>
+                <p className="mixed-text text-sm text-muted-foreground">
+                  ستتوفر إعدادات إضافية قريباً لتحسين تجربة استخدام المحافظ | Additional settings will be available soon to improve wallet user experience
                 </p>
               </div>
             </CardContent>

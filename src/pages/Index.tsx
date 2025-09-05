@@ -63,31 +63,30 @@ const Index = () => {
                 <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
-                <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
-                  {getContent('hero_subtitle', 'منصة مصر الرقمية')}
+                <p className="mixed-text-xl text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
+                  منصة مصر الرقمية | Egypt's Digital Platform
                 </p>
                 <div className="text-4xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
                   𓂀
                 </div>
-                
               </div>
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4">
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
+                <Link to="/early-access" className="mixed-text-responsive">انضم الآن | Join Now</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
+                <Link to="/updates" className="mixed-text-responsive">آخر التحديثات | Updates</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR stable coin')}</Link>
+                <Link to="/stable-coin" className="mixed-text-responsive">عملة مستقرة | MSR Stable Coin</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA')}</Link>
+                <Link to="/rwa" className="mixed-text-responsive">أصول العالم الحقيقي | MSR-RWA</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
-                <Link to="/call-out">{getContent('hero_cta_5', 'Call out')}</Link>
+                <Link to="/call-out" className="mixed-text-responsive">تكريم الشخصيات | Call Out</Link>
               </Button>
             </div>
           </div>
