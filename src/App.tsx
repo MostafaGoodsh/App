@@ -33,6 +33,7 @@ import Profile from "./pages/Profile";
 import EngagementStatsAdmin from "./pages/EngagementStatsAdmin";
 import DailyTasksAdmin from "./pages/DailyTasksAdmin";
 import DailyTasks from "./pages/DailyTasks";
+import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => {
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
+                  <Route path="admin/survey-responses" element={<RequireAdmin><SurveyResponsesAdmin /></RequireAdmin>} />
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
                   <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
