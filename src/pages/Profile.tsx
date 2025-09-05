@@ -17,6 +17,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import StreakDisplay from "@/components/engagement/StreakDisplay";
 import DailyTasksList from "@/components/engagement/DailyTasksList";
+import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
 import { SocialLinks } from '@/components/profile/SocialLinks';
@@ -98,6 +99,9 @@ export default function Profile() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Daily Tasks Card - First Card */}
+          <DailyTasksCard />
+          
           <div className="grid gap-6 md:grid-cols-2">
             {/* Profile Info */}
             <Card>
