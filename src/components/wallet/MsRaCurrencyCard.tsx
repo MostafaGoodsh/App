@@ -313,13 +313,10 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         <div className="relative z-10 px-6 pb-4">
           <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
+              <div className="col-span-2 text-center">
                 <div className="text-xs text-muted-foreground mb-1">Balance | الرصيد</div>
-                <div className="text-lg font-bold text-primary">{msRaBalance.toFixed(1)} MS-RA</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground mb-1">Progress | التقدم</div>
-                <div className="text-lg font-bold text-secondary">{miningProgress.toFixed(0)}%</div>
+                <div className="text-xl font-bold text-primary">{msRaBalance.toFixed(1)}</div>
+                <div className="text-sm text-primary">$Ms-Ra</div>
               </div>
             </div>
             <div className="mt-3">
@@ -381,7 +378,6 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>التقدم</span>
                   <span>{miningProgress.toFixed(1)}%</span>
                 </div>
                 <Progress value={miningProgress} className="h-2" />
