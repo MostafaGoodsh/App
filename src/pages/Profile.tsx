@@ -14,6 +14,9 @@ import {
   Languages
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
+import { useEngagementStats } from "@/hooks/useEngagementStats";
+import StreakDisplay from "@/components/engagement/StreakDisplay";
+import DailyTasksList from "@/components/engagement/DailyTasksList";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
 import { SocialLinks } from '@/components/profile/SocialLinks';
@@ -23,11 +26,19 @@ import { NotificationSettingsDialog } from '@/components/profile/NotificationSet
 
 export default function Profile() {
   const { profile, loading } = useProfile();
+  const { 
+    stats, 
+    dailyTasks, 
+    completedTasks, 
+    completeTask, 
+    isTaskCompleted,
+    loading: statsLoading 
+  } = useEngagementStats();
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
   const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
 
-  if (loading) {
+  if (loading || statsLoading) {
     return (
       <div className="container max-w-4xl mx-auto p-6 space-y-6">
         <Skeleton className="h-48 w-full" />

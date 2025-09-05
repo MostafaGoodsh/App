@@ -30,6 +30,8 @@ import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
 import CalloutPersonalitiesAdmin from "./pages/CalloutPersonalitiesAdmin";
 import UpdatesAdmin from "./pages/UpdatesAdmin";
 import Profile from "./pages/Profile";
+import EngagementStatsAdmin from "./pages/EngagementStatsAdmin";
+import DailyTasksAdmin from "./pages/DailyTasksAdmin";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,8 @@ const App = () => {
                   <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
+                  <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />
+                  <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

@@ -178,6 +178,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          points_reward: number | null
+          task_key: string
+          task_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          task_key: string
+          task_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          task_key?: string
+          task_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       early_access: {
         Row: {
           created_at: string
@@ -837,6 +876,90 @@ export type Database = {
         }
         Relationships: []
       }
+      user_daily_task_completions: {
+        Row: {
+          completed_date: string
+          created_at: string
+          id: string
+          points_earned: number | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          points_earned?: number | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          points_earned?: number | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_engagement_stats: {
+        Row: {
+          created_at: string
+          current_streak: number | null
+          daily_logins: number | null
+          id: string
+          last_login_date: string | null
+          longest_streak: number | null
+          monthly_logins: number | null
+          profile_completion_score: number | null
+          total_comments: number | null
+          total_content_views: number | null
+          total_likes: number | null
+          total_mining_hours: number | null
+          total_sessions: number | null
+          updated_at: string
+          user_id: string
+          weekly_logins: number | null
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number | null
+          daily_logins?: number | null
+          id?: string
+          last_login_date?: string | null
+          longest_streak?: number | null
+          monthly_logins?: number | null
+          profile_completion_score?: number | null
+          total_comments?: number | null
+          total_content_views?: number | null
+          total_likes?: number | null
+          total_mining_hours?: number | null
+          total_sessions?: number | null
+          updated_at?: string
+          user_id: string
+          weekly_logins?: number | null
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number | null
+          daily_logins?: number | null
+          id?: string
+          last_login_date?: string | null
+          longest_streak?: number | null
+          monthly_logins?: number | null
+          profile_completion_score?: number | null
+          total_comments?: number | null
+          total_content_views?: number | null
+          total_likes?: number | null
+          total_mining_hours?: number | null
+          total_sessions?: number | null
+          updated_at?: string
+          user_id?: string
+          weekly_logins?: number | null
+        }
+        Relationships: []
+      }
       user_mining_profiles: {
         Row: {
           account_strength: number
@@ -1182,6 +1305,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      complete_daily_task: {
+        Args: { p_task_id: string }
+        Returns: Json
+      }
       create_wallet_mfa_session: {
         Args: { p_wallet_id: string }
         Returns: Json
@@ -1289,6 +1416,10 @@ export type Database = {
         Returns: boolean
       }
       update_mining_progress: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      update_user_engagement_stats: {
         Args: { p_user_id: string }
         Returns: Json
       }
