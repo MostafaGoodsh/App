@@ -70,26 +70,25 @@ const MiningLevelsManagement = () => {
     if (!editingLevel || !editForm) return;
 
     try {
-      console.log('Updating mining level:', editingLevel, editForm);
-      
       const updateData = {
-        level_name: editForm.level_name,
-        required_account_strength: Number(editForm.required_account_strength),
-        mining_rate_per_hour: Number(editForm.mining_rate_per_hour),
-        upgrade_cost: Number(editForm.upgrade_cost)
+        level_name: editForm.level_name || '',
+        required_account_strength: Number(editForm.required_account_strength || 0),
+        mining_rate_per_hour: Number(editForm.mining_rate_per_hour || 0),
+        upgrade_cost: Number(editForm.upgrade_cost || 0)
       };
-      
-      console.log('Update data:', updateData);
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('mining_levels')
         .update(updateData)
-        .eq('id', editingLevel);
+        .eq('id', editingLevel)
+        .select();
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('خطأ في التحديث:', error);
         throw error;
       }
+
+      console.log('تم التحديث بنجاح:', data);
 
       toast({
         title: "تم الحفظ",
@@ -98,12 +97,12 @@ const MiningLevelsManagement = () => {
 
       setEditingLevel(null);
       setEditForm({});
-      await fetchLevels();
-    } catch (error) {
-      console.error('Error updating mining level:', error);
+      fetchLevels();
+    } catch (error: any) {
+      console.error('خطأ في حفظ التعديلات:', error);
       toast({
         title: "خطأ",
-        description: "فشل في تحديث مستوى التعدين",
+        description: error.message || "فشل في تحديث مستوى التعدين",
         variant: "destructive"
       });
     }
@@ -192,7 +191,7 @@ const MiningLevelsManagement = () => {
                     <Input
                       type="number"
                       value={editForm.required_account_strength || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, required_account_strength: parseInt(e.target.value) }))}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, required_account_strength: Number(e.target.value) || 0 }))}
                       className="mt-1"
                     />
                   ) : (
@@ -209,7 +208,7 @@ const MiningLevelsManagement = () => {
                       type="number"
                       step="0.1"
                       value={editForm.mining_rate_per_hour || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, mining_rate_per_hour: parseFloat(e.target.value) }))}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, mining_rate_per_hour: Number(e.target.value) || 0 }))}
                       className="mt-1"
                     />
                   ) : (
@@ -226,7 +225,7 @@ const MiningLevelsManagement = () => {
                       type="number"
                       step="0.01"
                       value={editForm.upgrade_cost || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, upgrade_cost: parseFloat(e.target.value) }))}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, upgrade_cost: Number(e.target.value) || 0 }))}
                       className="mt-1"
                     />
                   ) : (
@@ -244,7 +243,7 @@ const MiningLevelsManagement = () => {
                       step="0.1"
                       value={editForm.mining_rate_per_hour ? (editForm.mining_rate_per_hour * 24).toFixed(1) : ''}
                       onChange={(e) => {
-                        const dailyProduction = parseFloat(e.target.value) || 0;
+                        const dailyProduction = Number(e.target.value) || 0;
                         const hourlyRate = dailyProduction / 24;
                         setEditForm(prev => ({ ...prev, mining_rate_per_hour: hourlyRate }));
                       }}

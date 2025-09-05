@@ -97,68 +97,68 @@ export default function Profile() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Profile Info with Social Links */}
           <Card>
             <CardHeader>
-              <CardTitle className="arabic-text">معلومات الملف الشخصي</CardTitle>
+              <CardTitle className="arabic-text text-right">معلومات الملف الشخصي</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-6">
+                {/* Personal Information */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <div>
+                  <div className="flex items-center gap-3 justify-end">
+                    <div className="text-right">
                       <p className="text-sm text-muted-foreground arabic-text">الاسم</p>
-                      <p className="font-medium arabic-text">{profile.full_name || 'غير محدد'}</p>
+                      <p className="font-medium arabic-text text-lg">{profile.full_name || 'غير محدد'}</p>
                     </div>
+                    <User className="w-5 h-5 text-muted-foreground" />
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <div>
+                  <div className="flex items-center gap-3 justify-end">
+                    <div className="text-right">
                       <p className="text-sm text-muted-foreground arabic-text">تاريخ الانضمام</p>
                       <p className="font-medium arabic-text">
                         {new Date(profile.created_at).toLocaleDateString('ar-SA')}
                       </p>
                     </div>
+                    <Calendar className="w-5 h-5 text-muted-foreground" />
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <Languages className="w-4 h-4 text-muted-foreground" />
-                    <div>
+                  <div className="flex items-center gap-3 justify-end">
+                    <div className="text-right">
                       <p className="text-sm text-muted-foreground arabic-text">اللغة المفضلة</p>
                       <p className="font-medium arabic-text">
                         {profile.preferred_language === 'ar' ? 'العربية' : 'English'}
                       </p>
                     </div>
+                    <Languages className="w-5 h-5 text-muted-foreground" />
                   </div>
                 </div>
 
-                {/* Social Links */}
-                <div>
-                  <h3 className="font-medium mb-3 arabic-text">روابط التواصل</h3>
-                  <div className="flex flex-wrap gap-2">
+                {/* Social Links Section */}
+                <div className="pt-4 border-t">
+                  <h3 className="font-medium mb-4 arabic-text text-right text-lg">روابط التواصل</h3>
+                  <div className="grid gap-3">
                     {[
-                      { name: 'الموقع الشخصي', url: profile.website_url, icon: 'globe' },
-                      { name: 'Instagram', url: profile.instagram_url, icon: 'instagram' },
-                      { name: 'Twitter', url: profile.twitter_url, icon: 'twitter' },
-                      { name: 'LinkedIn', url: profile.linkedin_url, icon: 'linkedin' },
-                      { name: 'Facebook', url: profile.facebook_url, icon: 'facebook' }
+                      { name: 'الموقع الشخصي', url: profile.website_url },
+                      { name: 'Instagram', url: profile.instagram_url },
+                      { name: 'Twitter', url: profile.twitter_url },
+                      { name: 'LinkedIn', url: profile.linkedin_url },
+                      { name: 'Facebook', url: profile.facebook_url }
                     ].filter(link => link.url && link.url.trim() !== '').map((link) => (
                       <Button
                         key={link.name}
                         variant="outline"
                         size="sm"
                         asChild
-                        className="text-primary hover:text-primary-foreground"
+                        className="justify-start text-right w-full arabic-text"
                       >
                         <a
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1"
+                          className="flex items-center justify-center gap-2"
                         >
-                          <span className="text-xs arabic-text">{link.name}</span>
+                          <span className="text-sm arabic-text">{link.name}</span>
                         </a>
                       </Button>
                     ))}
@@ -169,7 +169,9 @@ export default function Profile() {
                       profile.linkedin_url,
                       profile.facebook_url
                     ].some(url => url && url.trim() !== '') && (
-                      <p className="text-sm text-muted-foreground arabic-text">لا توجد روابط متاحة</p>
+                      <p className="text-sm text-muted-foreground arabic-text text-center py-4">
+                        لا توجد روابط متاحة
+                      </p>
                     )}
                   </div>
                 </div>
