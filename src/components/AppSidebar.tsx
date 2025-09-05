@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Wallet, Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Pickaxe, Zap, Star, User, TrendingUp, Calendar } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,13 +19,10 @@ import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
 
 const useMenuItems = (getContent: (key: string, fallback?: string) => string) => [
+  { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
   { title: getContent("sidebar_home", "الرئيسية"), url: "/", icon: Home },
   { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
-  { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
-  { title: getContent("sidebar_mining", "التعدين"), url: "/mining", icon: Pickaxe, requireAuth: true },
-  { title: getContent("sidebar_identity", "الهوية"), url: "/identity", icon: Users, requireAuth: true },
   { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
-  { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
 ];
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
