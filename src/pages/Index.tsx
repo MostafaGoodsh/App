@@ -6,6 +6,7 @@ import { MsRaCurrencyCard } from "@/components/wallet/MsRaCurrencyCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
+import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -93,6 +94,9 @@ const Index = () => {
         </section>
 
         <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
+          {/* Daily Tasks Card - First Card */}
+          <DailyTasksCard />
+          
           {[
             { 
               imageKey: 'learning_card_image',
