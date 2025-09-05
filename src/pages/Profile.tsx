@@ -56,8 +56,8 @@ export default function Profile() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <User className="w-12 h-12 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2 arabic-text">البروفايل غير متوفر</h2>
-            <p className="text-muted-foreground arabic-text">لم يتم العثور على بيانات البروفايل</p>
+            <h2 className="text-xl font-semibold mb-2">البروفايل غير متوفر</h2>
+            <p className="text-muted-foreground">لم يتم العثور على بيانات البروفايل</p>
           </CardContent>
         </Card>
       </div>
@@ -67,13 +67,11 @@ export default function Profile() {
   return (
     <div className="container max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold arabic-text mb-2">
-          <span className="block sm:hidden">البروفايل الشخصي</span>
-          <span className="hidden sm:block">البروفايل الشخصي | Personal Profile</span>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+          البروفايل الشخصي
         </h1>
-        <p className="text-sm sm:text-base text-muted-foreground arabic-text">
-          <span className="block sm:hidden">إدارة معلوماتك الشخصية وإعدادات الحساب</span>
-          <span className="hidden sm:block">إدارة معلوماتك الشخصية وإعدادات الحساب | Manage your personal information and account settings</span>
+        <p className="text-sm text-muted-foreground">
+          إدارة معلوماتك الشخصية وإعدادات الحساب
         </p>
       </div>
 
@@ -81,33 +79,21 @@ export default function Profile() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 h-auto">
-          <TabsTrigger value="overview" className="arabic-text flex-col py-2 gap-1">
+          <TabsTrigger value="overview" className="flex-col py-2 gap-1">
             <User className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">
-              <span className="block sm:hidden">نظرة عامة</span>
-              <span className="hidden sm:block">نظرة عامة | Overview</span>
-            </span>
+            <span className="text-xs">نظرة عامة</span>
           </TabsTrigger>
-          <TabsTrigger value="edit" className="arabic-text flex-col py-2 gap-1">
+          <TabsTrigger value="edit" className="flex-col py-2 gap-1">
             <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">
-              <span className="block sm:hidden">تحرير</span>
-              <span className="hidden sm:block">تحرير | Edit</span>
-            </span>
+            <span className="text-xs">تحرير</span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="arabic-text flex-col py-2 gap-1">
+          <TabsTrigger value="activity" className="flex-col py-2 gap-1">
             <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">
-              <span className="block sm:hidden">النشاط</span>
-              <span className="hidden sm:block">النشاط | Activity</span>
-            </span>
+            <span className="text-xs">النشاط</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="arabic-text flex-col py-2 gap-1">
+          <TabsTrigger value="settings" className="flex-col py-2 gap-1">
             <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">
-              <span className="block sm:hidden">الإعدادات</span>
-              <span className="hidden sm:block">الإعدادات | Settings</span>
-            </span>
+            <span className="text-xs">الإعدادات</span>
           </TabsTrigger>
         </TabsList>
 
@@ -116,24 +102,22 @@ export default function Profile() {
             {/* Profile Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="arabic-text">
-                  معلومات الملف الشخصي | Profile Information
-                </CardTitle>
+                <CardTitle>معلومات الملف الشخصي</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
                   <User className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground arabic-text">الاسم</p>
-                    <p className="font-medium arabic-text">{profile.full_name || 'غير محدد'}</p>
+                    <p className="text-sm text-muted-foreground">الاسم</p>
+                    <p className="font-medium">{profile.full_name || 'غير محدد'}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground arabic-text">تاريخ الانضمام</p>
-                    <p className="font-medium arabic-text">
+                    <p className="text-sm text-muted-foreground">تاريخ الانضمام</p>
+                    <p className="font-medium">
                       {new Date(profile.created_at).toLocaleDateString('ar-SA')}
                     </p>
                   </div>
@@ -142,8 +126,8 @@ export default function Profile() {
                 <div className="flex items-center gap-3">
                   <Languages className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground arabic-text">اللغة المفضلة</p>
-                    <p className="font-medium arabic-text">
+                    <p className="text-sm text-muted-foreground">اللغة المفضلة</p>
+                    <p className="font-medium">
                       {profile.preferred_language === 'ar' ? 'العربية' : 'English'}
                     </p>
                   </div>
@@ -154,19 +138,17 @@ export default function Profile() {
             {/* Account Stats */}
             <Card>
               <CardHeader>
-                <CardTitle className="arabic-text">
-                  إحصائيات الحساب | Account Statistics
-                </CardTitle>
+                <CardTitle>إحصائيات الحساب</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div className="p-3 bg-primary/10 rounded-lg">
-                    <p className="text-2xl font-bold text-primary">0</p>
-                    <p className="text-sm text-muted-foreground arabic-text">المنشورات</p>
+                    <p className="text-xl sm:text-2xl font-bold text-primary">0</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">المنشورات</p>
                   </div>
                   <div className="p-3 bg-secondary/10 rounded-lg">
-                    <p className="text-2xl font-bold text-secondary-foreground">0</p>
-                    <p className="text-sm text-muted-foreground arabic-text">المتابعون</p>
+                    <p className="text-xl sm:text-2xl font-bold text-secondary-foreground">0</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">المتابعون</p>
                   </div>
                 </div>
               </CardContent>
@@ -183,17 +165,13 @@ export default function Profile() {
         <TabsContent value="activity">
           <Card>
             <CardHeader>
-              <CardTitle className="arabic-text">
-                سجل النشاط | Activity Log
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                تتبع نشاطاتك الأخيرة على المنصة | Track your recent activities on the platform
-              </CardDescription>
+              <CardTitle>سجل النشاط</CardTitle>
+              <CardDescription>تتبع نشاطاتك الأخيرة على المنصة</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
                 <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground arabic-text">لا توجد أنشطة مسجلة حتى الآن</p>
+                <p className="text-muted-foreground">لا توجد أنشطة مسجلة حتى الآن</p>
               </div>
             </CardContent>
           </Card>
@@ -202,62 +180,53 @@ export default function Profile() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle className="arabic-text">
-                إعدادات الحساب | Account Settings
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                إدارة إعدادات الخصوصية والأمان | Manage privacy and security settings
-              </CardDescription>
+              <CardTitle>إعدادات الحساب</CardTitle>
+              <CardDescription>إدارة إعدادات الخصوصية والأمان</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">
-                      إعدادات الخصوصية | Privacy Settings
-                    </h3>
-                    <p className="text-sm text-muted-foreground arabic-text">
-                      التحكم في من يمكنه رؤية معلوماتك | Control who can see your information
+                    <h3 className="font-medium">إعدادات الخصوصية</h3>
+                    <p className="text-sm text-muted-foreground">
+                      التحكم في من يمكنه رؤية معلوماتك
                     </p>
                   </div>
                   <Button 
-                    variant="outline" 
-                    className="arabic-text"
+                    variant="outline"
                     onClick={() => setPrivacyDialogOpen(true)}
                   >
-                    إعدادات | Settings
+                    إعدادات
                   </Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">الأمان | Security</h3>
-                    <p className="text-sm text-muted-foreground arabic-text">
-                      تغيير كلمة المرور والمصادقة الثنائية | Change password and two-factor authentication
+                    <h3 className="font-medium">الأمان</h3>
+                    <p className="text-sm text-muted-foreground">
+                      تغيير كلمة المرور والمصادقة الثنائية
                     </p>
                   </div>
                   <Button 
-                    variant="outline" 
-                    className="arabic-text"
+                    variant="outline"
                     onClick={() => setSecurityDialogOpen(true)}
                   >
-                    إعدادات | Settings
+                    إعدادات
                   </Button>
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium arabic-text">الإشعارات | Notifications</h3>
-                    <p className="text-sm text-muted-foreground arabic-text">
-                      إدارة تفضيلات الإشعارات | Manage notification preferences
+                    <h3 className="font-medium">الإشعارات</h3>
+                    <p className="text-sm text-muted-foreground">
+                      إدارة تفضيلات الإشعارات
                     </p>
                   </div>
                   <Button 
-                    variant="outline" 
-                    className="arabic-text"
+                    variant="outline"
                     onClick={() => setNotificationDialogOpen(true)}
                   >
-                    إعدادات | Settings
+                    إعدادات
                   </Button>
                 </div>
               </div>

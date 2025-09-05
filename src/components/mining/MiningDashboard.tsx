@@ -174,10 +174,10 @@ const MiningDashboard = () => {
             <Coins className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-lg sm:text-2xl font-bold truncate">
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
               {((profile?.total_mined || 0) + currentMined).toFixed(6)}
             </div>
-            <p className="text-xs text-muted-foreground whitespace-nowrap">Ms-Ra</p>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">MS-RA</p>
           </CardContent>
         </Card>
 
