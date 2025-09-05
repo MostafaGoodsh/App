@@ -68,16 +68,18 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full flex items-center justify-center">
             <div className="flex gap-2">
-              <label htmlFor="avatar-upload" className="cursor-pointer">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="w-8 h-8 p-0"
-                  disabled={uploading}
-                >
-                  <Camera className="w-4 h-4" />
-                </Button>
-              </label>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="w-8 h-8 p-0"
+                disabled={uploading}
+                onClick={() => {
+                  console.log('Camera button clicked');
+                  document.getElementById('avatar-upload')?.click();
+                }}
+              >
+                <Camera className="w-4 h-4" />
+              </Button>
               
               {profile.avatar_url && (
                 <Button
