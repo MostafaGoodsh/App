@@ -56,8 +56,8 @@ export default function Profile() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <User className="w-12 h-12 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">البروفايل غير متوفر</h2>
-            <p className="text-muted-foreground">لم يتم العثور على بيانات البروفايل</p>
+            <h2 className="text-xl font-semibold mb-2 arabic-text">البروفايل غير متوفر</h2>
+            <p className="text-muted-foreground arabic-text">لم يتم العثور على بيانات البروفايل</p>
           </CardContent>
         </Card>
       </div>
@@ -65,12 +65,12 @@ export default function Profile() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-6">
+    <div className="container max-w-4xl mx-auto p-6 arabic-content">
       <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 arabic-text">
           البروفايل الشخصي
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground arabic-text">
           إدارة معلوماتك الشخصية وإعدادات الحساب
         </p>
       </div>
@@ -81,19 +81,19 @@ export default function Profile() {
         <TabsList className="grid w-full grid-cols-4 h-auto">
           <TabsTrigger value="overview" className="flex-col py-2 gap-1">
             <User className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs">نظرة عامة</span>
+            <span className="text-xs arabic-text">نظرة عامة</span>
           </TabsTrigger>
           <TabsTrigger value="edit" className="flex-col py-2 gap-1">
             <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs">تحرير</span>
+            <span className="text-xs arabic-text">تحرير</span>
           </TabsTrigger>
           <TabsTrigger value="activity" className="flex-col py-2 gap-1">
             <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs">النشاط</span>
+            <span className="text-xs arabic-text">النشاط</span>
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex-col py-2 gap-1">
             <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs">الإعدادات</span>
+            <span className="text-xs arabic-text">الإعدادات</span>
           </TabsTrigger>
         </TabsList>
 
@@ -102,14 +102,14 @@ export default function Profile() {
             {/* Profile Info */}
             <Card>
               <CardHeader>
-                <CardTitle>معلومات الملف الشخصي</CardTitle>
+                <CardTitle className="arabic-text">معلومات الملف الشخصي</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
                   <User className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">الاسم</p>
-                    <p className="font-medium">{profile.full_name || 'غير محدد'}</p>
+                    <p className="text-sm text-muted-foreground arabic-text">الاسم</p>
+                    <p className="font-medium arabic-text">{profile.full_name || 'غير محدد'}</p>
                   </div>
                 </div>
                 

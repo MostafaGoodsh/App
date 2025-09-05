@@ -105,12 +105,12 @@ const WalletFixed = () => {
 
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
       <div className="text-center mb-8">
-        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent arabic-text">
           لوحة تحكم المحافظ الرقمية
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
           إدارة شاملة ومتقدمة لمحافظك الرقمية مع ميزات التبادل والأمان
         </p>
       </div>
@@ -123,11 +123,11 @@ const WalletFixed = () => {
           </TabsTrigger>
           <TabsTrigger value="connect" className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            إضافة محفظة
+            <span className="arabic-text">إضافة محفظة</span>
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            الإعدادات
+            <span className="arabic-text">الإعدادات</span>
           </TabsTrigger>
         </TabsList>
         
@@ -147,7 +147,7 @@ const WalletFixed = () => {
                 <Wallet className="w-5 h-5" />
                 توصيل محفظة جديدة
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="arabic-text">
                 اختر نوع المحفظة التي تريد توصيلها أو إنشاء محفظة داخلية جديدة
               </CardDescription>
             </CardHeader>
@@ -169,15 +169,15 @@ const WalletFixed = () => {
                 <Settings className="w-5 h-5" />
                 إعدادات المحافظ
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="arabic-text">
                 تخصيص تفضيلاتك وإعدادات الأمان
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="text-center py-8">
                 <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-2">إعدادات متقدمة</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground mb-2 arabic-text">إعدادات متقدمة</p>
+                <p className="text-sm text-muted-foreground arabic-text">
                   ستتوفر إعدادات إضافية قريباً لتحسين تجربة استخدام المحافظ
                 </p>
               </div>
