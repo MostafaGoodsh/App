@@ -19,6 +19,7 @@ interface LearningContent {
   difficulty_level: string;
   tags: string[];
   is_published: boolean;
+  language?: 'ar' | 'en';
 }
 
 interface LearningEditDialogProps {
@@ -36,6 +37,7 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [difficultyLevel, setDifficultyLevel] = useState(content.difficulty_level || "beginner");
   const [tagsText, setTagsText] = useState(content.tags?.join(", ") || "");
+  const [language, setLanguage] = useState<'ar' | 'en'>(content.language || 'ar');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -88,6 +90,7 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
         media_type: mediaType,
         difficulty_level: difficultyLevel,
         tags: tags.length > 0 ? tags : null,
+        language: language,
         updated_at: new Date().toISOString()
       };
 
@@ -129,6 +132,7 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
       setMediaType(content.media_type || "text");
       setDifficultyLevel(content.difficulty_level || "beginner");
       setTagsText(content.tags?.join(", ") || "");
+      setLanguage(content.language || 'ar');
       setSelectedFiles([]);
     }
     setOpen(newOpen);
@@ -146,19 +150,35 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
           تحرير
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className={`max-w-2xl max-h-[80vh] overflow-y-auto ${language === 'ar' ? 'arabic-content' : ''}`}>
         <DialogHeader>
           <DialogTitle>تحرير المحتوى التعليمي</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">عنوان المحتوى *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="أدخل عنوان المحتوى"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">عنوان المحتوى *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="أدخل عنوان المحتوى"
+                className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+                dir={language === 'ar' ? 'rtl' : 'ltr'}
+              />
+            </div>
+            <div>
+              <Label htmlFor="language">اللغة / Language</Label>
+              <Select value={language} onValueChange={(value: 'ar' | 'en') => setLanguage(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ar">العربية</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
@@ -278,6 +298,8 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
               onChange={(e) => setContentText(e.target.value)}
               placeholder="أدخل نص المحتوى التعليمي"
               rows={6}
+              className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+              dir={language === 'ar' ? 'rtl' : 'ltr'}
             />
           </div>
 
@@ -288,6 +310,8 @@ export default function LearningEditDialog({ content, onContentUpdated, disabled
               value={tagsText}
               onChange={(e) => setTagsText(e.target.value)}
               placeholder="مثال: بيتكوين, أساسيات, تشفير"
+              className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+              dir={language === 'ar' ? 'rtl' : 'ltr'}
             />
           </div>
 

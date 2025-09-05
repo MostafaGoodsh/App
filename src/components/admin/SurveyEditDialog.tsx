@@ -24,6 +24,7 @@ interface Survey {
   description: string;
   questions: Question[];
   is_active: boolean;
+  language?: 'ar' | 'en';
 }
 
 interface SurveyEditDialogProps {
@@ -37,6 +38,7 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
   const [title, setTitle] = useState(survey?.title || "");
   const [description, setDescription] = useState(survey?.description || "");
   const [questions, setQuestions] = useState<Question[]>(survey?.questions || []);
+  const [language, setLanguage] = useState<'ar' | 'en'>(survey?.language || 'ar');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   
@@ -120,6 +122,7 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
             description: description.trim() || null,
             questions: questions as any,
             is_active: false,
+            language: language,
             created_by: userData.user?.id
           });
 
@@ -136,6 +139,7 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
             title: title.trim(),
             description: description.trim() || null,
             questions: questions as any,
+            language: language,
             updated_at: new Date().toISOString()
           })
           .eq("id", survey!.id);
@@ -167,10 +171,12 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
         setTitle(survey.title);
         setDescription(survey.description || "");
         setQuestions(survey.questions || []);
+        setLanguage(survey.language || 'ar');
       } else {
         setTitle("");
         setDescription("");
         setQuestions([]);
+        setLanguage('ar');
       }
     }
     setOpen(newOpen);
@@ -184,12 +190,12 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
           {isCreateMode ? "إنشاء استبيان جديد" : "تحرير"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${language === 'ar' ? 'arabic-content' : ''}`}>
         <DialogHeader>
           <DialogTitle>{isCreateMode ? "إنشاء استبيان جديد" : "تحرير الاستبيان"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="title">عنوان الاستبيان *</Label>
               <Input
@@ -197,6 +203,8 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="أدخل عنوان الاستبيان"
+                className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+                dir={language === 'ar' ? 'rtl' : 'ltr'}
               />
             </div>
             <div>
@@ -206,7 +214,21 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="أدخل وصف الاستبيان"
+                className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+                dir={language === 'ar' ? 'rtl' : 'ltr'}
               />
+            </div>
+            <div>
+              <Label htmlFor="language">اللغة / Language</Label>
+              <Select value={language} onValueChange={(value: 'ar' | 'en') => setLanguage(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ar">العربية</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -243,6 +265,8 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
                         onChange={(e) => updateQuestion(question.id, 'question', e.target.value)}
                         placeholder="أدخل نص السؤال"
                         rows={2}
+                        className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+                        dir={language === 'ar' ? 'rtl' : 'ltr'}
                       />
                     </div>
                     <div>
@@ -284,6 +308,8 @@ export default function SurveyEditDialog({ survey, onSurveyUpdated, disabled }: 
                             value={option}
                             onChange={(e) => updateOption(question.id, optionIndex, e.target.value)}
                             placeholder={`الخيار ${optionIndex + 1}`}
+                            className={language === 'ar' ? 'arabic-text text-right' : 'text-left'}
+                            dir={language === 'ar' ? 'rtl' : 'ltr'}
                           />
                           <Button
                             size="sm"
