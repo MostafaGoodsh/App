@@ -20,13 +20,13 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('يرجى اختيار ملف صورة صالح | Please select a valid image file');
+      alert('يرجى اختيار ملف صورة صالح');
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      alert('حجم الملف يجب أن يكون أقل من 5 ميجابايت | File size must be less than 5MB');
+      alert('حجم الملف يجب أن يكون أقل من 5 ميجابايت');
       return;
     }
 
@@ -44,7 +44,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
   };
 
   const handleDeleteAvatar = async () => {
-    if (window.confirm('هل أنت متأكد من حذف الصورة الشخصية؟ | Are you sure you want to delete your profile picture?')) {
+    if (window.confirm('هل أنت متأكد من حذف الصورة الشخصية؟')) {
       await deleteAvatar();
     }
   };
@@ -105,24 +105,23 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
         </div>
         
         <div className="text-center md:text-right flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold arabic-text mb-2 truncate">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 truncate">
             {profile.full_name || 'المستخدم'}
           </h1>
           
-          <p className="text-sm sm:text-base text-muted-foreground arabic-text mb-4 truncate">
+          <p className="text-sm text-muted-foreground mb-4 truncate">
             {profile.email}
           </p>
           
           {profile.bio && (
-            <p className="text-sm arabic-content leading-relaxed max-w-md mx-auto md:mx-0 line-clamp-3">
+            <p className="text-sm leading-relaxed max-w-md mx-auto md:mx-0 line-clamp-3">
               {profile.bio}
             </p>
           )}
           
           {uploading && (
-            <p className="text-sm text-primary mt-2 arabic-text">
-              <span className="block sm:hidden">جاري رفع الصورة...</span>
-              <span className="hidden sm:block">جاري رفع الصورة... | Uploading image...</span>
+            <p className="text-sm text-primary mt-2">
+              جاري رفع الصورة...
             </p>
           )}
         </div>

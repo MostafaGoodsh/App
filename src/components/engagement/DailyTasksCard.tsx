@@ -13,7 +13,7 @@ const DailyTasksCard = () => {
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
           <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
-            المهام | Tasks
+            Tasks | المهام
           </h2>
           <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
             أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي

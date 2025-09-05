@@ -177,7 +177,7 @@ const MiningDashboard = () => {
             <div className="text-lg sm:text-2xl font-bold truncate">
               {((profile?.total_mined || 0) + currentMined).toFixed(6)}
             </div>
-            <p className="text-xs text-muted-foreground">Ms-Ra</p>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">Ms-Ra</p>
           </CardContent>
         </Card>
 
