@@ -51,45 +51,45 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
   return (
     <Card className="p-4 sm:p-6 mb-6">
-      <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div className="relative group">
-          <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-lg">
+          <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 border-4 border-background shadow-lg">
             <AvatarImage 
               src={profile.avatar_url || undefined} 
               alt={profile.full_name || 'صورة شخصية'} 
             />
-            <AvatarFallback className="text-xl sm:text-2xl">
+            <AvatarFallback className="text-lg sm:text-xl md:text-2xl">
               {profile.full_name 
                 ? profile.full_name.charAt(0).toUpperCase()
-                : <User className="w-8 h-8 sm:w-12 sm:h-12" />
+                : <User className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12" />
               }
             </AvatarFallback>
           </Avatar>
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full flex items-center justify-center">
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               <Button
                 size="sm"
                 variant="secondary"
-                className="w-8 h-8 p-0"
+                className="w-6 h-6 sm:w-8 sm:h-8 p-0"
                 disabled={uploading}
                 onClick={() => {
                   console.log('Camera button clicked');
                   document.getElementById('avatar-upload')?.click();
                 }}
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
               
               {profile.avatar_url && (
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="w-8 h-8 p-0"
+                  className="w-6 h-6 sm:w-8 sm:h-8 p-0"
                   onClick={handleDeleteAvatar}
                   disabled={uploading}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               )}
             </div>
@@ -104,23 +104,23 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           />
         </div>
         
-        <div className="text-center flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2 truncate">
+        <div className="w-full">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 truncate">
             {profile.full_name || 'المستخدم'}
           </h1>
           
-          <p className="text-sm text-muted-foreground mb-4 truncate">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-3 truncate">
             {profile.email}
           </p>
           
           {profile.bio && (
-            <p className="text-sm leading-relaxed max-w-md mx-auto md:mx-0 line-clamp-3">
+            <p className="text-xs sm:text-sm leading-relaxed max-w-sm mx-auto line-clamp-2">
               {profile.bio}
             </p>
           )}
           
           {uploading && (
-            <p className="text-sm text-primary mt-2">
+            <p className="text-xs sm:text-sm text-primary mt-2">
               جاري رفع الصورة...
             </p>
           )}

@@ -77,22 +77,26 @@ export default function Profile() {
       <ProfileHeader profile={profile} />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto">
-          <TabsTrigger value="overview" className="flex-col py-2 gap-1">
+        <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+          <TabsTrigger value="overview" className="flex-col py-2 gap-1 text-xs">
             <User className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs arabic-text">نظرة عامة</span>
+            <span className="arabic-text hidden sm:inline">نظرة عامة</span>
+            <span className="arabic-text sm:hidden">عامة</span>
           </TabsTrigger>
-          <TabsTrigger value="edit" className="flex-col py-2 gap-1">
+          <TabsTrigger value="edit" className="flex-col py-2 gap-1 text-xs">
             <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs arabic-text">تحرير</span>
+            <span className="arabic-text hidden sm:inline">تحرير</span>
+            <span className="arabic-text sm:hidden">تعديل</span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex-col py-2 gap-1">
+          <TabsTrigger value="activity" className="flex-col py-2 gap-1 text-xs">
             <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs arabic-text">النشاط</span>
+            <span className="arabic-text hidden sm:inline">النشاط</span>
+            <span className="arabic-text sm:hidden">نشاط</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex-col py-2 gap-1">
+          <TabsTrigger value="settings" className="flex-col py-2 gap-1 text-xs">
             <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs arabic-text">الإعدادات</span>
+            <span className="arabic-text hidden sm:inline">الإعدادات</span>
+            <span className="arabic-text sm:hidden">إعدادات</span>
           </TabsTrigger>
         </TabsList>
 
