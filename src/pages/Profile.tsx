@@ -67,33 +67,47 @@ export default function Profile() {
   return (
     <div className="container max-w-4xl mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold arabic-text mb-2">
-          البروفايل الشخصي | Personal Profile
+        <h1 className="text-2xl sm:text-3xl font-bold arabic-text mb-2">
+          <span className="block sm:hidden">البروفايل الشخصي</span>
+          <span className="hidden sm:block">البروفايل الشخصي | Personal Profile</span>
         </h1>
-        <p className="text-muted-foreground arabic-text">
-          إدارة معلوماتك الشخصية وإعدادات الحساب | Manage your personal information and account settings
+        <p className="text-sm sm:text-base text-muted-foreground arabic-text">
+          <span className="block sm:hidden">إدارة معلوماتك الشخصية وإعدادات الحساب</span>
+          <span className="hidden sm:block">إدارة معلوماتك الشخصية وإعدادات الحساب | Manage your personal information and account settings</span>
         </p>
       </div>
 
       <ProfileHeader profile={profile} />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" className="arabic-text">
-            <User className="w-4 h-4 ml-2" />
-            نظرة عامة | Overview
+        <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsTrigger value="overview" className="arabic-text flex-col py-2 gap-1">
+            <User className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">
+              <span className="block sm:hidden">نظرة عامة</span>
+              <span className="hidden sm:block">نظرة عامة | Overview</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="edit" className="arabic-text">
-            <Edit className="w-4 h-4 ml-2" />
-            تحرير | Edit
+          <TabsTrigger value="edit" className="arabic-text flex-col py-2 gap-1">
+            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">
+              <span className="block sm:hidden">تحرير</span>
+              <span className="hidden sm:block">تحرير | Edit</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="activity" className="arabic-text">
-            <Activity className="w-4 h-4 ml-2" />
-            النشاط | Activity
+          <TabsTrigger value="activity" className="arabic-text flex-col py-2 gap-1">
+            <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">
+              <span className="block sm:hidden">النشاط</span>
+              <span className="hidden sm:block">النشاط | Activity</span>
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="arabic-text">
-            <Settings className="w-4 h-4 ml-2" />
-            الإعدادات | Settings
+          <TabsTrigger value="settings" className="arabic-text flex-col py-2 gap-1">
+            <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm">
+              <span className="block sm:hidden">الإعدادات</span>
+              <span className="hidden sm:block">الإعدادات | Settings</span>
+            </span>
           </TabsTrigger>
         </TabsList>
 

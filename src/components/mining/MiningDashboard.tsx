@@ -135,86 +135,101 @@ const MiningDashboard = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">لوحة التعدين</h1>
-          <p className="text-muted-foreground">تتبع تقدم التعدين وقوة حسابك</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">لوحة التعدين</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">تتبع تقدم التعدين وقوة حسابك</p>
         </div>
         <Button
           onClick={handleToggleMining}
           variant={profile?.is_mining_active ? "destructive" : "default"}
-          size="lg"
+          size="sm"
+          className="w-full sm:w-auto"
         >
           {profile?.is_mining_active ? (
             <>
-              <Pause className="h-5 w-5 mr-2" />
-              إيقاف التعدين
+              <Pause className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">إيقاف التعدين</span>
+              <span className="sm:hidden">إيقاف</span>
             </>
           ) : (
             <>
-              <Play className="h-5 w-5 mr-2" />
-              بدء التعدين
+              <Play className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">بدء التعدين</span>
+              <span className="sm:hidden">بدء</span>
             </>
           )}
         </Button>
       </div>
 
       {/* Main Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Mined */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي التعدين</CardTitle>
-            <Coins className="h-4 w-4 text-primary" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">إجمالي التعدين</span>
+              <span className="sm:hidden">التعدين</span>
+            </CardTitle>
+            <Coins className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {((profile?.total_mined || 0) + currentMined).toFixed(8)}
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-2xl font-bold truncate">
+              {((profile?.total_mined || 0) + currentMined).toFixed(6)}
             </div>
-            <p className="text-xs text-muted-foreground">عملة Ms-Ra</p>
+            <p className="text-xs text-muted-foreground">Ms-Ra</p>
           </CardContent>
         </Card>
 
         {/* Mining Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">معدل التعدين</CardTitle>
-            <Zap className="h-4 w-4 text-warning" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">معدل التعدين</span>
+              <span className="sm:hidden">المعدل</span>
+            </CardTitle>
+            <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-2xl font-bold">
               {profile?.mining_rate_per_hour || 0}
             </div>
-            <p className="text-xs text-muted-foreground">عملة/ساعة</p>
+            <p className="text-xs text-muted-foreground">/ساعة</p>
           </CardContent>
         </Card>
 
         {/* Account Strength */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">قوة الحساب</CardTitle>
-            <Target className="h-4 w-4 text-success" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">قوة الحساب</span>
+              <span className="sm:hidden">القوة</span>
+            </CardTitle>
+            <Target className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-2xl font-bold">
               {profile?.account_strength || 0}
             </div>
-            <p className="text-xs text-muted-foreground">نقطة قوة</p>
+            <p className="text-xs text-muted-foreground">نقطة</p>
           </CardContent>
         </Card>
 
         {/* Current Level */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المستوى الحالي</CardTitle>
-            <Trophy className="h-4 w-4 text-warning" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">المستوى الحالي</span>
+              <span className="sm:hidden">المستوى</span>
+            </CardTitle>
+            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="pb-3">
+            <div className="text-sm sm:text-lg font-bold truncate">
               {currentLevel?.level_name || 'غير محدد'}
             </div>
             <p className="text-xs text-muted-foreground">
-              المستوى {profile?.current_level || 1}
+              #{profile?.current_level || 1}
             </p>
           </CardContent>
         </Card>

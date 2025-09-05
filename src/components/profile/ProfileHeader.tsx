@@ -50,18 +50,18 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
   };
 
   return (
-    <Card className="p-6 mb-6">
-      <div className="flex flex-col md:flex-row items-center gap-6">
+    <Card className="p-4 sm:p-6 mb-6">
+      <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
         <div className="relative group">
-          <Avatar className="w-32 h-32 border-4 border-background shadow-lg">
+          <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-lg">
             <AvatarImage 
               src={profile.avatar_url || undefined} 
               alt={profile.full_name || 'صورة شخصية'} 
             />
-            <AvatarFallback className="text-2xl">
+            <AvatarFallback className="text-xl sm:text-2xl">
               {profile.full_name 
                 ? profile.full_name.charAt(0).toUpperCase()
-                : <User className="w-12 h-12" />
+                : <User className="w-8 h-8 sm:w-12 sm:h-12" />
               }
             </AvatarFallback>
           </Avatar>
@@ -104,24 +104,25 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           />
         </div>
         
-        <div className="text-center md:text-right flex-1">
-          <h1 className="text-3xl font-bold arabic-text mb-2">
+        <div className="text-center md:text-right flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold arabic-text mb-2 truncate">
             {profile.full_name || 'المستخدم'}
           </h1>
           
-          <p className="text-muted-foreground arabic-text mb-4">
+          <p className="text-sm sm:text-base text-muted-foreground arabic-text mb-4 truncate">
             {profile.email}
           </p>
           
           {profile.bio && (
-            <p className="text-sm arabic-content leading-relaxed max-w-md mx-auto md:mx-0">
+            <p className="text-sm arabic-content leading-relaxed max-w-md mx-auto md:mx-0 line-clamp-3">
               {profile.bio}
             </p>
           )}
           
           {uploading && (
             <p className="text-sm text-primary mt-2 arabic-text">
-              جاري رفع الصورة... | Uploading image...
+              <span className="block sm:hidden">جاري رفع الصورة...</span>
+              <span className="hidden sm:block">جاري رفع الصورة... | Uploading image...</span>
             </p>
           )}
         </div>
