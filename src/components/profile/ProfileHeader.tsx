@@ -104,23 +104,23 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           />
         </div>
         
-        <div className="w-full">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 truncate">
+        <div className="w-full text-center">
+          <h1 className="text-sm sm:text-base font-bold mb-1 truncate">
             {profile.full_name || 'المستخدم'}
           </h1>
           
-          <p className="text-xs sm:text-sm text-muted-foreground mb-3 truncate">
+          <p className="text-xs text-muted-foreground mb-2 truncate">
             {profile.email}
           </p>
           
           {profile.bio && (
-            <p className="text-xs sm:text-sm leading-relaxed max-w-sm mx-auto line-clamp-2">
+            <p className="text-xs leading-relaxed max-w-sm mx-auto line-clamp-2 mb-2">
               {profile.bio}
             </p>
           )}
           
           {uploading && (
-            <p className="text-xs sm:text-sm text-primary mt-2">
+            <p className="text-xs text-primary mt-2">
               جاري رفع الصورة...
             </p>
           )}

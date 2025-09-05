@@ -87,11 +87,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     <Card>
       <CardHeader>
         <CardTitle className="arabic-text">
-          تحرير البروفايل الشخصي | Edit Personal Profile
+          تعديل | Edit
         </CardTitle>
-        <CardDescription className="arabic-text">
-          قم بتحديث معلوماتك الشخصية وروابط التواصل الاجتماعي | Update your personal information and social media links
-        </CardDescription>
       </CardHeader>
       
       <CardContent>
