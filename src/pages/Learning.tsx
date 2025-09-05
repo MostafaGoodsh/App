@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import LearningTimeline from "@/components/learning/LearningTimeline";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Learning() {
   const canonical = `${window.location.origin}/learning`;
@@ -24,14 +25,48 @@ export default function Learning() {
         <div className="min-h-screen bg-background/90">
           <section className="py-8 arabic-content">
         <div className="container mx-auto px-4 mb-8 text-center">
-          <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-2 arabic-text">منصة التعلم التفاعلية</h1>
-          <h2 className="text-lg md:text-xl font-medium mb-4 text-muted-foreground">Time line</h2>
+          <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 arabic-text">Timeline | المنصة التفاعلية</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto arabic-text">
             تعلم، شارك، وتفاعل مع مجتمع المتداولين والمستثمرين في العملات الرقمية
           </p>
         </div>
         
-        <LearningTimeline />
+        <div className="container mx-auto px-4">
+          <Tabs defaultValue="crypto" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-8 bg-black/20 border border-white/20">
+              <TabsTrigger 
+                value="crypto" 
+                className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10"
+              >
+                مالي Crypto
+              </TabsTrigger>
+              <TabsTrigger 
+                value="general" 
+                className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10"
+              >
+                عام General
+              </TabsTrigger>
+              <TabsTrigger 
+                value="divine" 
+                className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10"
+              >
+                ديني Divine
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="crypto">
+              <LearningTimeline />
+            </TabsContent>
+            
+            <TabsContent value="general">
+              <LearningTimeline />
+            </TabsContent>
+            
+            <TabsContent value="divine">
+              <LearningTimeline />
+            </TabsContent>
+          </Tabs>
+        </div>
           </section>
         </div>
       </div>
