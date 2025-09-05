@@ -105,11 +105,11 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
         </div>
         
         <div className="w-full text-center">
-          <h1 className="text-sm sm:text-base font-bold mb-1 truncate">
+          <h1 className="text-sm sm:text-base font-bold mb-1 text-center">
             {profile.full_name || 'المستخدم'}
           </h1>
           
-          <p className="text-xs text-muted-foreground mb-2 truncate">
+          <p className="text-xs text-muted-foreground mb-2 text-center">
             {profile.email}
           </p>
           
