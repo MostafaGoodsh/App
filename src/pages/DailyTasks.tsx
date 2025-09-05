@@ -11,18 +11,18 @@ const DailyTasks = () => {
   return (
     <>
       <Helmet>
-        <title>المهام اليومية | Daily Tasks - منصة مصر الرقمية</title>
-        <meta name="description" content="أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي | Complete daily tasks, earn points and build your streak" />
+        <title>المهام اليومية - منصة مصر الرقمية</title>
+        <meta name="description" content="أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي" />
       </Helmet>
       
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-4">
-          <h1 className="mixed-text-xl font-playfair text-4xl md:text-5xl font-bold">
-            المهام اليومية | Daily Tasks
+          <h1 className="font-playfair text-4xl md:text-5xl font-bold">
+            المهام اليومية
           </h1>
-          <p className="mixed-text text-lg text-muted-foreground max-w-2xl mx-auto">
-            أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي | Complete your daily tasks to earn points and build your streak
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي
           </p>
         </div>
 
@@ -30,34 +30,34 @@ const DailyTasks = () => {
         <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mixed-text text-sm font-medium">السلسلة الحالية | Current Streak</CardTitle>
+              <CardTitle className="text-sm font-medium">السلسلة الحالية</CardTitle>
               <Flame className="h-4 w-4 text-orange-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.current_streak || 0}</div>
-              <p className="mixed-text text-xs text-muted-foreground">يوم متتالي | consecutive days</p>
+              <p className="text-xs text-muted-foreground">يوم متتالي</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mixed-text text-sm font-medium">أطول سلسلة | Longest Streak</CardTitle>
+              <CardTitle className="text-sm font-medium">أطول سلسلة</CardTitle>
               <Target className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.longest_streak || 0}</div>
-              <p className="mixed-text text-xs text-muted-foreground">يوم | days</p>
+              <p className="text-xs text-muted-foreground">يوم</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="mixed-text text-sm font-medium">إجمالي الجلسات | Total Sessions</CardTitle>
+              <CardTitle className="text-sm font-medium">إجمالي الجلسات</CardTitle>
               <Clock className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.total_sessions || 0}</div>
-              <p className="mixed-text text-xs text-muted-foreground">جلسة | sessions</p>
+              <p className="text-xs text-muted-foreground">جلسة</p>
             </CardContent>
           </Card>
         </div>

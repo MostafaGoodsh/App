@@ -23,28 +23,28 @@ const Header = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavLink to="/wallet" className={`${navigationMenuTriggerStyle()} mixed-text-responsive`}>
-                  المحفظة | Wallet
+                <NavLink to="/wallet" className={navigationMenuTriggerStyle()}>
+                  المحفظة (Wallet)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/early-access" className={`${navigationMenuTriggerStyle()} mixed-text-responsive`}>
-                  الوصول المبكر | Early Access
+                <NavLink to="/early-access" className={navigationMenuTriggerStyle()}>
+                  الوصول المبكر (Early Access)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/identity" className={`${navigationMenuTriggerStyle()} mixed-text-responsive`}>
-                  الهوية | Identity
+                <NavLink to="/identity" className={navigationMenuTriggerStyle()}>
+                   الهوية (Identity)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/learning" className={`${navigationMenuTriggerStyle()} mixed-text-responsive`}>
-                  الحقيقة والعلم | Learning
+                <NavLink to="/learning" className={navigationMenuTriggerStyle()}>
+                  الحقيقة و العلم  (Learning)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/surveys" className={`${navigationMenuTriggerStyle()} mixed-text-responsive`}>
-                  التأهيل والاستبيانات | Surveys
+                <NavLink to="/surveys" className={navigationMenuTriggerStyle()}>
+                التأهيل و الاستبيانات (Surveys)
                 </NavLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -52,13 +52,13 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-3">
           <Button asChild size="default" className="px-6">
-            <Link to="/early-access" className="mixed-text-responsive">انضم الآن | Join Now</Link>
+            <Link to="/early-access">{getContent('hero_cta', 'انضم الآن')}</Link>
           </Button>
           {user ? (
-            <Button size="default" variant="outline" onClick={signOut} className="px-6 mixed-text-responsive">تسجيل الخروج | Sign Out</Button>
+            <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>
           ) : (
             <Button asChild size="default" variant="outline" className="px-6">
-              <Link to="/auth" className="mixed-text-responsive">تسجيل الدخول | Sign In</Link>
+              <Link to="/auth">تسجيل الدخول</Link>
             </Button>
           )}
         </div>
