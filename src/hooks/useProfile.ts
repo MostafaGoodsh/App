@@ -90,33 +90,48 @@ export const useProfile = () => {
   const uploadAvatar = async (file: File) => {
     if (!user) return;
 
+    console.log('Starting upload process for user:', user.id);
+    console.log('File details:', { name: file.name, size: file.size, type: file.type });
+
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/avatar.${fileExt}`;
       
+      console.log('Upload filename:', fileName);
+      
       // Delete old avatar if exists
       if (profile?.avatar_url) {
         const oldPath = profile.avatar_url.split('/').pop();
         if (oldPath && oldPath !== fileName) {
+          console.log('Removing old avatar:', `${user.id}/${oldPath}`);
           await supabase.storage
             .from('avatars')
             .remove([`${user.id}/${oldPath}`]);
         }
       }
 
+      console.log('Uploading to storage...');
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
+      console.log('Upload successful, getting public URL...');
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
+      console.log('Public URL:', publicUrl);
+      
+      console.log('Updating profile with new avatar URL...');
       await updateProfile({ avatar_url: publicUrl });
       
+      console.log('Profile updated successfully');
       return publicUrl;
     } catch (error) {
       console.error('Error uploading avatar:', error);
