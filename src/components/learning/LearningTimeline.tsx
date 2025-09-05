@@ -260,17 +260,35 @@ export default function LearningTimeline() {
 
   const fetchComments = async (postId: string) => {
     try {
-      const { data, error } = await supabase
+      // First get the comments
+      const { data: commentsData, error } = await supabase
         .from('learning_comments')
-        .select(`
-          *,
-          profiles:user_id (full_name)
-        `)
+        .select('*')
         .eq('content_id', postId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setComments(prev => ({ ...prev, [postId]: data || [] }));
+
+      // Then get profile data for each comment
+      const commentsWithProfiles = await Promise.all(
+        (commentsData || []).map(async (comment) => {
+          if (comment.user_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('user_id', comment.user_id)
+              .single();
+            
+            return {
+              ...comment,
+              profiles: profileData
+            };
+          }
+          return comment;
+        })
+      );
+
+      setComments(prev => ({ ...prev, [postId]: commentsWithProfiles || [] }));
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
