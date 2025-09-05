@@ -229,9 +229,24 @@ const MiningLevelsManagement = () => {
                 
                 <div>
                   <Label className="text-sm font-medium">إنتاجية يومية</Label>
-                  <p className="text-lg font-semibold text-blue-600 mt-1">
-                    {(level.mining_rate_per_hour * 24).toFixed(1)} MSR
-                  </p>
+                  {editingLevel === level.id ? (
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={editForm.mining_rate_per_hour ? (editForm.mining_rate_per_hour * 24).toFixed(1) : ''}
+                      onChange={(e) => {
+                        const dailyProduction = parseFloat(e.target.value) || 0;
+                        const hourlyRate = dailyProduction / 24;
+                        setEditForm(prev => ({ ...prev, mining_rate_per_hour: hourlyRate }));
+                      }}
+                      className="mt-1"
+                      placeholder="الإنتاج اليومي بـ MSR"
+                    />
+                  ) : (
+                    <p className="text-lg font-semibold text-blue-600 mt-1">
+                      {(level.mining_rate_per_hour * 24).toFixed(1)} MSR
+                    </p>
+                  )}
                 </div>
               </div>
               
