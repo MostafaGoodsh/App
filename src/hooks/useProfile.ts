@@ -95,55 +95,34 @@ export const useProfile = () => {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const fileName = `avatar.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      // Prepare form data for edge function
+      const formData = new FormData();
+      formData.append('file', file);
       
-      console.log('Upload file path:', filePath);
+      console.log('Calling upload-avatar edge function...');
       
-      // Delete old avatar if exists
-      if (profile?.avatar_url) {
-        const urlParts = profile.avatar_url.split('/');
-        const oldFileName = urlParts[urlParts.length - 1];
-        const oldPath = `${user.id}/${oldFileName}`;
-        
-        console.log('Removing old avatar:', oldPath);
-        const { error: deleteError } = await supabase.storage
-          .from('avatars')
-          .remove([oldPath]);
-          
-        if (deleteError) {
-          console.log('Delete error (ignoring):', deleteError);
-        }
+      // Call our edge function instead of direct storage upload
+      const { data, error } = await supabase.functions.invoke('upload-avatar', {
+        body: formData
+      });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
       }
 
-      console.log('Uploading to storage...');
-      const { data, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { 
-          upsert: true,
-          contentType: file.type
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+      if (!data.success) {
+        console.error('Upload failed:', data.error);
+        throw new Error(data.error);
       }
 
-      console.log('Upload successful:', data);
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      console.log('Public URL:', publicUrl);
+      console.log('Upload successful via edge function:', data.url);
       
       console.log('Updating profile with new avatar URL...');
-      await updateProfile({ avatar_url: publicUrl });
+      await updateProfile({ avatar_url: data.url });
       
       console.log('Profile updated successfully');
-      return publicUrl;
+      return data.url;
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
       
