@@ -24,31 +24,35 @@ const DailyTasksCard = () => {
   const completedTaskIds = completedTasks.map(ct => ct.task_id);
 
   return (
-    <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 bg-card/30 backdrop-blur-sm">
-      <div className="relative p-6 min-h-[280px] md:min-h-[320px] bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-        <div className="mb-4">
-          <h2 className="font-playfair text-2xl md:text-3xl mb-3 font-bold flex items-center gap-2">
-            <Clock className="h-6 w-6 text-primary" />
-            المهام اليومية
-          </h2>
-        </div>
+    <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+      <img 
+        src="/lovable-uploads/70f695e0-7133-47ea-82e8-7cca2196e7f4.png"
+        alt="أهرامات مصر عند الغروب - خلفية المهام اليومية" 
+        className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+        loading="lazy" 
+      />
+      <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+        <h2 className="font-playfair text-2xl md:text-3xl mb-3 font-bold flex items-center gap-2">
+          <Clock className="h-6 w-6 text-primary" />
+          المهام | Tasks
+        </h2>
         
-        <div className="space-y-3">
+        <div className="space-y-3 mb-4">
           {dailyTasks.slice(0, 3).map((task) => {
             const isCompleted = completedTaskIds.includes(task.id);
             
             return (
               <div 
                 key={task.id}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                className={`flex items-center justify-between p-3 rounded-lg border transition-all backdrop-blur-sm ${
                   isCompleted 
-                    ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800/30' 
-                    : 'bg-background/50 border-border hover:border-primary/30'
+                    ? 'bg-green-500/20 border-green-400/30 text-green-100' 
+                    : 'bg-background/30 border-border/30 hover:bg-background/50'
                 }`}
               >
                 <div className="flex items-center gap-3 flex-1">
                   {isCompleted ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <CheckCircle2 className="h-4 w-4 text-green-400" />
                   ) : (
                     <Circle className="h-4 w-4 text-muted-foreground" />
                   )}
@@ -75,14 +79,14 @@ const DailyTasksCard = () => {
                       variant="outline"
                       onClick={() => handleCompleteTask(task.id)}
                       disabled={loading}
-                      className="text-xs"
+                      className="text-xs bg-background/20 hover:bg-background/40 border-border/30"
                     >
                       إكمال
                     </Button>
                   )}
                   
                   {isCompleted && (
-                    <Badge variant="secondary" className="bg-green-500/20 text-green-600 dark:text-green-400">
+                    <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-400/30">
                       ✓
                     </Badge>
                   )}
