@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import SurveyParticipation from "@/components/surveys/SurveyParticipation";
 
 interface Survey {
   id: string;
@@ -118,9 +119,7 @@ const Surveys = () => {
                     </p>
                   </div>
                   {user && (
-                    <Button className="w-full mt-4" disabled>
-                      قريباً - المشاركة
-                    </Button>
+                    <SurveyParticipation survey={survey} />
                   )}
                 </CardContent>
               </Card>
