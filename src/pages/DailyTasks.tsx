@@ -37,37 +37,37 @@ const DailyTasks = () => {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
+        <div className="grid gap-4 md:grid-cols-3 max-w-3xl mx-auto">
+          <Card className="bg-black/90 border-white/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium arabic-text">السلسلة الحالية</CardTitle>
-              <Flame className="h-4 w-4 text-orange-600" />
+              <CardTitle className="text-xs font-medium text-white arabic-text">السلسلة الحالية</CardTitle>
+              <Flame className="h-3 w-3 text-orange-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.current_streak || 0}</div>
-              <p className="text-xs text-muted-foreground arabic-text">يوم متتالي</p>
+            <CardContent className="pt-2">
+              <div className="text-xl font-bold text-white">{stats?.current_streak || 0}</div>
+              <p className="text-xs text-white/70 arabic-text">يوم متتالي</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-black/90 border-white/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium arabic-text">أطول سلسلة</CardTitle>
-              <Target className="h-4 w-4 text-primary" />
+              <CardTitle className="text-xs font-medium text-white arabic-text">أطول سلسلة</CardTitle>
+              <Target className="h-3 w-3 text-primary" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.longest_streak || 0}</div>
-              <p className="text-xs text-muted-foreground arabic-text">يوم</p>
+            <CardContent className="pt-2">
+              <div className="text-xl font-bold text-white">{stats?.longest_streak || 0}</div>
+              <p className="text-xs text-white/70 arabic-text">يوم</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-black/90 border-white/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium arabic-text">إجمالي الجلسات</CardTitle>
-              <Clock className="h-4 w-4 text-green-600" />
+              <CardTitle className="text-xs font-medium text-white arabic-text">إجمالي الجلسات</CardTitle>
+              <Clock className="h-3 w-3 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats?.total_sessions || 0}</div>
-              <p className="text-xs text-muted-foreground arabic-text">جلسة</p>
+            <CardContent className="pt-2">
+              <div className="text-xl font-bold text-white">{stats?.total_sessions || 0}</div>
+              <p className="text-xs text-white/70 arabic-text">جلسة</p>
             </CardContent>
           </Card>
         </div>
