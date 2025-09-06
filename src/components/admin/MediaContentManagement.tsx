@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, Play, FileText, Image } from "lucide-react";
+import { Plus, Edit, Trash2, Play, FileText, Image, Upload } from "lucide-react";
 
 interface MediaContent {
   id: string;
@@ -24,6 +24,7 @@ interface MediaContent {
   points_reward: number;
   is_active: boolean;
   display_order: number;
+  text_direction?: string;
   created_at: string;
   updated_at: string;
 }
@@ -43,8 +44,11 @@ const MediaContentManagement = () => {
     article_content: '',
     points_reward: 10,
     is_active: true,
-    display_order: 0
+    display_order: 0,
+    text_direction: 'rtl' as string
   });
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchContent();
@@ -109,7 +113,8 @@ const MediaContentManagement = () => {
       article_content: contentItem.article_content || '',
       points_reward: contentItem.points_reward,
       is_active: contentItem.is_active,
-      display_order: contentItem.display_order
+      display_order: contentItem.display_order,
+      text_direction: contentItem.text_direction || 'rtl'
     });
     setIsDialogOpen(true);
   };
@@ -144,8 +149,36 @@ const MediaContentManagement = () => {
       article_content: '',
       points_reward: 10,
       is_active: true,
-      display_order: 0
+      display_order: 0,
+      text_direction: 'rtl'
     });
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploadingFile(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `media-content/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('learning-media')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('learning-media')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, media_url: data.publicUrl }));
+      toast.success('تم رفع الملف بنجاح');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('خطأ في رفع الملف');
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -246,14 +279,43 @@ const MediaContentManagement = () => {
                 </div>
                 
                 {formData.media_type !== 'article' && (
-                  <div>
-                    <Label htmlFor="media_url">رابط الوسائط</Label>
-                    <Input
-                      id="media_url"
-                      type="url"
-                      value={formData.media_url}
-                      onChange={(e) => setFormData(prev => ({ ...prev, media_url: e.target.value }))}
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="media_upload">رفع الملف</Label>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingFile}
+                          className="flex items-center gap-2"
+                        >
+                          <Upload className="h-4 w-4" />
+                          {uploadingFile ? 'جارٍ الرفع...' : 'رفع ملف'}
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept={formData.media_type === 'video' ? 'video/*' : 'image/*'}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file);
+                          }}
+                          className="hidden"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="media_url">أو أدخل رابط الوسائط</Label>
+                      <Input
+                        id="media_url"
+                        type="url"
+                        value={formData.media_url}
+                        onChange={(e) => setFormData(prev => ({ ...prev, media_url: e.target.value }))}
+                        placeholder="https://example.com/media.jpg"
+                      />
+                    </div>
                   </div>
                 )}
                 
@@ -265,9 +327,29 @@ const MediaContentManagement = () => {
                       value={formData.article_content}
                       onChange={(e) => setFormData(prev => ({ ...prev, article_content: e.target.value }))}
                       rows={6}
+                      className={formData.text_direction === 'rtl' ? 'text-right' : 'text-left'}
+                      dir={formData.text_direction}
                     />
                   </div>
                 )}
+                
+                <div>
+                  <Label htmlFor="text_direction">اتجاه النص</Label>
+                  <Select
+                    value={formData.text_direction}
+                    onValueChange={(value: string) => 
+                      setFormData(prev => ({ ...prev, text_direction: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rtl">من اليمين إلى اليسار (عربي)</SelectItem>
+                      <SelectItem value="ltr">من اليسار إلى اليمين (إنجليزي)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
