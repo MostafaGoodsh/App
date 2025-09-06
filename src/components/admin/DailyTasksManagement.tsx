@@ -220,7 +220,6 @@ const DailyTasksManagement = () => {
       text_direction: "rtl",
     });
   };
-  };
 
   const handleDialogOpenChange = (open: boolean) => {
     setIsDialogOpen(open);
