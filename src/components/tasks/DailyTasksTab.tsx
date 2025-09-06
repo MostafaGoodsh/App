@@ -16,6 +16,7 @@ interface DailyTasksTabProps {
   tasks: DailyTask[];
   completedTasks: string[];
   onCompleteTask: (taskId: string) => Promise<boolean>;
+  onUncompleteTask: (taskId: string) => Promise<boolean>;
   loading?: boolean;
 }
 
@@ -23,6 +24,7 @@ const DailyTasksTab = ({
   tasks, 
   completedTasks, 
   onCompleteTask, 
+  onUncompleteTask,
   loading = false 
 }: DailyTasksTabProps) => {
   const getTaskTypeIcon = (type: string) => {
@@ -39,6 +41,10 @@ const DailyTasksTab = ({
     await onCompleteTask(taskId);
   };
 
+  const handleUncompleteTask = async (taskId: string) => {
+    await onUncompleteTask(taskId);
+  };
+
   return (
     <div className="space-y-3">
       {tasks.map((task) => {
@@ -47,29 +53,30 @@ const DailyTasksTab = ({
         return (
           <div 
             key={task.id}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+            className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer hover:scale-[1.01] ${
               isCompleted 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-card border-border hover:border-primary/20'
+                ? 'bg-primary/10 border-primary/30 shadow-lg shadow-primary/20' 
+                : 'bg-background border-border hover:border-primary/50 hover:shadow-md'
             }`}
+            onClick={() => isCompleted ? handleUncompleteTask(task.id) : handleCompleteTask(task.id)}
           >
             <div className="flex items-center gap-3 flex-1">
               {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle2 className="h-6 w-6 text-primary animate-scale-in" />
               ) : (
-                <Circle className="h-5 w-5 text-muted-foreground" />
+                <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
               )}
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-sm">{getTaskTypeIcon(task.task_type)}</span>
-                  <h4 className={`font-medium ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+                  <h4 className={`font-medium transition-colors ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                     {task.title}
                   </h4>
                 </div>
                 
                 {task.description && (
-                  <p className={`text-sm ${isCompleted ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
+                  <p className={`text-sm transition-colors ${isCompleted ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
                     {task.description}
                   </p>
                 )}
@@ -77,26 +84,16 @@ const DailyTasksTab = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-orange-600">
+              <div className={`flex items-center gap-1 text-sm transition-colors ${
+                isCompleted ? 'text-primary' : 'text-muted-foreground'
+              }`}>
                 <Coins className="h-4 w-4" />
                 <span>{task.points_reward}</span>
               </div>
               
-              {!isCompleted && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleCompleteTask(task.id)}
-                  disabled={loading}
-                  className="text-xs"
-                >
-                  إكمال
-                </Button>
-              )}
-              
               {isCompleted && (
-                <div className="w-4 h-4 bg-green-600 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="h-3 w-3 text-white" />
+                <div className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
+                  مكتملة ✓
                 </div>
               )}
             </div>

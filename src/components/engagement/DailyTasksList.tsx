@@ -18,6 +18,7 @@ interface DailyTasksListProps {
   tasks: DailyTask[];
   completedTasks: string[];
   onCompleteTask: (taskId: string) => Promise<boolean>;
+  onUncompleteTask: (taskId: string) => Promise<boolean>;
   loading?: boolean;
 }
 
@@ -25,16 +26,11 @@ const DailyTasksList = ({
   tasks, 
   completedTasks, 
   onCompleteTask, 
+  onUncompleteTask,
   loading = false 
 }: DailyTasksListProps) => {
   const getTaskTypeColor = (type: string) => {
-    switch (type) {
-      case 'login': return 'bg-blue-100 text-blue-800';
-      case 'profile': return 'bg-green-100 text-green-800';
-      case 'mining': return 'bg-orange-100 text-orange-800';
-      case 'learning': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    return 'bg-background border border-border text-foreground';
   };
 
   const getTaskTypeIcon = (type: string) => {
@@ -49,6 +45,10 @@ const DailyTasksList = ({
 
   const handleCompleteTask = async (taskId: string) => {
     await onCompleteTask(taskId);
+  };
+
+  const handleUncompleteTask = async (taskId: string) => {
+    await onUncompleteTask(taskId);
   };
 
   return (
@@ -67,23 +67,24 @@ const DailyTasksList = ({
             return (
               <div 
                 key={task.id}
-                className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer hover:scale-[1.01] ${
                   isCompleted 
-                    ? 'bg-green-50 border-green-200' 
-                    : 'bg-white border-gray-200 hover:border-gray-300'
+                    ? 'bg-primary/10 border-primary/30 shadow-lg shadow-primary/20' 
+                    : 'bg-background border-border hover:border-primary/50 hover:shadow-md'
                 }`}
+                onClick={() => isCompleted ? handleUncompleteTask(task.id) : handleCompleteTask(task.id)}
               >
                 <div className="flex items-center gap-3 flex-1">
                   {isCompleted ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <CheckCircle2 className="h-6 w-6 text-primary animate-scale-in" />
                   ) : (
-                    <Circle className="h-5 w-5 text-gray-400" />
+                    <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
                   )}
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm">{getTaskTypeIcon(task.task_type)}</span>
-                      <h4 className={`font-medium ${isCompleted ? 'line-through text-gray-500' : ''}`}>
+                      <h4 className={`font-medium transition-colors ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                         {task.title}
                       </h4>
                       <Badge 
@@ -95,7 +96,7 @@ const DailyTasksList = ({
                     </div>
                     
                     {task.description && (
-                      <p className={`text-sm ${isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-sm transition-colors ${isCompleted ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
                         {task.description}
                       </p>
                     )}
@@ -103,26 +104,16 @@ const DailyTasksList = ({
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 text-sm text-orange-600">
+                  <div className={`flex items-center gap-1 text-sm transition-colors ${
+                    isCompleted ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
                     <Coins className="h-4 w-4" />
                     <span>{task.points_reward}</span>
                   </div>
                   
-                  {!isCompleted && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCompleteTask(task.id)}
-                      disabled={loading}
-                      className="text-xs"
-                    >
-                      إكمال
-                    </Button>
-                  )}
-                  
                   {isCompleted && (
-                    <Badge variant="default" className="bg-green-600 text-white">
-                      مكتملة
+                    <Badge variant="default" className="bg-primary text-primary-foreground pointer-events-none">
+                      مكتملة ✓
                     </Badge>
                   )}
                 </div>
@@ -131,7 +122,7 @@ const DailyTasksList = ({
           })}
           
           {tasks.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>لا توجد مهام يومية متاحة حالياً</p>
             </div>

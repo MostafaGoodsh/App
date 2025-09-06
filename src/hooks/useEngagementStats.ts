@@ -146,7 +146,7 @@ export const useEngagementStats = () => {
 
   // Complete a daily task
   const completeTask = async (taskId: string) => {
-    if (!user) return;
+    if (!user) return false;
 
     try {
       const { data, error } = await supabase.rpc('complete_daily_task', {
@@ -188,6 +188,45 @@ export const useEngagementStats = () => {
     }
   };
 
+  // Uncomplete a daily task
+  const uncompleteTask = async (taskId: string) => {
+    if (!user) return false;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { error } = await supabase
+        .from('user_daily_task_completions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('task_id', taskId)
+        .eq('completed_date', today);
+
+      if (error) {
+        console.error('Error uncompleting task:', error);
+        toast({
+          title: "خطأ",
+          description: "فشل في إلغاء إكمال المهمة",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      toast({
+        title: "تم بنجاح",
+        description: "تم إلغاء إكمال المهمة",
+      });
+      
+      // Refresh completed tasks
+      await fetchCompletedTasks();
+      await fetchStats(); // Refresh stats as points may have changed
+      return true;
+    } catch (error) {
+      console.error('Error uncompleting task:', error);
+      return false;
+    }
+  };
+
   // Check if a task is completed today
   const isTaskCompleted = (taskId: string): boolean => {
     return completedTasks.some(completion => completion.task_id === taskId);
@@ -217,6 +256,7 @@ export const useEngagementStats = () => {
     loading,
     updating,
     completeTask,
+    uncompleteTask,
     isTaskCompleted,
     updateEngagementStats,
     refetch: () => Promise.all([fetchStats(), fetchDailyTasks(), fetchCompletedTasks()])

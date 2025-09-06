@@ -9,7 +9,7 @@ import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { Target, Flame, Clock } from "lucide-react";
 
 const DailyTasks = () => {
-  const { stats, dailyTasks, completedTasks, completeTask, loading } = useEngagementStats();
+  const { stats, dailyTasks, completedTasks, completeTask, uncompleteTask, loading } = useEngagementStats();
 
   return (
     <>
@@ -90,6 +90,7 @@ const DailyTasks = () => {
                   tasks={dailyTasks}
                   completedTasks={completedTasks.map(ct => ct.task_id)}
                   onCompleteTask={completeTask}
+                  onUncompleteTask={uncompleteTask}
                   loading={loading}
                 />
               </TabsContent>
