@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Trash2, User } from "lucide-react";
+import { Plus, Edit, Trash2, User, Upload } from "lucide-react";
 
 interface PersonalityTask {
   id: string;
@@ -20,7 +21,9 @@ interface PersonalityTask {
   points_reward: number;
   is_active: boolean;
   display_order: number;
+  text_direction?: string;
   created_at: string;
+  updated_at: string;
 }
 
 const PersonalityTasksManagement = () => {
@@ -35,7 +38,8 @@ const PersonalityTasksManagement = () => {
     description_en: '',
     points_reward: 5,
     is_active: true,
-    display_order: 0
+    display_order: 0,
+    text_direction: 'rtl' as string
   });
 
   useEffect(() => {
@@ -98,7 +102,8 @@ const PersonalityTasksManagement = () => {
       description_en: task.description_en || '',
       points_reward: task.points_reward,
       is_active: task.is_active,
-      display_order: task.display_order
+      display_order: task.display_order,
+      text_direction: task.text_direction || 'rtl'
     });
     setIsDialogOpen(true);
   };
@@ -130,7 +135,8 @@ const PersonalityTasksManagement = () => {
       description_en: '',
       points_reward: 5,
       is_active: true,
-      display_order: 0
+      display_order: 0,
+      text_direction: 'rtl'
     });
   };
 
@@ -201,6 +207,24 @@ const PersonalityTasksManagement = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                     placeholder="Task Description in English"
                   />
+                </div>
+                
+                <div>
+                  <Label htmlFor="text_direction">اتجاه النص</Label>
+                  <Select
+                    value={formData.text_direction}
+                    onValueChange={(value: string) => 
+                      setFormData(prev => ({ ...prev, text_direction: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rtl">من اليمين إلى اليسار (عربي)</SelectItem>
+                      <SelectItem value="ltr">من اليسار إلى اليمين (إنجليزي)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

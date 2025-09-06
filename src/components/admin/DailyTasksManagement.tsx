@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit2, Trash2, Clock, Coins } from "lucide-react";
+import { Plus, Edit2, Trash2, Clock, Coins, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,6 +44,7 @@ interface DailyTask {
   task_type: string;
   is_active: boolean;
   display_order: number;
+  text_direction?: string;
   created_at: string;
   updated_at: string;
 }
@@ -64,6 +65,7 @@ const DailyTasksManagement = () => {
     task_type: "general",
     is_active: true,
     display_order: 0,
+    text_direction: "rtl",
   });
 
   const taskTypes = [
@@ -169,6 +171,7 @@ const DailyTasksManagement = () => {
       task_type: task.task_type,
       is_active: task.is_active,
       display_order: task.display_order,
+      text_direction: task.text_direction || 'rtl'
     });
     setIsDialogOpen(true);
   };
@@ -214,7 +217,9 @@ const DailyTasksManagement = () => {
       task_type: "general",
       is_active: true,
       display_order: 0,
+      text_direction: "rtl",
     });
+  };
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -340,6 +345,22 @@ const DailyTasksManagement = () => {
                         min="0"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="text_direction">اتجاه النص</Label>
+                    <Select
+                      value={formData.text_direction}
+                      onValueChange={(value) => setFormData({...formData, text_direction: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="rtl">من اليمين إلى اليسار (عربي)</SelectItem>
+                        <SelectItem value="ltr">من اليسار إلى اليمين (إنجليزي)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>

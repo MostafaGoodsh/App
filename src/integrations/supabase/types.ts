@@ -190,6 +190,7 @@ export type Database = {
           media_type: string
           media_url: string | null
           points_reward: number | null
+          text_direction: string | null
           title: string
           title_en: string | null
           updated_at: string
@@ -205,6 +206,7 @@ export type Database = {
           media_type: string
           media_url?: string | null
           points_reward?: number | null
+          text_direction?: string | null
           title: string
           title_en?: string | null
           updated_at?: string
@@ -220,6 +222,7 @@ export type Database = {
           media_type?: string
           media_url?: string | null
           points_reward?: number | null
+          text_direction?: string | null
           title?: string
           title_en?: string | null
           updated_at?: string
@@ -237,6 +240,7 @@ export type Database = {
           points_reward: number | null
           task_key: string
           task_type: string | null
+          text_direction: string | null
           title: string
           title_en: string | null
           updated_at: string
@@ -251,6 +255,7 @@ export type Database = {
           points_reward?: number | null
           task_key: string
           task_type?: string | null
+          text_direction?: string | null
           title: string
           title_en?: string | null
           updated_at?: string
@@ -265,6 +270,7 @@ export type Database = {
           points_reward?: number | null
           task_key?: string
           task_type?: string | null
+          text_direction?: string | null
           title?: string
           title_en?: string | null
           updated_at?: string
@@ -654,6 +660,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           points_reward: number | null
+          text_direction: string | null
           title: string
           title_en: string | null
           updated_at: string
@@ -666,6 +673,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           points_reward?: number | null
+          text_direction?: string | null
           title: string
           title_en?: string | null
           updated_at?: string
@@ -678,6 +686,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           points_reward?: number | null
+          text_direction?: string | null
           title?: string
           title_en?: string | null
           updated_at?: string
