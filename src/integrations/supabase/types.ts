@@ -183,6 +183,7 @@ export type Database = {
           article_content: string | null
           created_at: string
           description: string | null
+          description_en: string | null
           display_order: number | null
           id: string
           is_active: boolean | null
@@ -190,12 +191,14 @@ export type Database = {
           media_url: string | null
           points_reward: number | null
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           article_content?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
@@ -203,12 +206,14 @@ export type Database = {
           media_url?: string | null
           points_reward?: number | null
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           article_content?: string | null
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
@@ -216,6 +221,7 @@ export type Database = {
           media_url?: string | null
           points_reward?: number | null
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -224,6 +230,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          description_en: string | null
           display_order: number | null
           id: string
           is_active: boolean | null
@@ -231,11 +238,13 @@ export type Database = {
           task_key: string
           task_type: string | null
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
@@ -243,11 +252,13 @@ export type Database = {
           task_key: string
           task_type?: string | null
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
@@ -255,6 +266,7 @@ export type Database = {
           task_key?: string
           task_type?: string | null
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -637,31 +649,37 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          description_en: string | null
           display_order: number | null
           id: string
           is_active: boolean | null
           points_reward: number | null
           title: string
+          title_en: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
           points_reward?: number | null
           title: string
+          title_en?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           display_order?: number | null
           id?: string
           is_active?: boolean | null
           points_reward?: number | null
           title?: string
+          title_en?: string | null
           updated_at?: string
         }
         Relationships: []

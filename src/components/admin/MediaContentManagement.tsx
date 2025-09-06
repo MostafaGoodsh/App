@@ -15,7 +15,9 @@ import { Plus, Edit, Trash2, Play, FileText, Image } from "lucide-react";
 interface MediaContent {
   id: string;
   title: string;
+  title_en?: string;
   description: string | null;
+  description_en?: string;
   media_type: string;
   media_url: string | null;
   article_content: string | null;
@@ -33,7 +35,9 @@ const MediaContentManagement = () => {
   const [editingContent, setEditingContent] = useState<MediaContent | null>(null);
   const [formData, setFormData] = useState({
     title: '',
+    title_en: '',
     description: '',
+    description_en: '',
     media_type: 'article' as string,
     media_url: '',
     article_content: '',
@@ -97,7 +101,9 @@ const MediaContentManagement = () => {
     setEditingContent(contentItem);
     setFormData({
       title: contentItem.title,
+      title_en: contentItem.title_en || '',
       description: contentItem.description || '',
+      description_en: contentItem.description_en || '',
       media_type: contentItem.media_type,
       media_url: contentItem.media_url || '',
       article_content: contentItem.article_content || '',
@@ -130,7 +136,9 @@ const MediaContentManagement = () => {
     setEditingContent(null);
     setFormData({
       title: '',
+      title_en: '',
       description: '',
+      description_en: '',
       media_type: 'article',
       media_url: '',
       article_content: '',
@@ -190,11 +198,31 @@ const MediaContentManagement = () => {
                 </div>
                 
                 <div>
+                  <Label htmlFor="title_en">العنوان (English)</Label>
+                  <Input
+                    id="title_en"
+                    value={formData.title_en || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
+                    placeholder="Title in English"
+                  />
+                </div>
+                
+                <div>
                   <Label htmlFor="description">الوصف</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="description_en">الوصف (English)</Label>
+                  <Textarea
+                    id="description_en"
+                    value={formData.description_en || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
+                    placeholder="Description in English"
                   />
                 </div>
                 

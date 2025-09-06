@@ -37,7 +37,9 @@ interface DailyTask {
   id: string;
   task_key: string;
   title: string;
+  title_en?: string;
   description: string | null;
+  description_en?: string;
   points_reward: number;
   task_type: string;
   is_active: boolean;
@@ -55,7 +57,9 @@ const DailyTasksManagement = () => {
   const [formData, setFormData] = useState({
     task_key: "",
     title: "",
+    title_en: "",
     description: "",
+    description_en: "",
     points_reward: 10,
     task_type: "general",
     is_active: true,
@@ -158,7 +162,9 @@ const DailyTasksManagement = () => {
     setFormData({
       task_key: task.task_key,
       title: task.title,
+      title_en: task.title_en || '',
       description: task.description || "",
+      description_en: task.description_en || '',
       points_reward: task.points_reward,
       task_type: task.task_type,
       is_active: task.is_active,
@@ -201,7 +207,9 @@ const DailyTasksManagement = () => {
     setFormData({
       task_key: "",
       title: "",
+      title_en: "",
       description: "",
+      description_en: "",
       points_reward: 10,
       task_type: "general",
       is_active: true,
@@ -278,12 +286,33 @@ const DailyTasksManagement = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor="title_en">عنوان المهمة (English)</Label>
+                    <Input
+                      id="title_en"
+                      value={formData.title_en || ''}
+                      onChange={(e) => setFormData({...formData, title_en: e.target.value})}
+                      placeholder="Daily Login"
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="description">الوصف</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       placeholder="قم بتسجيل الدخول إلى المنصة"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description_en">الوصف (English)</Label>
+                    <Textarea
+                      id="description_en"
+                      value={formData.description_en || ''}
+                      onChange={(e) => setFormData({...formData, description_en: e.target.value})}
+                      placeholder="Log in to the platform"
                       rows={3}
                     />
                   </div>

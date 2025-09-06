@@ -14,7 +14,9 @@ import { Plus, Edit, Trash2, User } from "lucide-react";
 interface PersonalityTask {
   id: string;
   title: string;
+  title_en?: string;
   description: string | null;
+  description_en?: string;
   points_reward: number;
   is_active: boolean;
   display_order: number;
@@ -28,7 +30,9 @@ const PersonalityTasksManagement = () => {
   const [editingTask, setEditingTask] = useState<PersonalityTask | null>(null);
   const [formData, setFormData] = useState({
     title: '',
+    title_en: '',
     description: '',
+    description_en: '',
     points_reward: 5,
     is_active: true,
     display_order: 0
@@ -89,7 +93,9 @@ const PersonalityTasksManagement = () => {
     setEditingTask(task);
     setFormData({
       title: task.title,
+      title_en: task.title_en || '',
       description: task.description || '',
+      description_en: task.description_en || '',
       points_reward: task.points_reward,
       is_active: task.is_active,
       display_order: task.display_order
@@ -119,7 +125,9 @@ const PersonalityTasksManagement = () => {
     setEditingTask(null);
     setFormData({
       title: '',
+      title_en: '',
       description: '',
+      description_en: '',
       points_reward: 5,
       is_active: true,
       display_order: 0
@@ -167,11 +175,31 @@ const PersonalityTasksManagement = () => {
                 </div>
                 
                 <div>
+                  <Label htmlFor="title_en">عنوان المهمة (English)</Label>
+                  <Input
+                    id="title_en"
+                    value={formData.title_en || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
+                    placeholder="Task Title in English"
+                  />
+                </div>
+                
+                <div>
                   <Label htmlFor="description">وصف المهمة</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="description_en">وصف المهمة (English)</Label>
+                  <Textarea
+                    id="description_en"
+                    value={formData.description_en || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
+                    placeholder="Task Description in English"
                   />
                 </div>
                 
