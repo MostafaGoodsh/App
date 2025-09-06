@@ -178,6 +178,48 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_media_content: {
+        Row: {
+          article_content: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          media_type: string
+          media_url: string | null
+          points_reward: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_content?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          media_type: string
+          media_url?: string | null
+          points_reward?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_content?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          media_type?: string
+          media_url?: string | null
+          points_reward?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_tasks: {
         Row: {
           created_at: string
@@ -591,6 +633,39 @@ export type Database = {
         }
         Relationships: []
       }
+      personality_development_tasks: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          points_reward: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -963,6 +1038,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_media_completions: {
+        Row: {
+          completed_date: string
+          created_at: string
+          id: string
+          media_id: string
+          points_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          media_id: string
+          points_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          media_id?: string
+          points_earned?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_media_completions_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "daily_media_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_mining_profiles: {
         Row: {
           account_strength: number
@@ -1007,6 +1117,41 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mining_levels"
             referencedColumns: ["level_number"]
+          },
+        ]
+      }
+      user_personality_completions: {
+        Row: {
+          completed_date: string
+          created_at: string
+          id: string
+          points_earned: number | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          points_earned?: number | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          points_earned?: number | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_personality_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "personality_development_tasks"
+            referencedColumns: ["id"]
           },
         ]
       }
