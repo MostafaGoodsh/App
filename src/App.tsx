@@ -34,6 +34,8 @@ import EngagementStatsAdmin from "./pages/EngagementStatsAdmin";
 import DailyTasksAdmin from "./pages/DailyTasksAdmin";
 import DailyTasks from "./pages/DailyTasks";
 import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
+import MediaContentAdmin from "./pages/MediaContentAdmin";
+import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +75,8 @@ const App = () => {
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
                   <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />
                   <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />
+                  <Route path="admin/media-content" element={<RequireAdmin><MediaContentAdmin /></RequireAdmin>} />
+                  <Route path="admin/personality-tasks" element={<RequireAdmin><PersonalityTasksAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
