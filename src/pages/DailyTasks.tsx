@@ -31,8 +31,8 @@ const DailyTasks = () => {
           <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
         {/* Hero Section */}
         <div className="text-center space-y-4">
-          <h1 className="font-playfair text-4xl md:text-5xl font-bold arabic-text">
-            المهام اليومية
+          <h1 className="font-playfair text-2xl md:text-4xl font-bold arabic-text">
+            المهام | Tasks
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
             أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي
@@ -66,14 +66,14 @@ const DailyTasks = () => {
           <CardContent>
             <Tabs defaultValue="media" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="media" className="arabic-text">
-                  الوسائط | Media
+                <TabsTrigger value="media" className="arabic-text text-xs sm:text-sm">
+                  وسائط
                 </TabsTrigger>
-                <TabsTrigger value="personality" className="arabic-text">
-                  تطوير الشخصية | Personality
+                <TabsTrigger value="personality" className="arabic-text text-xs sm:text-sm">
+                  شخصية
                 </TabsTrigger>
-                <TabsTrigger value="daily" className="arabic-text">
-                  المهام اليومية | Daily Tasks
+                <TabsTrigger value="daily" className="arabic-text text-xs sm:text-sm">
+                  يومية
                 </TabsTrigger>
               </TabsList>
               
