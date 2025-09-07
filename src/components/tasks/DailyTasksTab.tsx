@@ -53,11 +53,7 @@ const DailyTasksTab = ({
         return (
           <div 
             key={task.id}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer hover:scale-[1.01] ${
-              isCompleted 
-                ? 'bg-primary/10 border-primary/30 shadow-lg shadow-primary/20' 
-                : 'bg-background border-border hover:border-primary/50 hover:shadow-md'
-            }`}
+            className="flex items-center justify-between p-4 rounded-lg border bg-background border-border hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
             onClick={() => isCompleted ? handleUncompleteTask(task.id) : handleCompleteTask(task.id)}
           >
             <div className="flex items-center gap-3 flex-1">
@@ -67,16 +63,13 @@ const DailyTasksTab = ({
                 <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
               )}
               
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm">{getTaskTypeIcon(task.task_type)}</span>
-                  <h4 className={`font-medium transition-colors ${isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                    {task.title}
-                  </h4>
-                </div>
+               <div className="flex-1">
+                <h4 className="font-medium text-foreground">
+                  {task.title}
+                </h4>
                 
                 {task.description && (
-                  <p className={`text-sm transition-colors ${isCompleted ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
+                  <p className="text-sm text-muted-foreground mt-1">
                     {task.description}
                   </p>
                 )}
@@ -84,17 +77,13 @@ const DailyTasksTab = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-1 text-sm transition-colors ${
-                isCompleted ? 'text-primary' : 'text-muted-foreground'
-              }`}>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Coins className="h-4 w-4" />
                 <span>{task.points_reward}</span>
               </div>
               
               {isCompleted && (
-                <div className="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
-                  مكتملة ✓
-                </div>
+                <span className="text-primary text-lg font-bold">✓</span>
               )}
             </div>
           </div>
