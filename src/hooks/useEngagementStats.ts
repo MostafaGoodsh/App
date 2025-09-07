@@ -165,14 +165,22 @@ export const useEngagementStats = () => {
 
       const result = data as any;
       if (result.success) {
+        // Add the completion to state immediately
+        const newCompletion = {
+          id: crypto.randomUUID(),
+          task_id: taskId,
+          completed_date: new Date().toISOString().split('T')[0],
+          points_earned: result.points_earned
+        };
+        setCompletedTasks(prev => [...prev, newCompletion]);
+
         toast({
           title: "تم بنجاح",
           description: `تم إكمال مهمة "${result.task_title}" وحصلت على ${result.points_earned} نقطة`,
         });
         
-        // Refresh completed tasks
-        await fetchCompletedTasks();
-        await fetchStats(); // Refresh stats as points may have changed
+        // Refresh stats as points may have changed
+        await fetchStats();
         return true;
       } else {
         toast({
@@ -193,6 +201,9 @@ export const useEngagementStats = () => {
     if (!user) return false;
 
     try {
+      // Update state immediately for better UX
+      setCompletedTasks(prev => prev.filter(completion => completion.task_id !== taskId));
+
       const today = new Date().toISOString().split('T')[0];
       
       const { error } = await supabase
@@ -204,6 +215,8 @@ export const useEngagementStats = () => {
 
       if (error) {
         console.error('Error uncompleting task:', error);
+        // Revert the optimistic update
+        await fetchCompletedTasks();
         toast({
           title: "خطأ",
           description: "فشل في إلغاء إكمال المهمة",
@@ -217,14 +230,13 @@ export const useEngagementStats = () => {
         description: "تم إلغاء إكمال المهمة",
       });
       
-      // Update state immediately for better UX
-      setCompletedTasks(prev => prev.filter(completion => completion.task_id !== taskId));
-      
-      // Refresh completed tasks and stats
-      await Promise.all([fetchCompletedTasks(), fetchStats()]);
+      // Refresh stats but don't refetch completed tasks as we already updated optimistically
+      await fetchStats();
       return true;
     } catch (error) {
       console.error('Error uncompleting task:', error);
+      // Revert the optimistic update
+      await fetchCompletedTasks();
       return false;
     }
   };
