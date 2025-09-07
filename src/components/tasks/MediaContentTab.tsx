@@ -71,22 +71,49 @@ const MediaContentTab = () => {
   const completeMediaContent = async (contentId: string, pointsReward: number) => {
     if (!user) return;
 
-    try {
-      const { error } = await supabase
-        .from('user_media_completions')
-        .insert({
-          user_id: user.id,
-          media_id: contentId,
-          points_earned: pointsReward
-        });
+    const isCompleted = completedContent.includes(contentId);
+    
+    if (isCompleted) {
+      // إلغاء إكمال المحتوى
+      try {
+        setCompletedContent(prev => prev.filter(id => id !== contentId));
+        
+        const { error } = await supabase
+          .from('user_media_completions')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('media_id', contentId)
+          .eq('completed_date', new Date().toISOString().split('T')[0]);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setCompletedContent(prev => [...prev, contentId]);
-      toast.success(`تم إكمال المحتوى! حصلت على ${pointsReward} نقطة`);
-    } catch (error) {
-      console.error('Error completing media content:', error);
-      toast.error('حدث خطأ أثناء إكمال المحتوى');
+        toast.success('تم إلغاء إكمال المحتوى');
+      } catch (error) {
+        console.error('Error uncompleting media content:', error);
+        setCompletedContent(prev => [...prev, contentId]);
+        toast.error('حدث خطأ أثناء إلغاء إكمال المحتوى');
+      }
+    } else {
+      // إكمال المحتوى
+      try {
+        setCompletedContent(prev => [...prev, contentId]);
+        
+        const { error } = await supabase
+          .from('user_media_completions')
+          .insert({
+            user_id: user.id,
+            media_id: contentId,
+            points_earned: pointsReward
+          });
+
+        if (error) throw error;
+
+        toast.success(`تم إكمال المحتوى! حصلت على ${pointsReward} نقطة`);
+      } catch (error) {
+        console.error('Error completing media content:', error);
+        setCompletedContent(prev => prev.filter(id => id !== contentId));
+        toast.error('حدث خطأ أثناء إكمال المحتوى');
+      }
     }
   };
 
@@ -126,15 +153,16 @@ const MediaContentTab = () => {
         return (
           <div 
             key={content.id}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+            onClick={() => completeMediaContent(content.id, content.points_reward)}
+            className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer ${
               isCompleted 
-                ? 'bg-green-50 border-green-200' 
+                ? 'bg-yellow-50 border-yellow-200' 
                 : 'bg-card border-border hover:border-primary/20'
             }`}
           >
             <div className="flex items-center gap-3 flex-1">
               {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle2 className="h-5 w-5 text-yellow-600" />
               ) : (
                 <Circle className="h-5 w-5 text-muted-foreground" />
               )}
@@ -159,26 +187,15 @@ const MediaContentTab = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-orange-600">
+              <div className="flex items-center gap-1 text-sm text-yellow-600">
                 <Coins className="h-4 w-4" />
                 <span>{content.points_reward}</span>
               </div>
               
-              {!isCompleted && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => completeMediaContent(content.id, content.points_reward)}
-                  className="text-xs"
-                >
-                  إكمال
-                </Button>
-              )}
-              
               {isCompleted && (
-                <Badge variant="default" className="bg-green-600 text-white">
-                  مكتملة
-                </Badge>
+                <div className="w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="h-3 w-3 text-white" />
+                </div>
               )}
             </div>
           </div>
