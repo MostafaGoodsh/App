@@ -21,7 +21,10 @@ const MainLayout = () => {
               backgroundColor: 'hsl(var(--background) / 0.85)'
             }}
           >
-            <SidebarTrigger />
+            <SidebarTrigger>
+              <span className="text-lg">𓋹</span>
+              <span className="sr-only">Toggle Sidebar</span>
+            </SidebarTrigger>
             <div className="ml-4 font-playfair text-lg font-bold">
               {getContent("app_name", "Crypto-MSR")}
             </div>
