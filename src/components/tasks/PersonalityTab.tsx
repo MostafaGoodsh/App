@@ -129,29 +129,22 @@ const PersonalityTab = () => {
           <div 
             key={task.id}
             onClick={() => completeTask(task.id, task.points_reward)}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer ${
-              isCompleted 
-                ? 'bg-yellow-50 border-yellow-200' 
-                : 'bg-card border-border hover:border-primary/20'
-            }`}
+            className="flex items-center justify-between p-4 rounded-lg border bg-background border-border hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3 flex-1">
               {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-yellow-600" />
+                <CheckCircle2 className="h-6 w-6 text-primary animate-scale-in" />
               ) : (
-                <Circle className="h-5 w-5 text-muted-foreground" />
+                <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
               )}
               
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <User className="h-4 w-4" />
-                  <h4 className={`font-medium ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
-                    {task.title}
-                  </h4>
-                </div>
+                <h4 className="font-medium text-foreground">
+                  {task.title}
+                </h4>
                 
                 {task.description && (
-                  <p className={`text-sm ${isCompleted ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
+                  <p className="text-sm text-muted-foreground mt-1">
                     {task.description}
                   </p>
                 )}
@@ -159,15 +152,13 @@ const PersonalityTab = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-yellow-600">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Coins className="h-4 w-4" />
                 <span>{task.points_reward}</span>
               </div>
               
               {isCompleted && (
-                <div className="w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="h-3 w-3 text-white" />
-                </div>
+                <span className="text-primary text-lg font-bold">✓</span>
               )}
             </div>
           </div>

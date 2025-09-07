@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import MediaModal from "./MediaModal";
 
 interface MediaContent {
   id: string;
@@ -153,38 +154,28 @@ const MediaContentTab = () => {
         return (
           <div 
             key={content.id}
-            className={`rounded-lg border transition-all p-4 ${
-              isCompleted 
-                ? 'bg-black/5 border-black/20' 
-                : 'bg-card border-border hover:border-primary/20'
-            }`}
+            className="rounded-lg border bg-background border-border hover:border-primary/50 hover:shadow-md transition-all"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3 flex-1">
                 <button
                   onClick={() => completeMediaContent(content.id, content.points_reward)}
                   className="flex-shrink-0"
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="h-5 w-5 text-black" />
+                    <CheckCircle2 className="h-6 w-6 text-primary animate-scale-in" />
                   ) : (
-                    <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                    <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
                   )}
                 </button>
                 
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {getMediaIcon(content.media_type)}
-                    <h4 className={`font-medium ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
-                      {content.title}
-                    </h4>
-                    <Badge variant="secondary" className="text-xs">
-                      {getMediaTypeLabel(content.media_type)}
-                    </Badge>
-                  </div>
+                  <h4 className="font-medium text-foreground">
+                    {content.title}
+                  </h4>
                   
                   {content.description && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {content.description}
                     </p>
                   )}
@@ -192,55 +183,63 @@ const MediaContentTab = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 text-sm text-amber-600">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Coins className="h-4 w-4" />
                   <span>{content.points_reward}</span>
                 </div>
                 
                 {isCompleted && (
-                  <div className="w-4 h-4 bg-amber-600 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="h-3 w-3 text-white" />
-                  </div>
+                  <span className="text-primary text-lg font-bold">✓</span>
                 )}
               </div>
             </div>
 
             {/* عرض الوسائط */}
-            {content.media_url && (
-              <div className="mt-3">
-                {content.media_type === 'image' ? (
-                  <img 
-                    src={content.media_url} 
-                    alt={content.title}
-                    className="w-full max-h-64 object-cover rounded-lg border"
-                    loading="lazy"
-                  />
-                ) : content.media_type === 'video' ? (
-                  <video 
-                    src={content.media_url}
-                    controls
-                    className="w-full max-h-64 rounded-lg border"
-                    preload="metadata"
-                  >
-                    متصفحك لا يدعم تشغيل الفيديو
-                  </video>
-                ) : (
-                  <a 
-                    href={content.media_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-primary hover:underline"
-                  >
-                    {getMediaIcon(content.media_type)}
-                    عرض المحتوى
-                  </a>
-                )}
+            {content.media_url && (content.media_type === 'image' || content.media_type === 'video') && (
+              <div className="px-4 pb-4">
+                <MediaModal 
+                  media_url={content.media_url} 
+                  media_type={content.media_type}
+                  title={content.title}
+                >
+                  {content.media_type === 'image' ? (
+                    <img 
+                      src={content.media_url} 
+                      alt={content.title}
+                      className="w-full max-h-48 object-cover rounded-lg border hover:opacity-90 transition-opacity"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <video 
+                      src={content.media_url}
+                      className="w-full max-h-48 rounded-lg border hover:opacity-90 transition-opacity"
+                      preload="metadata"
+                    >
+                      متصفحك لا يدعم تشغيل الفيديو
+                    </video>
+                  )}
+                </MediaModal>
+              </div>
+            )}
+
+            {/* رابط للملفات الأخرى */}
+            {content.media_url && content.media_type !== 'image' && content.media_type !== 'video' && (
+              <div className="px-4 pb-4">
+                <a 
+                  href={content.media_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:underline"
+                >
+                  {getMediaIcon(content.media_type)}
+                  عرض المحتوى
+                </a>
               </div>
             )}
 
             {/* عرض محتوى المقال */}
             {content.article_content && content.media_type === 'article' && (
-              <div className="mt-3 prose prose-sm max-w-none">
+              <div className="px-4 pb-4 prose prose-sm max-w-none">
                 <div className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {content.article_content.length > 200 
                     ? content.article_content.substring(0, 200) + '...'
