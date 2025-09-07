@@ -153,51 +153,102 @@ const MediaContentTab = () => {
         return (
           <div 
             key={content.id}
-            onClick={() => completeMediaContent(content.id, content.points_reward)}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all cursor-pointer ${
+            className={`rounded-lg border transition-all p-4 ${
               isCompleted 
-                ? 'bg-yellow-50 border-yellow-200' 
+                ? 'bg-black/5 border-black/20' 
                 : 'bg-card border-border hover:border-primary/20'
             }`}
           >
-            <div className="flex items-center gap-3 flex-1">
-              {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-yellow-600" />
-              ) : (
-                <Circle className="h-5 w-5 text-muted-foreground" />
-              )}
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  {getMediaIcon(content.media_type)}
-                  <h4 className={`font-medium ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
-                    {content.title}
-                  </h4>
-                  <Badge variant="secondary" className="text-xs">
-                    {getMediaTypeLabel(content.media_type)}
-                  </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3 flex-1">
+                <button
+                  onClick={() => completeMediaContent(content.id, content.points_reward)}
+                  className="flex-shrink-0"
+                >
+                  {isCompleted ? (
+                    <CheckCircle2 className="h-5 w-5 text-black" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                  )}
+                </button>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    {getMediaIcon(content.media_type)}
+                    <h4 className={`font-medium ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+                      {content.title}
+                    </h4>
+                    <Badge variant="secondary" className="text-xs">
+                      {getMediaTypeLabel(content.media_type)}
+                    </Badge>
+                  </div>
+                  
+                  {content.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {content.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 text-sm text-amber-600">
+                  <Coins className="h-4 w-4" />
+                  <span>{content.points_reward}</span>
                 </div>
                 
-                {content.description && (
-                  <p className={`text-sm ${isCompleted ? 'text-muted-foreground' : 'text-muted-foreground'}`}>
-                    {content.description}
-                  </p>
+                {isCompleted && (
+                  <div className="w-4 h-4 bg-amber-600 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="h-3 w-3 text-white" />
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-sm text-yellow-600">
-                <Coins className="h-4 w-4" />
-                <span>{content.points_reward}</span>
+            {/* عرض الوسائط */}
+            {content.media_url && (
+              <div className="mt-3">
+                {content.media_type === 'image' ? (
+                  <img 
+                    src={content.media_url} 
+                    alt={content.title}
+                    className="w-full max-h-64 object-cover rounded-lg border"
+                    loading="lazy"
+                  />
+                ) : content.media_type === 'video' ? (
+                  <video 
+                    src={content.media_url}
+                    controls
+                    className="w-full max-h-64 rounded-lg border"
+                    preload="metadata"
+                  >
+                    متصفحك لا يدعم تشغيل الفيديو
+                  </video>
+                ) : (
+                  <a 
+                    href={content.media_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-primary hover:underline"
+                  >
+                    {getMediaIcon(content.media_type)}
+                    عرض المحتوى
+                  </a>
+                )}
               </div>
-              
-              {isCompleted && (
-                <div className="w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="h-3 w-3 text-white" />
+            )}
+
+            {/* عرض محتوى المقال */}
+            {content.article_content && content.media_type === 'article' && (
+              <div className="mt-3 prose prose-sm max-w-none">
+                <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {content.article_content.length > 200 
+                    ? content.article_content.substring(0, 200) + '...'
+                    : content.article_content
+                  }
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         );
       })}
