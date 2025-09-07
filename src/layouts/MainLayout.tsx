@@ -31,8 +31,13 @@ const MainLayoutContent = () => {
             <span className="text-lg">𓋹</span>
             <span className="sr-only">Toggle Sidebar</span>
           </Button>
-          <div className="ml-4 font-cairo text-lg font-bold">
-            {getContent("app_name", "منصة مصر الرقمية")}
+          <div className="ml-4 flex flex-col justify-center leading-none">
+            <div className="font-playfair text-xs text-muted-foreground -mb-1">
+              Crypto-MSR
+            </div>
+            <div className="font-cairo text-base font-bold">
+              {getContent("app_name", "منصة مصر الرقمية")}
+            </div>
           </div>
         </header>
         <main className="flex-1">
