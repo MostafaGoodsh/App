@@ -217,9 +217,11 @@ export const useEngagementStats = () => {
         description: "تم إلغاء إكمال المهمة",
       });
       
-      // Refresh completed tasks
-      await fetchCompletedTasks();
-      await fetchStats(); // Refresh stats as points may have changed
+      // Update state immediately for better UX
+      setCompletedTasks(prev => prev.filter(completion => completion.task_id !== taskId));
+      
+      // Refresh completed tasks and stats
+      await Promise.all([fetchCompletedTasks(), fetchStats()]);
       return true;
     } catch (error) {
       console.error('Error uncompleting task:', error);
