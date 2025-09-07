@@ -51,13 +51,13 @@ const Header = () => {
           </NavigationMenu>
         </nav>
         <div className="flex items-center gap-3">
-          <Button asChild size="default" className="px-6">
+          <Button asChild size="default" className="px-5">
             <Link to="/early-access">{getContent('hero_cta', 'انضم الآن')}</Link>
           </Button>
           {user ? (
-            <Button size="default" variant="outline" onClick={signOut} className="px-6">تسجيل الخروج</Button>
+            <Button size="default" variant="outline" onClick={signOut} className="px-5 border-border/30">تسجيل الخروج</Button>
           ) : (
-            <Button asChild size="default" variant="outline" className="px-6">
+            <Button asChild size="default" variant="outline" className="px-5 border-border/30">
               <Link to="/auth">تسجيل الدخول</Link>
             </Button>
           )}

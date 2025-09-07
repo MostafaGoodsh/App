@@ -74,19 +74,19 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4">
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/call-out">{getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px] bg-transparent border-white/30 text-white hover:bg-white/10">
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
               </Button>
             </div>
