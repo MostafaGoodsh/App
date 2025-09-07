@@ -92,6 +92,7 @@ export default {
 			},
       fontFamily: {
         playfair: ['"Playfair Display"', 'serif'],
+        cairo: ['Cairo', 'sans-serif'],
       }
 		}
 	},
