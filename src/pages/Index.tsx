@@ -64,7 +64,7 @@ const Index = () => {
                 <h1 className="font-playfair text-3xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-1 md:mb-2">
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
-                <p className="font-cairo text-xl md:text-3xl lg:text-4xl text-primary mb-4 md:mb-4">
+                <p className="font-cairo text-xl md:text-3xl lg:text-4xl text-primary mb-8 md:mb-12">
                   {getContent('hero_subtitle', 'منصة مصر الرقمية')}
                 </p>
                 <div className="text-3xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
