@@ -37,6 +37,7 @@ import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
 import MediaContentAdmin from "./pages/MediaContentAdmin";
 import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
 import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
+import AnubisCardAdmin from "./pages/AnubisCardAdmin";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => {
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
                   <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
+                  <Route path="admin/anubis-card" element={<RequireAdmin><AnubisCardAdmin /></RequireAdmin>} />
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
                   <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />

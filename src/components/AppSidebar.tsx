@@ -33,6 +33,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: getContent("admin_learning_management", "إدارة التعلم"), url: "/admin/learning", icon: BookOpen },
   { title: getContent("admin_content_management", "إدارة محتوى التطبيق"), url: "/admin/content", icon: Settings },
   { title: getContent("admin_updates_management", "إدارة التحديثات"), url: "/admin/updates", icon: Settings },
+  { title: "إدارة كارت أنوبيس", url: "/admin/anubis-card", icon: Star },
   { title: getContent("admin_mining_levels_management", "إدارة مستويات التعدين"), url: "/admin/mining-levels", icon: Zap },
   { title: getContent("admin_callout_personalities_management", "قائمة الاستدعاء الشرفية"), url: "/admin/callout-personalities", icon: Star },
   { title: "إحصائيات التفاعل", url: "/admin/engagement-stats", icon: TrendingUp },

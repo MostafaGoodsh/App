@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
+import AnubisCard from "@/components/AnubisCard";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -96,6 +97,9 @@ const Index = () => {
         <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
           {/* Daily Tasks Card - First Card */}
           <DailyTasksCard />
+          
+          {/* Anubis Card */}
+          <AnubisCard />
           
           {[
             { 
