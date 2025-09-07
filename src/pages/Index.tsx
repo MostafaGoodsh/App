@@ -64,7 +64,7 @@ const Index = () => {
                 <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-4">
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
-                <p className="text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
+                <p className="font-cairo text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
                   {getContent('hero_subtitle', 'منصة مصر الرقمية')}
                 </p>
                 <div className="text-4xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
@@ -75,19 +75,19 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col items-center justify-center gap-4">
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
+              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
+              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
+              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/call-out">{getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
+              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
+              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
               </Button>
             </div>
@@ -130,10 +130,10 @@ const Index = () => {
                   loading="lazy" 
                 />
                 <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-                  <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+                  <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
                     {getContent(card.titleKey, 'عنوان البطاقة')}
                   </h2>
-                  <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+                  <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
                     {getContent(card.descriptionKey, 'وصف البطاقة')}
                   </p>
                   <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
