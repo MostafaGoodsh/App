@@ -11,12 +11,14 @@ import { Loader2 } from "lucide-react";
 interface AnubisCardContent {
   title: string;
   description: string;
+  introduction: string;
 }
 
 const AnubisCardManagement = () => {
   const [content, setContent] = useState<AnubisCardContent>({
     title: '',
-    description: ''
+    description: '',
+    introduction: ''
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,7 +33,7 @@ const AnubisCardManagement = () => {
       const { data } = await supabase
         .from('app_content')
         .select('content_key, text_content')
-        .in('content_key', ['anubis_card_title', 'anubis_card_description'])
+        .in('content_key', ['anubis_card_title', 'anubis_card_description', 'anubis_card_introduction'])
         .eq('is_active', true);
 
       if (data) {
@@ -42,7 +44,8 @@ const AnubisCardManagement = () => {
 
         setContent({
           title: contentMap['anubis_card_title'] || '',
-          description: contentMap['anubis_card_description'] || ''
+          description: contentMap['anubis_card_description'] || '',
+          introduction: contentMap['anubis_card_introduction'] || ''
         });
       }
     } catch (error) {
@@ -69,6 +72,11 @@ const AnubisCardManagement = () => {
         {
           content_key: 'anubis_card_description', 
           text_content: content.description,
+          content_type: 'text'
+        },
+        {
+          content_key: 'anubis_card_introduction',
+          text_content: content.introduction,
           content_type: 'text'
         }
       ];
@@ -139,7 +147,18 @@ const AnubisCardManagement = () => {
               value={content.description}
               onChange={(e) => setContent(prev => ({ ...prev, description: e.target.value }))}
               placeholder="أدخل وصف الكارت"
-              rows={4}
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="introduction">المقدمة الداخلية</Label>
+            <Textarea
+              id="introduction"
+              value={content.introduction}
+              onChange={(e) => setContent(prev => ({ ...prev, introduction: e.target.value }))}
+              placeholder="أدخل المقدمة التي ستظهر عند فتح الكارت"
+              rows={6}
             />
           </div>
 
