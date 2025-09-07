@@ -856,6 +856,45 @@ export type Database = {
         }
         Relationships: []
       }
+      task_section_introductions: {
+        Row: {
+          content: string
+          content_en: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          section_type: string
+          text_direction: string
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          content_en?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          section_type: string
+          text_direction?: string
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          content_en?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          section_type?: string
+          text_direction?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number

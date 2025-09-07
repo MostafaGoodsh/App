@@ -36,6 +36,7 @@ import DailyTasks from "./pages/DailyTasks";
 import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
 import MediaContentAdmin from "./pages/MediaContentAdmin";
 import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
+import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => {
                   <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />
                   <Route path="admin/media-content" element={<RequireAdmin><MediaContentAdmin /></RequireAdmin>} />
                   <Route path="admin/personality-tasks" element={<RequireAdmin><PersonalityTasksAdmin /></RequireAdmin>} />
+                  <Route path="admin/task-introductions" element={<RequireAdmin><TaskIntroductionsAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

@@ -5,6 +5,7 @@ import StreakDisplay from "@/components/engagement/StreakDisplay";
 import MediaContentTab from "@/components/tasks/MediaContentTab";
 import PersonalityTab from "@/components/tasks/PersonalityTab";
 import DailyTasksTab from "@/components/tasks/DailyTasksTab";
+import SectionIntroduction from "@/components/tasks/SectionIntroduction";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { Target, Flame, Clock } from "lucide-react";
 
@@ -37,6 +38,11 @@ const DailyTasks = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
             أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي
           </p>
+        </div>
+
+        {/* General Introduction */}
+        <div className="max-w-4xl mx-auto">
+          <SectionIntroduction sectionType="general" />
         </div>
 
         {/* Stats Overview */}
@@ -78,14 +84,17 @@ const DailyTasks = () => {
               </TabsList>
               
               <TabsContent value="media" className="space-y-4">
+                <SectionIntroduction sectionType="media_content" />
                 <MediaContentTab />
               </TabsContent>
               
               <TabsContent value="personality" className="space-y-4">
+                <SectionIntroduction sectionType="personality_tasks" />
                 <PersonalityTab />
               </TabsContent>
               
               <TabsContent value="daily" className="space-y-4">
+                <SectionIntroduction sectionType="daily_tasks" />
                 <DailyTasksTab 
                   tasks={dailyTasks}
                   completedTasks={completedTasks.map(ct => ct.task_id)}
