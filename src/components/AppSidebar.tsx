@@ -39,6 +39,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "المهام اليومية", url: "/admin/daily-tasks", icon: Calendar },
   { title: "إدارة الوسائط", url: "/admin/media-content", icon: BookOpen },
   { title: "مهام تطوير الشخصية", url: "/admin/personality-tasks", icon: User },
+  { title: "إدارة مقدمات المهام", url: "/admin/task-introductions", icon: Settings },
 ];
 
 export function AppSidebar() {
