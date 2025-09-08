@@ -28,8 +28,14 @@ export default defineConfig(({ mode }) => ({
     'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer', 'eventemitter3'],
-    exclude: ['@solana/web3.js', '@solana/spl-token', '@walletconnect/ethereum-provider']
+    include: [
+      'buffer', 
+      'eventemitter3',
+      'bn.js',
+      '@solana/web3.js',
+      '@solana/spl-token'
+    ],
+    exclude: ['@walletconnect/ethereum-provider']
   },
   build: {
     rollupOptions: {
