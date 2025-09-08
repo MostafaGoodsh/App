@@ -1,6 +1,5 @@
 import { WalletDashboard } from "@/components/wallet/WalletDashboard";
 import { WalletConnectionSection } from "@/components/wallet/WalletConnectionSection";
-import { WalletConnectSetup } from "@/components/wallet/WalletConnectSetup";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -143,7 +142,6 @@ const WalletFixed = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <WalletConnectSetup />
               <WalletConnectionSection
                 isConnecting={isConnecting}
                 onWalletConnect={handleWalletConnect}

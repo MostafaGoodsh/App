@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-import { WALLETCONNECT_CONFIG, NETWORK_CONFIG } from '@/config/wallet';
+import { WALLETCONNECT_CONFIG } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
@@ -25,7 +25,6 @@ export const useWalletConnect = () => {
     if (savedWallets) {
       try {
         const loadedWallets = JSON.parse(savedWallets);
-        console.log('Loading wallets from localStorage:', loadedWallets);
         setConnectedWallets(loadedWallets);
       } catch (error) {
         console.error('Error loading saved wallets:', error);
@@ -33,11 +32,11 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-  // Save wallets to localStorage (without provider objects)
+  // Save wallets to localStorage
   useEffect(() => {
     const walletsToSave = connectedWallets.map(wallet => ({
       ...wallet,
-      provider: undefined // Remove provider to avoid DataCloneError
+      provider: undefined
     }));
     localStorage.setItem('connectedWallets', JSON.stringify(walletsToSave));
   }, [connectedWallets]);
@@ -59,7 +58,6 @@ export const useWalletConnect = () => {
   const connectWalletConnect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      // Disconnect any existing provider first
       if (wcProvider) {
         try {
           await wcProvider.disconnect();
@@ -68,7 +66,6 @@ export const useWalletConnect = () => {
         }
       }
 
-      // Initialize WalletConnect provider
       const provider = await EthereumProvider.init({
         chains: WALLETCONNECT_CONFIG.chains,
         optionalChains: [137], // Polygon as optional chain
@@ -82,10 +79,8 @@ export const useWalletConnect = () => {
         }
       });
 
-      // Set up event listeners
       provider.on('accountsChanged', (accounts: string[]) => {
         if (accounts.length === 0) {
-          // Handle disconnection
           setConnectedWallets(prev => prev.filter(w => w.type !== 'WalletConnect'));
         }
       });
@@ -97,13 +92,7 @@ export const useWalletConnect = () => {
 
       setWcProvider(provider);
 
-      // Connect to wallet with timeout
-      const connectPromise = provider.connect();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Connection timeout')), 60000)
-      );
-
-      await Promise.race([connectPromise, timeoutPromise]);
+      await provider.connect();
       
       const accounts = provider.accounts;
       
@@ -132,7 +121,6 @@ export const useWalletConnect = () => {
       return null;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
-      // Clean up on error
       if (wcProvider) {
         try {
           await wcProvider.disconnect();
@@ -150,7 +138,7 @@ export const useWalletConnect = () => {
   const connectMetaMask = useCallback(async () => {
     if (!(window as any).ethereum?.isMetaMask) {
       window.open('https://metamask.io/download/', '_blank');
-      return;
+      throw new Error('يرجى تثبيت محفظة MetaMask أولاً');
     }
 
     setIsConnecting(true);
@@ -187,25 +175,59 @@ export const useWalletConnect = () => {
     setIsConnecting(true);
     
     try {
-      // Check multiple ways to detect Phantom
-      const phantomProvider = (window as any).phantom?.solana || 
-                            (window as any).solana?.isPhantom ? (window as any).solana : null;
+      // Enhanced Phantom detection for mobile and desktop
+      const getPhantom = () => {
+        if (typeof window === 'undefined') return null;
+        
+        // Check for Phantom in different contexts
+        if ((window as any).phantom?.solana) {
+          return (window as any).phantom.solana;
+        }
+        
+        if ((window as any).solana?.isPhantom) {
+          return (window as any).solana;
+        }
+
+        // For mobile browsers, check if we're in an app context
+        if (navigator.userAgent.includes('Mobile') || (window as any).ReactNativeWebView) {
+          if ((window as any).solana) {
+            return (window as any).solana;
+          }
+        }
+        
+        return null;
+      };
+
+      let phantomProvider = getPhantom();
       
-      console.log('Checking Phantom:', {
+      // If not found, wait for mobile injection
+      if (!phantomProvider) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        phantomProvider = getPhantom();
+      }
+      
+      console.log('Phantom detection:', {
+        found: !!phantomProvider,
+        userAgent: navigator.userAgent,
         phantom: (window as any).phantom,
-        solana: (window as any).solana,
-        provider: phantomProvider
+        solana: (window as any).solana
       });
       
       if (!phantomProvider) {
-        console.log('Phantom not detected, opening installation page');
-        window.open('https://phantom.app/', '_blank');
-        throw new Error('Phantom wallet not detected. Please install Phantom wallet and refresh the page.');
+        // Direct deep link for mobile
+        if (navigator.userAgent.includes('Mobile')) {
+          const currentUrl = window.location.href;
+          const phantomUrl = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}`;
+          window.location.href = phantomUrl;
+          throw new Error('فتح تطبيق Phantom...');
+        } else {
+          window.open('https://phantom.app/', '_blank');
+          throw new Error('يرجى تثبيت محفظة Phantom أولاً');
+        }
       }
 
-      console.log('Phantom detected, attempting connection...');
+      console.log('Attempting Phantom connection...');
       
-      // Request connection
       const response = await phantomProvider.connect({ onlyIfTrusted: false });
       const address = response.publicKey.toString();
       
@@ -250,7 +272,6 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-
   const disconnectWallet = useCallback((walletId: string) => {
     setConnectedWallets(prev => prev.filter(w => w.id !== walletId));
   }, []);
@@ -284,7 +305,6 @@ export const useWalletConnect = () => {
       const tx = await signer.sendTransaction(transaction);
       await tx.wait();
       
-      // Refresh balance after transaction
       await refreshBalance(wallet);
       
       return tx.hash;

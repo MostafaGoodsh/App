@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WalletConnectModal } from "./WalletConnectModal";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Wallet, Chrome } from "lucide-react";
 
 interface WalletConnectionSectionProps {
   isConnecting: boolean;
@@ -21,15 +21,15 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
     setConnectModalOpen(false);
   };
 
-
   return (
     <div className="grid gap-6 md:grid-cols-3 mb-8">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            🔗 WalletConnect
+            <Wallet className="w-5 h-5" />
+            WalletConnect
           </CardTitle>
-          <CardDescription>اتصال بأكثر من 300 محفظة</CardDescription>
+          <CardDescription className="arabic-text">اتصال بأكثر من 300 محفظة</CardDescription>
         </CardHeader>
         <CardContent>
           <Button 
@@ -38,7 +38,7 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
             className="w-full"
           >
             {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-            اتصال بالمحافظ
+            <span className="arabic-text">اتصال بالمحافظ</span>
           </Button>
         </CardContent>
       </Card>
@@ -46,9 +46,10 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            🦊 MetaMask
+            <Chrome className="w-5 h-5" />
+            MetaMask
           </CardTitle>
-          <CardDescription>محفظة Ethereum الأشهر</CardDescription>
+          <CardDescription className="arabic-text">محفظة Ethereum الأشهر</CardDescription>
         </CardHeader>
         <CardContent>
           <Button 
@@ -57,7 +58,7 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
             className="w-full"
           >
             {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-            اتصال بـ MetaMask
+            <span className="arabic-text">اتصال بـ MetaMask</span>
           </Button>
         </CardContent>
       </Card>
@@ -67,7 +68,7 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
           <CardTitle className="flex items-center gap-2">
             👻 Phantom
           </CardTitle>
-          <CardDescription>محفظة Solana الرائدة</CardDescription>
+          <CardDescription className="arabic-text">محفظة Solana الرائدة</CardDescription>
         </CardHeader>
         <CardContent>
           <Button 
@@ -76,11 +77,10 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
             className="w-full"
           >
             {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-            اتصال بـ Phantom
+            <span className="arabic-text">اتصال بـ Phantom</span>
           </Button>
         </CardContent>
       </Card>
-
 
       <WalletConnectModal
         open={connectModalOpen}
