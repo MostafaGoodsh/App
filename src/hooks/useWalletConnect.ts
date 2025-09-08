@@ -184,10 +184,20 @@ export const useWalletConnect = () => {
   }, [getBalance]);
 
   const connectPhantom = useCallback(async () => {
+    // Check if we're on mobile
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     if (!(window as any).phantom?.solana?.isPhantom) {
-      // Open Phantom installation page
-      window.open('https://phantom.app/', '_blank');
-      throw new Error('Phantom wallet not installed. Please install Phantom wallet and refresh the page.');
+      if (isMobile) {
+        // For mobile, use deeplink to open Phantom app
+        const deeplink = `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}?ref=${encodeURIComponent(window.location.origin)}`;
+        window.location.href = deeplink;
+        throw new Error('Redirecting to Phantom app...');
+      } else {
+        // For desktop, open installation page
+        window.open('https://phantom.app/', '_blank');
+        throw new Error('Phantom wallet not installed. Please install Phantom wallet and refresh the page.');
+      }
     }
 
     setIsConnecting(true);
