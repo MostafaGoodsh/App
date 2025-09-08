@@ -13,13 +13,11 @@ interface WalletOverviewProps {
 
 export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => {
   const ethereumWallets = wallets.filter(w => w.network === 'Ethereum');
-  const solanaWallets = wallets.filter(w => w.network === 'Solana');
   
   const totalEthBalance = ethereumWallets.reduce((sum, w) => sum + parseFloat(w.balance || '0'), 0);
-  const totalSolBalance = solanaWallets.reduce((sum, w) => sum + parseFloat(w.balance || '0'), 0);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5" />
         <CardHeader className="relative pb-2">
@@ -53,9 +51,6 @@ export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => 
             <Badge variant="secondary" className="text-xs">
               {ethereumWallets.length} ETH
             </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {solanaWallets.length} SOL
-            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -74,24 +69,6 @@ export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => 
         <CardContent className="relative">
           <div className="text-sm text-muted-foreground">
             {ethereumWallets.length} محفظة متصلة
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-green-500/5" />
-        <CardHeader className="relative pb-2">
-          <CardDescription className="flex items-center gap-2">
-            <Network className="w-4 h-4" />
-            Solana
-          </CardDescription>
-          <CardTitle className="text-2xl">
-            {totalSolBalance.toFixed(4)} SOL
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="relative">
-          <div className="text-sm text-muted-foreground">
-            {solanaWallets.length} محفظة متصلة
           </div>
         </CardContent>
       </Card>

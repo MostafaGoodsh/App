@@ -24,10 +24,12 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
   const [isAddingToken, setIsAddingToken] = useState(false);
 
   useEffect(() => {
-    if (wallet.network === 'Solana') {
-      fetchTokenAccounts(wallet.address);
-    }
-  }, [wallet.address, wallet.network, fetchTokenAccounts]);
+    // This component is no longer needed since we only support Ethereum
+    // Keeping it for potential future use
+  }, [wallet.address, wallet.network]);
+
+  // Return null since we only support Ethereum now
+  return null;
 
   const handleRefreshTokens = async () => {
     try {
@@ -77,9 +79,8 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
     window.open(`https://solscan.io/token/${mintAddress}`, '_blank');
   };
 
-  if (wallet.network !== 'Solana') {
-    return null;
-  }
+  // Component disabled since we only support Ethereum now
+  return null;
 
   return (
     <Card>

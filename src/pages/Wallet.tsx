@@ -13,53 +13,22 @@ const WalletFixed = () => {
   const {
     connectedWallets,
     isConnecting,
-    connectWalletConnect,
-    connectMetaMask,
-    connectPhantom,
+    connectWallet,
     refreshBalance,
     sendTransaction,
     disconnectWallet
   } = useWalletConnect();
 
-  const handleWalletConnect = async (type: string) => {
+  const handleWalletConnect = async () => {
     try {
-      let wallet;
-      switch (type) {
-        case 'walletconnect':
-          wallet = await connectWalletConnect();
-          if (wallet) {
-            toast({ 
-              title: "تم الاتصال بنجاح", 
-              description: `تم اتصال WalletConnect بالعنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الحصول على بيانات المحفظة');
-          }
-          break;
-        case 'metamask':
-          wallet = await connectMetaMask();
-          if (wallet) {
-            toast({ 
-              title: "متصل بـ MetaMask", 
-              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الاتصال بـ MetaMask');
-          }
-          break;
-        case 'phantom':
-          wallet = await connectPhantom();
-          if (wallet) {
-            toast({ 
-              title: "متصل بـ Phantom", 
-              description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-            });
-          } else {
-            throw new Error('فشل في الاتصال بـ Phantom');
-          }
-          break;
-        default:
-          throw new Error('نوع محفظة غير مدعوم');
+      const wallet = await connectWallet();
+      if (wallet) {
+        toast({ 
+          title: "تم الاتصال بنجاح", 
+          description: `تم الاتصال بالعنوان: ${wallet.address.slice(0, 16)}...` 
+        });
+      } else {
+        throw new Error('فشل في الحصول على بيانات المحفظة');
       }
     } catch (error: any) {
       console.error('Wallet connection error:', error);

@@ -4,7 +4,7 @@
 // Create a new project and get your Project ID
 
 export const WALLETCONNECT_CONFIG = {
-  projectId: '5cbecfb58785fd00d9c6f1825f993060', // Replace with your project ID
+  projectId: '5cbecfb58785fd00d9c6f1825f993060',
   metadata: {
     name: 'المحافظ الرقمية',
     description: 'منصة إدارة المحافظ الرقمية',
@@ -12,6 +12,8 @@ export const WALLETCONNECT_CONFIG = {
     icons: [typeof window !== 'undefined' ? window.location.origin + '/favicon.ico' : '']
   },
   chains: [1], // Ethereum mainnet
+  optionalChains: [137], // Polygon
+  showQrModal: true,
   qrModalOptions: {
     themeMode: 'dark' as const,
     themeVariables: {
