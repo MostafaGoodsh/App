@@ -20,8 +20,7 @@ const WalletFixed = () => {
     connectSquads,
     refreshBalance,
     sendTransaction,
-    disconnectWallet,
-    addInternalWallet
+    disconnectWallet
   } = useWalletConnect();
 
   const handleWalletConnect = async (type: string) => {
@@ -148,7 +147,7 @@ const WalletFixed = () => {
                 توصيل محفظة جديدة
               </CardTitle>
               <CardDescription className="arabic-text">
-                اختر نوع المحفظة التي تريد توصيلها أو إنشاء محفظة داخلية جديدة
+                اختر نوع المحفظة التي تريد توصيلها
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -156,7 +155,6 @@ const WalletFixed = () => {
               <WalletConnectionSection
                 isConnecting={isConnecting}
                 onWalletConnect={handleWalletConnect}
-                onAddInternalWallet={addInternalWallet}
               />
             </CardContent>
           </Card>

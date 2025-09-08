@@ -7,10 +7,9 @@ import { RefreshCw } from "lucide-react";
 interface WalletConnectionSectionProps {
   isConnecting: boolean;
   onWalletConnect: (type: string) => Promise<void>;
-  onAddInternalWallet: (wallet: any) => void;
 }
 
-export const WalletConnectionSection = ({ isConnecting, onWalletConnect, onAddInternalWallet }: WalletConnectionSectionProps) => {
+export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: WalletConnectionSectionProps) => {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
 
   const handleWalletConnectClick = () => {
