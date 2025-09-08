@@ -5,7 +5,7 @@ import { WALLETCONNECT_CONFIG, NETWORK_CONFIG } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect' | 'MetaMask' | 'Phantom' | 'Internal' | 'Squads';
+  type: 'WalletConnect' | 'MetaMask' | 'Phantom';
   address: string;
   balance: string;
   currency: string;
@@ -184,27 +184,34 @@ export const useWalletConnect = () => {
   }, [getBalance]);
 
   const connectPhantom = useCallback(async () => {
-    if (!(window as any).phantom?.solana?.isPhantom) {
-      // For both mobile and desktop, just open Phantom website
-      window.open('https://phantom.app/', '_blank');
-      throw new Error('Phantom wallet not installed. Please install Phantom wallet and refresh the page.');
-    }
-
     setIsConnecting(true);
+    
     try {
-      // Request connection with specific permissions
-      const response = await (window as any).phantom.solana.connect({ onlyIfTrusted: false });
+      // Check multiple ways to detect Phantom
+      const phantomProvider = (window as any).phantom?.solana || 
+                            (window as any).solana?.isPhantom ? (window as any).solana : null;
+      
+      console.log('Checking Phantom:', {
+        phantom: (window as any).phantom,
+        solana: (window as any).solana,
+        provider: phantomProvider
+      });
+      
+      if (!phantomProvider) {
+        console.log('Phantom not detected, opening installation page');
+        window.open('https://phantom.app/', '_blank');
+        throw new Error('Phantom wallet not detected. Please install Phantom wallet and refresh the page.');
+      }
+
+      console.log('Phantom detected, attempting connection...');
+      
+      // Request connection
+      const response = await phantomProvider.connect({ onlyIfTrusted: false });
       const address = response.publicKey.toString();
       
-      console.log('Phantom connected:', address);
+      console.log('Phantom connected successfully:', address);
       
-      // Verify connection by checking if we can sign a message
-      const provider = (window as any).phantom.solana;
-      if (!provider.isConnected) {
-        throw new Error('Phantom connection failed');
-      }
-      
-      // Get Solana balance using the connected provider
+      // Get Solana balance
       let balance = "0.0";
       try {
         const connection = new (await import('@solana/web3.js')).Connection(
@@ -216,25 +223,6 @@ export const useWalletConnect = () => {
         balance = (balanceResponse / 1000000000).toFixed(4);
       } catch (error) {
         console.error("Error fetching Solana balance:", error);
-        // Fallback to RPC call
-        try {
-          const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: 1,
-              method: 'getBalance',
-              params: [address]
-            })
-          });
-          const data = await solanaResponse.json();
-          if (data.result) {
-            balance = (data.result.value / 1000000000).toFixed(4);
-          }
-        } catch (fallbackError) {
-          console.error("Fallback balance fetch failed:", fallbackError);
-        }
       }
 
       const newWallet: ConnectedWallet = {
@@ -244,7 +232,7 @@ export const useWalletConnect = () => {
         balance,
         currency: 'SOL',
         network: 'Solana',
-        provider: provider
+        provider: phantomProvider
       };
 
       setConnectedWallets(prev => {
@@ -262,85 +250,6 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-  const connectSquads = useCallback(async () => {
-    // Check if SquadsX extension is available
-    if (!(window as any).squads?.isSquads) {
-      // Open Chrome Web Store for SquadsX
-      window.open('https://chrome.google.com/webstore/detail/squads-multisig/mccoklppdpbhceiflcjmapojohpphage', '_blank');
-      throw new Error('SquadsX wallet not installed. Please install SquadsX extension and refresh the page.');
-    }
-
-    setIsConnecting(true);
-    try {
-      const response = await (window as any).squads.connect();
-      const address = response.publicKey.toString();
-      
-      console.log('SquadsX connected:', address);
-      
-      // Verify connection
-      const provider = (window as any).squads;
-      if (!provider.isConnected) {
-        throw new Error('SquadsX connection failed');
-      }
-      
-      // Get Solana balance for multisig wallet using web3.js
-      let balance = "0.0";
-      try {
-        const connection = new (await import('@solana/web3.js')).Connection(
-          'https://api.mainnet-beta.solana.com',
-          'confirmed'
-        );
-        const publicKey = new (await import('@solana/web3.js')).PublicKey(address);
-        const balanceResponse = await connection.getBalance(publicKey);
-        balance = (balanceResponse / 1000000000).toFixed(4);
-      } catch (error) {
-        console.error("Error fetching Squads balance:", error);
-        // Fallback to RPC call
-        try {
-          const solanaResponse = await fetch('https://api.mainnet-beta.solana.com', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: 1,
-              method: 'getBalance',
-              params: [address]
-            })
-          });
-          const data = await solanaResponse.json();
-          if (data.result) {
-            balance = (data.result.value / 1000000000).toFixed(4);
-          }
-        } catch (fallbackError) {
-          console.error("Fallback balance fetch failed:", fallbackError);
-        }
-      }
-
-      const newWallet: ConnectedWallet = {
-        id: Date.now().toString(),
-        type: 'Squads' as any,
-        address,
-        balance,
-        currency: 'SOL',
-        network: 'Solana',
-        name: 'Squads MultiSig',
-        provider: provider
-      };
-
-      setConnectedWallets(prev => {
-        const exists = prev.find(w => w.address === address && w.type === 'Squads');
-        if (exists) return prev;
-        return [...prev, newWallet];
-      });
-
-      return newWallet;
-    } catch (error) {
-      console.error('Squads connection error:', error);
-      throw error;
-    } finally {
-      setIsConnecting(false);
-    }
-  }, []);
 
   const disconnectWallet = useCallback((walletId: string) => {
     setConnectedWallets(prev => prev.filter(w => w.id !== walletId));
@@ -390,7 +299,6 @@ export const useWalletConnect = () => {
     connectWalletConnect,
     connectMetaMask,
     connectPhantom,
-    connectSquads,
     disconnectWallet,
     refreshBalance,
     sendTransaction

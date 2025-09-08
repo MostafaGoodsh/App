@@ -23,7 +23,7 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
 
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+    <div className="grid gap-6 md:grid-cols-3 mb-8">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -77,25 +77,6 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
           >
             {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
             اتصال بـ Phantom
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🛡️ SquadsX
-          </CardTitle>
-          <CardDescription>محفظة Solana متعددة التوقيع</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            onClick={() => onWalletConnect('squads')}
-            disabled={isConnecting}
-            className="w-full"
-          >
-            {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
-            اتصال بـ SquadsX
           </Button>
         </CardContent>
       </Card>

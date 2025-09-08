@@ -17,7 +17,6 @@ const WalletFixed = () => {
     connectWalletConnect,
     connectMetaMask,
     connectPhantom,
-    connectSquads,
     refreshBalance,
     sendTransaction,
     disconnectWallet
@@ -53,13 +52,6 @@ const WalletFixed = () => {
           wallet = await connectPhantom();
           toast({ 
             title: "متصل بـ Phantom", 
-            description: `العنوان: ${wallet.address.slice(0, 16)}...` 
-          });
-          break;
-        case 'squads':
-          wallet = await connectSquads();
-          toast({ 
-            title: "متصل بـ SquadsX", 
             description: `العنوان: ${wallet.address.slice(0, 16)}...` 
           });
           break;
