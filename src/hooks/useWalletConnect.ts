@@ -175,24 +175,18 @@ export const useWalletConnect = () => {
     setIsConnecting(true);
     
     try {
-      // Enhanced Phantom detection for mobile and desktop
+      // Check for Phantom wallet in browser
       const getPhantom = () => {
         if (typeof window === 'undefined') return null;
         
-        // Check for Phantom in different contexts
-        if ((window as any).phantom?.solana) {
+        // Primary check for Phantom
+        if ((window as any).phantom?.solana?.isPhantom) {
           return (window as any).phantom.solana;
         }
         
+        // Secondary check for direct solana provider
         if ((window as any).solana?.isPhantom) {
           return (window as any).solana;
-        }
-
-        // For mobile browsers, check if we're in an app context
-        if (navigator.userAgent.includes('Mobile') || (window as any).ReactNativeWebView) {
-          if ((window as any).solana) {
-            return (window as any).solana;
-          }
         }
         
         return null;
@@ -200,30 +194,22 @@ export const useWalletConnect = () => {
 
       let phantomProvider = getPhantom();
       
-      // If not found, wait for mobile injection
+      // Wait a bit for injection if not immediately available
       if (!phantomProvider) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 100));
         phantomProvider = getPhantom();
       }
       
       console.log('Phantom detection:', {
         found: !!phantomProvider,
-        userAgent: navigator.userAgent,
-        phantom: (window as any).phantom,
-        solana: (window as any).solana
+        isPhantom: phantomProvider?.isPhantom,
+        phantom: !!(window as any).phantom,
+        solana: !!(window as any).solana
       });
       
       if (!phantomProvider) {
-        // Direct deep link for mobile
-        if (navigator.userAgent.includes('Mobile')) {
-          const currentUrl = window.location.href;
-          const phantomUrl = `https://phantom.app/ul/browse/${encodeURIComponent(currentUrl)}`;
-          window.location.href = phantomUrl;
-          throw new Error('فتح تطبيق Phantom...');
-        } else {
-          window.open('https://phantom.app/', '_blank');
-          throw new Error('يرجى تثبيت محفظة Phantom أولاً');
-        }
+        window.open('https://phantom.app/', '_blank');
+        throw new Error('يرجى تثبيت محفظة Phantom أولاً');
       }
 
       console.log('Attempting Phantom connection...');
