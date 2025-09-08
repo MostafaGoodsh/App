@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-import { WALLETCONNECT_CONFIG } from '@/config/wallet';
+import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { WALLETCONNECT_CONFIG, NETWORK_CONFIG, WALLET_TYPES } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
-  type: 'WalletConnect';
+  type: 'WalletConnect' | 'Phantom';
   address: string;
   balance: string;
   currency: string;
-  network: 'Ethereum';
+  network: 'Ethereum' | 'Solana';
   name?: string;
   provider?: any;
 }
@@ -55,9 +56,50 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-  const connectWallet = useCallback(async () => {
+  const getSolanaBalance = useCallback(async (address: string) => {
+    try {
+      const connection = new Connection(NETWORK_CONFIG.solana.rpcUrl);
+      const publicKey = new PublicKey(address);
+      const balance = await connection.getBalance(publicKey);
+      return (balance / LAMPORTS_PER_SOL).toFixed(4);
+    } catch (error) {
+      console.error('Error getting Solana balance:', error);
+      return "0.0";
+    }
+  }, []);
+
+  const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.WALLETCONNECT) => {
     setIsConnecting(true);
     try {
+      if (walletType === WALLET_TYPES.PHANTOM) {
+        // Connect to Phantom wallet
+        if (typeof window !== 'undefined' && 'solana' in window) {
+          const solana = (window as any).solana;
+          
+          if (solana && solana.isPhantom) {
+            await solana.connect();
+            const address = solana.publicKey.toString();
+            const balance = await getSolanaBalance(address);
+            
+            const newWallet: ConnectedWallet = {
+              id: Date.now().toString(),
+              type: 'Phantom',
+              address,
+              balance,
+              currency: 'SOL',
+              network: 'Solana',
+              name: 'Phantom',
+              provider: solana
+            };
+
+            setConnectedWallets([newWallet]);
+            return newWallet;
+          }
+        }
+        throw new Error('محفظة Phantom غير متوفرة. تأكد من تثبيت إضافة Phantom في المتصفح.');
+      }
+
+      // WalletConnect flow
       if (wcProvider) {
         try {
           await wcProvider.disconnect();
@@ -115,7 +157,7 @@ export const useWalletConnect = () => {
       }
       return null;
     } catch (error) {
-      console.error('WalletConnect connection error:', error);
+      console.error('Wallet connection error:', error);
       if (wcProvider) {
         try {
           await wcProvider.disconnect();
@@ -128,7 +170,7 @@ export const useWalletConnect = () => {
     } finally {
       setIsConnecting(false);
     }
-  }, [getBalance, wcProvider]);
+  }, [getBalance, getSolanaBalance, wcProvider]);
 
   const disconnectWallet = useCallback((walletId: string) => {
     setConnectedWallets([]);
@@ -139,10 +181,15 @@ export const useWalletConnect = () => {
   }, [wcProvider]);
 
   const refreshBalance = useCallback(async (wallet: ConnectedWallet) => {
-    const newBalance = await getBalance(wallet.address, wallet.provider);
+    let newBalance: string;
+    if (wallet.type === 'Phantom') {
+      newBalance = await getSolanaBalance(wallet.address);
+    } else {
+      newBalance = await getBalance(wallet.address, wallet.provider);
+    }
     setConnectedWallets([{ ...wallet, balance: newBalance }]);
     return newBalance;
-  }, [getBalance]);
+  }, [getBalance, getSolanaBalance]);
 
   const sendTransaction = useCallback(async (
     wallet: ConnectedWallet,

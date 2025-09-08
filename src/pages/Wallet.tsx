@@ -19,13 +19,13 @@ const WalletFixed = () => {
     disconnectWallet
   } = useWalletConnect();
 
-  const handleWalletConnect = async () => {
+  const handleWalletConnect = async (walletType?: string) => {
     try {
-      const wallet = await connectWallet();
+      const wallet = await connectWallet(walletType);
       if (wallet) {
         toast({ 
           title: "تم الاتصال بنجاح", 
-          description: `تم الاتصال بالعنوان: ${wallet.address.slice(0, 16)}...` 
+          description: `تم الاتصال بـ ${wallet.name || wallet.type}: ${wallet.address.slice(0, 16)}...` 
         });
       } else {
         throw new Error('فشل في الحصول على بيانات المحفظة');

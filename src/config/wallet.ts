@@ -35,3 +35,9 @@ export const NETWORK_CONFIG = {
     rpcUrl: 'https://api.mainnet-beta.solana.com'
   }
 };
+
+// Wallet types
+export const WALLET_TYPES = {
+  WALLETCONNECT: 'WalletConnect',
+  PHANTOM: 'Phantom'
+} as const;
