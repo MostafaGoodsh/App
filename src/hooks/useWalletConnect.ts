@@ -175,48 +175,72 @@ export const useWalletConnect = () => {
     setIsConnecting(true);
     
     try {
-      // Check for Phantom wallet in browser
-      const getPhantom = () => {
+      console.log('Starting Phantom connection process...');
+      
+      // Check for Phantom wallet availability
+      const detectPhantom = () => {
         if (typeof window === 'undefined') return null;
         
-        // Primary check for Phantom
-        if ((window as any).phantom?.solana?.isPhantom) {
-          return (window as any).phantom.solana;
-        }
+        // Check multiple injection patterns
+        const providers = [
+          (window as any).phantom?.solana,
+          (window as any).solana,
+          (window as any).phantom,
+        ].filter(Boolean);
         
-        // Secondary check for direct solana provider
-        if ((window as any).solana?.isPhantom) {
-          return (window as any).solana;
-        }
+        console.log('Available providers:', providers.map(p => ({
+          isPhantom: p?.isPhantom,
+          publicKey: p?.publicKey,
+          isConnected: p?.isConnected
+        })));
         
-        return null;
+        // Return the first valid Phantom provider
+        return providers.find(p => p?.isPhantom || p?.connect) || null;
       };
 
-      let phantomProvider = getPhantom();
+      let phantomProvider = detectPhantom();
       
-      // Wait a bit for injection if not immediately available
+      // Try multiple detection attempts
       if (!phantomProvider) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        phantomProvider = getPhantom();
+        console.log('Phantom not detected immediately, waiting...');
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          phantomProvider = detectPhantom();
+          if (phantomProvider) break;
+        }
       }
       
-      console.log('Phantom detection:', {
+      console.log('Final Phantom provider:', {
         found: !!phantomProvider,
         isPhantom: phantomProvider?.isPhantom,
-        phantom: !!(window as any).phantom,
-        solana: !!(window as any).solana
+        hasConnect: typeof phantomProvider?.connect === 'function',
+        isConnected: phantomProvider?.isConnected,
+        publicKey: phantomProvider?.publicKey?.toString()
       });
       
-      if (!phantomProvider) {
+      if (!phantomProvider || !phantomProvider.connect) {
+        console.log('Opening Phantom download page...');
         window.open('https://phantom.app/', '_blank');
         throw new Error('يرجى تثبيت محفظة Phantom أولاً');
       }
 
       console.log('Attempting Phantom connection...');
       
-      const response = await phantomProvider.connect({ onlyIfTrusted: false });
-      const address = response.publicKey.toString();
+      // Try connection with error handling
+      let response;
+      try {
+        response = await phantomProvider.connect({ onlyIfTrusted: false });
+        console.log('Phantom connection response:', response);
+      } catch (connectError) {
+        console.error('Phantom connection failed:', connectError);
+        throw new Error('فشل في الاتصال بمحفظة Phantom');
+      }
       
+      if (!response?.publicKey) {
+        throw new Error('لم يتم الحصول على عنوان المحفظة');
+      }
+      
+      const address = response.publicKey.toString();
       console.log('Phantom connected successfully:', address);
       
       // Get Solana balance

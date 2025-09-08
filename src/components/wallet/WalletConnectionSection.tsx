@@ -68,7 +68,13 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
           <CardTitle className="flex items-center gap-2">
             👻 Phantom
           </CardTitle>
-          <CardDescription className="arabic-text">محفظة Solana الرائدة</CardDescription>
+          <CardDescription className="arabic-text">
+            محفظة Solana الرائدة
+            <br />
+            <span className="text-xs text-orange-600">
+              تأكد من تثبيت التطبيق أو الإضافة أولاً
+            </span>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Button 
@@ -79,6 +85,9 @@ export const WalletConnectionSection = ({ isConnecting, onWalletConnect }: Walle
             {isConnecting ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
             <span className="arabic-text">اتصال بـ Phantom</span>
           </Button>
+          <p className="text-xs text-muted-foreground mt-2 arabic-text">
+            إذا لم يعمل الاتصال، تأكد من فتح phantom.app وتثبيت التطبيق
+          </p>
         </CardContent>
       </Card>
 
