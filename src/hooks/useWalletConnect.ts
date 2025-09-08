@@ -88,25 +88,41 @@ export const useWalletConnect = () => {
   }, []);
 
   const connectToPhantomApp = useCallback(async () => {
-    // Create deep link to Phantom app
-    const phantomUrl = `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}?ref=${encodeURIComponent(window.location.origin)}`;
+    // For mobile devices, use Phantom's universal link with proper connection parameters
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Open Phantom app
-    window.open(phantomUrl, '_blank');
+    if (isMobile) {
+      // Use Phantom's dApp browser with connection request
+      const dappUrl = encodeURIComponent(window.location.origin);
+      const phantomUrl = `https://phantom.app/ul/browse/${dappUrl}?cluster=mainnet-beta`;
+      
+      // Create a connection request
+      const connectionParams = {
+        origin: window.location.origin,
+        network: 'mainnet-beta'
+      };
+      
+      // Store connection request in localStorage for when app returns
+      localStorage.setItem('phantom-connection-request', JSON.stringify(connectionParams));
+      
+      // Open Phantom app with connection request
+      window.location.href = phantomUrl;
+      
+      // Return a placeholder that will be updated when the connection completes
+      const placeholder: ConnectedWallet = {
+        id: Date.now().toString(),
+        type: 'Phantom',
+        address: 'جاري الاتصال بـ Phantom...',
+        balance: '0.0',
+        currency: 'SOL',
+        network: 'Solana',
+        name: 'Phantom'
+      };
+      
+      return placeholder;
+    }
     
-    // Return a mock wallet for demo purposes
-    // In a real implementation, you'd need to handle the callback from Phantom
-    const mockWallet: ConnectedWallet = {
-      id: Date.now().toString(),
-      type: 'Phantom',
-      address: 'تم فتح تطبيق Phantom...',
-      balance: '0.0',
-      currency: 'SOL',
-      network: 'Solana',
-      name: 'Phantom'
-    };
-    
-    return mockWallet;
+    throw new Error('Desktop Phantom detection required');
   }, []);
 
   const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.WALLETCONNECT) => {
@@ -117,10 +133,51 @@ export const useWalletConnect = () => {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isMobile) {
-          // On mobile, open Phantom app directly
-          const newWallet = await connectToPhantomApp();
-          setConnectedWallets([newWallet]);
-          return newWallet;
+          // On mobile, use WalletConnect for Phantom or direct app connection
+          try {
+            // Try WalletConnect first for better mobile experience
+            const wcProvider = await EthereumProvider.init({
+              chains: [1],
+              optionalChains: [137],
+              projectId: WALLETCONNECT_CONFIG.projectId,
+              showQrModal: true,
+              qrModalOptions: {
+                ...WALLETCONNECT_CONFIG.qrModalOptions,
+                themeMode: 'dark',
+                themeVariables: {
+                  '--wcm-z-index': '1000'
+                }
+              },
+              metadata: WALLETCONNECT_CONFIG.metadata
+            });
+
+            await wcProvider.connect();
+            
+            if (wcProvider.accounts && wcProvider.accounts.length > 0) {
+              const address = wcProvider.accounts[0];
+              const balance = await getBalance(address, wcProvider);
+              
+              const newWallet: ConnectedWallet = {
+                id: Date.now().toString(),
+                type: 'Phantom',
+                address,
+                balance,
+                currency: 'ETH',
+                network: 'Ethereum',
+                name: 'Phantom (via WalletConnect)',
+                provider: wcProvider
+              };
+
+              setConnectedWallets([newWallet]);
+              return newWallet;
+            }
+          } catch (wcError) {
+            console.log('WalletConnect failed, trying direct connection:', wcError);
+            // Fallback to direct app connection
+            const newWallet = await connectToPhantomApp();
+            setConnectedWallets([newWallet]);
+            return newWallet;
+          }
         } else {
           // On desktop, try to detect browser extension
           if (typeof window !== 'undefined') {
@@ -150,10 +207,8 @@ export const useWalletConnect = () => {
                 throw new Error('فشل في الاتصال بمحفظة Phantom');
               }
             } else {
-              // If no extension, redirect to app download or installation
-              const phantomUrl = `https://phantom.app/ul/browse/${encodeURIComponent(window.location.href)}`;
-              window.open(phantomUrl, '_blank');
-              throw new Error('يتم فتح تطبيق Phantom...');
+              // If no extension, try WalletConnect as fallback
+              throw new Error('يرجى تثبيت امتداد Phantom أو استخدام WalletConnect');
             }
           }
         }
