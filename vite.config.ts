@@ -33,11 +33,22 @@ export default defineConfig(({ mode }) => ({
       'eventemitter3',
       'bn.js',
       '@solana/web3.js',
-      '@solana/spl-token'
+      '@solana/spl-token',
+      '@walletconnect/ethereum-provider',
+      '@walletconnect/time',
+      '@walletconnect/relay-auth',
+      '@walletconnect/core',
+      '@walletconnect/utils'
     ],
-    exclude: ['@walletconnect/ethereum-provider']
+    esbuildOptions: {
+      target: 'esnext',
+      define: {
+        global: 'globalThis'
+      }
+    }
   },
   build: {
+    target: 'esnext',
     rollupOptions: {
       external: [],
       output: {
