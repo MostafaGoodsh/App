@@ -88,38 +88,54 @@ export const useWalletConnect = () => {
   }, []);
 
   const connectToPhantomApp = useCallback(async () => {
-    // For mobile devices, use Phantom's universal link with proper connection parameters
+    // For mobile devices, create a deep link that requests connection
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-      // Use Phantom's dApp browser with connection request
-      const dappUrl = encodeURIComponent(window.location.origin);
-      const phantomUrl = `https://phantom.app/ul/browse/${dappUrl}?cluster=mainnet-beta`;
-      
-      // Create a connection request
-      const connectionParams = {
-        origin: window.location.origin,
-        network: 'mainnet-beta'
-      };
-      
-      // Store connection request in localStorage for when app returns
-      localStorage.setItem('phantom-connection-request', JSON.stringify(connectionParams));
-      
-      // Open Phantom app with connection request
-      window.location.href = phantomUrl;
-      
-      // Return a placeholder that will be updated when the connection completes
-      const placeholder: ConnectedWallet = {
-        id: Date.now().toString(),
-        type: 'Phantom',
-        address: 'جاري الاتصال بـ Phantom...',
-        balance: '0.0',
-        currency: 'SOL',
-        network: 'Solana',
-        name: 'Phantom'
-      };
-      
-      return placeholder;
+      try {
+        // Create a connection request with proper parameters
+        const appName = 'المحافظ الرقمية';
+        const appUrl = encodeURIComponent(window.location.origin);
+        const redirectLink = encodeURIComponent(`${window.location.origin}/wallet`);
+        
+        // Use Phantom's connect deep link format
+        const phantomConnectUrl = `phantom://v1/connect?app_url=${appUrl}&dapp_encryption_public_key=&nonce=&redirect_link=${redirectLink}&cluster=mainnet-beta`;
+        
+        console.log('Opening Phantom with connect URL:', phantomConnectUrl);
+        
+        // Try to open with the connect URL first
+        window.location.href = phantomConnectUrl;
+        
+        // Fallback: if the above doesn't work, try the browser approach
+        setTimeout(() => {
+          const browserUrl = `https://phantom.app/ul/browse/${appUrl}?cluster=mainnet-beta&connect=true`;
+          console.log('Fallback: Opening Phantom browser with:', browserUrl);
+          window.open(browserUrl, '_blank');
+        }, 1000);
+        
+        // Store connection state
+        localStorage.setItem('phantom-connection-attempt', JSON.stringify({
+          timestamp: Date.now(),
+          origin: window.location.origin,
+          status: 'pending'
+        }));
+        
+        // Return a placeholder
+        const placeholder: ConnectedWallet = {
+          id: Date.now().toString(),
+          type: 'Phantom',
+          address: 'تم فتح تطبيق Phantom...',
+          balance: '0.0',
+          currency: 'SOL',
+          network: 'Solana',
+          name: 'Phantom'
+        };
+        
+        return placeholder;
+      } catch (error) {
+        console.error('Error opening Phantom app:', error);
+        throw new Error('فشل في فتح تطبيق Phantom');
+      }
     }
     
     throw new Error('Desktop Phantom detection required');
