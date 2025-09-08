@@ -4,6 +4,25 @@ import { ethers } from 'ethers';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { WALLETCONNECT_CONFIG, NETWORK_CONFIG, WALLET_TYPES } from '@/config/wallet';
 
+declare global {
+  interface Window {
+    phantom?: {
+      solana?: {
+        isPhantom: boolean;
+        connect: () => Promise<{ publicKey: any }>;
+        disconnect: () => Promise<void>;
+        publicKey?: any;
+      };
+    };
+    solana?: {
+      isPhantom: boolean;
+      connect: () => Promise<{ publicKey: any }>;
+      disconnect: () => Promise<void>;
+      publicKey?: any;
+    };
+  }
+}
+
 export interface ConnectedWallet {
   id: string;
   type: 'WalletConnect' | 'Phantom';
@@ -68,35 +87,77 @@ export const useWalletConnect = () => {
     }
   }, []);
 
+  const detectPhantom = useCallback(async (): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds
+      
+      const check = () => {
+        attempts++;
+        
+        if (typeof window !== 'undefined') {
+          // Check for window.phantom.solana first (new way)
+          if ((window as any).phantom?.solana?.isPhantom) {
+            resolve((window as any).phantom.solana);
+            return;
+          }
+          
+          // Check for window.solana (old way)
+          if ((window as any).solana?.isPhantom) {
+            resolve((window as any).solana);
+            return;
+          }
+        }
+        
+        if (attempts >= maxAttempts) {
+          reject(new Error('محفظة Phantom غير متوفرة. تأكد من تثبيت إضافة Phantom في المتصفح.'));
+          return;
+        }
+        
+        setTimeout(check, 100);
+      };
+      
+      check();
+    });
+  }, []);
+
   const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.WALLETCONNECT) => {
     setIsConnecting(true);
     try {
       if (walletType === WALLET_TYPES.PHANTOM) {
         // Connect to Phantom wallet
-        if (typeof window !== 'undefined' && 'solana' in window) {
-          const solana = (window as any).solana;
+        console.log('Attempting to connect to Phantom...');
+        
+        const phantom = await detectPhantom();
+        console.log('Phantom detected:', phantom);
+        
+        // Connect to Phantom
+        const response = await phantom.connect();
+        console.log('Phantom connection response:', response);
+        
+        if (response.publicKey) {
+          const address = response.publicKey.toString();
+          console.log('Phantom address:', address);
           
-          if (solana && solana.isPhantom) {
-            await solana.connect();
-            const address = solana.publicKey.toString();
-            const balance = await getSolanaBalance(address);
-            
-            const newWallet: ConnectedWallet = {
-              id: Date.now().toString(),
-              type: 'Phantom',
-              address,
-              balance,
-              currency: 'SOL',
-              network: 'Solana',
-              name: 'Phantom',
-              provider: solana
-            };
+          const balance = await getSolanaBalance(address);
+          console.log('Phantom balance:', balance);
+          
+          const newWallet: ConnectedWallet = {
+            id: Date.now().toString(),
+            type: 'Phantom',
+            address,
+            balance,
+            currency: 'SOL',
+            network: 'Solana',
+            name: 'Phantom',
+            provider: phantom
+          };
 
-            setConnectedWallets([newWallet]);
-            return newWallet;
-          }
+          setConnectedWallets([newWallet]);
+          return newWallet;
         }
-        throw new Error('محفظة Phantom غير متوفرة. تأكد من تثبيت إضافة Phantom في المتصفح.');
+        
+        throw new Error('فشل في الحصول على عنوان المحفظة من Phantom');
       }
 
       // WalletConnect flow
