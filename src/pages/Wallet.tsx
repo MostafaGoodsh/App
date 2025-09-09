@@ -170,7 +170,7 @@ const WalletPage = () => {
         </TabsContent>
         
         <TabsContent value="swap" className="mt-6">
-          <TokenSwap wallet={connectedWallet} />
+          <TokenSwap wallet={connectedWallet} customTokens={customTokens} />
         </TabsContent>
       </Tabs>
 

@@ -16,6 +16,7 @@ interface SwapToken {
 
 interface TokenSwapProps {
   wallet: ConnectedWallet;
+  customTokens?: any[];
 }
 
 // Available tokens for swapping by network
@@ -46,7 +47,7 @@ const SWAP_TOKENS: Record<string, SwapToken[]> = {
   ]
 };
 
-export const TokenSwap = ({ wallet }: TokenSwapProps) => {
+export const TokenSwap = ({ wallet, customTokens = [] }: TokenSwapProps) => {
   const { toast } = useToast();
   const [fromToken, setFromToken] = useState<SwapToken | null>(null);
   const [toToken, setToToken] = useState<SwapToken | null>(null);
@@ -54,7 +55,13 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
   const [toAmount, setToAmount] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
 
-  const availableTokens = SWAP_TOKENS[wallet.network] || [];
+  const networkTokens = SWAP_TOKENS[wallet.network] || [];
+  const customSwapTokens = customTokens.map(token => ({
+    symbol: token.symbol,
+    name: token.name,
+    balance: token.balance
+  }));
+  const availableTokens = [...networkTokens, ...customSwapTokens];
 
   const calculateToAmount = (amount: string) => {
     if (!amount || !fromToken || !toToken) return "0.0";
