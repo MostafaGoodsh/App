@@ -10,15 +10,6 @@ export const WALLETCONNECT_CONFIG = {
     description: 'منصة إدارة المحافظ الرقمية',
     url: typeof window !== 'undefined' ? window.location.origin : '',
     icons: [typeof window !== 'undefined' ? window.location.origin + '/favicon.ico' : '']
-  },
-  chains: [1], // Ethereum mainnet
-  optionalChains: [137], // Polygon
-  showQrModal: true,
-  qrModalOptions: {
-    themeMode: 'dark' as const,
-    themeVariables: {
-      '--wcm-z-index': '1000'
-    }
   }
 };
 
@@ -28,16 +19,10 @@ export const NETWORK_CONFIG = {
     chainId: 1,
     name: 'Ethereum',
     currency: 'ETH'
-  },
-  solana: {
-    name: 'Solana',
-    currency: 'SOL',
-    rpcUrl: 'https://api.mainnet-beta.solana.com'
   }
 };
 
 // Wallet types
 export const WALLET_TYPES = {
-  WALLETCONNECT: 'WalletConnect',
-  PHANTOM: 'Phantom'
+  WALLETCONNECT: 'WalletConnect'
 } as const;

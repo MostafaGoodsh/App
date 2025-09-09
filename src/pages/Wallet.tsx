@@ -1,21 +1,20 @@
-import { WalletDashboard } from "@/components/wallet/WalletDashboard";
-import { WalletConnectionSection } from "@/components/wallet/WalletConnectionSection";
+import { WalletConnectModal } from "@/components/wallet/WalletConnectModal";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
-  Wallet, Plus, Settings, Activity, BarChart3 
+  Wallet, Plus
 } from "lucide-react";
+import { useState } from "react";
 
 const WalletFixed = () => {
   const { toast } = useToast();
+  const [showModal, setShowModal] = useState(false);
   const {
     connectedWallets,
     isConnecting,
     connectWallet,
-    refreshBalance,
-    sendTransaction,
     disconnectWallet
   } = useWalletConnect();
 
@@ -27,6 +26,7 @@ const WalletFixed = () => {
           title: "تم الاتصال بنجاح", 
           description: `تم الاتصال بـ ${wallet.name || wallet.type}: ${wallet.address.slice(0, 16)}...` 
         });
+        setShowModal(false);
       } else {
         throw new Error('فشل في الحصول على بيانات المحفظة');
       }
@@ -40,24 +40,6 @@ const WalletFixed = () => {
     }
   };
 
-  const handleRefreshBalance = async (wallet: any) => {
-    try {
-      await refreshBalance(wallet);
-    } catch (error) {
-      console.error('Refresh balance error:', error);
-      throw error;
-    }
-  };
-
-  const handleSendTransaction = async (wallet: any, toAddress: string, amount: string) => {
-    try {
-      return await sendTransaction(wallet, toAddress, amount);
-    } catch (error) {
-      console.error('Send transaction error:', error);
-      throw error;
-    }
-  };
-
   const handleDisconnect = (walletId: string) => {
     disconnectWallet(walletId);
     toast({ 
@@ -66,86 +48,72 @@ const WalletFixed = () => {
     });
   };
 
-
   return (
     <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
       <div className="text-center mb-8">
         <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent arabic-text">
-          لوحة تحكم المحافظ الرقمية
+          اتصال المحفظة الرقمية
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
-          إدارة شاملة ومتقدمة لمحافظك الرقمية مع ميزات التبادل والأمان
+          اتصل بمحفظتك الرقمية باستخدام WalletConnect
         </p>
       </div>
       
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            لوحة التحكم
-          </TabsTrigger>
-          <TabsTrigger value="connect" className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            <span className="arabic-text">إضافة محفظة</span>
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            <span className="arabic-text">الإعدادات</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="dashboard" className="space-y-6">
-          <WalletDashboard
-            wallets={connectedWallets}
-            onRefreshBalance={handleRefreshBalance}
-            onSendTransaction={handleSendTransaction}
-            onDisconnect={handleDisconnect}
-          />
-        </TabsContent>
-        
-        <TabsContent value="connect" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="w-5 h-5" />
-                توصيل محفظة جديدة
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                اختر نوع المحفظة التي تريد توصيلها
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <WalletConnectionSection
-                isConnecting={isConnecting}
-                onWalletConnect={handleWalletConnect}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                إعدادات المحافظ
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                تخصيص تفضيلاتك وإعدادات الأمان
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center py-8">
-                <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-2 arabic-text">إعدادات متقدمة</p>
-                <p className="text-sm text-muted-foreground arabic-text">
-                  ستتوفر إعدادات إضافية قريباً لتحسين تجربة استخدام المحافظ
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {connectedWallets.length === 0 ? (
+        <Card className="max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Wallet className="w-6 h-6" />
+              اتصال المحفظة
+            </CardTitle>
+            <CardDescription className="arabic-text">
+              اتصل بمحفظتك الرقمية لبدء الاستخدام
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setShowModal(true)}
+              className="w-full"
+              size="lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="arabic-text">اتصال بالمحفظة</span>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {connectedWallets.map((wallet) => (
+            <Card key={wallet.id} className="max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{wallet.name || wallet.type}</span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDisconnect(wallet.id)}
+                  >
+                    قطع الاتصال
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-2">العنوان:</p>
+                <p className="font-mono text-sm break-all mb-4">{wallet.address}</p>
+                <p className="text-sm text-muted-foreground mb-2">الرصيد:</p>
+                <p className="text-lg font-semibold">{wallet.balance} {wallet.currency}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <WalletConnectModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        onConnect={handleWalletConnect}
+        isConnecting={isConnecting}
+      />
     </div>
   );
 };

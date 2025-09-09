@@ -50,9 +50,7 @@ const mockTransactions = [
 
 export const TransactionHistory = ({ wallet }: TransactionHistoryProps) => {
   const openInExplorer = (txId: string) => {
-    const explorerUrl = wallet.network === 'Ethereum' 
-      ? `https://etherscan.io/tx/${txId}`
-      : `https://solscan.io/tx/${txId}`;
+    const explorerUrl = `https://etherscan.io/tx/${txId}`;
     window.open(explorerUrl, '_blank');
   };
 
@@ -72,7 +70,7 @@ export const TransactionHistory = ({ wallet }: TransactionHistoryProps) => {
           <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground mb-2">لا توجد معاملات بعد</p>
           <p className="text-sm text-muted-foreground">
-            ستظهر معاملاتك هنا عند بدء الاستخدام مع المحفظة {wallet.network === 'Solana' ? 'Solana' : 'Ethereum'}
+            ستظهر معاملاتك هنا عند بدء الاستخدام مع محفظة Ethereum
           </p>
         </div>
       </CardContent>
