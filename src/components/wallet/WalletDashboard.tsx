@@ -35,17 +35,7 @@ export const WalletDashboard = ({
   const [selectedWallet, setSelectedWallet] = useState<ConnectedWallet | null>(
     wallets.length > 0 ? wallets[0] : null
   );
-  const [selectedNetwork, setSelectedNetwork] = useState<string>(() => {
-    if (wallets.length > 0) {
-      const firstWallet = wallets[0];
-      return firstWallet.network.toLowerCase() === 'ethereum' ? 'ethereum' :
-             firstWallet.network.toLowerCase() === 'solana' ? 'solana' :
-             firstWallet.network.toLowerCase() === 'polygon' ? 'polygon' :
-             firstWallet.network.toLowerCase() === 'bsc' ? 'bsc' :
-             'ethereum';
-    }
-    return 'ethereum';
-  });
+  const [selectedNetwork, setSelectedNetwork] = useState<string>('solana');
 
   if (wallets.length === 0) {
     return (
@@ -77,60 +67,24 @@ export const WalletDashboard = ({
 
   const totalValue = wallets.reduce((sum, wallet) => {
     const balance = parseFloat(wallet.balance) || 0;
-    // تحويل تقريبي للقيمة (يمكن تحسينه بأسعار حقيقية)
-    const rate = wallet.currency === 'ETH' ? 2000 : wallet.currency === 'SOL' ? 100 : 1;
+    // تحويل تقريبي للقيمة - سولانا فقط
+    const rate = wallet.currency === 'SOL' ? 100 : 1;
     return sum + (balance * rate);
   }, 0);
 
-  // Filter wallets by selected network - ensure proper matching
-  const getNetworkId = (networkName: string) => {
-    // Direct mapping from actual wallet network names to display IDs
-    const networkMapping: { [key: string]: string } = {
-      'Ethereum': 'ethereum',
-      'Solana': 'solana', 
-      'Polygon': 'polygon',
-      'BSC': 'bsc'
-    };
-    console.log('Mapping network:', networkName, 'to:', networkMapping[networkName] || networkName.toLowerCase());
-    return networkMapping[networkName] || networkName.toLowerCase();
-  };
-  
-  const networkWallets = wallets.filter(wallet => {
-    const walletNetworkId = getNetworkId(wallet.network);
-    const selectedNetworkId = selectedNetwork.toLowerCase();
-    console.log('Filtering wallet:', { 
-      walletNetwork: wallet.network, 
-      walletNetworkId, 
-      selectedNetworkId, 
-      matches: walletNetworkId === selectedNetworkId 
-    });
-    return walletNetworkId === selectedNetworkId;
-  });
+  // Show only Solana wallets
+  const networkWallets = wallets.filter(wallet => 
+    wallet.network.toLowerCase() === 'solana'
+  );
 
   const handleNetworkChange = (network: string) => {
-    console.log('Network change requested:', network);
-    console.log('Available wallets:', wallets.map(w => ({ 
-      id: w.id, 
-      type: w.type,
-      network: w.network, 
-      address: w.address, 
-      balance: w.balance,
-      currency: w.currency
-    })));
+    // For Solana only
+    setSelectedNetwork('solana');
+    const solanaWallet = wallets.find(w => w.network.toLowerCase() === 'solana');
     
-    setSelectedNetwork(network);
-    const networkWallet = wallets.find(w => getNetworkId(w.network) === network.toLowerCase());
-    console.log('Found network wallet:', networkWallet);
-    
-    // Show all wallets and their network mappings
-    wallets.forEach(w => {
-      console.log(`Wallet ${w.type}: network="${w.network}" -> mapped to "${getNetworkId(w.network)}" (looking for "${network.toLowerCase()}")`);
-    });
-    
-    if (networkWallet) {
-      setSelectedWallet(networkWallet);
+    if (solanaWallet) {
+      setSelectedWallet(solanaWallet);
     } else {
-      // If no wallet found for this network, clear selection
       setSelectedWallet(null);
     }
   };
@@ -160,13 +114,11 @@ export const WalletDashboard = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Network Filter */}
+            {/* Solana Network Only */}
             <div className="pb-3 border-b">
-              <NetworkSwitcher 
-                wallets={wallets}
-                selectedNetwork={selectedNetwork}
-                onNetworkChange={handleNetworkChange}
-              />
+              <div className="text-center p-2 bg-muted rounded-lg">
+                <Badge variant="default">شبكة Solana</Badge>
+              </div>
             </div>
             
             {/* Wallet List for Selected Network */}

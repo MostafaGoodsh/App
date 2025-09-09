@@ -37,19 +37,39 @@ export interface ConnectedWallet {
 export const useWalletConnect = () => {
   const [connectedWallets, setConnectedWallets] = useState<ConnectedWallet[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [wcProvider, setWcProvider] = useState<any>(null);
 
-  // Load saved wallets from localStorage
+  // Load saved wallets from localStorage and reconnect
   useEffect(() => {
-    const savedWallets = localStorage.getItem('connectedWallets');
-    if (savedWallets) {
-      try {
-        const loadedWallets = JSON.parse(savedWallets);
-        setConnectedWallets(loadedWallets);
-      } catch (error) {
-        console.error('Error loading saved wallets:', error);
+    const checkPhantomConnection = async () => {
+      if (typeof window !== 'undefined') {
+        const phantom = (window as any).phantom?.solana || (window as any).solana;
+        
+        if (phantom?.isPhantom && phantom.publicKey) {
+          console.log('Found existing Phantom connection');
+          try {
+            const address = phantom.publicKey.toString();
+            const balance = await getSolanaBalance(address);
+            
+            const existingWallet: ConnectedWallet = {
+              id: Date.now().toString(),
+              type: 'Phantom',
+              address,
+              balance,
+              currency: 'SOL',
+              network: 'Solana',
+              name: 'Phantom',
+              provider: phantom
+            };
+            
+            setConnectedWallets([existingWallet]);
+          } catch (error) {
+            console.error('Error reconnecting to Phantom:', error);
+          }
+        }
       }
-    }
+    };
+    
+    checkPhantomConnection();
   }, []);
 
   // Save wallets to localStorage
@@ -141,225 +161,93 @@ export const useWalletConnect = () => {
     throw new Error('Desktop Phantom detection required');
   }, []);
 
-  const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.WALLETCONNECT) => {
+  const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.PHANTOM) => {
     setIsConnecting(true);
     try {
-      if (walletType === WALLET_TYPES.PHANTOM) {
-        // First try to connect directly regardless of device type
-        if (typeof window !== 'undefined') {
-          const phantom = (window as any).phantom?.solana || (window as any).solana;
-          
-          if (phantom?.isPhantom) {
-            try {
-              // Check if already connected
-              if (phantom.publicKey) {
-                const address = phantom.publicKey.toString();
-                console.log('Using existing Phantom connection:', address);
-                const balance = await getSolanaBalance(address);
-                
-                const newWallet: ConnectedWallet = {
-                  id: Date.now().toString(),
-                  type: 'Phantom',
-                  address,
-                  balance,
-                  currency: 'SOL',
-                  network: 'Solana',
-                  name: 'Phantom',
-                  provider: phantom
-                };
-
-                setConnectedWallets(prev => [...prev, newWallet]);
-                return newWallet;
-              }
-              
-              // Request new connection
-              const response = await phantom.connect();
-              console.log('Phantom connection response:', response);
-              
-              if (response && response.publicKey) {
-                const address = response.publicKey.toString();
-                console.log('Successfully connected to Phantom:', address);
-                const balance = await getSolanaBalance(address);
-                
-                const newWallet: ConnectedWallet = {
-                  id: Date.now().toString(),
-                  type: 'Phantom',
-                  address,
-                  balance,
-                  currency: 'SOL',
-                  network: 'Solana',
-                  name: 'Phantom',
-                  provider: phantom
-                };
-
-                setConnectedWallets(prev => [...prev, newWallet]);
-                return newWallet;
-              } else {
-                throw new Error('فشل في الحصول على عنوان المحفظة من Phantom');
-              }
-            } catch (error) {
-              console.error('Phantom connection error:', error);
-              throw new Error('فشل في الاتصال بمحفظة Phantom: ' + (error as Error).message);
-            }
-          }
-        }
+      if (typeof window !== 'undefined') {
+        const phantom = (window as any).phantom?.solana || (window as any).solana;
         
-        // Check if we're on mobile for fallback options
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-          // On mobile, redirect to Phantom app if no extension found
-          const newWallet = await connectToPhantomApp();
-          setConnectedWallets(prev => [...prev, newWallet]);
-          return newWallet;
-        } else {
-          // On desktop, try to detect browser extension
-          if (typeof window !== 'undefined') {
-            const phantom = (window as any).phantom?.solana || (window as any).solana;
+        if (phantom?.isPhantom) {
+          try {
+            // Request connection
+            const response = await phantom.connect();
+            console.log('Phantom connection response:', response);
             
-            if (phantom?.isPhantom) {
-              try {
-                // Check if already connected
-                if (phantom.publicKey) {
-                  const address = phantom.publicKey.toString();
-                  console.log('Using existing Phantom connection:', address);
-                  const balance = await getSolanaBalance(address);
-                  
-                  const newWallet: ConnectedWallet = {
-                    id: Date.now().toString(),
-                    type: 'Phantom',
-                    address,
-                    balance,
-                    currency: 'SOL',
-                    network: 'Solana',
-                    name: 'Phantom',
-                    provider: phantom
-                  };
+            if (response && response.publicKey) {
+              const address = response.publicKey.toString();
+              console.log('Successfully connected to Phantom:', address);
+              const balance = await getSolanaBalance(address);
+              
+              const newWallet: ConnectedWallet = {
+                id: Date.now().toString(),
+                type: 'Phantom',
+                address,
+                balance,
+                currency: 'SOL',
+                network: 'Solana',
+                name: 'Phantom',
+                provider: phantom
+              };
 
-                  setConnectedWallets(prev => [...prev, newWallet]);
-                  return newWallet;
-                }
-                
-                // Request new connection
-                const response = await phantom.connect();
-                console.log('Phantom connection response:', response);
-                
-                if (response && response.publicKey) {
-                  const address = response.publicKey.toString();
-                  console.log('Successfully connected to Phantom:', address);
-                  const balance = await getSolanaBalance(address);
-                  
-                  const newWallet: ConnectedWallet = {
-                    id: Date.now().toString(),
-                    type: 'Phantom',
-                    address,
-                    balance,
-                    currency: 'SOL',
-                    network: 'Solana',
-                    name: 'Phantom',
-                    provider: phantom
-                  };
-
-                  setConnectedWallets(prev => [...prev, newWallet]);
-                  return newWallet;
-                } else {
-                  throw new Error('فشل في الحصول على عنوان المحفظة من Phantom');
-                }
-              } catch (error) {
-                console.error('Phantom connection error:', error);
-                throw new Error('فشل في الاتصال بمحفظة Phantom: ' + (error as Error).message);
-              }
+              setConnectedWallets([newWallet]);
+              return newWallet;
             } else {
-              // If no extension, redirect to Phantom website to install
-              window.open('https://phantom.app/', '_blank');
-              throw new Error('يرجى تثبيت امتداد Phantom أولاً');
+              throw new Error('فشل في الحصول على عنوان المحفظة من Phantom');
             }
+          } catch (error) {
+            console.error('Phantom connection error:', error);
+            throw new Error('فشل في الاتصال بمحفظة Phantom: ' + (error as Error).message);
+          }
+        } else {
+          // Check if we're on mobile for fallback options
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          if (isMobile) {
+            // On mobile, redirect to Phantom app
+            try {
+              const appUrl = encodeURIComponent(window.location.origin);
+              const redirectLink = encodeURIComponent(`${window.location.origin}/wallet`);
+              const phantomConnectUrl = `phantom://v1/connect?app_url=${appUrl}&redirect_link=${redirectLink}&cluster=mainnet-beta`;
+              
+              window.location.href = phantomConnectUrl;
+              
+              setTimeout(() => {
+                const browserUrl = `https://phantom.app/ul/browse/${appUrl}?cluster=mainnet-beta&connect=true`;
+                window.open(browserUrl, '_blank');
+              }, 1000);
+              
+              throw new Error('يتم فتح تطبيق Phantom...');
+            } catch (error) {
+              throw new Error('فشل في فتح تطبيق Phantom');
+            }
+          } else {
+            // On desktop, redirect to install Phantom
+            window.open('https://phantom.app/', '_blank');
+            throw new Error('يرجى تثبيت امتداد Phantom أولاً');
           }
         }
-        
-        throw new Error('غير قادر على الاتصال بـ Phantom');
       }
-
-      // WalletConnect flow
-      if (wcProvider) {
-        try {
-          await wcProvider.disconnect();
-        } catch (e) {
-          console.warn('Error disconnecting existing provider:', e);
-        }
-      }
-
-      const provider = await EthereumProvider.init({
-        chains: [1], // Ethereum mainnet
-        optionalChains: [137], // Polygon
-        projectId: WALLETCONNECT_CONFIG.projectId,
-        showQrModal: WALLETCONNECT_CONFIG.showQrModal,
-        qrModalOptions: WALLETCONNECT_CONFIG.qrModalOptions,
-        metadata: {
-          ...WALLETCONNECT_CONFIG.metadata,
-          url: window.location.origin,
-          icons: [window.location.origin + '/favicon.ico']
-        }
-      });
-
-      provider.on('accountsChanged', (accounts: string[]) => {
-        if (accounts.length === 0) {
-          setConnectedWallets([]);
-        }
-      });
-
-      provider.on('disconnect', () => {
-        setConnectedWallets([]);
-        setWcProvider(null);
-      });
-
-      setWcProvider(provider);
-
-      await provider.connect();
       
-      const accounts = provider.accounts;
-      
-      if (accounts && accounts.length > 0) {
-        const address = accounts[0];
-        const balance = await getBalance(address, provider);
-        
-        const newWallet: ConnectedWallet = {
-          id: Date.now().toString(),
-          type: 'WalletConnect',
-          address,
-          balance,
-          currency: 'ETH',
-          network: 'Ethereum',
-          provider
-        };
-
-        setConnectedWallets([newWallet]);
-        return newWallet;
-      }
-      return null;
+      throw new Error('غير قادر على الاتصال بـ Phantom');
     } catch (error) {
       console.error('Wallet connection error:', error);
-      if (wcProvider) {
-        try {
-          await wcProvider.disconnect();
-        } catch (e) {
-          console.warn('Error cleaning up provider:', e);
-        }
-        setWcProvider(null);
-      }
       throw error;
     } finally {
       setIsConnecting(false);
     }
-  }, [getBalance, getSolanaBalance, wcProvider]);
+  }, [getSolanaBalance]);
 
   const disconnectWallet = useCallback((walletId: string) => {
     setConnectedWallets([]);
-    if (wcProvider) {
-      wcProvider.disconnect();
-      setWcProvider(null);
+    
+    // Disconnect from Phantom if connected
+    if (typeof window !== 'undefined') {
+      const phantom = (window as any).phantom?.solana || (window as any).solana;
+      if (phantom?.disconnect) {
+        phantom.disconnect();
+      }
     }
-  }, [wcProvider]);
+  }, []);
 
   const refreshBalance = useCallback(async (wallet: ConnectedWallet) => {
     let newBalance: string;
