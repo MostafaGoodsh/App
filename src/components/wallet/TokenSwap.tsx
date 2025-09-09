@@ -203,6 +203,9 @@ export const TokenSwap = ({ wallet, customTokens = [] }: TokenSwapProps) => {
             <p className="text-sm text-muted-foreground arabic-text">
               معدل التبديل: 1 {fromToken.symbol} = 0.998 {toToken.symbol} (رسوم 0.2%)
             </p>
+            <p className="text-xs text-orange-500 mt-2 arabic-text">
+              ⚠️ تنبيه: هذا مجرد محاكاة للتبديل - لا يتم تنفيذ معاملات حقيقية
+            </p>
           </div>
         )}
 

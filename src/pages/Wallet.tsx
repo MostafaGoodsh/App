@@ -15,7 +15,10 @@ import {
 const WalletPage = () => {
   const { toast } = useToast();
   const [showAddToken, setShowAddToken] = useState(false);
-  const [customTokens, setCustomTokens] = useState<any[]>([]);
+  const [customTokens, setCustomTokens] = useState<any[]>(() => {
+    const saved = localStorage.getItem('customTokens');
+    return saved ? JSON.parse(saved) : [];
+  });
   const {
     connectedWallet,
     isConnecting,
@@ -179,7 +182,9 @@ const WalletPage = () => {
         onOpenChange={setShowAddToken}
         wallet={connectedWallet}
         onTokenAdded={(token) => {
-          setCustomTokens(prev => [...prev, token]);
+          const updatedTokens = [...customTokens, token];
+          setCustomTokens(updatedTokens);
+          localStorage.setItem('customTokens', JSON.stringify(updatedTokens));
           setShowAddToken(false);
         }}
       />

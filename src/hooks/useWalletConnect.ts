@@ -16,7 +16,10 @@ export interface ConnectedWallet {
 }
 
 export const useWalletConnect = () => {
-  const [connectedWallet, setConnectedWallet] = useState<ConnectedWallet | null>(null);
+  const [connectedWallet, setConnectedWallet] = useState<ConnectedWallet | null>(() => {
+    const saved = localStorage.getItem('connectedWallet');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [isConnecting, setIsConnecting] = useState(false);
 
   const getBalance = useCallback(async (address: string, provider?: any) => {
@@ -71,6 +74,7 @@ export const useWalletConnect = () => {
       };
 
       setConnectedWallet(wallet);
+      localStorage.setItem('connectedWallet', JSON.stringify({...wallet, provider: undefined}));
       return wallet;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
@@ -126,6 +130,8 @@ export const useWalletConnect = () => {
       connectedWallet.provider.disconnect();
     }
     setConnectedWallet(null);
+    localStorage.removeItem('connectedWallet');
+    localStorage.removeItem('customTokens');
   }, [connectedWallet]);
 
   const refreshBalance = useCallback(async () => {
