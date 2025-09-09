@@ -2,14 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowUpDown, Loader2 } from "lucide-react";
+import { ArrowUpDown, RefreshCw } from "lucide-react";
 import { ConnectedWallet } from "@/hooks/useWalletConnect";
 import { useToast } from "@/hooks/use-toast";
-
-interface TokenSwapProps {
-  wallet: ConnectedWallet;
-}
 
 interface SwapToken {
   symbol: string;
@@ -17,60 +14,76 @@ interface SwapToken {
   balance: string;
 }
 
-export const TokenSwap = ({ wallet }: TokenSwapProps) => {
-  const { toast } = useToast();
-  const [fromToken, setFromToken] = useState<string>("ETH");
-  const [toToken, setToToken] = useState<string>("USDT");
-  const [fromAmount, setFromAmount] = useState<string>("");
-  const [toAmount, setToAmount] = useState<string>("");
-  const [isSwapping, setIsSwapping] = useState(false);
+interface TokenSwapProps {
+  wallet: ConnectedWallet;
+}
 
-  // Available tokens for swapping
-  const availableTokens: SwapToken[] = [
-    { symbol: "ETH", name: "Ethereum", balance: wallet.balance },
+// Available tokens for swapping by network
+const SWAP_TOKENS: Record<string, SwapToken[]> = {
+  Ethereum: [
+    { symbol: "ETH", name: "Ethereum", balance: "0.0" },
     { symbol: "USDT", name: "Tether USD", balance: "0.0" },
     { symbol: "USDC", name: "USD Coin", balance: "0.0" },
     { symbol: "AAVE", name: "Aave", balance: "0.0" },
-  ];
+  ],
+  Polygon: [
+    { symbol: "MATIC", name: "Polygon", balance: "0.0" },
+    { symbol: "USDT", name: "Tether USD", balance: "0.0" },
+    { symbol: "USDC", name: "USD Coin", balance: "0.0" },
+    { symbol: "WMATIC", name: "Wrapped Matic", balance: "0.0" },
+  ],
+  BSC: [
+    { symbol: "BNB", name: "BNB", balance: "0.0" },
+    { symbol: "USDT", name: "Tether USD", balance: "0.0" },
+    { symbol: "BUSD", name: "Binance USD", balance: "0.0" },
+    { symbol: "WBNB", name: "Wrapped BNB", balance: "0.0" },
+  ],
+  Arbitrum: [
+    { symbol: "ETH", name: "Ethereum", balance: "0.0" },
+    { symbol: "USDT", name: "Tether USD", balance: "0.0" },
+    { symbol: "USDC", name: "USD Coin", balance: "0.0" },
+    { symbol: "WETH", name: "Wrapped Ether", balance: "0.0" },
+  ]
+};
 
-  const handleSwapTokens = () => {
-    const tempFrom = fromToken;
-    const tempFromAmount = fromAmount;
-    
-    setFromToken(toToken);
-    setToToken(tempFrom);
-    setFromAmount(toAmount);
-    setToAmount(tempFromAmount);
-  };
+export const TokenSwap = ({ wallet }: TokenSwapProps) => {
+  const { toast } = useToast();
+  const [fromToken, setFromToken] = useState<SwapToken | null>(null);
+  const [toToken, setToToken] = useState<SwapToken | null>(null);
+  const [fromAmount, setFromAmount] = useState("");
+  const [toAmount, setToAmount] = useState("");
+  const [isSwapping, setIsSwapping] = useState(false);
+
+  const availableTokens = SWAP_TOKENS[wallet.network] || [];
 
   const calculateToAmount = (amount: string) => {
-    if (!amount || parseFloat(amount) === 0) {
-      setToAmount("");
-      return;
-    }
+    if (!amount || !fromToken || !toToken) return "0.0";
     
-    // Mock exchange rate calculation (1 ETH = 2500 USDT)
-    let rate = 1;
-    if (fromToken === "ETH" && toToken === "USDT") {
-      rate = 2500;
-    } else if (fromToken === "USDT" && toToken === "ETH") {
-      rate = 1 / 2500;
-    }
-    
-    const result = (parseFloat(amount) * rate).toFixed(6);
-    setToAmount(result);
+    // Mock exchange rate calculation
+    const mockRate = 0.998; // 0.2% slippage
+    const calculatedAmount = (parseFloat(amount) * mockRate).toFixed(6);
+    return calculatedAmount;
   };
 
   const handleFromAmountChange = (value: string) => {
     setFromAmount(value);
-    calculateToAmount(value);
+    setToAmount(calculateToAmount(value));
+  };
+
+  const handleSwapTokens = () => {
+    if (fromToken && toToken) {
+      setFromToken(toToken);
+      setToToken(fromToken);
+      setFromAmount(toAmount);
+      setToAmount(fromAmount);
+    }
   };
 
   const handleSwap = async () => {
-    if (!fromAmount || parseFloat(fromAmount) === 0) {
+    if (!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) === 0) {
       toast({
-        title: "خطأ",
-        description: "يرجى إدخال مبلغ صالح",
+        title: "خطأ في التبديل",
+        description: "يرجى تحديد الرموز والمقدار",
         variant: "destructive"
       });
       return;
@@ -79,20 +92,21 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
     setIsSwapping(true);
     
     try {
-      // Mock swap implementation
+      // Mock swap execution
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "تم التبادل بنجاح",
-        description: `تم تبديل ${fromAmount} ${fromToken} إلى ${toAmount} ${toToken}`,
+        title: "تم التبديل بنجاح",
+        description: `تم تبديل ${fromAmount} ${fromToken.symbol} إلى ${toAmount} ${toToken.symbol}`,
       });
       
+      // Reset form
       setFromAmount("");
       setToAmount("");
     } catch (error) {
       toast({
-        title: "فشل التبادل",
-        description: "حدث خطأ أثناء عملية التبادل",
+        title: "خطأ في التبديل",
+        description: "فشل في تنفيذ عملية التبديل",
         variant: "destructive"
       });
     } finally {
@@ -103,16 +117,19 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="arabic-text">تبادل الرموز المميزة</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <ArrowUpDown className="w-5 h-5" />
+          <span className="arabic-text">تبديل الرموز المميزة</span>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* From Token */}
         <div className="space-y-2">
-          <label className="text-sm font-medium arabic-text">من</label>
+          <Label className="arabic-text">من</Label>
           <div className="flex gap-2">
-            <Select value={fromToken} onValueChange={setFromToken}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
+            <Select onValueChange={(value) => setFromToken(availableTokens.find(t => t.symbol === value) || null)}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="اختر رمز" />
               </SelectTrigger>
               <SelectContent>
                 {availableTokens.map((token) => (
@@ -123,37 +140,38 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
               </SelectContent>
             </Select>
             <Input
-              type="number"
               placeholder="0.0"
               value={fromAmount}
               onChange={(e) => handleFromAmountChange(e.target.value)}
               className="flex-1"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            الرصيد المتاح: {availableTokens.find(t => t.symbol === fromToken)?.balance || "0.0"} {fromToken}
-          </p>
+          {fromToken && (
+            <p className="text-sm text-muted-foreground">
+              الرصيد المتاح: {fromToken.symbol === wallet.currency ? wallet.balance : fromToken.balance} {fromToken.symbol}
+            </p>
+          )}
         </div>
 
         {/* Swap Button */}
         <div className="flex justify-center">
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={handleSwapTokens}
-            className="rounded-full w-10 h-10 p-0"
+            disabled={!fromToken || !toToken}
           >
-            <ArrowUpDown className="h-4 w-4" />
+            <ArrowUpDown className="w-4 h-4" />
           </Button>
         </div>
 
         {/* To Token */}
         <div className="space-y-2">
-          <label className="text-sm font-medium arabic-text">إلى</label>
+          <Label className="arabic-text">إلى</Label>
           <div className="flex gap-2">
-            <Select value={toToken} onValueChange={setToToken}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
+            <Select onValueChange={(value) => setToToken(availableTokens.find(t => t.symbol === value) || null)}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="اختر رمز" />
               </SelectTrigger>
               <SelectContent>
                 {availableTokens.map((token) => (
@@ -164,7 +182,6 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
               </SelectContent>
             </Select>
             <Input
-              type="number"
               placeholder="0.0"
               value={toAmount}
               readOnly
@@ -174,10 +191,10 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
         </div>
 
         {/* Exchange Rate */}
-        {fromAmount && toAmount && (
-          <div className="p-3 bg-muted rounded-lg">
-            <p className="text-sm">
-              <span className="arabic-text">سعر الصرف:</span> 1 {fromToken} = {(parseFloat(toAmount) / parseFloat(fromAmount)).toFixed(6)} {toToken}
+        {fromToken && toToken && fromAmount && (
+          <div className="p-4 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground arabic-text">
+              معدل التبديل: 1 {fromToken.symbol} = 0.998 {toToken.symbol} (رسوم 0.2%)
             </p>
           </div>
         )}
@@ -185,14 +202,14 @@ export const TokenSwap = ({ wallet }: TokenSwapProps) => {
         {/* Swap Button */}
         <Button 
           onClick={handleSwap}
-          disabled={!fromAmount || parseFloat(fromAmount) === 0 || isSwapping}
+          disabled={!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) === 0 || isSwapping}
           className="w-full"
           size="lg"
         >
           {isSwapping ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span className="arabic-text">جاري التبادل...</span>
+              <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+              <span className="arabic-text">جاري التبديل...</span>
             </>
           ) : (
             <span className="arabic-text">تبديل الرموز</span>

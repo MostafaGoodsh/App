@@ -1,28 +1,46 @@
-// Wallet configuration
-// For security, move sensitive configuration here
-// Get a free project key at https://cloud.reown.com
-// Create a new project and get your Project ID
-
+// WalletConnect Configuration - Multi-Chain Support
 export const WALLETCONNECT_CONFIG = {
   projectId: '5cbecfb58785fd00d9c6f1825f993060',
   metadata: {
     name: 'المحافظ الرقمية',
-    description: 'منصة إدارة المحافظ الرقمية',
+    description: 'منصة إدارة المحافظ الرقمية متعددة الشبكات',
     url: typeof window !== 'undefined' ? window.location.origin : '',
     icons: [typeof window !== 'undefined' ? window.location.origin + '/favicon.ico' : '']
   }
 };
 
-// Network configurations
-export const NETWORK_CONFIG = {
+// Multi-Chain Network Support
+export const SUPPORTED_NETWORKS = {
+  ethereum: {
+    chainId: 1,
+    name: 'Ethereum',
+    currency: 'ETH',
+    rpcUrls: ['https://mainnet.infura.io/v3/'],
+    blockExplorerUrls: ['https://etherscan.io/']
+  },
   polygon: {
     chainId: 137,
     name: 'Polygon',
-    currency: 'MATIC'
+    currency: 'MATIC',
+    rpcUrls: ['https://polygon-rpc.com/'],
+    blockExplorerUrls: ['https://polygonscan.com/']
+  },
+  bsc: {
+    chainId: 56,
+    name: 'BSC',
+    currency: 'BNB',
+    rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+    blockExplorerUrls: ['https://bscscan.com/']
+  },
+  arbitrum: {
+    chainId: 42161,
+    name: 'Arbitrum',
+    currency: 'ETH',
+    rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+    blockExplorerUrls: ['https://arbiscan.io/']
   }
 };
 
-// Wallet types
 export const WALLET_TYPES = {
   WALLETCONNECT: 'WalletConnect'
 } as const;

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-import { WALLETCONNECT_CONFIG, WALLET_TYPES } from '@/config/wallet';
+import { WALLETCONNECT_CONFIG, SUPPORTED_NETWORKS } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
@@ -9,13 +9,14 @@ export interface ConnectedWallet {
   address: string;
   balance: string;
   currency: string;
-  network: 'Polygon';
-  name?: string;
+  network: string;
+  chainId: number;
+  name: string;
   provider?: any;
 }
 
 export const useWalletConnect = () => {
-  const [connectedWallets, setConnectedWallets] = useState<ConnectedWallet[]>([]);
+  const [connectedWallet, setConnectedWallet] = useState<ConnectedWallet | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
   const getBalance = useCallback(async (address: string, provider?: any) => {
@@ -32,11 +33,13 @@ export const useWalletConnect = () => {
     }
   }, []);
 
-  const connectToWalletConnect = useCallback(async () => {
+  const connectWallet = useCallback(async () => {
+    setIsConnecting(true);
     try {
       const provider = await EthereumProvider.init({
         projectId: WALLETCONNECT_CONFIG.projectId,
-        chains: [137], // Polygon mainnet only
+        chains: [1], // Ethereum by default
+        optionalChains: Object.values(SUPPORTED_NETWORKS).map(network => network.chainId),
         showQrModal: true,
         metadata: WALLETCONNECT_CONFIG.metadata
       });
@@ -48,116 +51,100 @@ export const useWalletConnect = () => {
         throw new Error('فشل في الحصول على حسابات المحفظة');
       }
 
-      // Ensure we're on Polygon network
-      const chainId = await provider.request({ method: 'eth_chainId' });
-      if (chainId !== '0x89') { // 0x89 is hex for 137 (Polygon)
-        try {
-          await provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x89' }],
-          });
-        } catch (error: any) {
-          if (error.code === 4902) {
-            await provider.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x89',
-                chainName: 'Polygon Mainnet',
-                nativeCurrency: {
-                  name: 'MATIC',
-                  symbol: 'MATIC',
-                  decimals: 18,
-                },
-                rpcUrls: ['https://polygon-rpc.com/'],
-                blockExplorerUrls: ['https://polygonscan.com/'],
-              }],
-            });
-          } else {
-            throw error;
-          }
-        }
-      }
-
+      const chainIdHex = await provider.request({ method: 'eth_chainId' });
+      const chainId = parseInt(chainIdHex as string, 16);
+      const currentNetwork = Object.values(SUPPORTED_NETWORKS).find(n => n.chainId === chainId) || SUPPORTED_NETWORKS.ethereum;
+      
       const address = accounts[0];
       const balance = await getBalance(address, provider);
       
-      const newWallet: ConnectedWallet = {
+      const wallet: ConnectedWallet = {
         id: Date.now().toString(),
         type: 'WalletConnect',
         address,
         balance,
-        currency: 'MATIC',
-        network: 'Polygon',
+        currency: currentNetwork.currency,
+        network: currentNetwork.name,
+        chainId: currentNetwork.chainId,
         name: 'WalletConnect',
         provider
       };
 
-      setConnectedWallets([newWallet]);
-      return newWallet;
+      setConnectedWallet(wallet);
+      return wallet;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
-      throw new Error('فشل في الاتصال بـ WalletConnect: ' + (error as Error).message);
-    }
-  }, [getBalance]);
-
-  const connectWallet = useCallback(async (walletType: string = WALLET_TYPES.WALLETCONNECT) => {
-    setIsConnecting(true);
-    try {
-      return await connectToWalletConnect();
-    } catch (error) {
-      console.error('Wallet connection error:', error);
-      throw error;
+      throw new Error('فشل في الاتصال بـ WalletConnect');
     } finally {
       setIsConnecting(false);
     }
-  }, [connectToWalletConnect]);
-
-  const disconnectWallet = useCallback((walletId: string) => {
-    const wallet = connectedWallets.find(w => w.id === walletId);
-    if (wallet?.provider) {
-      wallet.provider.disconnect();
-    }
-    setConnectedWallets([]);
-  }, [connectedWallets]);
-
-  const refreshBalance = useCallback(async (wallet: ConnectedWallet) => {
-    const newBalance = await getBalance(wallet.address, wallet.provider);
-    const updatedWallet = { ...wallet, balance: newBalance };
-    setConnectedWallets([updatedWallet]);
-    return newBalance;
   }, [getBalance]);
 
-  const sendTransaction = useCallback(async (
-    wallet: ConnectedWallet,
-    toAddress: string,
-    amount: string
-  ) => {
-    if (!wallet.provider) {
-      throw new Error('No provider available');
+  const switchNetwork = useCallback(async (networkKey: keyof typeof SUPPORTED_NETWORKS) => {
+    if (!connectedWallet?.provider) return;
+    
+    const network = SUPPORTED_NETWORKS[networkKey];
+    const chainIdHex = `0x${network.chainId.toString(16)}`;
+    
+    try {
+      await connectedWallet.provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: chainIdHex }],
+      });
+    } catch (error: any) {
+      if (error.code === 4902) {
+        await connectedWallet.provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: chainIdHex,
+            chainName: network.name,
+            nativeCurrency: {
+              name: network.currency,
+              symbol: network.currency,
+              decimals: 18,
+            },
+            rpcUrls: network.rpcUrls,
+            blockExplorerUrls: network.blockExplorerUrls,
+          }],
+        });
+      }
     }
 
-    const ethersProvider = new ethers.BrowserProvider(wallet.provider);
-    const signer = await ethersProvider.getSigner();
+    // Update wallet state
+    const balance = await getBalance(connectedWallet.address, connectedWallet.provider);
+    setConnectedWallet({
+      ...connectedWallet,
+      network: network.name,
+      currency: network.currency,
+      chainId: network.chainId,
+      balance
+    });
+  }, [connectedWallet, getBalance]);
+
+  const disconnectWallet = useCallback(() => {
+    if (connectedWallet?.provider) {
+      connectedWallet.provider.disconnect();
+    }
+    setConnectedWallet(null);
+  }, [connectedWallet]);
+
+  const refreshBalance = useCallback(async () => {
+    if (!connectedWallet) return;
     
-    const transaction = {
-      to: toAddress,
-      value: ethers.parseEther(amount)
-    };
-    
-    const tx = await signer.sendTransaction(transaction);
-    await tx.wait();
-    
-    await refreshBalance(wallet);
-    
-    return tx.hash;
-  }, [refreshBalance]);
+    const newBalance = await getBalance(connectedWallet.address, connectedWallet.provider);
+    setConnectedWallet({
+      ...connectedWallet,
+      balance: newBalance
+    });
+    return newBalance;
+  }, [connectedWallet, getBalance]);
 
   return {
-    connectedWallets,
+    connectedWallet,
     isConnecting,
     connectWallet,
+    switchNetwork,
     disconnectWallet,
-    refreshBalance,
-    sendTransaction
+    refreshBalance
   };
 };
