@@ -30,9 +30,9 @@ export const EnhancedWalletCard = ({
   };
 
   const openInExplorer = () => {
-    const explorerUrl = wallet.network === 'Ethereum' 
-      ? `https://etherscan.io/address/${wallet.address}`
-      : `https://solscan.io/account/${wallet.address}`;
+    const explorerUrl = wallet.network === 'Polygon' 
+      ? `https://polygonscan.com/address/${wallet.address}`
+      : `https://polygonscan.com/address/${wallet.address}`;
     window.open(explorerUrl, '_blank');
   };
 

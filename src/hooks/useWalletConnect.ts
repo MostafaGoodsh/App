@@ -9,7 +9,7 @@ export interface ConnectedWallet {
   address: string;
   balance: string;
   currency: string;
-  network: 'Ethereum';
+  network: 'Polygon';
   name?: string;
   provider?: any;
 }
@@ -36,8 +36,7 @@ export const useWalletConnect = () => {
     try {
       const provider = await EthereumProvider.init({
         projectId: WALLETCONNECT_CONFIG.projectId,
-        chains: [1], // Ethereum mainnet
-        optionalChains: [137], // Polygon
+        chains: [137], // Polygon mainnet only
         showQrModal: true,
         metadata: WALLETCONNECT_CONFIG.metadata
       });
@@ -49,6 +48,36 @@ export const useWalletConnect = () => {
         throw new Error('فشل في الحصول على حسابات المحفظة');
       }
 
+      // Ensure we're on Polygon network
+      const chainId = await provider.request({ method: 'eth_chainId' });
+      if (chainId !== '0x89') { // 0x89 is hex for 137 (Polygon)
+        try {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x89' }],
+          });
+        } catch (error: any) {
+          if (error.code === 4902) {
+            await provider.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x89',
+                chainName: 'Polygon Mainnet',
+                nativeCurrency: {
+                  name: 'MATIC',
+                  symbol: 'MATIC',
+                  decimals: 18,
+                },
+                rpcUrls: ['https://polygon-rpc.com/'],
+                blockExplorerUrls: ['https://polygonscan.com/'],
+              }],
+            });
+          } else {
+            throw error;
+          }
+        }
+      }
+
       const address = accounts[0];
       const balance = await getBalance(address, provider);
       
@@ -57,8 +86,8 @@ export const useWalletConnect = () => {
         type: 'WalletConnect',
         address,
         balance,
-        currency: 'ETH',
-        network: 'Ethereum',
+        currency: 'MATIC',
+        network: 'Polygon',
         name: 'WalletConnect',
         provider
       };

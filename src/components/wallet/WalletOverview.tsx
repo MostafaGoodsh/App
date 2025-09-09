@@ -12,9 +12,9 @@ interface WalletOverviewProps {
 }
 
 export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => {
-  const ethereumWallets = wallets.filter(w => w.network === 'Ethereum');
+  const polygonWallets = wallets.filter(w => w.network === 'Polygon');
   
-  const totalEthBalance = ethereumWallets.reduce((sum, w) => sum + parseFloat(w.balance || '0'), 0);
+  const totalMaticBalance = polygonWallets.reduce((sum, w) => sum + parseFloat(w.balance || '0'), 0);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -49,7 +49,7 @@ export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => 
         <CardContent className="relative">
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
-              {ethereumWallets.length} ETH
+              {polygonWallets.length} MATIC
             </Badge>
           </div>
         </CardContent>
@@ -60,15 +60,15 @@ export const WalletOverview = ({ wallets, totalValue }: WalletOverviewProps) => 
         <CardHeader className="relative pb-2">
           <CardDescription className="flex items-center gap-2">
             <Network className="w-4 h-4" />
-            Ethereum
+            Polygon
           </CardDescription>
           <CardTitle className="text-2xl">
-            {totalEthBalance.toFixed(4)} ETH
+            {totalMaticBalance.toFixed(4)} MATIC
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
           <div className="text-sm text-muted-foreground">
-            {ethereumWallets.length} محفظة متصلة
+            {polygonWallets.length} محفظة متصلة
           </div>
         </CardContent>
       </Card>

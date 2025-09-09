@@ -133,7 +133,7 @@ export const QuickActions = ({
                   <Label htmlFor="send-address">عنوان المستلم</Label>
                   <Input
                     id="send-address"
-                    placeholder={wallet.network === 'Ethereum' ? '0x...' : 'SOL address...'}
+                    placeholder={wallet.network === 'Polygon' ? '0x...' : '0x...'}
                     value={sendAddress}
                     onChange={(e) => setSendAddress(e.target.value)}
                   />

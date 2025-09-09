@@ -15,10 +15,10 @@ export const WALLETCONNECT_CONFIG = {
 
 // Network configurations
 export const NETWORK_CONFIG = {
-  ethereum: {
-    chainId: 1,
-    name: 'Ethereum',
-    currency: 'ETH'
+  polygon: {
+    chainId: 137,
+    name: 'Polygon',
+    currency: 'MATIC'
   }
 };
 
