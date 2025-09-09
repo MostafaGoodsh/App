@@ -13,6 +13,7 @@ interface AddTokenDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   wallet: ConnectedWallet;
+  onTokenAdded?: (token: any) => void;
 }
 
 const ERC20_ABI = [
@@ -27,7 +28,7 @@ interface TokenInfo {
   decimals: number;
 }
 
-export const AddTokenDialog = ({ open, onOpenChange, wallet }: AddTokenDialogProps) => {
+export const AddTokenDialog = ({ open, onOpenChange, wallet, onTokenAdded }: AddTokenDialogProps) => {
   const { toast } = useToast();
   const [tokenAddress, setTokenAddress] = useState("");
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
@@ -79,8 +80,15 @@ export const AddTokenDialog = ({ open, onOpenChange, wallet }: AddTokenDialogPro
 
     setIsAdding(true);
     try {
-      // Add token to wallet (this is a mock implementation)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const newToken = {
+        symbol: tokenInfo.symbol,
+        name: tokenInfo.name,
+        balance: "0",
+        address: tokenAddress,
+        decimals: tokenInfo.decimals
+      };
+      
+      onTokenAdded?.(newToken);
       
       toast({
         title: "تم إضافة الرمز بنجاح",

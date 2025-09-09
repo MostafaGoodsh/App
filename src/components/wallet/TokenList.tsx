@@ -16,6 +16,8 @@ interface Token {
 interface TokenListProps {
   wallet: ConnectedWallet;
   onAddToken: () => void;
+  customTokens?: Token[];
+  onTokenAdded?: (token: Token) => void;
 }
 
 const ERC20_ABI = [
@@ -49,7 +51,7 @@ const POPULAR_TOKENS: Record<string, Array<{address: string; symbol: string; nam
   ]
 };
 
-export const TokenList = ({ wallet, onAddToken }: TokenListProps) => {
+export const TokenList = ({ wallet, onAddToken, customTokens = [], onTokenAdded }: TokenListProps) => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -86,7 +88,12 @@ export const TokenList = ({ wallet, onAddToken }: TokenListProps) => {
     setIsLoading(true);
     try {
       const popularTokens = POPULAR_TOKENS[wallet.network] || [];
-      const tokenPromises = popularTokens.map(token => getTokenBalance(token.address));
+      const allTokenAddresses = [
+        ...popularTokens.map(t => t.address),
+        ...customTokens.map(t => t.address)
+      ];
+      
+      const tokenPromises = allTokenAddresses.map(address => getTokenBalance(address));
       const results = await Promise.all(tokenPromises);
       
       const validTokens = results.filter(token => token !== null) as Token[];
@@ -102,7 +109,7 @@ export const TokenList = ({ wallet, onAddToken }: TokenListProps) => {
     if (wallet && wallet.provider) {
       loadTokenBalances();
     }
-  }, [wallet.network, wallet.address]);
+  }, [wallet.network, wallet.address, customTokens]);
 
   return (
     <Card>

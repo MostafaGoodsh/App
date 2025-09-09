@@ -38,6 +38,13 @@ export const SUPPORTED_NETWORKS = {
     currency: 'ETH',
     rpcUrls: ['https://arb1.arbitrum.io/rpc'],
     blockExplorerUrls: ['https://arbiscan.io/']
+  },
+  solana: {
+    chainId: 101,
+    name: 'Solana',
+    currency: 'SOL',
+    rpcUrls: ['https://api.mainnet-beta.solana.com'],
+    blockExplorerUrls: ['https://explorer.solana.com/']
   }
 };
 

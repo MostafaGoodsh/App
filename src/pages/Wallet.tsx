@@ -15,6 +15,7 @@ import {
 const WalletPage = () => {
   const { toast } = useToast();
   const [showAddToken, setShowAddToken] = useState(false);
+  const [customTokens, setCustomTokens] = useState<any[]>([]);
   const {
     connectedWallet,
     isConnecting,
@@ -163,6 +164,8 @@ const WalletPage = () => {
           <TokenList 
             wallet={connectedWallet} 
             onAddToken={() => setShowAddToken(true)}
+            customTokens={customTokens}
+            onTokenAdded={(token) => setCustomTokens(prev => [...prev, token])}
           />
         </TabsContent>
         
@@ -175,6 +178,10 @@ const WalletPage = () => {
         open={showAddToken}
         onOpenChange={setShowAddToken}
         wallet={connectedWallet}
+        onTokenAdded={(token) => {
+          setCustomTokens(prev => [...prev, token]);
+          setShowAddToken(false);
+        }}
       />
     </div>
   );
