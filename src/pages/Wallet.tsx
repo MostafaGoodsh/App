@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { useToast } from "@/hooks/use-toast";
-import { NetworkSwitcher } from "@/components/wallet/NetworkSwitcher";
-import { TokenList } from "@/components/wallet/TokenList";
+import { WalletDashboard } from "@/components/wallet/WalletDashboard";
 import { TokenSwap } from "@/components/wallet/TokenSwap";
 import { AddTokenDialog } from "@/components/wallet/AddTokenDialog";
-import { 
-  Wallet, RefreshCw, ArrowUpDown, Coins, Plus
-} from "lucide-react";
+import { SolanaWalletProvider } from "@/components/wallet/SolanaWalletProvider";
+import { SolanaWalletCard } from "@/components/wallet/SolanaWalletCard";
+import { SolanaTokenTransfer } from "@/components/wallet/SolanaTokenTransfer";
+import { useToast } from "@/hooks/use-toast";
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 const WalletPage = () => {
   const { toast } = useToast();
@@ -19,168 +17,108 @@ const WalletPage = () => {
     const saved = localStorage.getItem('customTokens');
     return saved ? JSON.parse(saved) : [];
   });
-  const {
-    connectedWallet,
-    isConnecting,
-    connectWallet,
-    switchNetwork,
-    disconnectWallet,
-    refreshBalance
-  } = useWalletConnect();
-
-  const handleConnect = async () => {
-    try {
-      await connectWallet();
-      toast({ 
-        title: "تم الاتصال بنجاح", 
-        description: "تم الاتصال بالمحفظة بنجاح" 
-      });
-    } catch (error: any) {
-      toast({ 
-        title: "خطأ في الاتصال", 
-        description: error.message, 
-        variant: "destructive" 
-      });
-    }
-  };
-
-  const handleDisconnect = () => {
-    disconnectWallet();
-    toast({ 
-      title: "تم قطع الاتصال", 
-      description: "تم قطع اتصال المحفظة بنجاح" 
-    });
-  };
-
-  const handleRefresh = async () => {
-    try {
-      await refreshBalance();
-      toast({
-        title: "تم تحديث الرصيد",
-        description: "تم تحديث رصيد المحفظة بنجاح"
-      });
-    } catch (error) {
-      toast({
-        title: "خطأ في التحديث",
-        description: "فشل في تحديث رصيد المحفظة",
-        variant: "destructive"
-      });
-    }
-  };
-
-  if (!connectedWallet) {
-    return (
-      <div className="container mx-auto px-4 py-8 space-y-8 arabic-content">
-        <div className="text-center mb-8">
-          <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent arabic-text">
-            المحفظة الرقمية
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
-            اتصل بمحفظتك الرقمية باستخدام WalletConnect
-          </p>
-        </div>
-        
-        <Card className="max-w-md mx-auto">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Wallet className="w-6 h-6" />
-              اتصال المحفظة
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={handleConnect}
-              disabled={isConnecting}
-              className="w-full"
-              size="lg"
-            >
-              {isConnecting ? <RefreshCw className="w-4 w-4 animate-spin mr-2" /> : <Wallet className="w-4 h-4 mr-2" />}
-              <span className="arabic-text">اتصال بـ WalletConnect</span>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const [showSolanaTransfer, setShowSolanaTransfer] = useState(false);
+  const [selectedSolanaToken, setSelectedSolanaToken] = useState<any>(null);
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6 arabic-content">
-      {/* Wallet Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="w-5 h-5" />
-                {connectedWallet.name}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {connectedWallet.address.slice(0, 8)}...{connectedWallet.address.slice(-8)}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <NetworkSwitcher 
-                currentNetwork={connectedWallet.network}
-                onNetworkSwitch={switchNetwork}
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <header className="text-center space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent arabic-text">
+            إدارة المحافظ الرقمية
+          </h1>
+          <p className="text-muted-foreground arabic-text">
+            اتصل بمحافظك وأدر عملاتك الرقمية بأمان
+          </p>
+        </header>
+
+        <Tabs defaultValue="evm" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="evm" className="arabic-text">محافظ EVM</TabsTrigger>
+            <TabsTrigger value="solana" className="arabic-text">محفظة سولانا</TabsTrigger>
+            <TabsTrigger value="swap" className="arabic-text">تبديل الرموز</TabsTrigger>
+          </TabsList>
+
+          {/* EVM Wallets Tab */}
+          <TabsContent value="evm">
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground arabic-text">
+                  محافظ EVM (WalletConnect) متاحة للاتصال
+                </p>
+                <p className="text-center text-sm text-orange-500 arabic-text mt-2">
+                  ⚠️ حالياً في وضع المحاكاة
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Solana Wallet Tab */}
+          <TabsContent value="solana">
+            <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
+              <SolanaWalletCard 
+                onSendToken={(token) => {
+                  setSelectedSolanaToken(token);
+                  setShowSolanaTransfer(true);
+                }}
               />
-              <Button variant="outline" size="sm" onClick={handleRefresh}>
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDisconnect}>
-                قطع الاتصال
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground arabic-text">الرصيد الإجمالي</p>
-              <p className="text-2xl font-bold">{connectedWallet.balance} {connectedWallet.currency}</p>
-            </div>
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground arabic-text">الشبكة</p>
-              <p className="text-lg font-semibold">{connectedWallet.network}</p>
-            </div>
-            <div className="text-center p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground arabic-text">نوع المحفظة</p>
-              <p className="text-lg font-semibold">{connectedWallet.type}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </SolanaWalletProvider>
+          </TabsContent>
 
-      {/* Wallet Features */}
-      <Tabs defaultValue="tokens" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="tokens" className="flex items-center gap-2">
-            <Coins className="w-4 h-4" />
-            <span className="arabic-text">الرموز المميزة</span>
-          </TabsTrigger>
-          <TabsTrigger value="swap" className="flex items-center gap-2">
-            <ArrowUpDown className="w-4 h-4" />
-            <span className="arabic-text">التبديل</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="tokens" className="mt-6">
-          <TokenList 
-            wallet={connectedWallet} 
-            onAddToken={() => setShowAddToken(true)}
-            customTokens={customTokens}
-            onTokenAdded={(token) => setCustomTokens(prev => [...prev, token])}
-          />
-        </TabsContent>
-        
-        <TabsContent value="swap" className="mt-6">
-          <TokenSwap wallet={connectedWallet} customTokens={customTokens} />
-        </TabsContent>
-      </Tabs>
+          {/* Token Swap Tab */}
+          <TabsContent value="swap">
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-muted-foreground arabic-text mb-4">
+                    ميزة التبديل متاحة فقط مع محافظ EVM المتصلة
+                  </p>
+                  <p className="text-center text-sm text-orange-500 arabic-text">
+                    ⚠️ التبديل حالياً للمحاكاة فقط - لا معاملات حقيقية
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
 
-      <AddTokenDialog
-        open={showAddToken}
+        {/* Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="border-green-500/20 bg-green-500/5">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <h3 className="font-semibold text-green-600 arabic-text">✅ الميزات المتاحة</h3>
+                <ul className="text-sm text-muted-foreground space-y-1 arabic-text">
+                  <li>• الاتصال بمحافظ Phantom و Solflare</li>
+                  <li>• عرض أرصدة SOL والرموز المميزة</li>
+                  <li>• إرسال واستقبال العملات الحقيقية</li>
+                  <li>• Airdrop مجاني على Devnet</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-500/20 bg-blue-500/5">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-2">
+                <h3 className="font-semibold text-blue-600 arabic-text">🚀 قريباً</h3>
+                <ul className="text-sm text-muted-foreground space-y-1 arabic-text">
+                  <li>• تبديل حقيقي عبر Jupiter</li>
+                  <li>• نظام المكافآت والـ Airdrops</li>
+                  <li>• دعم شبكة Solana الرئيسية</li>
+                  <li>• ميزات DeFi متقدمة</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      <AddTokenDialog 
+        open={showAddToken} 
         onOpenChange={setShowAddToken}
-        wallet={connectedWallet}
+        wallet={null}
         onTokenAdded={(token) => {
           const updatedTokens = [...customTokens, token];
           setCustomTokens(updatedTokens);
@@ -188,6 +126,14 @@ const WalletPage = () => {
           setShowAddToken(false);
         }}
       />
+
+      <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
+        <SolanaTokenTransfer 
+          open={showSolanaTransfer}
+          onOpenChange={setShowSolanaTransfer}
+          token={selectedSolanaToken}
+        />
+      </SolanaWalletProvider>
     </div>
   );
 };
