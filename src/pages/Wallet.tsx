@@ -4,6 +4,7 @@ import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
 import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Gift, TrendingUp, Zap } from 'lucide-react';
@@ -61,6 +62,17 @@ const WalletPage = () => {
         </header>
 
         <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
+          {/* زر الاتصال بالمحفظة */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>اتصال المحفظة</CardTitle>
+              <CardDescription>اتصل بمحفظة Phantom الخاصة بك</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center">
+              <WalletMultiButton className="!bg-primary hover:!bg-primary/90 !text-primary-foreground !border-0 !rounded-lg !px-6 !py-3 !text-base !font-medium !transition-colors" />
+            </CardContent>
+          </Card>
+
           {/* إحصائيات المحفظة */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
