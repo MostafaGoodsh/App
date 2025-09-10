@@ -26,7 +26,15 @@ export const SolanaWalletProvider = ({
 
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter(),
+      new PhantomWalletAdapter({
+        // Force deep linking to the Phantom app
+        config: {
+          options: {
+            preferredWalletType: 'phantom',
+            requiresChain: false
+          }
+        }
+      }),
       new SolflareWalletAdapter(),
     ],
     []
