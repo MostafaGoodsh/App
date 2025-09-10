@@ -27,7 +27,6 @@ export const SolanaWalletProvider = ({
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
     ],
     []
   );
