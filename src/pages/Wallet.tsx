@@ -1,15 +1,52 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SolanaWalletProvider } from "@/components/wallet/SolanaWalletProvider";
-import { SolanaWalletCard } from "@/components/wallet/SolanaWalletCard";
-import { SolanaTokenTransfer } from "@/components/wallet/SolanaTokenTransfer";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState, useEffect } from 'react';
+import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
+import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
+import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
+import { useSolanaWallet } from '@/hooks/useSolanaWallet';
+import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Coins, Gift, TrendingUp, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 const WalletPage = () => {
-  const { toast } = useToast();
   const [showSolanaTransfer, setShowSolanaTransfer] = useState(false);
   const [selectedSolanaToken, setSelectedSolanaToken] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const { requestAirdrop } = useSolanaWallet();
+  const { walletData, addAirdropReward, getTransactionHistory } = useSolanaWalletData();
+
+  const handleAirdrop = async () => {
+    try {
+      toast.loading('جاري طلب Airdrop...');
+      const signature = await requestAirdrop(1);
+      
+      if (signature) {
+        // إضافة مكافأة في قاعدة البيانات
+        await addAirdropReward(1);
+        toast.success('تم إرسال 1 SOL بنجاح!');
+        
+        // تحديث قائمة المعاملات
+        const updatedTransactions = await getTransactionHistory();
+        setTransactions(updatedTransactions);
+      }
+    } catch (error) {
+      console.error('Airdrop error:', error);
+      toast.error('فشل في طلب Airdrop');
+    }
+  };
+
+  const loadTransactions = async () => {
+    const txHistory = await getTransactionHistory();
+    setTransactions(txHistory);
+  };
+
+  useEffect(() => {
+    if (walletData) {
+      loadTransactions();
+    }
+  }, [walletData]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
@@ -24,50 +61,109 @@ const WalletPage = () => {
         </header>
 
         <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
+          {/* إحصائيات المحفظة */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">الرصيد الحالي</CardTitle>
+                <Coins className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{walletData?.balance || 0} SOL</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">إجمالي المعاملات</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{transactions.length}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">حالة الشبكة</CardTitle>
+                <Zap className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">Devnet</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* محفظة Solana */}
           <SolanaWalletCard 
             onSendToken={(token) => {
               setSelectedSolanaToken(token);
               setShowSolanaTransfer(true);
             }}
           />
-        </SolanaWalletProvider>
 
-        {/* Next Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="border-green-500/20 bg-green-500/5">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-2">
-                <h3 className="font-semibold text-green-600 arabic-text">✅ تم الاتصال بنجاح</h3>
-                <p className="text-sm text-muted-foreground arabic-text">
-                  الآن يمكنك استقبال الرموز وإرسالها
-                </p>
+          {/* الإجراءات السريعة */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>الإجراءات السريعة</CardTitle>
+              <CardDescription>إجراءات سريعة لإدارة محفظتك</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button onClick={handleAirdrop} className="w-full" size="lg">
+                  <Gift className="mr-2 h-4 w-4" />
+                  طلب Airdrop (1 SOL)
+                </Button>
+                <Button 
+                  onClick={() => setShowSolanaTransfer(true)} 
+                  variant="outline" 
+                  className="w-full" 
+                  size="lg"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  إرسال SOL
+                </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-blue-500/20 bg-blue-500/5">
-            <CardHeader>
-              <CardTitle className="text-blue-600 arabic-text text-center">🚀 الخطوات التالية</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-muted-foreground space-y-2 arabic-text">
-                <li>• 💰 احصل على SOL مجاني من الـ Airdrop</li>
-                <li>• 📤 جرب إرسال SOL لعنوان آخر</li>
-                <li>• 🎯 إنشاء نظام المكافآت للمستخدمين</li>
-                <li>• 🔄 ربط المعاملات بقاعدة البيانات</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+          {/* تاريخ المعاملات */}
+          {transactions.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>تاريخ المعاملات</CardTitle>
+                <CardDescription>آخر المعاملات المنفذة</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {transactions.slice(0, 5).map((tx, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <div className="font-medium">{tx.transaction_type}</div>
+                        <div className="text-sm text-muted-foreground">{tx.description}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-green-600">+{tx.amount} SOL</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(tx.created_at).toLocaleDateString('ar-SA')}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </SolanaWalletProvider>
 
-      <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
-        <SolanaTokenTransfer 
-          open={showSolanaTransfer}
-          onOpenChange={setShowSolanaTransfer}
-          token={selectedSolanaToken}
-        />
-      </SolanaWalletProvider>
+        <SolanaWalletProvider network={WalletAdapterNetwork.Devnet}>
+          <SolanaTokenTransfer 
+            open={showSolanaTransfer}
+            onOpenChange={setShowSolanaTransfer}
+            token={selectedSolanaToken}
+          />
+        </SolanaWalletProvider>
+      </div>
     </div>
   );
 };

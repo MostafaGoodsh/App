@@ -54,7 +54,7 @@ const App = () => {
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Index />} />
                   <Route path="auth" element={<Auth />} />
-                  <Route path="wallet" element={<Wallet />} />
+                  <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
