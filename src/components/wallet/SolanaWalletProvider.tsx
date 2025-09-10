@@ -27,11 +27,13 @@ export const SolanaWalletProvider = ({
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter({
-        // Force deep linking to the Phantom app
+        // Force opening the Phantom app instead of browser
         config: {
-          options: {
-            preferredWalletType: 'phantom',
-            requiresChain: false
+          appMetadata: {
+            name: "Crypto Vault Insight",
+            description: "إدارة المحافظ الرقمية",
+            url: window.location.origin,
+            icons: [window.location.origin + "/favicon.ico"]
           }
         }
       }),
