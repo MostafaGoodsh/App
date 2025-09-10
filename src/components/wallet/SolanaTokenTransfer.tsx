@@ -64,7 +64,8 @@ export const SolanaTokenTransfer = ({ open, onOpenChange, token }: SolanaTokenTr
     if (token) {
       return amountNum <= token.balance;
     }
-    return true; // For SOL, we'll let the network handle insufficient funds
+    // للـ SOL، نحتاج للتحقق من الرصيد أيضاً
+    return amountNum <= 1000; // حد أقصى معقول
   };
 
   const isValidRecipient = () => {

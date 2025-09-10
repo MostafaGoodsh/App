@@ -39,12 +39,22 @@ export const useSolanaWallet = () => {
 
   // Send SOL
   const sendSol = useCallback(async (toAddress: string, amount: number) => {
-    if (!publicKey || !connected || !signTransaction) {
+    if (!publicKey || !connected || !sendTransaction) {
       throw new Error('المحفظة غير متصلة');
     }
 
     try {
+      // التحقق من الرصيد أولاً
+      const balance = await connection.getBalance(publicKey);
+      const balanceInSol = balance / LAMPORTS_PER_SOL;
+      
+      if (balanceInSol < amount) {
+        throw new Error(`الرصيد غير كافي. الرصيد الحالي: ${balanceInSol.toFixed(4)} SOL`);
+      }
+
       const toPubkey = new PublicKey(toAddress);
+      
+      // إنشاء المعاملة
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
@@ -53,7 +63,14 @@ export const useSolanaWallet = () => {
         })
       );
 
+      // الحصول على أحدث blockhash
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = publicKey;
+
       const signature = await sendTransaction(transaction, connection);
+      
+      // انتظار التأكيد
       await connection.confirmTransaction(signature, 'confirmed');
       
       toast({
@@ -62,16 +79,26 @@ export const useSolanaWallet = () => {
       });
 
       return signature;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending SOL:', error);
+      
+      let errorMessage = "فشل في إرسال SOL";
+      if (error.message?.includes('insufficient funds')) {
+        errorMessage = "الرصيد غير كافي لإتمام المعاملة";
+      } else if (error.message?.includes('الرصيد غير كافي')) {
+        errorMessage = error.message;
+      } else if (error.message?.includes('Invalid public key')) {
+        errorMessage = "عنوان المحفظة غير صحيح";
+      }
+      
       toast({
         title: "خطأ في الإرسال",
-        description: "فشل في إرسال SOL",
+        description: errorMessage,
         variant: "destructive"
       });
       throw error;
     }
-  }, [publicKey, connected, signTransaction, sendTransaction, connection, toast]);
+  }, [publicKey, connected, sendTransaction, connection, toast]);
 
   // Send SPL Token
   const sendToken = useCallback(async (toAddress: string, tokenMint: string, amount: number, decimals: number = 9) => {
