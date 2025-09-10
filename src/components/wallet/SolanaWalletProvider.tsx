@@ -26,17 +26,7 @@ export const SolanaWalletProvider = ({
 
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter({
-        // Force opening the Phantom app instead of browser
-        config: {
-          appMetadata: {
-            name: "Crypto Vault Insight",
-            description: "إدارة المحافظ الرقمية",
-            url: window.location.origin,
-            icons: [window.location.origin + "/favicon.ico"]
-          }
-        }
-      }),
+      new PhantomWalletAdapter(),
       new SolflareWalletAdapter(),
     ],
     []
