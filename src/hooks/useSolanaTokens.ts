@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import React from 'react';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,6 +168,24 @@ export const useSolanaTokens = () => {
       throw error;
     }
   }, [connection]);
+
+  // Listen for conversion events to auto-refresh tokens
+  const handleConversionCompleted = useCallback(async (event: CustomEvent) => {
+    const { walletAddress } = event.detail;
+    // Refresh token accounts after a successful conversion
+    if (walletAddress) {
+      setTimeout(() => {
+        fetchTokenAccounts(walletAddress);
+      }, 2000); // Wait 2 seconds to ensure blockchain state is updated
+    }
+  }, [fetchTokenAccounts]);
+
+  React.useEffect(() => {
+    window.addEventListener('tokenConversionCompleted', handleConversionCompleted as EventListener);
+    return () => {
+      window.removeEventListener('tokenConversionCompleted', handleConversionCompleted as EventListener);
+    };
+  }, [handleConversionCompleted]);
 
   return {
     tokens,

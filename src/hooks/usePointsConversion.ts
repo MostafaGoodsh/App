@@ -161,6 +161,15 @@ export const usePointsConversion = () => {
         getConversions()
       ]);
 
+      // Trigger token refresh in wallet
+      window.dispatchEvent(new CustomEvent('tokenConversionCompleted', {
+        detail: {
+          mintAddress: response.data.data.token_mint,
+          tokenAmount: response.data.data.tokens_received,
+          walletAddress: walletAddress
+        }
+      }));
+
       return response.data.data;
 
     } catch (error: any) {
