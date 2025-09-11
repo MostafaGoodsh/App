@@ -137,8 +137,7 @@ serve(async (req) => {
     // Connect to Solana Devnet
     const connection = new Connection('https://api.devnet.solana.com', 'confirmed')
     
-    // For demo purposes, we'll use a keypair for the mint authority
-    // In production, this should be securely managed
+    // Generate a keypair for the mint authority
     const mintAuthority = Keypair.generate()
     
     console.log('Generated mint authority:', mintAuthority.publicKey.toString())
@@ -153,12 +152,10 @@ serve(async (req) => {
       // Continue anyway, might have enough SOL already
     }
 
-    // Create or get token mint
+    // Create token mint
     let tokenMint: PublicKey
     
     try {
-      // For demo, create a new mint each time
-      // In production, you'd want to reuse the same mint
       tokenMint = await createMint(
         connection,
         mintAuthority,
@@ -187,58 +184,75 @@ serve(async (req) => {
     console.log('User token account:', userTokenAccount.address.toString())
 
     // Mint tokens to user
-    const mintAmount = token_amount * Math.pow(10, settings.token_decimals || 9)
+    const mintAmount = BigInt(Math.floor(token_amount * Math.pow(10, settings.token_decimals || 9)))
     
-    const mintTx = await mintTo(
-      connection,
-      mintAuthority,
-      tokenMint,
-      userTokenAccount.address,
-      mintAuthority.publicKey,
-      mintAmount
-    )
+    console.log('Minting amount:', mintAmount.toString(), 'to account:', userTokenAccount.address.toString())
+    
+    try {
+      const mintTx = await mintTo(
+        connection,
+        mintAuthority,
+        tokenMint,
+        userTokenAccount.address,
+        mintAuthority,
+        mintAmount
+      )
 
-    console.log('Minted tokens, transaction signature:', mintTx)
+      console.log('Minted tokens, transaction signature:', mintTx)
 
-    // Update conversion record as completed
-    const { error: updateError } = await supabase
-      .from('point_to_token_conversions')
-      .update({
-        status: 'completed',
-        token_mint_address: tokenMint.toString(),
-        transaction_signature: mintTx,
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', conversion.id)
-
-    if (updateError) {
-      console.error('Error updating conversion record:', updateError)
-      // Don't throw here as the tokens were already minted
-    }
-
-    // Update user points balance
-    await supabase.rpc('update_user_points_balance', { p_user_id: user.id })
-
-    console.log('Conversion completed successfully')
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Points converted to tokens successfully',
-        data: {
-          conversion_id: conversion.id,
-          points_converted: points_amount,
-          tokens_received: token_amount,
-          token_mint: tokenMint.toString(),
+      // Update conversion record as completed
+      const { error: updateError } = await supabase
+        .from('point_to_token_conversions')
+        .update({
+          status: 'completed',
+          token_mint_address: tokenMint.toString(),
           transaction_signature: mintTx,
-          token_account: userTokenAccount.address.toString()
-        }
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', conversion.id)
+
+      if (updateError) {
+        console.error('Error updating conversion record:', updateError)
+        // Don't throw here as the tokens were already minted
       }
-    )
+
+      // Update user points balance
+      await supabase.rpc('update_user_points_balance', { p_user_id: user.id })
+
+      console.log('Conversion completed successfully')
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Points converted to tokens successfully',
+          data: {
+            conversion_id: conversion.id,
+            points_converted: points_amount,
+            tokens_received: token_amount,
+            token_mint: tokenMint.toString(),
+            transaction_signature: mintTx,
+            token_account: userTokenAccount.address.toString()
+          }
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      )
+
+    } catch (mintError) {
+      console.error('Error minting tokens:', mintError)
+      
+      // Update conversion record as failed
+      await supabase
+        .from('point_to_token_conversions')
+        .update({
+          status: 'failed'
+        })
+        .eq('id', conversion.id)
+      
+      throw new Error('Failed to mint tokens to user account')
+    }
 
   } catch (error) {
     console.error('Conversion error:', error)
