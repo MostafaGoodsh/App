@@ -3,6 +3,7 @@ import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
 import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
 import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
 import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
+import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -128,6 +129,9 @@ const WalletContent = () => {
         <TabsContent value="conversion" className="space-y-6">
           {/* تحويل النقاط إلى العملات */}
           <PointsToTokensConverter />
+          
+          {/* العملات المحولة */}
+          <ConvertedTokensList />
         </TabsContent>
 
         <TabsContent value="actions" className="space-y-6">

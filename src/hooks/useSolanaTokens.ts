@@ -15,7 +15,7 @@ export const useSolanaTokens = () => {
   const [tokens, setTokens] = useState<SolanaToken[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const connection = new Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
   const fetchTokenAccounts = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
