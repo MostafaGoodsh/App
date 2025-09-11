@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface SolanaToken {
   mintAddress: string;
@@ -9,13 +11,55 @@ export interface SolanaToken {
   balance: string;
   decimals: number;
   logoUri?: string;
+  isConverted?: boolean; // Flag for converted tokens
+  conversionId?: string; // Reference to conversion record
 }
 
 export const useSolanaTokens = () => {
+  const { user } = useAuth();
   const [tokens, setTokens] = useState<SolanaToken[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+
+  // Fetch converted tokens from database
+  const fetchConvertedTokens = useCallback(async () => {
+    if (!user) return [];
+    
+    try {
+      // Get conversion settings for token info
+      const { data: settingsData } = await supabase
+        .from('conversion_settings')
+        .select('*')
+        .eq('is_active', true)
+        .single();
+
+      // Get user's completed conversions
+      const { data: conversions, error } = await supabase
+        .from('point_to_token_conversions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const convertedTokens: SolanaToken[] = (conversions || []).map(conversion => ({
+        mintAddress: conversion.token_mint_address || 'converted-token',
+        symbol: settingsData?.token_symbol || 'MSRA',
+        name: settingsData?.token_name || 'MsRa DevNet Token',
+        balance: conversion.token_amount.toString(),
+        decimals: settingsData?.token_decimals || 9,
+        isConverted: true,
+        conversionId: conversion.id
+      }));
+
+      return convertedTokens;
+    } catch (error) {
+      console.error('Error fetching converted tokens:', error);
+      return [];
+    }
+  }, [user]);
 
   const fetchTokenAccounts = useCallback(async (walletAddress: string) => {
     setIsLoading(true);
@@ -30,6 +74,7 @@ export const useSolanaTokens = () => {
 
       const tokenList: SolanaToken[] = [];
 
+      // Process regular SPL tokens
       for (const tokenAccount of tokenAccounts.value) {
         const tokenInfo = tokenAccount.account.data.parsed.info;
         const mintAddress = tokenInfo.mint;
@@ -47,7 +92,8 @@ export const useSolanaTokens = () => {
               name: tokenMetadata?.name || 'Unknown Token',
               balance: balance.toString(),
               decimals: tokenInfo.tokenAmount.decimals,
-              logoUri: tokenMetadata?.logoUri
+              logoUri: tokenMetadata?.logoUri,
+              isConverted: false
             });
           } catch (error) {
             console.error('Error fetching token metadata:', error);
@@ -57,21 +103,28 @@ export const useSolanaTokens = () => {
               symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
               name: 'Unknown Token',
               balance: balance.toString(),
-              decimals: tokenInfo.tokenAmount.decimals
+              decimals: tokenInfo.tokenAmount.decimals,
+              isConverted: false
             });
           }
         }
       }
 
-      setTokens(tokenList);
-      return tokenList;
+      // Add converted tokens from database
+      const convertedTokens = await fetchConvertedTokens();
+      
+      // Combine both types of tokens
+      const allTokens = [...tokenList, ...convertedTokens];
+      
+      setTokens(allTokens);
+      return allTokens;
     } catch (error) {
       console.error('Error fetching token accounts:', error);
       return [];
     } finally {
       setIsLoading(false);
     }
-  }, [connection]);
+  }, [connection, fetchConvertedTokens]);
 
   const addCustomToken = useCallback(async (mintAddress: string, walletAddress: string) => {
     try {
@@ -119,7 +172,8 @@ export const useSolanaTokens = () => {
     tokens,
     isLoading,
     fetchTokenAccounts,
-    addCustomToken
+    addCustomToken,
+    fetchConvertedTokens
   };
 };
 

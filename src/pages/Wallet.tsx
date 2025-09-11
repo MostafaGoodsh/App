@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
 import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
 import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
+import { SolanaTokenList } from '@/components/wallet/SolanaTokenList';
 import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
@@ -124,14 +125,31 @@ const WalletContent = () => {
               setShowSolanaTransfer(true);
             }}
           />
+          
+          {/* قائمة العملات */}
+          {walletData && (
+            <SolanaTokenList 
+              wallet={{
+                id: '1',
+                address: walletData.publicKey?.toString() || '',
+                network: 'solana',
+                type: 'WalletConnect',
+                balance: walletData.balance?.toString() || '0',
+                currency: 'SOL',
+                name: 'Phantom Wallet',
+                chainId: 101 // Solana mainnet chainId
+              }}
+              onSendToken={(token) => {
+                setSelectedSolanaToken(token);
+                setShowSolanaTransfer(true);
+              }}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="conversion" className="space-y-6">
           {/* تحويل النقاط إلى العملات */}
           <PointsToTokensConverter />
-          
-          {/* العملات المحولة */}
-          <ConvertedTokensList />
         </TabsContent>
 
         <TabsContent value="actions" className="space-y-6">

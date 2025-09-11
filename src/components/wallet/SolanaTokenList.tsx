@@ -9,14 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useSolanaTokens, SolanaToken } from "@/hooks/useSolanaTokens";
 import { ConnectedWallet } from "@/hooks/useWalletConnect";
 import { 
-  Coins, Plus, RefreshCw, ExternalLink, Copy
+  Coins, Plus, RefreshCw, ExternalLink, Copy, Send, ArrowUpDown
 } from "lucide-react";
 
 interface SolanaTokenListProps {
   wallet: ConnectedWallet;
+  onSendToken?: (token: SolanaToken) => void;
 }
 
-export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
+export const SolanaTokenList = ({ wallet, onSendToken }: SolanaTokenListProps) => {
   const { toast } = useToast();
   const { tokens, isLoading, fetchTokenAccounts, addCustomToken } = useSolanaTokens();
   const [addTokenDialog, setAddTokenDialog] = useState(false);
@@ -83,7 +84,7 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins className="w-5 h-5" />
-            العملات SPL ({tokens.length})
+            العملات ({tokens.length})
           </div>
           <div className="flex gap-2">
             <Button
@@ -141,7 +142,7 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
           </div>
         </CardTitle>
         <CardDescription>
-          عملات SPL المحفوظة في محفظة {wallet.name || wallet.type}
+          عملات Solana وعملاتك المحولة في محفظة {wallet.name || wallet.type}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -168,12 +169,21 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
                       }}
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                      <Coins className="w-4 h-4" />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      token.isConverted ? 'bg-primary/10' : 'bg-muted'
+                    }`}>
+                      <Coins className={`w-4 h-4 ${token.isConverted ? 'text-primary' : ''}`} />
                     </div>
                   )}
                   <div>
-                    <p className="font-medium">{token.symbol}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{token.symbol}</p>
+                      {token.isConverted && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                          محول
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{token.name}</p>
                   </div>
                 </div>
@@ -187,22 +197,52 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
                   </div>
                   
                   <div className="flex gap-1">
+                    {/* Send/Transfer button */}
+                    {onSendToken && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onSendToken(token)}
+                        className="h-8 w-8 p-0"
+                        title="إرسال العملة"
+                      >
+                        <Send className="h-3 w-3" />
+                      </Button>
+                    )}
+                    
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => copyAddress(token.mintAddress)}
                       className="h-8 w-8 p-0"
+                      title="نسخ العنوان"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => openSolscan(token.mintAddress)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                    </Button>
+                    
+                    {!token.isConverted && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => openSolscan(token.mintAddress)}
+                        className="h-8 w-8 p-0"
+                        title="عرض في Solscan"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    )}
+                    
+                    {token.isConverted && token.mintAddress !== 'converted-token' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => openSolscan(token.mintAddress)}
+                        className="h-8 w-8 p-0"
+                        title="عرض في Solscan"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -211,8 +251,8 @@ export const SolanaTokenList = ({ wallet }: SolanaTokenListProps) => {
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Coins className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm mb-2">لا توجد عملات SPL</p>
-            <p className="text-xs">قم بإضافة عملة مخصصة أو احصل على عملات SPL أولاً</p>
+            <p className="text-sm mb-2">لا توجد عملات</p>
+            <p className="text-xs">قم بإضافة عملة مخصصة أو احصل على عملات أولاً</p>
           </div>
         )}
       </CardContent>
