@@ -22,6 +22,8 @@ import { ProfileEditForm } from '@/components/profile/ProfileEditForm';
 import { PrivacySettingsDialog } from '@/components/profile/PrivacySettingsDialog';
 import { SecuritySettingsDialog } from '@/components/profile/SecuritySettingsDialog';
 import { NotificationSettingsDialog } from '@/components/profile/NotificationSettingsDialog';
+import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
+import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
 
 export default function Profile() {
   const { profile, loading } = useProfile();
@@ -102,6 +104,12 @@ export default function Profile() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Account Stats and Engagement */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AccountStatsCard />
+            <EngagementStatsCard />
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle className="arabic-text text-right">معلومات الملف الشخصي</CardTitle>

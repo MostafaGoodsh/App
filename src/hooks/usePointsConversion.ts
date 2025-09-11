@@ -73,6 +73,12 @@ export const usePointsConversion = () => {
 
       if (error) throw error;
       setPointsBalance(data as unknown as PointsBalance);
+      
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('pointsBalanceUpdated', {
+        detail: data
+      }));
+      
       return data as unknown as PointsBalance;
     } catch (error) {
       console.error('Error fetching points balance:', error);

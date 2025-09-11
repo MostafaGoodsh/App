@@ -263,6 +263,17 @@ export const useEngagementStats = () => {
     }
   }, [user]);
 
+  // Auto-refresh engagement stats every 5 minutes
+  useEffect(() => {
+    if (!user) return;
+    
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 300000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, [user, fetchStats]);
+
   return {
     stats,
     dailyTasks,
