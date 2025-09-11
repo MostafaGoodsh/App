@@ -11,6 +11,7 @@ import { TransactionHistory } from "./TransactionHistory";
 import { NetworkSwitcher } from "./NetworkSwitcher";
 import { CurrencyExchange } from "./CurrencyExchange";
 import { SolanaTokenList } from "./SolanaTokenList";
+import { PointsToTokensConverter } from "./PointsToTokensConverter";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -210,6 +211,7 @@ export const WalletDashboard = ({
 
                 <TabsContent value="tokens" className="space-y-4">
                   <SolanaTokenList wallet={selectedWallet} />
+                  <PointsToTokensConverter />
                 </TabsContent>
 
                 <TabsContent value="exchange" className="space-y-4">

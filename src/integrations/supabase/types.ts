@@ -101,6 +101,48 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_settings: {
+        Row: {
+          created_at: string
+          daily_conversion_limit: number
+          id: string
+          is_active: boolean
+          maximum_conversion_points: number
+          minimum_conversion_points: number
+          points_to_token_rate: number
+          token_decimals: number
+          token_name: string
+          token_symbol: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_conversion_limit?: number
+          id?: string
+          is_active?: boolean
+          maximum_conversion_points?: number
+          minimum_conversion_points?: number
+          points_to_token_rate?: number
+          token_decimals?: number
+          token_name?: string
+          token_symbol?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_conversion_limit?: number
+          id?: string
+          is_active?: boolean
+          maximum_conversion_points?: number
+          minimum_conversion_points?: number
+          points_to_token_rate?: number
+          token_decimals?: number
+          token_name?: string
+          token_symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crypto_addresses: {
         Row: {
           address: string
@@ -693,6 +735,45 @@ export type Database = {
         }
         Relationships: []
       }
+      point_to_token_conversions: {
+        Row: {
+          completed_at: string | null
+          conversion_rate: number
+          created_at: string
+          id: string
+          points_amount: number
+          status: string
+          token_amount: number
+          token_mint_address: string | null
+          transaction_signature: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          conversion_rate?: number
+          created_at?: string
+          id?: string
+          points_amount: number
+          status?: string
+          token_amount: number
+          token_mint_address?: string | null
+          transaction_signature?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          conversion_rate?: number
+          created_at?: string
+          id?: string
+          points_amount?: number
+          status?: string
+          token_amount?: number
+          token_mint_address?: string | null
+          transaction_signature?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1221,6 +1302,33 @@ export type Database = {
           },
         ]
       }
+      user_points_balance: {
+        Row: {
+          available_points: number
+          converted_points: number
+          id: string
+          last_updated: string
+          total_points: number
+          user_id: string
+        }
+        Insert: {
+          available_points?: number
+          converted_points?: number
+          id?: string
+          last_updated?: string
+          total_points?: number
+          user_id: string
+        }
+        Update: {
+          available_points?: number
+          converted_points?: number
+          id?: string
+          last_updated?: string
+          total_points?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           completed_at: string | null
@@ -1519,6 +1627,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      calculate_user_points: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       complete_daily_task: {
         Args: { p_task_id: string }
         Returns: Json
@@ -1634,6 +1746,10 @@ export type Database = {
         Returns: Json
       }
       update_user_engagement_stats: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      update_user_points_balance: {
         Args: { p_user_id: string }
         Returns: Json
       }
