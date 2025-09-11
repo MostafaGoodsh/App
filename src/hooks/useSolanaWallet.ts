@@ -48,30 +48,48 @@ export const useSolanaWallet = () => {
       const balance = await connection.getBalance(publicKey);
       const balanceInSol = balance / LAMPORTS_PER_SOL;
       
-      if (balanceInSol < amount) {
-        throw new Error(`الرصيد غير كافي. الرصيد الحالي: ${balanceInSol.toFixed(4)} SOL`);
+      // ترك مساحة لرسوم الشبكة (0.000005 SOL)
+      const networkFee = 0.000005;
+      if (balanceInSol < (amount + networkFee)) {
+        throw new Error(`الرصيد غير كافي. الرصيد الحالي: ${balanceInSol.toFixed(6)} SOL، مطلوب: ${(amount + networkFee).toFixed(6)} SOL`);
       }
 
       const toPubkey = new PublicKey(toAddress);
       
       // إنشاء المعاملة
-      const transaction = new Transaction().add(
+      const transaction = new Transaction();
+      
+      // الحصول على أحدث blockhash
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = publicKey;
+      
+      // إضافة تعليمة التحويل
+      transaction.add(
         SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey,
-          lamports: amount * LAMPORTS_PER_SOL,
+          lamports: Math.floor(amount * LAMPORTS_PER_SOL),
         })
       );
 
-      // الحصول على أحدث blockhash
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = publicKey;
-
-      const signature = await sendTransaction(transaction, connection);
+      // إرسال المعاملة مع خيارات إضافية
+      const signature = await sendTransaction(transaction, connection, {
+        maxRetries: 3,
+        preflightCommitment: 'processed',
+        skipPreflight: false,
+      });
       
-      // انتظار التأكيد
-      await connection.confirmTransaction(signature, 'confirmed');
+      // انتظار التأكيد مع timeout
+      const confirmation = await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight,
+      }, 'confirmed');
+
+      if (confirmation.value.err) {
+        throw new Error('فشل في تأكيد المعاملة');
+      }
       
       toast({
         title: "تم الإرسال بنجاح",
