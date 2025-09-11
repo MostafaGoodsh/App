@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,13 +37,15 @@ export const useSolanaWallet = () => {
     }
   }, [connection, publicKey, connected]);
 
-  // Send SOL
+  // Send SOL - Alternative method using signTransaction instead of sendTransaction
   const sendSol = useCallback(async (toAddress: string, amount: number) => {
-    if (!publicKey || !connected || !sendTransaction) {
+    if (!publicKey || !connected || !signTransaction) {
       throw new Error('المحفظة غير متصلة');
     }
 
     try {
+      console.log('Starting SOL transfer...', { toAddress, amount });
+      
       // التحقق من الرصيد أولاً
       const balance = await connection.getBalance(publicKey);
       const balanceInSol = balance / LAMPORTS_PER_SOL;
@@ -55,14 +57,17 @@ export const useSolanaWallet = () => {
       }
 
       const toPubkey = new PublicKey(toAddress);
+      console.log('Target public key:', toPubkey.toString());
       
       // إنشاء المعاملة
       const transaction = new Transaction();
       
       // الحصول على أحدث blockhash
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = publicKey;
+      
+      console.log('Transaction setup:', { blockhash, feePayer: publicKey.toString() });
       
       // إضافة تعليمة التحويل
       transaction.add(
@@ -73,22 +78,32 @@ export const useSolanaWallet = () => {
         })
       );
 
-      // إرسال المعاملة مع خيارات إضافية
-      const signature = await sendTransaction(transaction, connection, {
+      console.log('Transaction instruction added, signing...');
+
+      // توقيع المعاملة باستخدام المحفظة
+      const signedTransaction = await signTransaction(transaction);
+      console.log('Transaction signed, sending...');
+      
+      // إرسال المعاملة الموقعة
+      const signature = await connection.sendRawTransaction(signedTransaction.serialize(), {
         maxRetries: 3,
-        preflightCommitment: 'processed',
+        preflightCommitment: 'confirmed',
         skipPreflight: false,
       });
       
-      // انتظار التأكيد مع timeout
+      console.log('Transaction sent, signature:', signature);
+      
+      // انتظار التأكيد
       const confirmation = await connection.confirmTransaction({
         signature,
         blockhash,
         lastValidBlockHeight,
       }, 'confirmed');
 
+      console.log('Transaction confirmation:', confirmation);
+
       if (confirmation.value.err) {
-        throw new Error('فشل في تأكيد المعاملة');
+        throw new Error('فشل في تأكيد المعاملة: ' + JSON.stringify(confirmation.value.err));
       }
       
       toast({
@@ -107,6 +122,10 @@ export const useSolanaWallet = () => {
         errorMessage = error.message;
       } else if (error.message?.includes('Invalid public key')) {
         errorMessage = "عنوان المحفظة غير صحيح";
+      } else if (error.message?.includes('User rejected')) {
+        errorMessage = "تم إلغاء المعاملة من قبل المستخدم";
+      } else if (error.message?.includes('Signature verification failed')) {
+        errorMessage = "فشل في التحقق من التوقيع - يرجى المحاولة مرة أخرى";
       }
       
       toast({
@@ -116,7 +135,7 @@ export const useSolanaWallet = () => {
       });
       throw error;
     }
-  }, [publicKey, connected, sendTransaction, connection, toast]);
+  }, [publicKey, connected, signTransaction, connection, toast]);
 
   // Send SPL Token
   const sendToken = useCallback(async (toAddress: string, tokenMint: string, amount: number, decimals: number = 9) => {
