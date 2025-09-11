@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
 import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
 import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
+import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Gift, TrendingUp, Zap } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Coins, Gift, TrendingUp, Zap, ArrowLeftRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
@@ -96,38 +98,65 @@ const WalletContent = () => {
         </Card>
       </div>
 
-      {/* محفظة Solana */}
-      <SolanaWalletCard 
-        onSendToken={(token) => {
-          setSelectedSolanaToken(token);
-          setShowSolanaTransfer(true);
-        }}
-      />
+      {/* التبويبات الرئيسية */}
+      <Tabs defaultValue="wallet" className="mb-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="wallet" className="flex items-center gap-2">
+            <Coins className="w-4 h-4" />
+            المحفظة
+          </TabsTrigger>
+          <TabsTrigger value="conversion" className="flex items-center gap-2">
+            <ArrowLeftRight className="w-4 h-4" />
+            تحويل النقاط
+          </TabsTrigger>
+          <TabsTrigger value="actions" className="flex items-center gap-2">
+            <Zap className="w-4 h-4" />
+            الإجراءات السريعة
+          </TabsTrigger>
+        </TabsList>
 
-      {/* الإجراءات السريعة */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>الإجراءات السريعة</CardTitle>
-          <CardDescription>إجراءات سريعة لإدارة محفظتك</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button onClick={handleAirdrop} className="w-full" size="lg">
-              <Gift className="mr-2 h-4 w-4" />
-              طلب Airdrop (1 SOL)
-            </Button>
-            <Button 
-              onClick={() => setShowSolanaTransfer(true)} 
-              variant="outline" 
-              className="w-full" 
-              size="lg"
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              إرسال SOL
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="wallet" className="space-y-6">
+          {/* محفظة Solana */}
+          <SolanaWalletCard 
+            onSendToken={(token) => {
+              setSelectedSolanaToken(token);
+              setShowSolanaTransfer(true);
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="conversion" className="space-y-6">
+          {/* تحويل النقاط إلى العملات */}
+          <PointsToTokensConverter />
+        </TabsContent>
+
+        <TabsContent value="actions" className="space-y-6">
+          {/* الإجراءات السريعة */}
+          <Card>
+            <CardHeader>
+              <CardTitle>الإجراءات السريعة</CardTitle>
+              <CardDescription>إجراءات سريعة لإدارة محفظتك</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button onClick={handleAirdrop} className="w-full" size="lg">
+                  <Gift className="mr-2 h-4 w-4" />
+                  طلب Airdrop (1 SOL)
+                </Button>
+                <Button 
+                  onClick={() => setShowSolanaTransfer(true)} 
+                  variant="outline" 
+                  className="w-full" 
+                  size="lg"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  إرسال SOL
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* تاريخ المعاملات */}
       {transactions.length > 0 && (
