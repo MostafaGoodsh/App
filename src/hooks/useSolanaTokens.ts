@@ -35,26 +35,30 @@ export const useSolanaTokens = () => {
         .eq('is_active', true)
         .single();
 
-      // Get user's completed conversions
+      // Get user's completed conversions with valid mint addresses
       const { data: conversions, error } = await supabase
         .from('point_to_token_conversions')
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'completed')
+        .not('token_mint_address', 'is', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const convertedTokens: SolanaToken[] = (conversions || []).map(conversion => ({
-        mintAddress: conversion.token_mint_address || 'converted-token',
-        symbol: settingsData?.token_symbol || 'MSRA',
-        name: settingsData?.token_name || 'MsRa DevNet Token',
-        balance: conversion.token_amount.toString(),
-        decimals: settingsData?.token_decimals || 9,
-        isConverted: true,
-        conversionId: conversion.id
-      }));
+      const convertedTokens: SolanaToken[] = (conversions || [])
+        .filter(conversion => conversion.token_mint_address && conversion.token_mint_address !== 'converted-token')
+        .map(conversion => ({
+          mintAddress: conversion.token_mint_address,
+          symbol: settingsData?.token_symbol || 'MSRA',
+          name: settingsData?.token_name || 'MsRa DevNet Token',
+          balance: conversion.token_amount.toString(),
+          decimals: settingsData?.token_decimals || 9,
+          isConverted: true,
+          conversionId: conversion.id
+        }));
 
+      console.log('Fetched converted tokens:', convertedTokens);
       return convertedTokens;
     } catch (error) {
       console.error('Error fetching converted tokens:', error);
@@ -114,8 +118,16 @@ export const useSolanaTokens = () => {
       // Add converted tokens from database
       const convertedTokens = await fetchConvertedTokens();
       
-      // Combine both types of tokens
-      const allTokens = [...tokenList, ...convertedTokens];
+      // Merge with actual tokens (avoid duplicates)
+      const allTokens = [...tokenList];
+      
+      // Add converted tokens that don't already exist in the token list
+      convertedTokens.forEach(convertedToken => {
+        const exists = tokenList.find(t => t.mintAddress === convertedToken.mintAddress);
+        if (!exists) {
+          allTokens.push(convertedToken);
+        }
+      });
       
       setTokens(allTokens);
       return allTokens;
@@ -174,11 +186,14 @@ export const useSolanaTokens = () => {
     const { walletAddress } = event.detail;
     // Refresh token accounts after a successful conversion
     if (walletAddress) {
+      // Immediate refresh for converted tokens
+      await fetchConvertedTokens();
+      // Then full refresh after blockchain update
       setTimeout(() => {
         fetchTokenAccounts(walletAddress);
-      }, 2000); // Wait 2 seconds to ensure blockchain state is updated
+      }, 3000); // Wait 3 seconds to ensure blockchain state is updated
     }
-  }, [fetchTokenAccounts]);
+  }, [fetchTokenAccounts, fetchConvertedTokens]);
 
   React.useEffect(() => {
     window.addEventListener('tokenConversionCompleted', handleConversionCompleted as EventListener);

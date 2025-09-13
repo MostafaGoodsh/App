@@ -24,6 +24,7 @@ import { SecuritySettingsDialog } from '@/components/profile/SecuritySettingsDia
 import { NotificationSettingsDialog } from '@/components/profile/NotificationSettingsDialog';
 import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
 import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
+import { ReelsCard } from '@/components/reels/ReelsCard';
 
 export default function Profile() {
   const { profile, loading } = useProfile();
@@ -104,12 +105,6 @@ export default function Profile() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Account Stats and Engagement */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AccountStatsCard />
-            <EngagementStatsCard />
-          </div>
-
           <Card>
             <CardHeader>
               <CardTitle className="arabic-text text-right">معلومات الملف الشخصي</CardTitle>
@@ -191,6 +186,13 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Account Stats, Engagement and Reels */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <AccountStatsCard />
+            <EngagementStatsCard />
+            <ReelsCard />
+          </div>
         </TabsContent>
 
         <TabsContent value="edit">
