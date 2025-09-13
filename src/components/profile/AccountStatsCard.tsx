@@ -57,91 +57,93 @@ export function AccountStatsCard() {
   const status = getMiningStatus();
 
   return (
-    <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+    <Card className="bg-gray-900 border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg font-bold arabic-text">إحصائيات الحساب</CardTitle>
+        <CardTitle className="text-lg font-bold text-white arabic-text">إحصائيات الحساب</CardTitle>
         <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
           disabled={pointsLoading || miningLoading || statsLoading}
-          className="arabic-text"
+          className="arabic-text border-gray-600 hover:bg-gray-800 text-white"
         >
           <RefreshCw className={`w-4 h-4 ml-2 ${(pointsLoading || miningLoading || statsLoading) ? 'animate-spin' : ''}`} />
           تحديث
         </Button>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3">
         {/* Points Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-blue-800 arabic-text">إجمالي النقاط</h3>
-              <Coins className="w-4 h-4 text-blue-600" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+            <div className="flex items-center justify-end gap-2 mb-1">
+              <h3 className="text-sm font-medium text-white arabic-text">إجمالي النقاط</h3>
+              <Coins className="w-4 h-4 text-gray-300" />
             </div>
-            <div className="text-2xl font-bold text-blue-900">
+            <div className="text-lg font-bold text-white text-right">
               {pointsBalance ? formatNumber(pointsBalance.total_points) : '0'}
             </div>
-            <p className="text-xs text-blue-600 arabic-text">نقطة مكتسبة</p>
+            <p className="text-xs text-gray-400 arabic-text text-right">نقطة مكتسبة</p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-green-800 arabic-text">النقاط المتاحة</h3>
-              <Zap className="w-4 h-4 text-green-600" />
+          <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+            <div className="flex items-center justify-end gap-2 mb-1">
+              <h3 className="text-sm font-medium text-white arabic-text">النقاط المتاحة</h3>
+              <Zap className="w-4 h-4 text-gray-300" />
             </div>
-            <div className="text-2xl font-bold text-green-900">
+            <div className="text-lg font-bold text-white text-right">
               {pointsBalance ? formatNumber(pointsBalance.available_points) : '0'}
             </div>
-            <p className="text-xs text-green-600 arabic-text">قابلة للتحويل</p>
+            <p className="text-xs text-gray-400 arabic-text text-right">قابلة للتحويل</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-purple-800 arabic-text">النقاط المحولة</h3>
-              <TrendingUp className="w-4 h-4 text-purple-600" />
+          <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+            <div className="flex items-center justify-end gap-2 mb-1">
+              <h3 className="text-sm font-medium text-white arabic-text">النقاط المحولة</h3>
+              <TrendingUp className="w-4 h-4 text-gray-300" />
             </div>
-            <div className="text-2xl font-bold text-purple-900">
+            <div className="text-lg font-bold text-white text-right">
               {pointsBalance ? formatNumber(pointsBalance.converted_points) : '0'}
             </div>
-            <p className="text-xs text-purple-600 arabic-text">تم تحويلها</p>
+            <p className="text-xs text-gray-400 arabic-text text-right">تم تحويلها</p>
           </div>
         </div>
 
         {/* Account Strength & Mining */}
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+          <div className="flex items-center justify-end gap-2 mb-2">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-yellow-600" />
-              <h3 className="font-medium text-yellow-800 arabic-text">قوة الحساب</h3>
+              <h3 className="font-medium text-white arabic-text">قوة الحساب</h3>
+              <Shield className="w-4 h-4 text-gray-300" />
             </div>
             <Badge className={`${status.color} text-white text-xs`}>
               {status.text}
             </Badge>
           </div>
           
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold text-yellow-900">
+          <div className="space-y-2">
+            <div className="flex items-center justify-end gap-2">
+              <span className="text-sm text-gray-400 arabic-text">نقطة قوة</span>
+              <span className="text-lg font-bold text-white">
                 {miningProfile ? formatNumber(miningProfile.account_strength) : formatNumber(stats?.profile_completion_score || 0)}
               </span>
-              <span className="text-sm text-yellow-700 arabic-text">نقطة قوة</span>
             </div>
 
             {currentLevel && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-yellow-700 arabic-text">
-                    {nextLevel ? `المستوى التالي: ${nextLevel.level_name}` : 'المستوى الأقصى'}
-                  </span>
-                  <span className="text-yellow-600 arabic-text">
+              <div className="space-y-1">
+                <div className="flex justify-end text-sm text-right">
+                  <span className="text-gray-400 arabic-text">
                     المستوى الحالي: {currentLevel.level_name}
+                  </span>
+                </div>
+                <div className="flex justify-end text-xs text-right">
+                  <span className="text-gray-500 arabic-text">
+                    {nextLevel ? `المستوى التالي: ${nextLevel.level_name}` : 'المستوى الأقصى'}
                   </span>
                 </div>
                 {nextLevel && (
                   <Progress 
                     value={levelProgress} 
-                    className="h-2 bg-yellow-200" 
+                    className="h-1 bg-gray-700" 
                   />
                 )}
               </div>
@@ -151,18 +153,18 @@ export function AccountStatsCard() {
 
         {/* Mining Stats */}
         {miningProfile && (
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-4 border border-emerald-200">
-            <h3 className="font-medium text-emerald-800 mb-3 arabic-text">إحصائيات التعدين</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-emerald-600 arabic-text">إجمالي المُعدن</p>
-                <p className="text-lg font-bold text-emerald-900">
+          <div className="bg-gray-900 rounded-md p-3 border border-gray-700">
+            <h3 className="font-medium text-white mb-2 arabic-text text-right">إحصائيات التعدين</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-right">
+                <p className="text-sm text-gray-400 arabic-text">إجمالي المُعدن</p>
+                <p className="text-lg font-bold text-white">
                   {formatNumber(Number(miningProfile.total_mined))}
                 </p>
               </div>
-              <div>
-                <p className="text-sm text-emerald-600 arabic-text">معدل التعدين/ساعة</p>
-                <p className="text-lg font-bold text-emerald-900">
+              <div className="text-right">
+                <p className="text-sm text-gray-400 arabic-text">معدل التعدين/ساعة</p>
+                <p className="text-lg font-bold text-white">
                   {Number(miningProfile.mining_rate_per_hour).toFixed(4)}
                 </p>
               </div>
