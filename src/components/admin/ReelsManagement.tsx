@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Video, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Video, Eye, EyeOff, Upload } from 'lucide-react';
 
 interface ReelsContent {
   id: string;
@@ -44,6 +44,9 @@ export const ReelsManagement = () => {
     display_order: 0,
     is_active: true
   });
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchReelsContent();
@@ -69,15 +72,48 @@ export const ReelsManagement = () => {
     }
   };
 
+  const uploadFile = async (file: File, path: string): Promise<string> => {
+    const { data, error } = await supabase.storage
+      .from('reels-videos')
+      .upload(path, file, {
+        upsert: true
+      });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('reels-videos')
+      .getPublicUrl(data.path);
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     
     try {
+      let finalFormData = { ...formData };
+
+      // Upload video file if provided
+      if (videoFile) {
+        const videoPath = `videos/${Date.now()}-${videoFile.name}`;
+        const videoUrl = await uploadFile(videoFile, videoPath);
+        finalFormData.video_url = videoUrl;
+      }
+
+      // Upload thumbnail file if provided
+      if (thumbnailFile) {
+        const thumbnailPath = `thumbnails/${Date.now()}-${thumbnailFile.name}`;
+        const thumbnailUrl = await uploadFile(thumbnailFile, thumbnailPath);
+        finalFormData.thumbnail_url = thumbnailUrl;
+      }
+
       if (editingReel) {
         // Update existing reel
         const { error } = await supabase
           .from('reels_content')
-          .update(formData)
+          .update(finalFormData)
           .eq('id', editingReel.id);
 
         if (error) throw error;
@@ -90,7 +126,7 @@ export const ReelsManagement = () => {
         // Create new reel
         const { error } = await supabase
           .from('reels_content')
-          .insert([formData]);
+          .insert([finalFormData]);
 
         if (error) throw error;
 
@@ -110,6 +146,8 @@ export const ReelsManagement = () => {
         description: editingReel ? 'فشل في تحديث الريلز' : 'فشل في إنشاء الريلز',
         variant: 'destructive'
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -191,6 +229,8 @@ export const ReelsManagement = () => {
       display_order: 0,
       is_active: true
     });
+    setVideoFile(null);
+    setThumbnailFile(null);
   };
 
   const openDialog = () => {
@@ -265,24 +305,45 @@ export const ReelsManagement = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="video_url">رابط الفيديو</Label>
+                  <Label htmlFor="video_file">رفع الفيديو</Label>
                   <Input
-                    id="video_url"
-                    type="url"
-                    value={formData.video_url}
-                    onChange={(e) => setFormData({...formData, video_url: e.target.value})}
-                    required
+                    id="video_file"
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+                    className="cursor-pointer"
                   />
+                  {videoFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      تم اختيار: {videoFile.name}
+                    </p>
+                  )}
+                  {formData.video_url && !videoFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      الفيديو الحالي موجود
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <Label htmlFor="thumbnail_url">رابط الصورة المصغرة</Label>
+                  <Label htmlFor="thumbnail_file">رفع الصورة المصغرة</Label>
                   <Input
-                    id="thumbnail_url"
-                    type="url"
-                    value={formData.thumbnail_url}
-                    onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
+                    id="thumbnail_file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
+                    className="cursor-pointer"
                   />
+                  {thumbnailFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      تم اختيار: {thumbnailFile.name}
+                    </p>
+                  )}
+                  {formData.thumbnail_url && !thumbnailFile && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      الصورة المصغرة الحالية موجودة
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -317,14 +378,22 @@ export const ReelsManagement = () => {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1">
-                    {editingReel ? 'تحديث' : 'إنشاء'}
+                  <Button type="submit" className="flex-1" disabled={uploading}>
+                    {uploading ? (
+                      <>
+                        <Upload className="w-4 h-4 mr-2 animate-spin" />
+                        جاري الرفع...
+                      </>
+                    ) : (
+                      editingReel ? 'تحديث' : 'إنشاء'
+                    )}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={() => setDialogOpen(false)}
                     className="flex-1"
+                    disabled={uploading}
                   >
                     إلغاء
                   </Button>
