@@ -872,6 +872,57 @@ export type Database = {
           },
         ]
       }
+      reels_content: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          duration: number | null
+          id: string
+          is_active: boolean | null
+          thumbnail_url: string | null
+          title: string
+          title_en: string | null
+          updated_at: string
+          video_url: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          duration?: number | null
+          id?: string
+          is_active?: boolean | null
+          thumbnail_url?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          video_url: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          duration?: number | null
+          id?: string
+          is_active?: boolean | null
+          thumbnail_url?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          video_url?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       survey_responses: {
         Row: {
           completed_at: string

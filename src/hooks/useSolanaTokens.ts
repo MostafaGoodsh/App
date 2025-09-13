@@ -71,54 +71,60 @@ export const useSolanaTokens = () => {
     try {
       const publicKey = new PublicKey(walletAddress);
       
-      // Get all token accounts for this wallet
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        publicKey,
-        { programId: TOKEN_PROGRAM_ID }
-      );
+      // First, always fetch converted tokens
+      const convertedTokens = await fetchConvertedTokens();
+      console.log('Fetched converted tokens:', convertedTokens);
+      
+      // Try to get token accounts for this wallet
+      let tokenList: SolanaToken[] = [];
+      
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+          publicKey,
+          { programId: TOKEN_PROGRAM_ID }
+        );
 
-      const tokenList: SolanaToken[] = [];
-
-      // Process regular SPL tokens
-      for (const tokenAccount of tokenAccounts.value) {
-        const tokenInfo = tokenAccount.account.data.parsed.info;
-        const mintAddress = tokenInfo.mint;
-        const balance = tokenInfo.tokenAmount.uiAmount || 0;
-        
-        // Only include tokens with balance > 0
-        if (balance > 0) {
-          try {
-            // Try to get token metadata from popular token list
-            const tokenMetadata = await fetchTokenMetadata(mintAddress);
-            
-            tokenList.push({
-              mintAddress,
-              symbol: tokenMetadata?.symbol || 'Unknown',
-              name: tokenMetadata?.name || 'Unknown Token',
-              balance: balance.toString(),
-              decimals: tokenInfo.tokenAmount.decimals,
-              logoUri: tokenMetadata?.logoUri,
-              isConverted: false
-            });
-          } catch (error) {
-            console.error('Error fetching token metadata:', error);
-            // Add token without metadata
-            tokenList.push({
-              mintAddress,
-              symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
-              name: 'Unknown Token',
-              balance: balance.toString(),
-              decimals: tokenInfo.tokenAmount.decimals,
-              isConverted: false
-            });
+        // Process regular SPL tokens
+        for (const tokenAccount of tokenAccounts.value) {
+          const tokenInfo = tokenAccount.account.data.parsed.info;
+          const mintAddress = tokenInfo.mint;
+          const balance = tokenInfo.tokenAmount.uiAmount || 0;
+          
+          // Only include tokens with balance > 0
+          if (balance > 0) {
+            try {
+              // Try to get token metadata from popular token list
+              const tokenMetadata = await fetchTokenMetadata(mintAddress);
+              
+              tokenList.push({
+                mintAddress,
+                symbol: tokenMetadata?.symbol || 'Unknown',
+                name: tokenMetadata?.name || 'Unknown Token',
+                balance: balance.toString(),
+                decimals: tokenInfo.tokenAmount.decimals,
+                logoUri: tokenMetadata?.logoUri,
+                isConverted: false
+              });
+            } catch (error) {
+              console.error('Error fetching token metadata:', error);
+              // Add token without metadata
+              tokenList.push({
+                mintAddress,
+                symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
+                name: 'Unknown Token',
+                balance: balance.toString(),
+                decimals: tokenInfo.tokenAmount.decimals,
+                isConverted: false
+              });
+            }
           }
         }
+      } catch (error) {
+        console.warn('Could not fetch token accounts (wallet may not have any tokens):', error.message);
+        // This is normal for new wallets, continue with converted tokens only
       }
-
-      // Add converted tokens from database
-      const convertedTokens = await fetchConvertedTokens();
       
-      // Merge with actual tokens (avoid duplicates)
+      // Merge with converted tokens (avoid duplicates)
       const allTokens = [...tokenList];
       
       // Add converted tokens that don't already exist in the token list
@@ -129,11 +135,15 @@ export const useSolanaTokens = () => {
         }
       });
       
+      console.log('Final tokens list:', allTokens);
       setTokens(allTokens);
       return allTokens;
     } catch (error) {
       console.error('Error fetching token accounts:', error);
-      return [];
+      // Even if there's an error, try to show converted tokens
+      const convertedTokens = await fetchConvertedTokens();
+      setTokens(convertedTokens);
+      return convertedTokens;
     } finally {
       setIsLoading(false);
     }

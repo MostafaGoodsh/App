@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer, RefreshCw, Eye, EyeOff, Building, Coins } from "lucide-react";
+import { Pencil, Plus, Image, FileText, Upload, X, Zap, MousePointer, RefreshCw, Eye, EyeOff, Building, Coins, Video } from "lucide-react";
+import { ReelsManagement } from "@/components/admin/ReelsManagement";
 
 interface AppContent {
   id: string;
@@ -500,19 +501,32 @@ export default function ContentManagement() {
         </div>
       )}
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">جميع المحتويات</TabsTrigger>
-          <TabsTrigger value="rwa" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            محتوى RWA
+      <Tabs defaultValue="content" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            المحتوى النصي
           </TabsTrigger>
-          <TabsTrigger value="stablecoin" className="flex items-center gap-2">
-            <Coins className="h-4 w-4" />
-            محتوى العملة المستقرة
+          <TabsTrigger value="reels" className="flex items-center gap-2">
+            <Video className="w-4 h-4" />
+            الريلز
           </TabsTrigger>
-          <TabsTrigger value="other">محتويات أخرى</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="content">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="all">جميع المحتويات</TabsTrigger>
+              <TabsTrigger value="rwa" className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                محتوى RWA
+              </TabsTrigger>
+              <TabsTrigger value="stablecoin" className="flex items-center gap-2">
+                <Coins className="h-4 w-4" />
+                محتوى العملة المستقرة
+              </TabsTrigger>
+              <TabsTrigger value="other">محتويات أخرى</TabsTrigger>
+            </TabsList>
         
         <TabsContent value="all" className="mt-6">
           <div className="grid gap-4">
@@ -873,7 +887,7 @@ export default function ContentManagement() {
                   )}
                   {content.text_content && (
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      {content.text_content.length > 200 
+                       {content.text_content.length > 200 
                         ? `${content.text_content.substring(0, 200)}...` 
                         : content.text_content
                       }
@@ -883,6 +897,12 @@ export default function ContentManagement() {
               </Card>
             ))}
           </div>
+          </TabsContent>
+        </Tabs>
+        </TabsContent>
+
+        <TabsContent value="reels">
+          <ReelsManagement />
         </TabsContent>
       </Tabs>
     </div>
