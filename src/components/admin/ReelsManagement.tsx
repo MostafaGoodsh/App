@@ -111,12 +111,23 @@ export const ReelsManagement = () => {
 
       if (editingReel) {
         // Update existing reel
+        const updateData = { ...finalFormData };
+        // Remove undefined fields for update
+        Object.keys(updateData).forEach(key => {
+          if (updateData[key] === undefined || updateData[key] === '') {
+            delete updateData[key];
+          }
+        });
+        
         const { error } = await supabase
           .from('reels_content')
-          .update(finalFormData)
+          .update(updateData)
           .eq('id', editingReel.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
 
         toast({
           title: 'تم التحديث',
@@ -124,11 +135,20 @@ export const ReelsManagement = () => {
         });
       } else {
         // Create new reel
+        const insertData = { ...finalFormData };
+        // Ensure required fields are present
+        if (!insertData.title) {
+          throw new Error('العنوان مطلوب');
+        }
+        
         const { error } = await supabase
           .from('reels_content')
-          .insert([finalFormData]);
+          .insert([insertData]);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
 
         toast({
           title: 'تم الإنشاء',

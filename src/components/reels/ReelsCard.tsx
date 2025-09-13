@@ -14,7 +14,7 @@ interface ReelsContent {
   view_count: number;
 }
 
-export const ReelsCard = () => {
+export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
   const [reelsContent, setReelsContent] = useState<ReelsContent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +40,8 @@ export const ReelsCard = () => {
     }
   };
 
-  const handleVideoClick = async (reel: ReelsContent) => {
+  const handleVideoClick = async (reel: ReelsContent, e: React.MouseEvent) => {
+    e.stopPropagation();
     // Increment view count
     try {
       await supabase
@@ -57,8 +58,22 @@ export const ReelsCard = () => {
     }
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      // Default behavior - navigate to reels page or open first video
+      if (reelsContent.length > 0) {
+        handleVideoClick(reelsContent[0], {} as React.MouseEvent);
+      }
+    }
+  };
+
   return (
-    <Card className="relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
+    <Card 
+      className="relative overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+      onClick={handleCardClick}
+    >
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-300"
@@ -97,7 +112,7 @@ export const ReelsCard = () => {
                 <div 
                   key={reel.id} 
                   className="relative bg-muted/20 rounded-lg aspect-video flex items-center justify-center border border-border/30 group-hover:border-primary/30 transition-colors duration-300 cursor-pointer"
-                  onClick={() => handleVideoClick(reel)}
+                  onClick={(e) => handleVideoClick(reel, e)}
                   title={reel.title}
                 >
                   {reel.thumbnail_url ? (

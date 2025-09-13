@@ -126,11 +126,11 @@ const Index = () => {
             </Link>
           ))}
 
+          {/* Reels Card - Second Card */}
+          <ReelsCard />
+          
           {/* Daily Tasks Card */}
           <DailyTasksCard />
-          
-          {/* Reels Card */}
-          <ReelsCard />
           
           {/* Identity and Wallet Cards */}
           {[
