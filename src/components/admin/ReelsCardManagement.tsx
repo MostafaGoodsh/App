@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Upload, Eye } from 'lucide-react';
+import { Loader2, Save, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface ReelsCardContent {
   id: string;
@@ -21,10 +22,11 @@ export const ReelsCardManagement = () => {
     title: 'الفيديوهات القصيرة',
     description: 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية',
     background_image_url: '',
-    is_active: true,
+    is_active: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,10 +39,12 @@ export const ReelsCardManagement = () => {
         .from('reels_card_content')
         .select('*')
         .eq('is_active', true)
-        .maybeSingle();
+        .single();
 
-      if (error) throw error;
-      
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
       if (data) {
         setContent(data);
       }
@@ -48,7 +52,7 @@ export const ReelsCardManagement = () => {
       console.error('Error fetching content:', error);
       toast({
         title: "خطأ",
-        description: "فشل في تحميل بيانات الكارت",
+        description: "فشل في تحميل البيانات",
         variant: "destructive",
       });
     } finally {
@@ -60,25 +64,23 @@ export const ReelsCardManagement = () => {
     setSaving(true);
     try {
       if (content.id) {
-        // Update existing
         const { error } = await supabase
           .from('reels_card_content')
           .update({
             title: content.title,
             description: content.description,
-            background_image_url: content.background_image_url,
+            background_image_url: content.background_image_url
           })
           .eq('id', content.id);
 
         if (error) throw error;
       } else {
-        // Insert new
         const { data, error } = await supabase
           .from('reels_card_content')
           .insert({
             title: content.title,
             description: content.description,
-            background_image_url: content.background_image_url,
+            background_image_url: content.background_image_url
           })
           .select()
           .single();
@@ -103,30 +105,43 @@ export const ReelsCardManagement = () => {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "خطأ",
+        description: "يجب اختيار ملف صورة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `reels-card-bg-${Date.now()}.${fileExt}`;
-      const filePath = `reels-card/${fileName}`;
+      const fileName = `reels-bg-${Date.now()}.${fileExt}`;
+      const filePath = `reels/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('learning-media')
+        .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('learning-media')
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
         .getPublicUrl(filePath);
 
-      setContent(prev => ({ ...prev, background_image_url: data.publicUrl }));
+      setContent(prev => ({
+        ...prev,
+        background_image_url: publicUrl
+      }));
 
       toast({
         title: "تم رفع الصورة بنجاح",
-        description: "تم تحديث صورة خلفية الكارت",
+        description: "يمكنك الآن حفظ التغييرات",
       });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -135,20 +150,16 @@ export const ReelsCardManagement = () => {
         description: "فشل في رفع الصورة",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-1/4"></div>
-            <div className="h-10 bg-muted rounded"></div>
-            <div className="h-20 bg-muted rounded"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
     );
   }
 
@@ -156,62 +167,86 @@ export const ReelsCardManagement = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Eye className="w-5 h-5" />
+          <ImageIcon className="h-5 w-5" />
           إدارة كارت الريلز
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium">العنوان</label>
+          <Label htmlFor="title">العنوان</Label>
           <Input
+            id="title"
             value={content.title}
             onChange={(e) => setContent(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="العنوان الرئيسي للكارت"
             dir="rtl"
+            placeholder="عنوان الكارت"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">المقدمة</label>
+          <Label htmlFor="description">المقدمة</Label>
           <Textarea
+            id="description"
             value={content.description}
             onChange={(e) => setContent(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="وصف الكارت والمحتوى"
-            rows={3}
             dir="rtl"
+            placeholder="وصف مختصر للكارت"
+            rows={3}
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">صورة الخلفية</label>
-          <div className="flex items-center gap-2">
+          <Label htmlFor="background">صورة الخلفية</Label>
+          <div className="flex items-center gap-4">
             <Input
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
+              disabled={uploading}
               className="flex-1"
             />
-            <Button variant="outline" size="icon">
-              <Upload className="w-4 h-4" />
+            <Button 
+              size="sm" 
+              variant="outline"
+              disabled={uploading}
+              onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
+            >
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+              رفع صورة
             </Button>
           </div>
           {content.background_image_url && (
             <div className="mt-2">
-              <img
-                src={content.background_image_url}
-                alt="صورة الخلفية"
+              <img 
+                src={content.background_image_url} 
+                alt="معاينة الخلفية"
                 className="w-32 h-20 object-cover rounded border"
               />
             </div>
           )}
         </div>
 
-        <div className="flex justify-end">
-          <Button onClick={handleSave} disabled={saving}>
-            <Save className="w-4 h-4 ml-2" />
-            {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-          </Button>
-        </div>
+        <Button 
+          onClick={handleSave} 
+          disabled={saving}
+          className="w-full"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              جاري الحفظ...
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              حفظ التغييرات
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
