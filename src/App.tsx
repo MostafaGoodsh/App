@@ -39,6 +39,7 @@ import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
 import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
 import AnubisCardAdmin from "./pages/AnubisCardAdmin";
 import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
+import Reels from "./pages/Reels";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => {
                   <Route path="stable-coin" element={<StableCoin />} />
                   <Route path="rwa" element={<RWA />} />
                   <Route path="call-out" element={<CallOut />} />
+                  <Route path="reels" element={<Reels />} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
