@@ -90,6 +90,7 @@ export const ReelsManagement = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setUploading(true);
     
     try {
@@ -272,12 +273,16 @@ export const ReelsManagement = () => {
             إدارة محتوى الريلز
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                إضافة ريلز
-              </Button>
-            </DialogTrigger>
+             <DialogTrigger asChild>
+               <Button onClick={(e) => {
+                 e.preventDefault();
+                 e.stopPropagation();
+                 openDialog();
+               }}>
+                 <Plus className="w-4 h-4 mr-2" />
+                 إضافة ريلز
+               </Button>
+             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
@@ -408,13 +413,17 @@ export const ReelsManagement = () => {
                       editingReel ? 'تحديث' : 'إنشاء'
                     )}
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setDialogOpen(false)}
-                    className="flex-1"
-                    disabled={uploading}
-                  >
+                   <Button 
+                     type="button" 
+                     variant="outline" 
+                     onClick={(e) => {
+                       e.preventDefault();
+                       e.stopPropagation();
+                       setDialogOpen(false);
+                     }}
+                     className="flex-1"
+                     disabled={uploading}
+                   >
                     إلغاء
                   </Button>
                 </div>
@@ -454,26 +463,38 @@ export const ReelsManagement = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => toggleActive(reel.id, reel.is_active)}
-                    >
+                     <Button
+                       size="sm"
+                       variant="ghost"
+                       onClick={(e) => {
+                         e.preventDefault();
+                         e.stopPropagation();
+                         toggleActive(reel.id, reel.is_active);
+                       }}
+                     >
                       {reel.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(reel)}
-                    >
+                     <Button
+                       size="sm"
+                       variant="ghost"
+                       onClick={(e) => {
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleEdit(reel);
+                       }}
+                     >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDelete(reel.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
+                     <Button
+                       size="sm"
+                       variant="ghost"
+                       onClick={(e) => {
+                         e.preventDefault();
+                         e.stopPropagation();
+                         handleDelete(reel.id);
+                       }}
+                       className="text-destructive hover:text-destructive"
+                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

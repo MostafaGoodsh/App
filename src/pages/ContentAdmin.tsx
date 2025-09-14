@@ -1,4 +1,5 @@
 import ContentManagement from "@/components/admin/ContentManagement";
+import { ReelsManagement } from "@/components/admin/ReelsManagement";
 
 export default function ContentAdmin() {
   return (
@@ -11,8 +12,9 @@ export default function ContentAdmin() {
         backgroundAttachment: 'fixed'
       }}
     >
-      <div className="min-h-screen bg-background/90">
+      <div className="min-h-screen bg-background/90 p-4 space-y-6">
         <ContentManagement />
+        <ReelsManagement />
       </div>
     </div>
   );
