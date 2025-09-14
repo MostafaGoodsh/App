@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -14,15 +14,15 @@ import { Plus, Edit, Trash2, Video, Eye, EyeOff, Upload } from 'lucide-react';
 interface ReelsContent {
   id: string;
   title: string;
-  title_en: string;
-  description: string;
-  description_en: string;
+  title_en?: string;
+  description?: string;
+  description_en?: string;
   video_url: string;
-  thumbnail_url: string;
-  duration: number;
+  thumbnail_url?: string;
+  duration?: number;
   display_order: number;
   is_active: boolean;
-  view_count: number;
+  view_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -33,20 +33,20 @@ export const ReelsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingReel, setEditingReel] = useState<ReelsContent | null>(null);
+  const [uploading, setUploading] = useState(false);
+  
   const [formData, setFormData] = useState({
     title: '',
     title_en: '',
     description: '',
     description_en: '',
-    video_url: '',
-    thumbnail_url: '',
     duration: 0,
     display_order: 0,
     is_active: true
   });
+  
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchReelsContent();
@@ -62,6 +62,7 @@ export const ReelsManagement = () => {
       if (error) throw error;
       setReelsContent(data || []);
     } catch (error: any) {
+      console.error('خطأ في تحميل البيانات:', error);
       toast({
         title: 'خطأ',
         description: 'فشل في تحميل محتوى الريلز',
@@ -72,99 +73,105 @@ export const ReelsManagement = () => {
     }
   };
 
-  const uploadFile = async (file: File, path: string): Promise<string> => {
-    const { data, error } = await supabase.storage
-      .from('reels-videos')
-      .upload(path, file, {
-        upsert: true
-      });
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `${folder}/${fileName}`;
 
-    if (error) throw error;
+      const { data, error } = await supabase.storage
+        .from('reels-videos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('reels-videos')
-      .getPublicUrl(data.path);
+      if (error) {
+        console.error('خطأ في رفع الملف:', error);
+        throw error;
+      }
 
-    return publicUrl;
+      const { data: { publicUrl } } = supabase.storage
+        .from('reels-videos')
+        .getPublicUrl(data.path);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('خطأ في uploadFile:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     setUploading(true);
-    
+
     try {
-      let finalFormData = { ...formData };
+      // التحقق من البيانات المطلوبة
+      if (!formData.title.trim()) {
+        throw new Error('العنوان مطلوب');
+      }
 
-      // Upload video file if provided
+      if (!editingReel && !videoFile) {
+        throw new Error('الفيديو مطلوب للريلز الجديد');
+      }
+
+      // رفع الملفات
+      let video_url = editingReel?.video_url || '';
+      let thumbnail_url = editingReel?.thumbnail_url || '';
+
       if (videoFile) {
-        const videoPath = `videos/${Date.now()}-${videoFile.name}`;
-        const videoUrl = await uploadFile(videoFile, videoPath);
-        finalFormData.video_url = videoUrl;
+        video_url = await uploadFile(videoFile, 'videos');
       }
 
-      // Upload thumbnail file if provided
       if (thumbnailFile) {
-        const thumbnailPath = `thumbnails/${Date.now()}-${thumbnailFile.name}`;
-        const thumbnailUrl = await uploadFile(thumbnailFile, thumbnailPath);
-        finalFormData.thumbnail_url = thumbnailUrl;
+        thumbnail_url = await uploadFile(thumbnailFile, 'thumbnails');
       }
+
+      const submitData = {
+        title: formData.title.trim(),
+        title_en: formData.title_en.trim() || null,
+        description: formData.description.trim() || null,
+        description_en: formData.description_en.trim() || null,
+        video_url,
+        thumbnail_url: thumbnail_url || null,
+        duration: formData.duration || 0,
+        display_order: formData.display_order,
+        is_active: formData.is_active
+      };
 
       if (editingReel) {
-        // Update existing reel
-        const updateData = { ...finalFormData };
-        // Don't remove empty strings for optional fields, but ensure we have title
-        if (!updateData.title) {
-          throw new Error('العنوان مطلوب');
-        }
-        
         const { error } = await supabase
           .from('reels_content')
-          .update(updateData)
+          .update(submitData)
           .eq('id', editingReel.id);
 
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         toast({
           title: 'تم التحديث',
-          description: 'تم تحديث محتوى الريلز بنجاح'
+          description: 'تم تحديث الريلز بنجاح'
         });
       } else {
-        // Create new reel - ensure required fields are present
-        if (!finalFormData.title) {
-          throw new Error('العنوان العربي مطلوب');
-        }
-        if (!finalFormData.video_url && !videoFile) {
-          throw new Error('الفيديو مطلوب');
-        }
-        
         const { error } = await supabase
           .from('reels_content')
-          .insert([finalFormData]);
+          .insert([submitData]);
 
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         toast({
           title: 'تم الإنشاء',
-          description: 'تم إنشاء محتوى الريلز بنجاح'
+          description: 'تم إنشاء الريلز بنجاح'
         });
       }
 
-      setDialogOpen(false);
-      setEditingReel(null);
       resetForm();
+      setDialogOpen(false);
       fetchReelsContent();
     } catch (error: any) {
-      console.error('Error in handleSubmit:', error);
+      console.error('خطأ في الحفظ:', error);
       toast({
         title: 'خطأ',
-        description: error.message || (editingReel ? 'فشل في تحديث الريلز' : 'فشل في إنشاء الريلز'),
+        description: error.message || 'فشل في حفظ البيانات',
         variant: 'destructive'
       });
     } finally {
@@ -179,8 +186,6 @@ export const ReelsManagement = () => {
       title_en: reel.title_en || '',
       description: reel.description || '',
       description_en: reel.description_en || '',
-      video_url: reel.video_url,
-      thumbnail_url: reel.thumbnail_url || '',
       duration: reel.duration || 0,
       display_order: reel.display_order,
       is_active: reel.is_active
@@ -244,24 +249,27 @@ export const ReelsManagement = () => {
       title_en: '',
       description: '',
       description_en: '',
-      video_url: '',
-      thumbnail_url: '',
       duration: 0,
       display_order: 0,
       is_active: true
     });
     setVideoFile(null);
     setThumbnailFile(null);
+    setEditingReel(null);
   };
 
   const openDialog = () => {
-    setEditingReel(null);
     resetForm();
     setDialogOpen(true);
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center py-8">جاري التحميل...</div>;
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="mr-2">جاري التحميل...</span>
+      </div>
+    );
   }
 
   return (
@@ -272,166 +280,13 @@ export const ReelsManagement = () => {
             <Video className="w-5 h-5" />
             إدارة محتوى الريلز
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-             <DialogTrigger asChild>
-               <Button onClick={(e) => {
-                 e.preventDefault();
-                 e.stopPropagation();
-                 openDialog();
-               }}>
-                 <Plus className="w-4 h-4 mr-2" />
-                 إضافة ريلز
-               </Button>
-             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingReel ? 'تعديل الريلز' : 'إضافة ريلز جديد'}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="title">العنوان (عربي)</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="title_en">العنوان (إنجليزي)</Label>
-                  <Input
-                    id="title_en"
-                    value={formData.title_en}
-                    onChange={(e) => setFormData({...formData, title_en: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description">الوصف (عربي)</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description_en">الوصف (إنجليزي)</Label>
-                  <Textarea
-                    id="description_en"
-                    value={formData.description_en}
-                    onChange={(e) => setFormData({...formData, description_en: e.target.value})}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="video_file">رفع الفيديو</Label>
-                  <Input
-                    id="video_file"
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
-                    className="cursor-pointer"
-                  />
-                  {videoFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      تم اختيار: {videoFile.name}
-                    </p>
-                  )}
-                  {formData.video_url && !videoFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      الفيديو الحالي موجود
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="thumbnail_file">رفع الصورة المصغرة</Label>
-                  <Input
-                    id="thumbnail_file"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
-                    className="cursor-pointer"
-                  />
-                  {thumbnailFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      تم اختيار: {thumbnailFile.name}
-                    </p>
-                  )}
-                  {formData.thumbnail_url && !thumbnailFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      الصورة المصغرة الحالية موجودة
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="duration">المدة (ثانية)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={formData.duration}
-                      onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="display_order">ترتيب العرض</Label>
-                    <Input
-                      id="display_order"
-                      type="number"
-                      value={formData.display_order}
-                      onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value) || 0})}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-                  />
-                  <Label htmlFor="is_active">نشط</Label>
-                </div>
-
-                <div className="flex gap-2 pt-4">
-                  <Button type="submit" className="flex-1" disabled={uploading}>
-                    {uploading ? (
-                      <>
-                        <Upload className="w-4 h-4 mr-2 animate-spin" />
-                        جاري الرفع...
-                      </>
-                    ) : (
-                      editingReel ? 'تحديث' : 'إنشاء'
-                    )}
-                  </Button>
-                   <Button 
-                     type="button" 
-                     variant="outline" 
-                     onClick={(e) => {
-                       e.preventDefault();
-                       e.stopPropagation();
-                       setDialogOpen(false);
-                     }}
-                     className="flex-1"
-                     disabled={uploading}
-                   >
-                    إلغاء
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={openDialog}>
+            <Plus className="w-4 h-4 mr-2" />
+            إضافة ريلز
+          </Button>
         </CardTitle>
       </CardHeader>
+      
       <CardContent>
         {reelsContent.length === 0 ? (
           <div className="text-center py-12">
@@ -441,7 +296,7 @@ export const ReelsManagement = () => {
             <p className="text-sm text-muted-foreground mb-6">
               ابدأ بإضافة أول مقطع فيديو قصير للمنصة
             </p>
-            <Button onClick={openDialog} className="font-cairo">
+            <Button onClick={openDialog}>
               إضافة ريلز جديد
             </Button>
           </div>
@@ -465,44 +320,31 @@ export const ReelsManagement = () => {
                     )}
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>ترتيب: {reel.display_order}</span>
-                      {reel.duration > 0 && <span>المدة: {reel.duration}ث</span>}
-                      <span>المشاهدات: {reel.view_count}</span>
+                      {reel.duration && reel.duration > 0 && <span>المدة: {reel.duration}ث</span>}
+                      <span>المشاهدات: {reel.view_count || 0}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                     <Button
-                       size="sm"
-                       variant="ghost"
-                       onClick={(e) => {
-                         e.preventDefault();
-                         e.stopPropagation();
-                         toggleActive(reel.id, reel.is_active);
-                       }}
-                     >
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleActive(reel.id, reel.is_active)}
+                    >
                       {reel.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
-                     <Button
-                       size="sm"
-                       variant="ghost"
-                       onClick={(e) => {
-                         e.preventDefault();
-                         e.stopPropagation();
-                         handleEdit(reel);
-                       }}
-                     >
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEdit(reel)}
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
-                     <Button
-                       size="sm"
-                       variant="ghost"
-                       onClick={(e) => {
-                         e.preventDefault();
-                         e.stopPropagation();
-                         handleDelete(reel.id);
-                       }}
-                       className="text-destructive hover:text-destructive"
-                     >
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDelete(reel.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -512,6 +354,148 @@ export const ReelsManagement = () => {
           </div>
         )}
       </CardContent>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingReel ? 'تعديل الريلز' : 'إضافة ريلز جديد'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="title">العنوان (عربي) *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                required
+                placeholder="أدخل عنوان الريلز"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="title_en">العنوان (إنجليزي)</Label>
+              <Input
+                id="title_en"
+                value={formData.title_en}
+                onChange={(e) => setFormData({...formData, title_en: e.target.value})}
+                placeholder="Enter reel title in English"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">الوصف (عربي)</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                rows={3}
+                placeholder="أدخل وصف الريلز"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description_en">الوصف (إنجليزي)</Label>
+              <Textarea
+                id="description_en"
+                value={formData.description_en}
+                onChange={(e) => setFormData({...formData, description_en: e.target.value})}
+                rows={3}
+                placeholder="Enter reel description in English"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="video_file">
+                رفع الفيديو {!editingReel && '*'}
+              </Label>
+              <Input
+                id="video_file"
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
+              />
+              {videoFile && (
+                <p className="text-sm text-green-600 mt-1">
+                  تم اختيار: {videoFile.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="thumbnail_file">رفع الصورة المصغرة</Label>
+              <Input
+                id="thumbnail_file"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
+              />
+              {thumbnailFile && (
+                <p className="text-sm text-green-600 mt-1">
+                  تم اختيار: {thumbnailFile.name}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="duration">المدة (ثانية)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  min="0"
+                  value={formData.duration}
+                  onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value) || 0})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="display_order">ترتيب العرض</Label>
+                <Input
+                  id="display_order"
+                  type="number"
+                  min="0"
+                  value={formData.display_order}
+                  onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value) || 0})}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
+              />
+              <Label htmlFor="is_active">نشط</Label>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button type="submit" className="flex-1" disabled={uploading}>
+                {uploading ? (
+                  <>
+                    <Upload className="w-4 h-4 mr-2 animate-spin" />
+                    جاري الحفظ...
+                  </>
+                ) : (
+                  editingReel ? 'تحديث' : 'إنشاء'
+                )}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)}
+                className="flex-1"
+                disabled={uploading}
+              >
+                إلغاء
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
