@@ -112,12 +112,10 @@ export const ReelsManagement = () => {
       if (editingReel) {
         // Update existing reel
         const updateData = { ...finalFormData };
-        // Remove undefined fields for update
-        Object.keys(updateData).forEach(key => {
-          if (updateData[key] === undefined || updateData[key] === '') {
-            delete updateData[key];
-          }
-        });
+        // Don't remove empty strings for optional fields, but ensure we have title
+        if (!updateData.title) {
+          throw new Error('العنوان مطلوب');
+        }
         
         const { error } = await supabase
           .from('reels_content')
@@ -134,16 +132,17 @@ export const ReelsManagement = () => {
           description: 'تم تحديث محتوى الريلز بنجاح'
         });
       } else {
-        // Create new reel
-        const insertData = { ...finalFormData };
-        // Ensure required fields are present
-        if (!insertData.title) {
-          throw new Error('العنوان مطلوب');
+        // Create new reel - ensure required fields are present
+        if (!finalFormData.title) {
+          throw new Error('العنوان العربي مطلوب');
+        }
+        if (!finalFormData.video_url && !videoFile) {
+          throw new Error('الفيديو مطلوب');
         }
         
         const { error } = await supabase
           .from('reels_content')
-          .insert([insertData]);
+          .insert([finalFormData]);
 
         if (error) {
           console.error('Insert error:', error);
@@ -161,9 +160,10 @@ export const ReelsManagement = () => {
       resetForm();
       fetchReelsContent();
     } catch (error: any) {
+      console.error('Error in handleSubmit:', error);
       toast({
         title: 'خطأ',
-        description: editingReel ? 'فشل في تحديث الريلز' : 'فشل في إنشاء الريلز',
+        description: error.message || (editingReel ? 'فشل في تحديث الريلز' : 'فشل في إنشاء الريلز'),
         variant: 'destructive'
       });
     } finally {

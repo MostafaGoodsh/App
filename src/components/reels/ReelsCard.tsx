@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { VideoModal } from './VideoModal';
 import egyptianCatBg from '@/assets/egyptian-cat-bg.jpg';
 
 interface ReelsContent {
@@ -8,6 +9,7 @@ interface ReelsContent {
   title: string;
   title_en: string;
   description: string;
+  description_en: string;
   video_url: string;
   thumbnail_url: string;
   view_count: number;
@@ -16,6 +18,8 @@ interface ReelsContent {
 export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
   const [reelsContent, setReelsContent] = useState<ReelsContent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<ReelsContent | null>(null);
 
   useEffect(() => {
     fetchReelsContent();
@@ -51,10 +55,9 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
       console.error('Error updating view count:', error);
     }
 
-    // Open video (could be modal or external link)
-    if (reel.video_url.startsWith('http')) {
-      window.open(reel.video_url, '_blank');
-    }
+    // Open video in modal
+    setSelectedVideo(reel);
+    setVideoModalOpen(true);
   };
 
   const handleCardClick = () => {
@@ -139,6 +142,17 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
         </div>
         <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
       </div>
+      
+      {/* Video Modal */}
+      {selectedVideo && (
+        <VideoModal
+          open={videoModalOpen}
+          onOpenChange={setVideoModalOpen}
+          videoUrl={selectedVideo.video_url}
+          title={selectedVideo.title}
+          description={selectedVideo.description}
+        />
+      )}
     </article>
   );
 };
