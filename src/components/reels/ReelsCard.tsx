@@ -15,29 +15,49 @@ interface ReelsContent {
   view_count: number;
 }
 
+interface ReelsCardContent {
+  id: string;
+  title: string;
+  description: string;
+  background_image_url: string;
+  is_active: boolean;
+}
+
 export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
   const [reelsContent, setReelsContent] = useState<ReelsContent[]>([]);
+  const [cardContent, setCardContent] = useState<ReelsCardContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<ReelsContent | null>(null);
 
   useEffect(() => {
-    fetchReelsContent();
+    fetchData();
   }, []);
 
-  const fetchReelsContent = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch reels content
+      const { data: reelsData, error: reelsError } = await supabase
         .from('reels_content')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true })
         .limit(3);
 
-      if (error) throw error;
-      setReelsContent(data || []);
+      if (reelsError) throw reelsError;
+      setReelsContent(reelsData || []);
+
+      // Fetch card content
+      const { data: cardData, error: cardError } = await supabase
+        .from('reels_card_content')
+        .select('*')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (cardError) throw cardError;
+      setCardContent(cardData);
     } catch (error) {
-      console.error('Error fetching reels content:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
@@ -76,7 +96,7 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
     >
       {/* Background Image */}
       <img 
-        src={egyptianCatBg}
+        src={cardContent?.background_image_url || egyptianCatBg}
         alt="خلفية الفيديوهات القصيرة"
         className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
         loading="lazy" 
@@ -86,11 +106,11 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
       <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
         <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold flex items-center gap-3">
           <Video className="w-6 h-6 text-primary" />
-          الفيديوهات القصيرة
+          {cardContent?.title || 'الفيديوهات القصيرة'}
         </h2>
         
         <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-4">
-          شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية
+          {cardContent?.description || 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية'}
         </p>
         
         {/* Video thumbnails */}

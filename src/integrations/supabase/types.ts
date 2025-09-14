@@ -872,6 +872,39 @@ export type Database = {
           },
         ]
       }
+      reels_card_content: {
+        Row: {
+          background_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          background_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reels_content: {
         Row: {
           created_at: string
