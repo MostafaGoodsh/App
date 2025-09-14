@@ -21,6 +21,7 @@ export const ReelsViewer = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,9 +47,48 @@ export const ReelsViewer = () => {
       }
     };
 
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        goToNext();
+      } else {
+        goToPrevious();
+      }
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      setTouchStart(touch.clientY);
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStart) return;
+      
+      const touch = e.changedTouches[0];
+      const diff = touchStart - touch.clientY;
+      
+      if (Math.abs(diff) > 50) { // minimum swipe distance
+        if (diff > 0) {
+          goToNext();
+        } else {
+          goToPrevious();
+        }
+      }
+      setTouchStart(null);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentVideoIndex, reelsContent.length]);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [currentVideoIndex, reelsContent.length, touchStart]);
 
   const fetchReelsContent = async () => {
     try {
