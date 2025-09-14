@@ -434,8 +434,16 @@ export const ReelsManagement = () => {
       </CardHeader>
       <CardContent>
         {reelsContent.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            لا يوجد محتوى ريلز
+          <div className="text-center py-12">
+            <div className="text-muted-foreground mb-4 text-lg">
+              لا يوجد محتوى ريلز حالياً
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              ابدأ بإضافة أول مقطع فيديو قصير للمنصة
+            </p>
+            <Button onClick={openDialog} className="font-cairo">
+              إضافة ريلز جديد
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
