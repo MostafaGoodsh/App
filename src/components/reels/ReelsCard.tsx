@@ -64,10 +64,8 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
     if (onClick) {
       onClick();
     } else {
-      // Default behavior - navigate to reels page or open first video
-      if (reelsContent.length > 0) {
-        handleVideoClick(reelsContent[0], {} as React.MouseEvent);
-      }
+      // Navigate to full reels viewer
+      window.location.href = '/reels';
     }
   };
 
