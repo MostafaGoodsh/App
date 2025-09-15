@@ -136,7 +136,7 @@ export const ReelsManagement = () => {
             description: formData.description,
             duration: formData.duration,
             display_order: formData.display_order,
-            category_id: formData.category_id || null,
+            category_id: formData.category_id === "none" ? null : formData.category_id || null,
             video_url: videoUrl || editingReel.video_url,
             thumbnail_url: thumbnailUrl || editingReel.thumbnail_url
           })
@@ -158,7 +158,7 @@ export const ReelsManagement = () => {
             description: formData.description,
             duration: formData.duration,
             display_order: formData.display_order,
-            category_id: formData.category_id || null,
+            category_id: formData.category_id === "none" ? null : formData.category_id || null,
             video_url: videoUrl,
             thumbnail_url: thumbnailUrl
           }]);
@@ -384,7 +384,7 @@ export const ReelsManagement = () => {
                   <SelectValue placeholder="اختر قسم (اختياري)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون قسم</SelectItem>
+                  <SelectItem value="none">بدون قسم</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.title}
