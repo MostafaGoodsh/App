@@ -6,6 +6,8 @@ import { SolanaTokenList } from '@/components/wallet/SolanaTokenList';
 import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
 import { SolanaTokenSwap } from '@/components/wallet/SolanaTokenSwap';
+import { InternalWalletCard } from '@/components/wallet/InternalWalletCard';
+import { InternalTokenSwap } from '@/components/wallet/InternalTokenSwap';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -102,25 +104,44 @@ const WalletContent = () => {
       </div>
 
       {/* التبويبات الرئيسية */}
-      <Tabs defaultValue="wallet" className="mb-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="internal" className="mb-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="internal" className="flex items-center gap-2">
+            <Coins className="w-4 h-4" />
+            المحفظة الداخلية
+          </TabsTrigger>
+          <TabsTrigger value="internal-swap" className="flex items-center gap-2">
+            <ArrowLeftRight className="w-4 h-4" />
+            تبديل داخلي
+          </TabsTrigger>
           <TabsTrigger value="wallet" className="flex items-center gap-2">
             <Coins className="w-4 h-4" />
-            المحفظة
+            محفظة Solana
           </TabsTrigger>
           <TabsTrigger value="swap" className="flex items-center gap-2">
             <ArrowLeftRight className="w-4 h-4" />
-            تبديل العملات
+            تبديل Solana
           </TabsTrigger>
           <TabsTrigger value="conversion" className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             تحويل النقاط
           </TabsTrigger>
-          <TabsTrigger value="actions" className="flex items-center gap-2">
-            <Zap className="w-4 h-4" />
-            الإجراءات السريعة
-          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="internal" className="space-y-6">
+          {/* المحفظة الداخلية */}
+          <InternalWalletCard 
+            onSendToken={(token) => {
+              setSelectedSolanaToken(token);
+              setShowSolanaTransfer(true);
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="internal-swap" className="space-y-6">
+          {/* تبديل العملات الداخلي */}
+          <InternalTokenSwap />
+        </TabsContent>
 
         <TabsContent value="wallet" className="space-y-6">
           {/* محفظة Solana */}
@@ -160,9 +181,7 @@ const WalletContent = () => {
         <TabsContent value="conversion" className="space-y-6">
           {/* تحويل النقاط إلى العملات */}
           <PointsToTokensConverter />
-        </TabsContent>
 
-        <TabsContent value="actions" className="space-y-6">
           {/* الإجراءات السريعة */}
           <Card>
             <CardHeader>
