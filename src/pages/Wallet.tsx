@@ -5,6 +5,7 @@ import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
 import { SolanaTokenList } from '@/components/wallet/SolanaTokenList';
 import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
+import { SolanaTokenSwap } from '@/components/wallet/SolanaTokenSwap';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -102,13 +103,17 @@ const WalletContent = () => {
 
       {/* التبويبات الرئيسية */}
       <Tabs defaultValue="wallet" className="mb-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="wallet" className="flex items-center gap-2">
             <Coins className="w-4 h-4" />
             المحفظة
           </TabsTrigger>
-          <TabsTrigger value="conversion" className="flex items-center gap-2">
+          <TabsTrigger value="swap" className="flex items-center gap-2">
             <ArrowLeftRight className="w-4 h-4" />
+            تبديل العملات
+          </TabsTrigger>
+          <TabsTrigger value="conversion" className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
             تحويل النقاط
           </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
@@ -145,6 +150,11 @@ const WalletContent = () => {
               }}
             />
           )}
+        </TabsContent>
+
+        <TabsContent value="swap" className="space-y-6">
+          {/* تبديل العملات على Solana Devnet */}
+          <SolanaTokenSwap />
         </TabsContent>
 
         <TabsContent value="conversion" className="space-y-6">
