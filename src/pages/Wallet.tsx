@@ -8,6 +8,7 @@ import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
 import { SolanaTokenSwap } from '@/components/wallet/SolanaTokenSwap';
 import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
 import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
+import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -132,6 +133,9 @@ const WalletContent = () => {
               onSwapClick={() => setShowHybridSwap(true)}
               onWithdrawClick={() => setShowWithdraw(true)}
             />
+            
+            {/* تاريخ السحوبات */}
+            <WithdrawalHistory />
             
             {/* تبديل سريع في نافذة منبثقة */}
             {showHybridSwap && (
