@@ -1,161 +1,211 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useAuth } from './useAuth';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface InternalToken {
+  id: string;
   symbol: string;
   name: string;
-  balance: number;
+  description?: string;
+  icon_url?: string;
   decimals: number;
-  logoUri?: string;
-  isNative?: boolean;
+  is_active: boolean;
+  is_base_currency: boolean;
+  exchange_rate_usd: number;
 }
 
-const DEFAULT_TOKENS: InternalToken[] = [
-  {
-    symbol: 'SOL',
-    name: 'Solana',
-    balance: 2.5,
-    decimals: 9,
-    isNative: true,
-  },
-  {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    balance: 100.0,
-    decimals: 6,
-  },
-  {
-    symbol: 'MSRA',
-    name: 'MsRa Token',
-    balance: 50.0,
-    decimals: 9,
-  }
-];
+export interface InternalBalance {
+  id: string;
+  token_id: string;
+  balance: number;
+  locked_balance: number;
+  token: InternalToken;
+}
+
+export interface InternalSwap {
+  id: string;
+  from_token_id: string;
+  to_token_id: string;
+  from_amount: number;
+  to_amount: number;
+  exchange_rate: number;
+  fee_amount: number;
+  status: string;
+  created_at: string;
+}
 
 export const useInternalWallet = () => {
-  const { user } = useAuth();
-  const [tokens, setTokens] = useState<InternalToken[]>(DEFAULT_TOKENS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [tokens, setTokens] = useState<InternalToken[]>([]);
+  const [balances, setBalances] = useState<InternalBalance[]>([]);
+  const [swapHistory, setSwapHistory] = useState<InternalSwap[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  // تحميل أرصدة المحفظة من التخزين المحلي
-  const loadWalletBalances = useCallback(() => {
-    if (!user) return;
-    
-    setIsLoading(true);
+  // تحميل العملات المتاحة
+  const loadTokens = async () => {
     try {
-      const savedBalances = localStorage.getItem(`wallet_balances_${user.id}`);
-      if (savedBalances) {
-        const balances = JSON.parse(savedBalances);
-        const updatedTokens = DEFAULT_TOKENS.map(token => {
-          const savedBalance = balances[token.symbol];
-          return savedBalance !== undefined 
-            ? { ...token, balance: savedBalance }
-            : token;
-        });
-        setTokens(updatedTokens);
-      }
+      const { data, error } = await supabase
+        .from('internal_tokens')
+        .select('*')
+        .eq('is_active', true)
+        .order('is_base_currency', { ascending: false })
+        .order('symbol');
+
+      if (error) throw error;
+      setTokens(data || []);
     } catch (error) {
-      console.error('Error loading wallet balances:', error);
+      console.error('Error loading tokens:', error);
+      toast({
+        title: 'خطأ في تحميل العملات',
+        description: 'حدث خطأ أثناء تحميل العملات المتاحة',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // تحميل أرصدة المستخدم
+  const loadBalances = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('internal_wallet_balances')
+        .select(`
+          *,
+          token:internal_tokens(*)
+        `)
+        .order('balance', { ascending: false });
+
+      if (error) throw error;
+      setBalances(data || []);
+    } catch (error) {
+      console.error('Error loading balances:', error);
+      toast({
+        title: 'خطأ في تحميل الأرصدة',
+        description: 'حدث خطأ أثناء تحميل أرصدة المحفظة',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // تحميل تاريخ التبديل
+  const loadSwapHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('internal_swaps')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setSwapHistory(data || []);
+    } catch (error) {
+      console.error('Error loading swap history:', error);
+    }
+  };
+
+  // تبديل العملات
+  const swapTokens = async (
+    fromTokenSymbol: string,
+    toTokenSymbol: string,
+    amount: number
+  ) => {
+    try {
+      setIsLoading(true);
+
+      const { data: result, error } = await supabase.rpc('internal_token_swap', {
+        p_from_token_symbol: fromTokenSymbol,
+        p_to_token_symbol: toTokenSymbol,
+        p_from_amount: amount,
+      });
+
+      if (error) throw error;
+
+      const data = result as any;
+      
+      if (!data?.success) {
+        throw new Error(data?.error || 'حدث خطأ في التبديل');
+      }
+
+      toast({
+        title: 'تم التبديل بنجاح!',
+        description: `تم تبديل ${data.from_amount} ${data.from_token} إلى ${Number(data.to_amount || 0).toFixed(2)} ${data.to_token}`,
+      });
+
+      // إعادة تحميل البيانات
+      await Promise.all([loadBalances(), loadSwapHistory()]);
+      
+      return data;
+    } catch (error: any) {
+      console.error('Swap error:', error);
+      toast({
+        title: 'فشل في التبديل',
+        description: error.message || 'حدث خطأ أثناء عملية التبديل',
+        variant: 'destructive',
+      });
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  };
 
-  // حفظ أرصدة المحفظة في التخزين المحلي
-  const saveWalletBalances = useCallback((updatedTokens: InternalToken[]) => {
-    if (!user) return;
+  // الحصول على رصيد عملة معينة
+  const getTokenBalance = (tokenSymbol: string): number => {
+    const balance = balances.find(b => b.token.symbol === tokenSymbol);
+    return balance?.balance || 0;
+  };
 
-    try {
-      const balances: Record<string, number> = {};
-      updatedTokens.forEach(token => {
-        balances[token.symbol] = token.balance;
-      });
-      localStorage.setItem(`wallet_balances_${user.id}`, JSON.stringify(balances));
-    } catch (error) {
-      console.error('Error saving wallet balances:', error);
-    }
-  }, [user]);
-
-  // تحديث رصيد عملة معينة
-  const updateTokenBalance = useCallback((symbol: string, newBalance: number) => {
-    setTokens(prevTokens => {
-      const updatedTokens = prevTokens.map(token =>
-        token.symbol === symbol 
-          ? { ...token, balance: Math.max(0, newBalance) }
-          : token
-      );
-      
-      // حفظ في قاعدة البيانات
-      saveWalletBalances(updatedTokens);
-      
-      return updatedTokens;
-    });
-  }, [saveWalletBalances]);
-
-  // تبديل العملات
-  const swapTokens = useCallback((
-    fromSymbol: string,
-    toSymbol: string,
-    fromAmount: number,
-    exchangeRate: number
-  ) => {
-    const toAmount = fromAmount * exchangeRate;
+  // الحصول على معدل التبديل بين عملتين
+  const getExchangeRate = (fromSymbol: string, toSymbol: string): number => {
+    const fromToken = tokens.find(t => t.symbol === fromSymbol);
+    const toToken = tokens.find(t => t.symbol === toSymbol);
     
-    setTokens(prevTokens => {
-      const updatedTokens = prevTokens.map(token => {
-        if (token.symbol === fromSymbol) {
-          return { ...token, balance: Math.max(0, token.balance - fromAmount) };
-        }
-        if (token.symbol === toSymbol) {
-          return { ...token, balance: token.balance + toAmount };
-        }
-        return token;
-      });
-      
-      // حفظ في قاعدة البيانات
-      saveWalletBalances(updatedTokens);
-      
-      return updatedTokens;
-    });
-
-    return { fromAmount, toAmount };
-  }, [saveWalletBalances]);
-
-  // إضافة عملة جديدة
-  const addToken = useCallback((token: InternalToken) => {
-    setTokens(prevTokens => {
-      const exists = prevTokens.find(t => t.symbol === token.symbol);
-      if (exists) return prevTokens;
-      
-      const updatedTokens = [...prevTokens, token];
-      saveWalletBalances(updatedTokens);
-      return updatedTokens;
-    });
-  }, [saveWalletBalances]);
-
-  // طلب airdrop (إضافة SOL مجاني)
-  const requestAirdrop = useCallback((amount: number = 1) => {
-    updateTokenBalance('SOL', 
-      tokens.find(t => t.symbol === 'SOL')?.balance + amount || amount
-    );
+    if (!fromToken || !toToken) return 0;
     
-    // إرسال حدث مخصص
-    window.dispatchEvent(new CustomEvent('wallet-airdrop-completed', {
-      detail: { amount, symbol: 'SOL' }
-    }));
-  }, [tokens, updateTokenBalance]);
+    return fromToken.exchange_rate_usd / toToken.exchange_rate_usd;
+  };
+
+  // حساب القيمة بالدولار لرصيد معين
+  const getUSDValue = (tokenSymbol: string, amount: number): number => {
+    const token = tokens.find(t => t.symbol === tokenSymbol);
+    if (!token) return 0;
+    return amount * token.exchange_rate_usd;
+  };
+
+  // الحصول على إجمالي القيمة بالدولار
+  const getTotalUSDValue = (): number => {
+    return balances.reduce((total, balance) => {
+      return total + getUSDValue(balance.token.symbol, balance.balance);
+    }, 0);
+  };
 
   useEffect(() => {
-    loadWalletBalances();
-  }, [loadWalletBalances]);
+    const initializeWallet = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          loadTokens(),
+          loadBalances(),
+          loadSwapHistory(),
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeWallet();
+  }, []);
 
   return {
     tokens,
+    balances,
+    swapHistory,
     isLoading,
-    updateTokenBalance,
     swapTokens,
-    addToken,
-    requestAirdrop,
-    refreshBalances: loadWalletBalances
+    getTokenBalance,
+    getExchangeRate,
+    getUSDValue,
+    getTotalUSDValue,
+    refreshData: async () => {
+      await Promise.all([loadBalances(), loadSwapHistory()]);
+    },
   };
 };

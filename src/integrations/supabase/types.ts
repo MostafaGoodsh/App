@@ -412,6 +412,140 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_swaps: {
+        Row: {
+          created_at: string
+          exchange_rate: number
+          fee_amount: number
+          from_amount: number
+          from_token_id: string
+          id: string
+          status: string
+          to_amount: number
+          to_token_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exchange_rate: number
+          fee_amount?: number
+          from_amount: number
+          from_token_id: string
+          id?: string
+          status?: string
+          to_amount: number
+          to_token_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exchange_rate?: number
+          fee_amount?: number
+          from_amount?: number
+          from_token_id?: string
+          id?: string
+          status?: string
+          to_amount?: number
+          to_token_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_swaps_from_token_id_fkey"
+            columns: ["from_token_id"]
+            isOneToOne: false
+            referencedRelation: "internal_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "internal_swaps_to_token_id_fkey"
+            columns: ["to_token_id"]
+            isOneToOne: false
+            referencedRelation: "internal_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      internal_tokens: {
+        Row: {
+          created_at: string
+          decimals: number
+          description: string | null
+          exchange_rate_usd: number
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          is_base_currency: boolean
+          name: string
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decimals?: number
+          description?: string | null
+          exchange_rate_usd?: number
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_base_currency?: boolean
+          name: string
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decimals?: number
+          description?: string | null
+          exchange_rate_usd?: number
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_base_currency?: boolean
+          name?: string
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      internal_wallet_balances: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          locked_balance: number
+          token_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          locked_balance?: number
+          token_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          locked_balance?: number
+          token_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_wallet_balances_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "internal_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_comments: {
         Row: {
           comment: string
@@ -1749,6 +1883,59 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          created_at: string
+          id: string
+          internal_amount: number
+          internal_token_id: string
+          processed_at: string | null
+          status: string
+          target_address: string
+          target_amount: number
+          target_token: string
+          transaction_hash: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          internal_amount: number
+          internal_token_id: string
+          processed_at?: string | null
+          status?: string
+          target_address: string
+          target_amount: number
+          target_token: string
+          transaction_hash?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          internal_amount?: number
+          internal_token_id?: string
+          processed_at?: string | null
+          status?: string
+          target_address?: string
+          target_amount?: number
+          target_token?: string
+          transaction_hash?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "withdrawal_requests_internal_token_id_fkey"
+            columns: ["internal_token_id"]
+            isOneToOne: false
+            referencedRelation: "internal_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1765,6 +1952,10 @@ export type Database = {
       complete_daily_task: {
         Args: { p_task_id: string }
         Returns: Json
+      }
+      create_initial_internal_balances: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
       create_wallet_mfa_session: {
         Args: { p_wallet_id: string }
@@ -1834,6 +2025,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      internal_token_swap: {
+        Args: {
+          p_from_amount: number
+          p_from_token_symbol: string
+          p_to_token_symbol: string
+        }
+        Returns: Json
       }
       is_admin: {
         Args: { _user_id: string }

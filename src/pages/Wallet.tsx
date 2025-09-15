@@ -6,8 +6,8 @@ import { SolanaTokenList } from '@/components/wallet/SolanaTokenList';
 import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { ConvertedTokensList } from '@/components/wallet/ConvertedTokensList';
 import { SolanaTokenSwap } from '@/components/wallet/SolanaTokenSwap';
-import { InternalWalletCard } from '@/components/wallet/InternalWalletCard';
-import { InternalTokenSwap } from '@/components/wallet/InternalTokenSwap';
+import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
+import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -23,6 +23,8 @@ const WalletContent = () => {
   const [showSolanaTransfer, setShowSolanaTransfer] = useState(false);
   const [selectedSolanaToken, setSelectedSolanaToken] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [showHybridSwap, setShowHybridSwap] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
   const { requestAirdrop } = useSolanaWallet();
   const { walletData, addAirdropReward, getTransactionHistory } = useSolanaWalletData();
 
@@ -103,45 +105,85 @@ const WalletContent = () => {
         </Card>
       </div>
 
-      {/* التبويبات الرئيسية */}
-      <Tabs defaultValue="internal" className="mb-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="internal" className="flex items-center gap-2">
-            <Coins className="w-4 h-4" />
-            المحفظة الداخلية
-          </TabsTrigger>
-          <TabsTrigger value="internal-swap" className="flex items-center gap-2">
-            <ArrowLeftRight className="w-4 h-4" />
-            تبديل داخلي
-          </TabsTrigger>
-          <TabsTrigger value="wallet" className="flex items-center gap-2">
-            <Coins className="w-4 h-4" />
-            محفظة Solana
-          </TabsTrigger>
-          <TabsTrigger value="swap" className="flex items-center gap-2">
-            <ArrowLeftRight className="w-4 h-4" />
-            تبديل Solana
-          </TabsTrigger>
-          <TabsTrigger value="conversion" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            تحويل النقاط
-          </TabsTrigger>
-        </TabsList>
+        {/* التبويبات الرئيسية */}
+        <Tabs defaultValue="hybrid" className="mb-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="hybrid" className="flex items-center gap-2">
+              <Coins className="w-4 h-4" />
+              المحفظة الهجين
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="flex items-center gap-2">
+              <Coins className="w-4 h-4" />
+              محفظة Solana
+            </TabsTrigger>
+            <TabsTrigger value="swap" className="flex items-center gap-2">
+              <ArrowLeftRight className="w-4 h-4" />
+              تبديل Solana
+            </TabsTrigger>
+            <TabsTrigger value="conversion" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              تحويل النقاط
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="internal" className="space-y-6">
-          {/* المحفظة الداخلية */}
-          <InternalWalletCard 
-            onSendToken={(token) => {
-              setSelectedSolanaToken(token);
-              setShowSolanaTransfer(true);
-            }}
-          />
-        </TabsContent>
+          <TabsContent value="hybrid" className="space-y-6">
+            {/* المحفظة الهجين */}
+            <HybridWalletCard 
+              onSwapClick={() => setShowHybridSwap(true)}
+              onWithdrawClick={() => setShowWithdraw(true)}
+            />
+            
+            {/* تبديل سريع في نافذة منبثقة */}
+            {showHybridSwap && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">تبديل سريع</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowHybridSwap(false)}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  <div className="p-4">
+                    <HybridTokenSwap />
+                  </div>
+                </div>
+              </div>
+            )}
 
-        <TabsContent value="internal-swap" className="space-y-6">
-          {/* تبديل العملات الداخلي */}
-          <InternalTokenSwap />
-        </TabsContent>
+            {/* نافذة السحب الحقيقي */}
+            {showWithdraw && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">سحب حقيقي</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setShowWithdraw(false)}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  <div className="p-4">
+                    <div className="text-center py-8">
+                      <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">قريباً جداً!</h3>
+                      <p className="text-muted-foreground mb-4">
+                        ميزة السحب الحقيقي للعملات قيد التطوير
+                      </p>
+                      <p className="text-sm text-blue-600">
+                        ستتمكن قريباً من سحب عملاتك الداخلية كعملات حقيقية على شبكة Solana
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </TabsContent>
 
         <TabsContent value="wallet" className="space-y-6">
           {/* محفظة Solana */}
