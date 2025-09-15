@@ -48,7 +48,7 @@ export const ExternalReelsCard = () => {
   const displayDescription = cardContent?.description || getContent('reels_card_description', 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة');
   const backgroundImage = (cardContent?.background_image_url && cardContent.background_image_url.trim() !== '') 
     ? cardContent.background_image_url 
-    : '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png';
+    : '/lovable-uploads/egyptian-ankh-reels-bg.jpg';
 
   return (
     <Link to="/reels-categories" className="group">
