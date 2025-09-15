@@ -40,6 +40,7 @@ import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
 import AnubisCardAdmin from "./pages/AnubisCardAdmin";
 import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
 import Reels from "./pages/Reels";
+import ReelsCardAdmin from "./pages/ReelsCardAdmin";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,7 @@ const App = () => {
                   <Route path="admin/personality-tasks" element={<RequireAdmin><PersonalityTasksAdmin /></RequireAdmin>} />
                   <Route path="admin/task-introductions" element={<RequireAdmin><TaskIntroductionsAdmin /></RequireAdmin>} />
                   <Route path="admin/conversion-settings" element={<RequireAdmin><ConversionSettingsAdmin /></RequireAdmin>} />
+                  <Route path="admin/reels-card" element={<RequireAdmin><ReelsCardAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
