@@ -47,6 +47,12 @@ export const ReelsViewer = () => {
 
   useEffect(() => {
     fetchData();
+    // Get category from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
   }, []);
 
   useEffect(() => {

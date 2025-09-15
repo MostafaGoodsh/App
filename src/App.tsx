@@ -42,6 +42,7 @@ import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
 import Reels from "./pages/Reels";
 import ReelsCardAdmin from "./pages/ReelsCardAdmin";
 import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
+import ReelsCategories from "./pages/ReelsCategories";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => {
                   <Route path="rwa" element={<RWA />} />
                   <Route path="call-out" element={<CallOut />} />
                   <Route path="reels" element={<Reels />} />
+                  <Route path="reels-categories" element={<ReelsCategories />} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
