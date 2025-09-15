@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
+import { WithdrawalDialog } from './WithdrawalDialog';
 import { Coins, ArrowUpRight, Wallet, TrendingUp } from 'lucide-react';
 
 interface HybridWalletCardProps {
@@ -13,6 +14,7 @@ interface HybridWalletCardProps {
 
 export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletCardProps) => {
   const { balances, getTotalUSDValue, isLoading } = useInternalWallet();
+  const [showWithdrawalDialog, setShowWithdrawalDialog] = React.useState(false);
 
   if (isLoading) {
     return (
@@ -122,7 +124,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
             تبديل سريع
           </Button>
           <Button 
-            onClick={onWithdrawClick}
+            onClick={() => setShowWithdrawalDialog(true)}
             variant="outline"
             className="flex items-center gap-2"
           >
@@ -135,6 +137,11 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
           💡 التبديل الداخلي فوري ومجاني، السحب الحقيقي يتطلب رسوم شبكة
         </div>
       </CardContent>
+      
+      <WithdrawalDialog 
+        open={showWithdrawalDialog}
+        onOpenChange={setShowWithdrawalDialog}
+      />
     </Card>
   );
 };
