@@ -30,6 +30,18 @@ export const SolanaTokenList = ({ wallet, onSendToken }: SolanaTokenListProps) =
     }
   }, [wallet.address, wallet.network, fetchTokenAccounts]);
 
+  // الاستماع لأحداث التبديل
+  useEffect(() => {
+    const handleSwapComplete = () => {
+      if (wallet?.address && wallet?.network === 'solana') {
+        fetchTokenAccounts(wallet.address);
+      }
+    };
+
+    window.addEventListener('solana-swap-completed', handleSwapComplete);
+    return () => window.removeEventListener('solana-swap-completed', handleSwapComplete);
+  }, [wallet?.address, wallet?.network, fetchTokenAccounts]);
+
   const handleRefreshTokens = async () => {
     try {
       await fetchTokenAccounts(wallet.address);

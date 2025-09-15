@@ -64,6 +64,16 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
     loadBalances();
   }, [connected, publicKey]);
 
+  // الاستماع لأحداث التبديل
+  useEffect(() => {
+    const handleSwapComplete = () => {
+      loadBalances();
+    };
+
+    window.addEventListener('solana-swap-completed', handleSwapComplete);
+    return () => window.removeEventListener('solana-swap-completed', handleSwapComplete);
+  }, []);
+
   const handleCopyAddress = () => {
     if (publicKey) {
       navigator.clipboard.writeText(publicKey.toString());

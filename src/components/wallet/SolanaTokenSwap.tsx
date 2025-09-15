@@ -181,6 +181,16 @@ export const SolanaTokenSwap = () => {
           return token;
         })
       );
+
+      // إرسال حدث مخصص لتحديث المكونات الأخرى
+      window.dispatchEvent(new CustomEvent('solana-swap-completed', {
+        detail: {
+          fromToken: fromToken.symbol,
+          toToken: toToken.symbol,
+          fromAmount: parseFloat(fromAmount),
+          toAmount: parseFloat(toAmount)
+        }
+      }));
       
       toast({
         title: "تم التبديل بنجاح! 🎉",
