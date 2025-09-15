@@ -166,6 +166,22 @@ export const SolanaTokenSwap = () => {
       // محاكاة وقت المعاملة
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // تحديث الأرصدة بعد التبديل
+      setTokens(prevTokens => 
+        prevTokens.map(token => {
+          if (token.symbol === fromToken.symbol) {
+            // خصم المبلغ من العملة المصدر
+            const newBalance = Math.max(0, parseFloat(token.balance) - parseFloat(fromAmount));
+            return { ...token, balance: newBalance.toFixed(4) };
+          } else if (token.symbol === toToken.symbol) {
+            // إضافة المبلغ للعملة الهدف
+            const newBalance = parseFloat(token.balance) + parseFloat(toAmount);
+            return { ...token, balance: newBalance.toFixed(4) };
+          }
+          return token;
+        })
+      );
+      
       toast({
         title: "تم التبديل بنجاح! 🎉",
         description: `تم تبديل ${fromAmount} ${fromToken.symbol} إلى ${toAmount} ${toToken.symbol}`,
