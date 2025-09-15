@@ -89,33 +89,6 @@ export const ExternalReelsCard = () => {
             </p>
           </div>
           
-          {categories.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-foreground/90 mb-3">الأقسام المتاحة:</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {categories.slice(0, 4).map((category) => (
-                  <div 
-                    key={category.id}
-                    className="bg-background/20 backdrop-blur-sm rounded-lg p-3 border border-border/30 group-hover:border-primary/30 transition-all duration-300"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      <span className="text-sm font-medium text-foreground/80">
-                        {category.title}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {categories.length > 4 && (
-                <div className="text-center">
-                  <span className="text-sm text-muted-foreground">
-                    +{categories.length - 4} أقسام أخرى
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
           
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>

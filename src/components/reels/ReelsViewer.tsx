@@ -16,10 +16,23 @@ interface ReelsContent {
   video_url: string;
   thumbnail_url: string;
   view_count: number;
+  category_id?: string;
+}
+
+interface ReelsCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  is_active: boolean;
+  display_order: number;
 }
 
 export const ReelsViewer = () => {
   const [reelsContent, setReelsContent] = useState<ReelsContent[]>([]);
+  const [categories, setCategories] = useState<ReelsCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filteredContent, setFilteredContent] = useState<ReelsContent[]>([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
@@ -33,8 +46,19 @@ export const ReelsViewer = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchReelsContent();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    // تصفية المحتوى حسب القسم المحدد
+    if (selectedCategory) {
+      const filtered = reelsContent.filter(reel => reel.category_id === selectedCategory);
+      setFilteredContent(filtered);
+    } else {
+      setFilteredContent(reelsContent);
+    }
+    setCurrentVideoIndex(0);
+  }, [selectedCategory, reelsContent]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,10 +125,24 @@ export const ReelsViewer = () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [currentVideoIndex, reelsContent.length, touchStart, isEditing]);
+  }, [currentVideoIndex, filteredContent.length, touchStart, isEditing]);
 
-  const fetchReelsContent = async () => {
+  const fetchData = async () => {
     try {
+      setLoading(true);
+      
+      // جلب الأقسام
+      const { data: categoriesData } = await supabase
+        .from('reels_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (categoriesData) {
+        setCategories(categoriesData);
+      }
+
+      // جلب الفيديوهات
       const { data, error } = await supabase
         .from('reels_content')
         .select('*')
@@ -114,7 +152,7 @@ export const ReelsViewer = () => {
       if (error) throw error;
       setReelsContent(data || []);
     } catch (error) {
-      console.error('Error fetching reels content:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
@@ -122,9 +160,9 @@ export const ReelsViewer = () => {
 
   const goToNext = () => {
     if (isEditing) return; // منع التنقل أثناء التحرير
-    if (currentVideoIndex < reelsContent.length - 1) {
+    if (currentVideoIndex < filteredContent.length - 1) {
       setCurrentVideoIndex(currentVideoIndex + 1);
-      incrementViewCount(reelsContent[currentVideoIndex + 1]);
+      incrementViewCount(filteredContent[currentVideoIndex + 1]);
     }
   };
 
@@ -180,7 +218,7 @@ export const ReelsViewer = () => {
   };
 
   const handleEditClick = () => {
-    const currentReel = reelsContent[currentVideoIndex];
+    const currentReel = filteredContent[currentVideoIndex];
     setEditTitle(currentReel.title);
     setEditDescription(currentReel.description);
     setIsEditing(true);
@@ -188,7 +226,7 @@ export const ReelsViewer = () => {
 
   const handleSaveEdit = async () => {
     try {
-      const currentReel = reelsContent[currentVideoIndex];
+      const currentReel = filteredContent[currentVideoIndex];
       const { error } = await supabase
         .from('reels_content')
         .update({ 
@@ -201,12 +239,15 @@ export const ReelsViewer = () => {
 
       // تحديث البيانات المحلية
       const updatedContent = [...reelsContent];
-      updatedContent[currentVideoIndex] = {
-        ...currentReel,
-        title: editTitle,
-        description: editDescription
-      };
-      setReelsContent(updatedContent);
+      const originalIndex = updatedContent.findIndex(reel => reel.id === currentReel.id);
+      if (originalIndex !== -1) {
+        updatedContent[originalIndex] = {
+          ...currentReel,
+          title: editTitle,
+          description: editDescription
+        };
+        setReelsContent(updatedContent);
+      }
       setIsEditing(false);
       
       toast({
@@ -237,21 +278,72 @@ export const ReelsViewer = () => {
     );
   }
 
-  if (reelsContent.length === 0) {
+  if (filteredContent.length === 0 && !loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-background">
-        <p className="text-lg text-muted-foreground">لا توجد فيديوهات متاحة</p>
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
+        {categories.length > 0 && (
+          <div className="absolute top-4 left-4 right-4">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button
+                variant={selectedCategory === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(null)}
+                className="text-sm"
+              >
+                الكل
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category.id)}
+                  className="text-sm"
+                >
+                  {category.title}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        <p className="text-lg text-muted-foreground mt-16">لا توجد فيديوهات متاحة في هذا القسم</p>
       </div>
     );
   }
 
-  const currentReel = reelsContent[currentVideoIndex];
+  const currentReel = filteredContent[currentVideoIndex];
 
   return (
     <div 
       ref={containerRef}
       className="h-screen w-full bg-black overflow-hidden relative"
     >
+      {/* Categories Navigation */}
+      {categories.length > 0 && !isEditing && (
+        <div className="absolute top-4 left-4 right-4 z-10">
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button
+              variant={selectedCategory === null ? "default" : "secondary"}
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+              className="text-xs bg-black/40 text-white border-white/20 hover:bg-black/60"
+            >
+              الكل
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "secondary"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.id)}
+                className="text-xs bg-black/40 text-white border-white/20 hover:bg-black/60"
+              >
+                {category.title}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Video Container */}
       <div className="relative h-full w-full flex items-center justify-center">
         <video
@@ -297,7 +389,7 @@ export const ReelsViewer = () => {
               onClick={goToNext}
               style={{ background: 'transparent' }}
             >
-              {currentVideoIndex < reelsContent.length - 1 && (
+              {currentVideoIndex < filteredContent.length - 1 && (
                 <ArrowDown className="w-8 h-8 text-white/60 opacity-0 hover:opacity-100 transition-opacity" />
               )}
             </div>
@@ -408,7 +500,7 @@ export const ReelsViewer = () => {
       {/* Progress Indicator */}
       <div className="absolute top-4 right-4">
         <div className="text-white text-sm bg-black/40 px-3 py-1 rounded-full">
-          {currentVideoIndex + 1} / {reelsContent.length}
+          {currentVideoIndex + 1} / {filteredContent.length}
         </div>
       </div>
 
@@ -419,7 +511,7 @@ export const ReelsViewer = () => {
             {currentVideoIndex > 0 && "انقر للسابق"}
           </div>
           <div className="absolute top-1/2 right-4 transform -translate-y-1/2 text-white/40 text-xs">
-            {currentVideoIndex < reelsContent.length - 1 && "انقر للتالي"}
+            {currentVideoIndex < filteredContent.length - 1 && "انقر للتالي"}
           </div>
         </>
       )}
