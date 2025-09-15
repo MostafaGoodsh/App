@@ -243,9 +243,25 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ open, onOpen
               جاري المعالجة...
             </>
           ) : (
-            'تأكيد السحب'
+            'تأكيد السحب الحقيقي'
           )}
         </Button>
+      </div>
+
+      <Alert className="border-amber-200 bg-amber-50">
+        <AlertDescription className="text-amber-800">
+          ⚠️ <strong>سحب حقيقي:</strong> ستُرسل العملات فعلياً إلى محفظتك الخارجية على البلوك تشين. 
+          هذه العملية غير قابلة للإلغاء وتتطلب رسوم شبكة حقيقية.
+        </AlertDescription>
+      </Alert>
+
+      <div className="bg-blue-50 p-3 rounded-lg">
+        <h4 className="font-medium text-blue-900 mb-2 text-sm">الشبكات المدعومة:</h4>
+        <div className="text-xs text-blue-700 space-y-1">
+          <div>• <strong>SOL:</strong> معاملات حقيقية على شبكة Solana Devnet</div>
+          <div>• <strong>USDC:</strong> قيد التطوير (محاكاة حالياً)</div>
+          <div>• <strong>BTC/ETH:</strong> قيد التطوير (محاكاة حالياً)</div>
+        </div>
       </div>
     </div>
   );
