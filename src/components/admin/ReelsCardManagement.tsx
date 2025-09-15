@@ -118,20 +118,46 @@ export const ReelsCardManagement = () => {
       return;
     }
 
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "خطأ",
+        description: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `reels-bg-${Date.now()}.${fileExt}`;
-      const filePath = `reels/${fileName}`;
+      const filePath = `backgrounds/${fileName}`;
+
+      // Delete old image if exists
+      if (content.background_image_url) {
+        const oldPath = content.background_image_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('reels-content')
+            .remove([`backgrounds/${oldPath}`]);
+        }
+      }
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+        .from('reels-content')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(uploadError.message || 'فشل في رفع الصورة');
+      }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from('reels-content')
         .getPublicUrl(filePath);
 
       setContent(prev => ({
@@ -143,11 +169,11 @@ export const ReelsCardManagement = () => {
         title: "تم رفع الصورة بنجاح",
         description: "يمكنك الآن حفظ التغييرات",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
       toast({
         title: "خطأ",
-        description: "فشل في رفع الصورة",
+        description: error.message || "فشل في رفع الصورة",
         variant: "destructive",
       });
     } finally {
