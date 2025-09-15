@@ -41,6 +41,7 @@ import AnubisCardAdmin from "./pages/AnubisCardAdmin";
 import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
 import Reels from "./pages/Reels";
 import ReelsCardAdmin from "./pages/ReelsCardAdmin";
+import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ const App = () => {
                   <Route path="admin/task-introductions" element={<RequireAdmin><TaskIntroductionsAdmin /></RequireAdmin>} />
                   <Route path="admin/conversion-settings" element={<RequireAdmin><ConversionSettingsAdmin /></RequireAdmin>} />
                   <Route path="admin/reels-card" element={<RequireAdmin><ReelsCardAdmin /></RequireAdmin>} />
+                  <Route path="admin/reels-categories" element={<RequireAdmin><ReelsCategoriesAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

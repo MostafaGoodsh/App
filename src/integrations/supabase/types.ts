@@ -905,8 +905,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reels_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reels_content: {
         Row: {
+          category_id: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -923,6 +960,7 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          category_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -939,6 +977,7 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          category_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -954,7 +993,15 @@ export type Database = {
           video_url?: string
           view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reels_content_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "reels_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       survey_responses: {
         Row: {

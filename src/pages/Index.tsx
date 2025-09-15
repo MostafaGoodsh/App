@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import AnubisCard from "@/components/AnubisCard";
-import { ReelsCard } from "@/components/reels/ReelsCard";
+import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -127,7 +127,7 @@ const Index = () => {
           ))}
 
           {/* Reels Card - Second Card */}
-          <ReelsCard />
+          <ExternalReelsCard />
           
           {/* Daily Tasks Card */}
           <DailyTasksCard />

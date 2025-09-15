@@ -1,59 +1,64 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Trash2, Edit, Plus, Video, Upload, Save, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Video, Eye, EyeOff, Upload } from 'lucide-react';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ReelsContent {
   id: string;
   title: string;
-  title_en?: string;
-  description?: string;
-  description_en?: string;
+  description: string;
   video_url: string;
   thumbnail_url?: string;
   duration?: number;
   display_order: number;
   is_active: boolean;
-  view_count?: number;
+  view_count: number;
   created_at: string;
-  updated_at: string;
+  category_id?: string;
+}
+
+interface ReelsCategory {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  is_active: boolean;
 }
 
 export const ReelsManagement = () => {
-  const { toast } = useToast();
   const [reelsContent, setReelsContent] = useState<ReelsContent[]>([]);
+  const [categories, setCategories] = useState<ReelsCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingReel, setEditingReel] = useState<ReelsContent | null>(null);
-  const [uploading, setUploading] = useState(false);
-  
   const [formData, setFormData] = useState({
     title: '',
-    title_en: '',
     description: '',
-    description_en: '',
     duration: 0,
     display_order: 0,
-    is_active: true
+    category_id: ''
   });
-  
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchReelsContent();
+    fetchCategories();
   }, []);
 
   const fetchReelsContent = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('reels_content')
         .select('*')
@@ -61,121 +66,115 @@ export const ReelsManagement = () => {
 
       if (error) throw error;
       setReelsContent(data || []);
-    } catch (error: any) {
-      console.error('خطأ في تحميل البيانات:', error);
-      toast({
-        title: 'خطأ',
-        description: 'فشل في تحميل محتوى الريلز',
-        variant: 'destructive'
-      });
+    } catch (error) {
+      console.error('Error fetching reels content:', error);
+      toast.error('خطأ في جلب محتوى الريلز');
     } finally {
       setLoading(false);
     }
   };
 
-  const uploadFile = async (file: File, folder: string): Promise<string> => {
+  const fetchCategories = async () => {
     try {
-      const fileName = `${Date.now()}-${file.name}`;
-      const filePath = `${folder}/${fileName}`;
+      const { data, error } = await supabase
+        .from('reels_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
-      const { data, error } = await supabase.storage
-        .from('reels-videos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        console.error('خطأ في رفع الملف:', error);
-        throw error;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('reels-videos')
-        .getPublicUrl(data.path);
-
-      return publicUrl;
+      if (error) throw error;
+      setCategories(data || []);
     } catch (error) {
-      console.error('خطأ في uploadFile:', error);
-      throw error;
+      console.error('Error fetching categories:', error);
     }
+  };
+
+  // Upload file function
+  const uploadFile = async (file: File, folder: string): Promise<string> => {
+    const fileName = `${Date.now()}-${file.name}`;
+    const filePath = `${folder}/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('reels-videos')
+      .upload(filePath, file);
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('reels-videos')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUploading(true);
+    if (!formData.title.trim()) {
+      toast.error('يرجى إدخال عنوان الريل');
+      return;
+    }
 
     try {
-      // التحقق من البيانات المطلوبة
-      if (!formData.title.trim()) {
-        throw new Error('العنوان مطلوب');
-      }
+      setSaving(true);
+      let videoUrl = editingReel?.video_url || '';
+      let thumbnailUrl = editingReel?.thumbnail_url || '';
 
-      if (!editingReel && !videoFile) {
-        throw new Error('الفيديو مطلوب للريلز الجديد');
-      }
-
-      // رفع الملفات
-      let video_url = editingReel?.video_url || '';
-      let thumbnail_url = editingReel?.thumbnail_url || '';
-
+      // Upload files if selected
       if (videoFile) {
-        video_url = await uploadFile(videoFile, 'videos');
+        videoUrl = await uploadFile(videoFile, 'videos');
       }
-
       if (thumbnailFile) {
-        thumbnail_url = await uploadFile(thumbnailFile, 'thumbnails');
+        thumbnailUrl = await uploadFile(thumbnailFile, 'thumbnails');
       }
-
-      const submitData = {
-        title: formData.title.trim(),
-        title_en: formData.title_en.trim() || null,
-        description: formData.description.trim() || null,
-        description_en: formData.description_en.trim() || null,
-        video_url,
-        thumbnail_url: thumbnail_url || null,
-        duration: formData.duration || 0,
-        display_order: formData.display_order,
-        is_active: formData.is_active
-      };
 
       if (editingReel) {
+        // Update existing reel
         const { error } = await supabase
           .from('reels_content')
-          .update(submitData)
+          .update({
+            title: formData.title,
+            description: formData.description,
+            duration: formData.duration,
+            display_order: formData.display_order,
+            category_id: formData.category_id || null,
+            video_url: videoUrl || editingReel.video_url,
+            thumbnail_url: thumbnailUrl || editingReel.thumbnail_url
+          })
           .eq('id', editingReel.id);
 
         if (error) throw error;
-
-        toast({
-          title: 'تم التحديث',
-          description: 'تم تحديث الريلز بنجاح'
-        });
+        toast.success('تم تحديث الريل بنجاح');
       } else {
+        // Create new reel
+        if (!videoFile) {
+          toast.error('يرجى اختيار ملف فيديو');
+          return;
+        }
+
         const { error } = await supabase
           .from('reels_content')
-          .insert([submitData]);
+          .insert([{
+            title: formData.title,
+            description: formData.description,
+            duration: formData.duration,
+            display_order: formData.display_order,
+            category_id: formData.category_id || null,
+            video_url: videoUrl,
+            thumbnail_url: thumbnailUrl
+          }]);
 
         if (error) throw error;
-
-        toast({
-          title: 'تم الإنشاء',
-          description: 'تم إنشاء الريلز بنجاح'
-        });
+        toast.success('تم إضافة الريل بنجاح');
       }
 
-      resetForm();
-      setDialogOpen(false);
       fetchReelsContent();
-    } catch (error: any) {
-      console.error('خطأ في الحفظ:', error);
-      toast({
-        title: 'خطأ',
-        description: error.message || 'فشل في حفظ البيانات',
-        variant: 'destructive'
-      });
+      resetForm();
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving reel:', error);
+      toast.error('خطأ في حفظ الريل');
     } finally {
-      setUploading(false);
+      setSaving(false);
     }
   };
 
@@ -183,18 +182,16 @@ export const ReelsManagement = () => {
     setEditingReel(reel);
     setFormData({
       title: reel.title,
-      title_en: reel.title_en || '',
-      description: reel.description || '',
-      description_en: reel.description_en || '',
+      description: reel.description,
       duration: reel.duration || 0,
       display_order: reel.display_order,
-      is_active: reel.is_active
+      category_id: reel.category_id || ''
     });
-    setDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الريلز؟')) return;
+    if (!confirm('هل أنت متأكد من حذف هذا الريل؟')) return;
 
     try {
       const { error } = await supabase
@@ -203,19 +200,11 @@ export const ReelsManagement = () => {
         .eq('id', id);
 
       if (error) throw error;
-
-      toast({
-        title: 'تم الحذف',
-        description: 'تم حذف الريلز بنجاح'
-      });
-
+      toast.success('تم حذف الريل بنجاح');
       fetchReelsContent();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل في حذف الريلز',
-        variant: 'destructive'
-      });
+    } catch (error) {
+      console.error('Error deleting reel:', error);
+      toast.error('خطأ في حذف الريل');
     }
   };
 
@@ -227,275 +216,247 @@ export const ReelsManagement = () => {
         .eq('id', id);
 
       if (error) throw error;
-
-      toast({
-        title: 'تم التحديث',
-        description: `تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الريلز`
-      });
-
+      toast.success(`تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الريل`);
       fetchReelsContent();
-    } catch (error: any) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل في تحديث حالة الريلز',
-        variant: 'destructive'
-      });
+    } catch (error) {
+      console.error('Error toggling active status:', error);
+      toast.error('خطأ في تغيير حالة الريل');
     }
   };
 
   const resetForm = () => {
     setFormData({
       title: '',
-      title_en: '',
       description: '',
-      description_en: '',
       duration: 0,
       display_order: 0,
-      is_active: true
+      category_id: ''
     });
+    setEditingReel(null);
     setVideoFile(null);
     setThumbnailFile(null);
-    setEditingReel(null);
   };
 
   const openDialog = () => {
     resetForm();
-    setDialogOpen(true);
+    setIsDialogOpen(true);
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <span className="mr-2">جاري التحميل...</span>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="text-center">جاري التحميل...</div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Video className="w-5 h-5" />
-            إدارة محتوى الريلز
-          </div>
-          <Button onClick={openDialog}>
-            <Plus className="w-4 h-4 mr-2" />
-            إضافة ريلز
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        {reelsContent.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-muted-foreground mb-4 text-lg">
-              لا يوجد محتوى ريلز حالياً
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              إدارة محتوى الريلز ({reelsContent.length})
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
-              ابدأ بإضافة أول مقطع فيديو قصير للمنصة
-            </p>
-            <Button onClick={openDialog}>
-              إضافة ريلز جديد
+            <Button onClick={openDialog} className="gap-2">
+              <Plus className="h-4 w-4" />
+              إضافة ريل
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {reelsContent.map((reel) => (
-              <div key={reel.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{reel.title}</h3>
-                      <Badge variant={reel.is_active ? 'default' : 'secondary'}>
-                        {reel.is_active ? 'نشط' : 'غير نشط'}
-                      </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {reelsContent.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">لا توجد ريلز حتى الآن</p>
+              <Button onClick={openDialog} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                إضافة أول ريل
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reelsContent.map((reel) => (
+                <Card key={reel.id} className="border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg">{reel.title}</h3>
+                          <Badge 
+                            variant={reel.is_active ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {reel.is_active ? 'نشط' : 'غير نشط'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            المشاهدات: {reel.view_count}
+                          </Badge>
+                          {reel.category_id && (
+                            <Badge variant="secondary" className="text-xs">
+                              {categories.find(cat => cat.id === reel.category_id)?.title || 'قسم غير محدد'}
+                            </Badge>
+                          )}
+                        </div>
+                        {reel.description && (
+                          <p className="text-muted-foreground text-sm mb-2">
+                            {reel.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>الترتيب: {reel.display_order}</span>
+                          <span>•</span>
+                          <span>المدة: {reel.duration || 0}ث</span>
+                          <span>•</span>
+                          <span>تم الإنشاء: {new Date(reel.created_at).toLocaleDateString('ar-EG')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={reel.is_active}
+                          onCheckedChange={() => toggleActive(reel.id, reel.is_active)}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(reel)}
+                          className="gap-2"
+                        >
+                          <Edit className="h-3 w-3" />
+                          تعديل
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(reel.id)}
+                          className="gap-2"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          حذف
+                        </Button>
+                      </div>
                     </div>
-                    {reel.title_en && (
-                      <p className="text-sm text-muted-foreground mb-1">{reel.title_en}</p>
-                    )}
-                    {reel.description && (
-                      <p className="text-sm text-muted-foreground mb-2">{reel.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>ترتيب: {reel.display_order}</span>
-                      {reel.duration && reel.duration > 0 && <span>المدة: {reel.duration}ث</span>}
-                      <span>المشاهدات: {reel.view_count || 0}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => toggleActive(reel.id, reel.is_active)}
-                    >
-                      {reel.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleEdit(reel)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDelete(reel.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingReel ? 'تعديل الريلز' : 'إضافة ريلز جديد'}
+              {editingReel ? 'تعديل الريل' : 'إضافة ريل جديد'}
             </DialogTitle>
           </DialogHeader>
-          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="title">العنوان (عربي) *</Label>
+              <Label htmlFor="title">عنوان الريل</Label>
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="أدخل عنوان الريل"
                 required
-                placeholder="أدخل عنوان الريلز"
               />
             </div>
-
             <div>
-              <Label htmlFor="title_en">العنوان (إنجليزي)</Label>
-              <Input
-                id="title_en"
-                value={formData.title_en}
-                onChange={(e) => setFormData({...formData, title_en: e.target.value})}
-                placeholder="Enter reel title in English"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description">الوصف (عربي)</Label>
+              <Label htmlFor="description">الوصف</Label>
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="أدخل وصف الريل"
                 rows={3}
-                placeholder="أدخل وصف الريلز"
               />
             </div>
-
             <div>
-              <Label htmlFor="description_en">الوصف (إنجليزي)</Label>
-              <Textarea
-                id="description_en"
-                value={formData.description_en}
-                onChange={(e) => setFormData({...formData, description_en: e.target.value})}
-                rows={3}
-                placeholder="Enter reel description in English"
-              />
+              <Label htmlFor="category">القسم</Label>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر قسم (اختياري)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">بدون قسم</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-
             <div>
-              <Label htmlFor="video_file">
-                رفع الفيديو {!editingReel && '*'}
-              </Label>
+              <Label htmlFor="video">ملف الفيديو {!editingReel && '*'}</Label>
               <Input
-                id="video_file"
+                id="video"
                 type="file"
                 accept="video/*"
                 onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
               />
               {videoFile && (
-                <p className="text-sm text-green-600 mt-1">
-                  تم اختيار: {videoFile.name}
-                </p>
+                <p className="text-sm text-green-600 mt-1">تم اختيار: {videoFile.name}</p>
               )}
             </div>
-
             <div>
-              <Label htmlFor="thumbnail_file">رفع الصورة المصغرة</Label>
+              <Label htmlFor="thumbnail">الصورة المصغرة (اختياري)</Label>
               <Input
-                id="thumbnail_file"
+                id="thumbnail"
                 type="file"
                 accept="image/*"
                 onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)}
               />
               {thumbnailFile && (
-                <p className="text-sm text-green-600 mt-1">
-                  تم اختيار: {thumbnailFile.name}
-                </p>
+                <p className="text-sm text-green-600 mt-1">تم اختيار: {thumbnailFile.name}</p>
               )}
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="duration">المدة (ثانية)</Label>
                 <Input
                   id="duration"
                   type="number"
-                  min="0"
                   value={formData.duration}
-                  onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
+                  min="0"
                 />
               </div>
-
               <div>
                 <Label htmlFor="display_order">ترتيب العرض</Label>
                 <Input
                   id="display_order"
                   type="number"
-                  min="0"
                   value={formData.display_order}
-                  onChange={(e) => setFormData({...formData, display_order: parseInt(e.target.value) || 0})}
+                  onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                  min="0"
                 />
               </div>
             </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
-              />
-              <Label htmlFor="is_active">نشط</Label>
-            </div>
-
             <div className="flex gap-2 pt-4">
-              <Button type="submit" className="flex-1" disabled={uploading}>
-                {uploading ? (
-                  <>
-                    <Upload className="w-4 h-4 mr-2 animate-spin" />
-                    جاري الحفظ...
-                  </>
-                ) : (
-                  editingReel ? 'تحديث' : 'إنشاء'
-                )}
+              <Button type="submit" disabled={saving} className="flex-1 gap-2">
+                <Save className="h-4 w-4" />
+                {saving ? 'جاري الحفظ...' : editingReel ? 'تحديث' : 'إضافة'}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setDialogOpen(false)}
-                className="flex-1"
-                disabled={uploading}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                className="gap-2"
               >
+                <X className="h-4 w-4" />
                 إلغاء
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    </Card>
+    </>
   );
 };

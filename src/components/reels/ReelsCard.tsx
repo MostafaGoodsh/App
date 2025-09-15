@@ -91,7 +91,7 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
 
   return (
     <article 
-      className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm"
+      className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm group"
       onClick={handleCardClick}
     >
       {/* Background Image */}
