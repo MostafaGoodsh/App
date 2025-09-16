@@ -140,9 +140,22 @@ serve(async (req) => {
         }
 
         // Create hot wallet keypair
-        const hotWallet = Keypair.fromSecretKey(
-          new Uint8Array(JSON.parse(hotWalletKey))
-        )
+        let hotWallet: Keypair
+        try {
+          // Try to parse as JSON array first
+          const keyArray = JSON.parse(hotWalletKey)
+          if (!Array.isArray(keyArray)) {
+            throw new Error('Private key must be a JSON array of numbers')
+          }
+          hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+        } catch (parseError) {
+          // If JSON parsing fails, try base58 format
+          try {
+            hotWallet = Keypair.fromSecretKey(Buffer.from(hotWalletKey, 'base64'))
+          } catch (base64Error) {
+            throw new Error('Invalid private key format. Please provide as JSON array or base64 string')
+          }
+        }
 
         // Check hot wallet balance
         const hotWalletBalance = await connection.getBalance(hotWallet.publicKey)
@@ -191,9 +204,22 @@ serve(async (req) => {
         }
 
         // Create hot wallet keypair
-        const hotWallet = Keypair.fromSecretKey(
-          new Uint8Array(JSON.parse(hotWalletKey))
-        )
+        let hotWallet: Keypair
+        try {
+          // Try to parse as JSON array first
+          const keyArray = JSON.parse(hotWalletKey)
+          if (!Array.isArray(keyArray)) {
+            throw new Error('Private key must be a JSON array of numbers')
+          }
+          hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+        } catch (parseError) {
+          // If JSON parsing fails, try base58 format
+          try {
+            hotWallet = Keypair.fromSecretKey(Buffer.from(hotWalletKey, 'base64'))
+          } catch (base64Error) {
+            throw new Error('Invalid private key format. Please provide as JSON array or base64 string')
+          }
+        }
 
         // For now, create a SOL transaction as placeholder until USDC token is set up
         // In production, this would mint/transfer USDC tokens
