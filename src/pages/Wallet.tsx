@@ -14,7 +14,7 @@ const WalletPage = () => {
       setIsConnecting(true);
       
       const ethereumProvider = await EthereumProvider.init({
-        projectId: '2f05a7cdc2674bb905b88db5e83154a6', // Valid WalletConnect project ID
+        projectId: process.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_REOWN_PROJECT_ID_HERE', // استخدم project ID من حساب Reown الخاص بك
         chains: [1, 137, 56], // Ethereum, Polygon, BSC
         showQrModal: true,
         qrModalOptions: {
