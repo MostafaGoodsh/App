@@ -56,7 +56,25 @@ const WalletPage = () => {
       case 1: return 'Ethereum Mainnet';
       case 137: return 'Polygon';
       case 56: return 'BSC';
+      case 10: return 'Optimism';
+      case 42161: return 'Arbitrum';
+      case 8453: return 'Base';
+      case 43114: return 'Avalanche';
       default: return `Chain ${chainId}`;
+    }
+  };
+
+  // الحصول على رمز الرمز الأصلي للشبكة
+  const getNativeTokenSymbol = (chainId: number) => {
+    switch (chainId) {
+      case 1: return 'ETH';
+      case 137: return 'MATIC';
+      case 56: return 'BNB';
+      case 10: return 'ETH';
+      case 42161: return 'ETH';
+      case 8453: return 'ETH';
+      case 43114: return 'AVAX';
+      default: return 'ETH';
     }
   };
 
@@ -69,7 +87,7 @@ const WalletPage = () => {
       
       const ethereumProvider = await EthereumProvider.init({
         projectId: '5cbecfb58785fd00d9c6f1825f993060', // معرف مشروع Reown الخاص بك
-        chains: [1, 137, 56], // Ethereum, Polygon, BSC
+        chains: [1, 137, 56, 10, 42161, 8453, 43114], // Ethereum, Polygon, BSC, Optimism, Arbitrum, Base, Avalanche
         showQrModal: true,
         qrModalOptions: {
           themeMode: 'dark',
@@ -220,7 +238,7 @@ const WalletPage = () => {
                               <span>جاري التحميل...</span>
                             </div>
                           ) : (
-                            <p className="text-2xl font-bold text-primary">{balance} ETH</p>
+                            <p className="text-2xl font-bold text-primary">{balance} {getNativeTokenSymbol(networkId)}</p>
                           )}
                         </div>
                         
