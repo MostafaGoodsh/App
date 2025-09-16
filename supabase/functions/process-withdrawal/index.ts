@@ -153,6 +153,13 @@ serve(async (req) => {
               throw new Error('Invalid JSON array format for private key')
             }
             hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+          } else if (hotWalletKey.includes(',')) {
+            // Comma-separated numbers format (most likely from generate-wallet.js)
+            const keyNumbers = hotWalletKey.split(',').map(num => parseInt(num.trim()))
+            if (keyNumbers.length !== 64 || keyNumbers.some(isNaN)) {
+              throw new Error('Invalid comma-separated format for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(new Uint8Array(keyNumbers))
           } else if (hotWalletKey.length === 128) {
             // Hex string format
             const keyBytes = new Uint8Array(hotWalletKey.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || [])
@@ -240,6 +247,13 @@ serve(async (req) => {
               throw new Error('Invalid JSON array format for private key')
             }
             hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+          } else if (hotWalletKey.includes(',')) {
+            // Comma-separated numbers format
+            const keyNumbers = hotWalletKey.split(',').map(num => parseInt(num.trim()))
+            if (keyNumbers.length !== 64 || keyNumbers.some(isNaN)) {
+              throw new Error('Invalid comma-separated format for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(new Uint8Array(keyNumbers))
           } else if (hotWalletKey.length === 128) {
             const keyBytes = new Uint8Array(hotWalletKey.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || [])
             if (keyBytes.length !== 64) {
