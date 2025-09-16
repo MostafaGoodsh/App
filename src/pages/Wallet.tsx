@@ -8,6 +8,9 @@ const WalletPage = () => {
   const [provider, setProvider] = useState<any>(null);
   const [account, setAccount] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [balance, setBalance] = useState<string>('0');
+  const [networkId, setNetworkId] = useState<number>(1);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
   // مسح البيانات المحفوظة عند تحميل الصفحة
   useEffect(() => {
@@ -24,6 +27,36 @@ const WalletPage = () => {
       });
     } catch (error) {
       console.warn('Failed to clear storage:', error);
+    }
+  };
+
+  // جلب رصيد المحفظة
+  const fetchBalance = async (walletProvider: any, walletAccount: string) => {
+    try {
+      setIsLoadingBalance(true);
+      const balance = await walletProvider.request({
+        method: 'eth_getBalance',
+        params: [walletAccount, 'latest']
+      });
+      
+      // تحويل من wei إلى ether
+      const balanceInEth = parseInt(balance, 16) / Math.pow(10, 18);
+      setBalance(balanceInEth.toFixed(4));
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      setBalance('0');
+    } finally {
+      setIsLoadingBalance(false);
+    }
+  };
+
+  // الحصول على اسم الشبكة
+  const getNetworkName = (chainId: number) => {
+    switch (chainId) {
+      case 1: return 'Ethereum Mainnet';
+      case 137: return 'Polygon';
+      case 56: return 'BSC';
+      default: return `Chain ${chainId}`;
     }
   };
 
@@ -58,6 +91,13 @@ const WalletPage = () => {
       if (accounts && accounts.length > 0) {
         setAccount(accounts[0]);
         setProvider(ethereumProvider);
+        
+        // جلب الشبكة الحالية
+        const chainId = await ethereumProvider.request({ method: 'eth_chainId' }) as string;
+        setNetworkId(parseInt(chainId, 16));
+        
+        // جلب الرصيد
+        await fetchBalance(ethereumProvider, accounts[0]);
       }
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -75,12 +115,16 @@ const WalletPage = () => {
       clearWalletConnectStorage();
       setProvider(null);
       setAccount('');
+      setBalance('0');
+      setNetworkId(1);
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
       // حتى لو فشل قطع الاتصال، امسح البيانات محلياً
       clearWalletConnectStorage();
       setProvider(null);
       setAccount('');
+      setBalance('0');
+      setNetworkId(1);
     }
   };
 
@@ -157,6 +201,47 @@ const WalletPage = () => {
                       {account}
                     </p>
                   </div>
+                  
+                  {/* معلومات المحفظة */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5" />
+                        محتويات المحفظة
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 bg-primary/5 rounded-lg">
+                          <h3 className="font-semibold mb-2">الرصيد الحالي</h3>
+                          {isLoadingBalance ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                              <span>جاري التحميل...</span>
+                            </div>
+                          ) : (
+                            <p className="text-2xl font-bold text-primary">{balance} ETH</p>
+                          )}
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h3 className="font-semibold mb-2">الشبكة الحالية</h3>
+                          <p className="text-lg font-medium text-blue-700">{getNetworkName(networkId)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="pt-4 border-t">
+                        <Button 
+                          onClick={() => fetchBalance(provider, account)}
+                          variant="outline"
+                          className="w-full"
+                          disabled={isLoadingBalance}
+                        >
+                          تحديث الرصيد
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                   
                   <Button 
                     onClick={disconnectWallet}
