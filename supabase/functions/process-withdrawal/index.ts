@@ -142,19 +142,47 @@ serve(async (req) => {
         // Create hot wallet keypair
         let hotWallet: Keypair
         try {
-          // Try to parse as JSON array first
-          const keyArray = JSON.parse(hotWalletKey)
-          if (!Array.isArray(keyArray)) {
-            throw new Error('Private key must be a JSON array of numbers')
+          console.log('Hot wallet key type:', typeof hotWalletKey)
+          console.log('Hot wallet key sample:', hotWalletKey.substring(0, 20) + '...')
+          
+          // Try different formats
+          if (hotWalletKey.startsWith('[') && hotWalletKey.endsWith(']')) {
+            // JSON array format
+            const keyArray = JSON.parse(hotWalletKey)
+            if (!Array.isArray(keyArray) || keyArray.length !== 64) {
+              throw new Error('Invalid JSON array format for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+          } else if (hotWalletKey.length === 128) {
+            // Hex string format
+            const keyBytes = new Uint8Array(hotWalletKey.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || [])
+            if (keyBytes.length !== 64) {
+              throw new Error('Invalid hex string length for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(keyBytes)
+          } else {
+            // Base64 or base58 format
+            try {
+              const decoded = Buffer.from(hotWalletKey, 'base64')
+              if (decoded.length !== 64) {
+                throw new Error('Invalid base64 key length')
+              }
+              hotWallet = Keypair.fromSecretKey(decoded)
+            } catch {
+              // Try as raw bytes if it's exactly 64 characters
+              if (hotWalletKey.length === 64) {
+                const keyBytes = new Uint8Array(Buffer.from(hotWalletKey, 'utf8'))
+                hotWallet = Keypair.fromSecretKey(keyBytes)
+              } else {
+                throw new Error('Unsupported private key format')
+              }
+            }
           }
-          hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
-        } catch (parseError) {
-          // If JSON parsing fails, try base58 format
-          try {
-            hotWallet = Keypair.fromSecretKey(Buffer.from(hotWalletKey, 'base64'))
-          } catch (base64Error) {
-            throw new Error('Invalid private key format. Please provide as JSON array or base64 string')
-          }
+          
+          console.log('Hot wallet public key:', hotWallet.publicKey.toBase58())
+        } catch (error) {
+          console.error('Hot wallet creation failed:', error)
+          throw new Error(`Failed to create hot wallet: ${error.message}`)
         }
 
         // Check hot wallet balance
@@ -203,22 +231,40 @@ serve(async (req) => {
           throw new Error('Hot wallet not configured')
         }
 
-        // Create hot wallet keypair
+        // Create hot wallet keypair (same logic as SOL withdrawal)
         let hotWallet: Keypair
         try {
-          // Try to parse as JSON array first
-          const keyArray = JSON.parse(hotWalletKey)
-          if (!Array.isArray(keyArray)) {
-            throw new Error('Private key must be a JSON array of numbers')
+          if (hotWalletKey.startsWith('[') && hotWalletKey.endsWith(']')) {
+            const keyArray = JSON.parse(hotWalletKey)
+            if (!Array.isArray(keyArray) || keyArray.length !== 64) {
+              throw new Error('Invalid JSON array format for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+          } else if (hotWalletKey.length === 128) {
+            const keyBytes = new Uint8Array(hotWalletKey.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || [])
+            if (keyBytes.length !== 64) {
+              throw new Error('Invalid hex string length for private key')
+            }
+            hotWallet = Keypair.fromSecretKey(keyBytes)
+          } else {
+            try {
+              const decoded = Buffer.from(hotWalletKey, 'base64')
+              if (decoded.length !== 64) {
+                throw new Error('Invalid base64 key length')
+              }
+              hotWallet = Keypair.fromSecretKey(decoded)
+            } catch {
+              if (hotWalletKey.length === 64) {
+                const keyBytes = new Uint8Array(Buffer.from(hotWalletKey, 'utf8'))
+                hotWallet = Keypair.fromSecretKey(keyBytes)
+              } else {
+                throw new Error('Unsupported private key format')
+              }
+            }
           }
-          hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
-        } catch (parseError) {
-          // If JSON parsing fails, try base58 format
-          try {
-            hotWallet = Keypair.fromSecretKey(Buffer.from(hotWalletKey, 'base64'))
-          } catch (base64Error) {
-            throw new Error('Invalid private key format. Please provide as JSON array or base64 string')
-          }
+        } catch (error) {
+          console.error('Hot wallet creation failed:', error)
+          throw new Error(`Failed to create hot wallet: ${error.message}`)
         }
 
         // For now, create a SOL transaction as placeholder until USDC token is set up
