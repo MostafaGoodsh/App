@@ -32,13 +32,7 @@ export default defineConfig(({ mode }) => ({
       'buffer', 
       'eventemitter3',
       'bn.js',
-      '@solana/web3.js',
-      '@solana/spl-token',
-      '@walletconnect/ethereum-provider',
-      '@walletconnect/time',
-      '@walletconnect/relay-auth',
-      '@walletconnect/core',
-      '@walletconnect/utils'
+      '@walletconnect/ethereum-provider'
     ],
     esbuildOptions: {
       target: 'esnext',

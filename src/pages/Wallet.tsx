@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Shield, Zap } from 'lucide-react';
-import EthereumProvider from '@walletconnect/ethereum-provider';
+import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 const WalletPage = () => {
   const [provider, setProvider] = useState<any>(null);
