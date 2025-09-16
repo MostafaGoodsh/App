@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, ExternalLink, Shield, Zap } from 'lucide-react';
@@ -9,12 +9,33 @@ const WalletPage = () => {
   const [account, setAccount] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
 
+  // مسح البيانات المحفوظة عند تحميل الصفحة
+  useEffect(() => {
+    clearWalletConnectStorage();
+  }, []);
+
+  const clearWalletConnectStorage = () => {
+    try {
+      // مسح جميع بيانات WalletConnect المحفوظة
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('walletconnect') || key.includes('wc@2') || key.includes('-wc')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to clear storage:', error);
+    }
+  };
+
   const handleWalletConnect = async () => {
     try {
       setIsConnecting(true);
       
+      // مسح البيانات المحفوظة قبل الاتصال الجديد
+      clearWalletConnectStorage();
+      
       const ethereumProvider = await EthereumProvider.init({
-        projectId: process.env.VITE_WALLETCONNECT_PROJECT_ID || 'YOUR_REOWN_PROJECT_ID_HERE', // استخدم project ID من حساب Reown الخاص بك
+        projectId: '5cbecfb58785fd00d9c6f1825f993060', // معرف مشروع Reown الخاص بك
         chains: [1, 137, 56], // Ethereum, Polygon, BSC
         showQrModal: true,
         qrModalOptions: {
@@ -45,9 +66,19 @@ const WalletPage = () => {
     }
   };
 
-  const disconnectWallet = () => {
-    if (provider) {
-      provider.disconnect();
+  const disconnectWallet = async () => {
+    try {
+      if (provider) {
+        await provider.disconnect();
+      }
+      // مسح البيانات المحفوظة عند قطع الاتصال
+      clearWalletConnectStorage();
+      setProvider(null);
+      setAccount('');
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+      // حتى لو فشل قطع الاتصال، امسح البيانات محلياً
+      clearWalletConnectStorage();
       setProvider(null);
       setAccount('');
     }
