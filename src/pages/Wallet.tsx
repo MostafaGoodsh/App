@@ -14,7 +14,7 @@ const WalletPage = () => {
       setIsConnecting(true);
       
       const ethereumProvider = await EthereumProvider.init({
-        projectId: 'a01e2f3b4c5d6e7f8a9b0c1d2e3f4a5b', // Project ID عام للاختبار
+        projectId: '2f05a7cdc2674bb905b88db5e83154a6', // Valid WalletConnect project ID
         chains: [1, 137, 56], // Ethereum, Polygon, BSC
         showQrModal: true,
         qrModalOptions: {
