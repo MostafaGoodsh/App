@@ -41,24 +41,19 @@ const SolanaWalletContent = () => {
       
       let tokenBalances = [];
       
-      // استخدام connection مخصص إذا فشل الحالي
+      // استخدام connection أكثر استقراراً مع إعدادات محسنة
       let workingConnection = connection;
       if (retryCount > 0) {
-        const backupEndpoints = [
-          'https://solana.public-rpc.com',     // mainnet مجاني
-          'https://rpc.helius.xyz/',          // mainnet Helius
-          'https://mainnet.helius-rpc.com'    // mainnet Helius backup
-        ];
-        const endpointToUse = backupEndpoints[retryCount - 1] || connection.rpcEndpoint;
-        console.log('🔄 استخدام mainnet endpoint احتياطي:', endpointToUse);
-        workingConnection = new Connection(endpointToUse, 'confirmed');
+        // استخدام endpoint رسمي واحد فقط مع commitment أقل تشدداً
+        console.log('🔄 محاولة مع commitment أقل تشدداً');
+        workingConnection = new Connection(connection.rpcEndpoint, 'processed');
       }
       
       // محاولة جلب رصيد SOL أولاً مع retry logic
       console.log('📊 محاولة جلب رصيد SOL...');
       try {
-        // استخدام finalized للحصول على بيانات مؤكدة أكثر
-        const solBalance = await workingConnection.getBalance(publicKey, 'finalized');
+        // استخدام processed للحصول على استجابة أسرع
+        const solBalance = await workingConnection.getBalance(publicKey, 'processed');
         const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
         console.log('✅ تم جلب رصيد SOL بنجاح:', solBalanceFormatted);
         
@@ -79,10 +74,10 @@ const SolanaWalletContent = () => {
           publicKey: publicKey.toString()
         });
         
-        // محاولة endpoint آخر
-        if (retryCount < 2) {
-          console.log('🔄 محاولة endpoint مختلف...');
-          setTimeout(() => fetchBalance(retryCount + 1), 2000);
+        // إنهاء المحاولات بعد فشل الطريقة الأساسية
+        if (retryCount < 1) {
+          console.log('🔄 محاولة مع إعدادات مختلفة...');
+          setTimeout(() => fetchBalance(retryCount + 1), 1000);
           return;
         }
         
@@ -103,7 +98,7 @@ const SolanaWalletContent = () => {
         console.log('🔍 جاري البحث عن رموز SPL...');
         const tokenAccounts = await workingConnection.getParsedTokenAccountsByOwner(publicKey, {
           programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), // SPL Token Program ID
-        }, 'finalized');
+        }, 'processed');
         
         console.log('📊 تم العثور على', tokenAccounts.value.length, 'حساب رمز مميز');
         
