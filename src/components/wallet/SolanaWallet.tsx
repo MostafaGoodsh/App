@@ -19,39 +19,48 @@ const SolanaWalletContent = () => {
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
   const fetchBalance = async () => {
-    if (!publicKey || !connection) return;
+    if (!publicKey || !connection) {
+      console.log('❌ لا يمكن جلب الرصيد: محفظة غير متصلة أو connection غير متاح');
+      return;
+    }
     
     try {
       setIsLoadingBalance(true);
       console.log('🔍 جاري جلب الأرصدة للمحفظة:', publicKey.toString());
+      console.log('🌐 RPC Endpoint:', connection.rpcEndpoint);
       
-      let solBalance = 0;
       let tokenBalances = [];
       
+      // محاولة جلب رصيد SOL أولاً
+      console.log('📊 محاولة جلب رصيد SOL...');
       try {
-        // محاولة جلب رصيد SOL مع retry مع endpoints مختلفة
-        solBalance = await connection.getBalance(publicKey);
+        const solBalance = await connection.getBalance(publicKey);
         const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
-        console.log('💰 رصيد SOL:', solBalanceFormatted);
+        console.log('✅ تم جلب رصيد SOL بنجاح:', solBalanceFormatted);
         
-        // إضافة رصيد SOL دائماً إلى القائمة
         tokenBalances.push({
           symbol: 'SOL',
-          balance: solBalanceFormatted.toFixed(4),
+          balance: solBalanceFormatted.toFixed(6),
           mint: 'So11111111111111111111111111111111111111112',
           decimals: 9
         });
         
         setBalance(solBalanceFormatted);
       } catch (solError) {
-        console.warn('⚠️ خطأ في جلب رصيد SOL:', solError);
-        // حتى لو فشل في جلب SOL، نضيف 0 للعرض
+        console.error('❌ فشل في جلب رصيد SOL:', {
+          error: solError,
+          message: solError instanceof Error ? solError.message : 'Unknown error',
+          publicKey: publicKey.toString()
+        });
+        
+        // إضافة SOL مع رصيد 0 في حالة الخطأ
         tokenBalances.push({
           symbol: 'SOL',
-          balance: '0.0000',
+          balance: '0.000000',
           mint: 'So11111111111111111111111111111111111111112',
           decimals: 9
         });
+        setBalance(0);
       }
       
       try {
@@ -131,9 +140,12 @@ const SolanaWalletContent = () => {
   };
 
   React.useEffect(() => {
+    console.log('🎯 useEffect triggered:', { connected, publicKey: publicKey?.toString() });
     if (connected && publicKey) {
+      console.log('✅ المحفظة متصلة، سأبدأ في جلب الأرصدة...');
       fetchBalance();
     } else {
+      console.log('❌ المحفظة غير متصلة، إعادة تعيين البيانات');
       setBalance(0);
       setTokens([]);
     }
@@ -233,9 +245,33 @@ const SolanaWalletContent = () => {
                             </div>
                           </div>
                         ))}
+                        
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg text-center">
+                          <p className="text-sm text-blue-600">
+                            تم العثور على {tokens.length} رمز في محفظتك
+                          </p>
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-gray-500">لا توجد رموز مميزة</p>
+                      <div className="text-center py-8 space-y-4">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                          <Coins className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-gray-500 font-medium">لا توجد أرصدة متاحة</p>
+                          <p className="text-sm text-gray-400 mt-1">
+                            قد تحتاج إلى إضافة بعض العملات إلى محفظتك أولاً
+                          </p>
+                        </div>
+                        <Button 
+                          onClick={fetchBalance}
+                          variant="outline"
+                          size="sm"
+                          disabled={isLoadingBalance}
+                        >
+                          {isLoadingBalance ? 'جاري البحث...' : 'البحث مرة أخرى'}
+                        </Button>
+                      </div>
                     )}
                   </div>
                   
@@ -267,17 +303,10 @@ const SolanaWalletContent = () => {
 };
 
 const SolanaWallet = () => {
-  // استخدام Mainnet مع endpoints مجانية
   const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => {
-    // قائمة بـ RPC endpoints مجانية كبديل
-    const endpoints = [
-      'https://solana-mainnet.g.alchemy.com/v2/demo',
-      'https://api.mainnet-beta.solana.com',
-      'https://rpc.ankr.com/solana',
-      'https://solana-api.projectserum.com'
-    ];
-    return endpoints[0]; // استخدام أول endpoint متاح
+    // استخدام endpoints موثوقة أكثر
+    return 'https://api.mainnet-beta.solana.com';
   }, []);
   
   const wallets = useMemo(() => [
