@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Wallet, Shield, Zap, ExternalLink, Coins } from 'lucide-react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ConnectionProvider, WalletProvider, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { LedgerWalletAdapter } from '@solana/wallet-adapter-wallets';
@@ -16,15 +15,8 @@ const SolanaWalletContent = () => {
   const { connection } = useConnection();
   const { publicKey, connected } = useWallet();
   const [balance, setBalance] = useState<number>(0);
-  const [tokens, setTokens] = useState<Array<{symbol: string, balance: string, mint: string}>>([]);
+  const [tokens, setTokens] = useState<Array<{symbol: string, balance: string, mint: string, decimals: number}>>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
-
-  // Popular SPL tokens on Solana
-  const popularTokens = [
-    { symbol: 'USDC', mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', decimals: 6 },
-    { symbol: 'USDT', mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', decimals: 6 },
-    { symbol: 'SOL', mint: 'So11111111111111111111111111111111111111112', decimals: 9 },
-  ];
 
   const fetchBalance = async () => {
     if (!publicKey || !connection) return;
@@ -38,45 +30,50 @@ const SolanaWalletContent = () => {
       setBalance(solBalance / LAMPORTS_PER_SOL);
       console.log('رصيد SOL:', solBalance / LAMPORTS_PER_SOL);
       
-      // جلب رصيد الرموز المميزة
+      // جلب جميع حسابات الرموز المميزة للمحفظة باستخدام Solana RPC
+      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), // SPL Token Program ID
+      });
+      
       const tokenBalances = [];
       
-      for (const token of popularTokens) {
-        try {
-          if (token.mint === 'So11111111111111111111111111111111111111112') {
-            // SOL نفسه
-            tokenBalances.push({
-              symbol: 'SOL',
-              balance: (solBalance / LAMPORTS_PER_SOL).toFixed(4),
-              mint: token.mint
-            });
-          } else {
-            // الرموز المميزة SPL
-            const tokenAccount = await getAssociatedTokenAddress(
-              new PublicKey(token.mint),
-              publicKey
-            );
-            
-            const accountInfo = await connection.getAccountInfo(tokenAccount);
-            
-            if (accountInfo) {
-              const accountData = accountInfo.data;
-              // قراءة الرصيد من البيانات (64 بت في البايت 64-71)
-              const balanceBuffer = accountData.slice(64, 72);
-              const balance = Buffer.from(balanceBuffer).readBigUInt64LE();
-              const formattedBalance = (Number(balance) / Math.pow(10, token.decimals)).toFixed(4);
-              
-              if (parseFloat(formattedBalance) > 0) {
-                tokenBalances.push({
-                  symbol: token.symbol,
-                  balance: formattedBalance,
-                  mint: token.mint
-                });
-              }
-            }
-          }
-        } catch (tokenError) {
-          console.log(`لم يتم العثور على رمز ${token.symbol}`);
+      // إضافة رصيد SOL
+      tokenBalances.push({
+        symbol: 'SOL',
+        balance: (solBalance / LAMPORTS_PER_SOL).toFixed(4),
+        mint: 'So11111111111111111111111111111111111111112',
+        decimals: 9
+      });
+      
+      // معالجة رموز SPL
+      for (const account of tokenAccounts.value) {
+        const parsedInfo = account.account.data.parsed.info;
+        const balance = parsedInfo.tokenAmount.uiAmount;
+        const mint = parsedInfo.mint;
+        const decimals = parsedInfo.tokenAmount.decimals;
+        
+        if (balance && balance > 0) {
+          // محاولة الحصول على رمز العملة المعروف
+          let symbol = 'UNKNOWN';
+          
+          // بعض الرموز المعروفة
+          const knownTokens: { [key: string]: string } = {
+            'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+            'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+            'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
+            'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+            'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP',
+            'rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof': 'RAY',
+          };
+          
+          symbol = knownTokens[mint] || `${mint.slice(0, 4)}...${mint.slice(-4)}`;
+          
+          tokenBalances.push({
+            symbol,
+            balance: balance.toFixed(4),
+            mint,
+            decimals
+          });
         }
       }
       
