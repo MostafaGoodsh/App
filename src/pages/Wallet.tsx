@@ -124,6 +124,24 @@ const WalletPage = () => {
     }
   };
 
+  // تبديل الشبكة
+  const switchNetwork = async (chainId: number) => {
+    if (!provider) return;
+    
+    try {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${chainId.toString(16)}` }],
+      });
+      
+      setNetworkId(chainId);
+      // إعادة جلب الرصيد للشبكة الجديدة
+      await fetchBalance(provider, account);
+    } catch (error) {
+      console.error('Error switching network:', error);
+    }
+  };
+
   const disconnectWallet = async () => {
     try {
       if (provider) {
@@ -248,7 +266,31 @@ const WalletPage = () => {
                         </div>
                       </div>
                       
-                      <div className="pt-4 border-t">
+                      <div className="pt-4 border-t space-y-3">
+                        <div>
+                          <h4 className="font-semibold mb-3">تبديل الشبكة</h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 1, name: 'Ethereum', symbol: 'ETH' },
+                              { id: 137, name: 'Polygon', symbol: 'MATIC' },
+                              { id: 56, name: 'BSC', symbol: 'BNB' },
+                              { id: 42161, name: 'Arbitrum', symbol: 'ETH' },
+                              { id: 10, name: 'Optimism', symbol: 'ETH' },
+                              { id: 8453, name: 'Base', symbol: 'ETH' }
+                            ].map((network) => (
+                              <Button
+                                key={network.id}
+                                onClick={() => switchNetwork(network.id)}
+                                variant={networkId === network.id ? "default" : "outline"}
+                                size="sm"
+                                className="text-xs"
+                              >
+                                {network.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        
                         <Button 
                           onClick={() => fetchBalance(provider, account)}
                           variant="outline"
