@@ -45,12 +45,12 @@ const SolanaWalletContent = () => {
       let workingConnection = connection;
       if (retryCount > 0) {
         const backupEndpoints = [
-          'https://api.devnet.solana.com', // تجريبي للاختبار
-          'https://api.testnet.solana.com', // تجريبي للاختبار
-          'https://rpc.ankr.com/solana'    // مع إمكانية قيود
+          'https://solana.public-rpc.com',     // mainnet مجاني
+          'https://rpc.helius.xyz/',          // mainnet Helius
+          'https://mainnet.helius-rpc.com'    // mainnet Helius backup
         ];
         const endpointToUse = backupEndpoints[retryCount - 1] || connection.rpcEndpoint;
-        console.log('🔄 استخدام endpoint احتياطي:', endpointToUse);
+        console.log('🔄 استخدام mainnet endpoint احتياطي:', endpointToUse);
         workingConnection = new Connection(endpointToUse, 'confirmed');
       }
       
