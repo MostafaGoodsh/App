@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wallet, ExternalLink, Shield, Zap } from 'lucide-react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import SolanaWallet from '@/components/wallet/SolanaWallet';
 
 const WalletPage = () => {
   const [provider, setProvider] = useState<any>(null);
@@ -169,153 +171,167 @@ const WalletPage = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent arabic-text">
-            محفظة WalletConnect
+            محافظ العملات الرقمية
           </h1>
           <p className="text-muted-foreground arabic-text">
-            اتصل بمحفظتك بأمان باستخدام WalletConnect
+            اتصل بمحافظ Ethereum و Solana بأمان
           </p>
         </header>
 
-        {/* بطاقة WalletConnect الرئيسية */}
-        <Card className="border-2 border-primary/20">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-              <Wallet className="w-8 h-8 text-primary" />
-            </div>
-            <CardTitle className="text-2xl">اتصال المحفظة</CardTitle>
-            <CardDescription>
-              اتصل بمحفظتك المفضلة بأمان عبر بروتوكول WalletConnect
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center space-y-2">
-                <Shield className="w-8 h-8 mx-auto text-green-500" />
-                <h3 className="font-semibold">آمن</h3>
-                <p className="text-sm text-muted-foreground">
-                  بروتوكول مشفر ومؤمن
-                </p>
-              </div>
-              <div className="text-center space-y-2">
-                <Zap className="w-8 h-8 mx-auto text-blue-500" />
-                <h3 className="font-semibold">سريع</h3>
-                <p className="text-sm text-muted-foreground">
-                  اتصال فوري بالمحفظة
-                </p>
-              </div>
-              <div className="text-center space-y-2">
-                <ExternalLink className="w-8 h-8 mx-auto text-purple-500" />
-                <h3 className="font-semibold">متوافق</h3>
-                <p className="text-sm text-muted-foreground">
-                  يدعم جميع المحافظ
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {!account ? (
-                <>
-                  <Button 
-                    onClick={handleWalletConnect}
-                    className="w-full h-12 text-lg"
-                    size="lg"
-                    disabled={isConnecting}
-                  >
-                    <Wallet className="mr-2 h-5 w-5" />
-                    {isConnecting ? 'جاري الاتصال...' : 'اتصل بالمحفظة'}
-                  </Button>
-                  
-                  <p className="text-center text-sm text-muted-foreground">
-                    ستفتح نافذة جديدة لاختيار المحفظة وإجراء الاتصال الآمن
-                  </p>
-                </>
-              ) : (
-                <div className="space-y-4">
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                    <p className="text-green-700 font-medium mb-2">محفظة متصلة بنجاح!</p>
-                    <p className="text-sm text-green-600 font-mono break-all">
-                      {account}
+        {/* تبويبات المحافظ */}
+        <Tabs defaultValue="ethereum" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ethereum">Ethereum & EVM</TabsTrigger>
+            <TabsTrigger value="solana">Solana</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="ethereum" className="space-y-4">
+            {/* بطاقة WalletConnect الرئيسية */}
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <Wallet className="w-8 h-8 text-primary" />
+                </div>
+                <CardTitle className="text-2xl">اتصال المحفظة</CardTitle>
+                <CardDescription>
+                  اتصل بمحفظتك المفضلة بأمان عبر بروتوكول WalletConnect
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center space-y-2">
+                    <Shield className="w-8 h-8 mx-auto text-green-500" />
+                    <h3 className="font-semibold">آمن</h3>
+                    <p className="text-sm text-muted-foreground">
+                      بروتوكول مشفر ومؤمن
                     </p>
                   </div>
-                  
-                  {/* معلومات المحفظة */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Wallet className="w-5 h-5" />
-                        محتويات المحفظة
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-primary/5 rounded-lg">
-                          <h3 className="font-semibold mb-2">الرصيد الحالي</h3>
-                          {isLoadingBalance ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                              <span>جاري التحميل...</span>
-                            </div>
-                          ) : (
-                            <p className="text-2xl font-bold text-primary">{balance} {getNativeTokenSymbol(networkId)}</p>
-                          )}
-                        </div>
-                        
-                        <div className="p-4 bg-blue-50 rounded-lg">
-                          <h3 className="font-semibold mb-2">الشبكة الحالية</h3>
-                          <p className="text-lg font-medium text-blue-700">{getNetworkName(networkId)}</p>
-                        </div>
+                  <div className="text-center space-y-2">
+                    <Zap className="w-8 h-8 mx-auto text-blue-500" />
+                    <h3 className="font-semibold">سريع</h3>
+                    <p className="text-sm text-muted-foreground">
+                      اتصال فوري بالمحفظة
+                    </p>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <ExternalLink className="w-8 h-8 mx-auto text-purple-500" />
+                    <h3 className="font-semibold">متوافق</h3>
+                    <p className="text-sm text-muted-foreground">
+                      يدعم جميع المحافظ
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {!account ? (
+                    <>
+                      <Button 
+                        onClick={handleWalletConnect}
+                        className="w-full h-12 text-lg"
+                        size="lg"
+                        disabled={isConnecting}
+                      >
+                        <Wallet className="mr-2 h-5 w-5" />
+                        {isConnecting ? 'جاري الاتصال...' : 'اتصل بالمحفظة'}
+                      </Button>
+                      
+                      <p className="text-center text-sm text-muted-foreground">
+                        ستفتح نافذة جديدة لاختيار المحفظة وإجراء الاتصال الآمن
+                      </p>
+                    </>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                        <p className="text-green-700 font-medium mb-2">محفظة متصلة بنجاح!</p>
+                        <p className="text-sm text-green-600 font-mono break-all">
+                          {account}
+                        </p>
                       </div>
                       
-                      <div className="pt-4 border-t space-y-3">
-                        <div>
-                          <h4 className="font-semibold mb-3">تبديل الشبكة</h4>
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              { id: 1, name: 'Ethereum', symbol: 'ETH' },
-                              { id: 137, name: 'Polygon', symbol: 'MATIC' },
-                              { id: 56, name: 'BSC', symbol: 'BNB' },
-                              { id: 42161, name: 'Arbitrum', symbol: 'ETH' },
-                              { id: 10, name: 'Optimism', symbol: 'ETH' },
-                              { id: 8453, name: 'Base', symbol: 'ETH' }
-                            ].map((network) => (
-                              <Button
-                                key={network.id}
-                                onClick={() => switchNetwork(network.id)}
-                                variant={networkId === network.id ? "default" : "outline"}
-                                size="sm"
-                                className="text-xs"
-                              >
-                                {network.name}
-                              </Button>
-                            ))}
+                      {/* معلومات المحفظة */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Wallet className="w-5 h-5" />
+                            محتويات المحفظة
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 bg-primary/5 rounded-lg">
+                              <h3 className="font-semibold mb-2">الرصيد الحالي</h3>
+                              {isLoadingBalance ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                  <span>جاري التحميل...</span>
+                                </div>
+                              ) : (
+                                <p className="text-2xl font-bold text-primary">{balance} {getNativeTokenSymbol(networkId)}</p>
+                              )}
+                            </div>
+                            
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                              <h3 className="font-semibold mb-2">الشبكة الحالية</h3>
+                              <p className="text-lg font-medium text-blue-700">{getNetworkName(networkId)}</p>
+                            </div>
                           </div>
-                        </div>
-                        
-                        <Button 
-                          onClick={() => fetchBalance(provider, account)}
-                          variant="outline"
-                          className="w-full"
-                          disabled={isLoadingBalance}
-                        >
-                          تحديث الرصيد
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Button 
-                    onClick={disconnectWallet}
-                    variant="outline"
-                    className="w-full h-12 text-lg"
-                    size="lg"
-                  >
-                    قطع الاتصال
-                  </Button>
+                          
+                          <div className="pt-4 border-t space-y-3">
+                            <div>
+                              <h4 className="font-semibold mb-3">تبديل الشبكة</h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { id: 1, name: 'Ethereum', symbol: 'ETH' },
+                                  { id: 137, name: 'Polygon', symbol: 'MATIC' },
+                                  { id: 56, name: 'BSC', symbol: 'BNB' },
+                                  { id: 42161, name: 'Arbitrum', symbol: 'ETH' },
+                                  { id: 10, name: 'Optimism', symbol: 'ETH' },
+                                  { id: 8453, name: 'Base', symbol: 'ETH' }
+                                ].map((network) => (
+                                  <Button
+                                    key={network.id}
+                                    onClick={() => switchNetwork(network.id)}
+                                    variant={networkId === network.id ? "default" : "outline"}
+                                    size="sm"
+                                    className="text-xs"
+                                  >
+                                    {network.name}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <Button 
+                              onClick={() => fetchBalance(provider, account)}
+                              variant="outline"
+                              className="w-full"
+                              disabled={isLoadingBalance}
+                            >
+                              تحديث الرصيد
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Button 
+                        onClick={disconnectWallet}
+                        variant="outline"
+                        className="w-full h-12 text-lg"
+                        size="lg"
+                      >
+                        قطع الاتصال
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="solana" className="space-y-4">
+            <SolanaWallet />
+          </TabsContent>
+        </Tabs>
 
         {/* معلومات إضافية */}
         <Card>
