@@ -2,11 +2,9 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConnectionProvider, WalletProvider, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider, WalletMultiButton, WalletDisconnectButton } from '@solana/wallet-adapter-react-ui';
 import { 
-  LedgerWalletAdapter,
-  PhantomWalletAdapter,
-  SolflareWalletAdapter
+  LedgerWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
@@ -41,7 +39,7 @@ const SolanaWalletContent: React.FC<{ onConnect: (account: string, balance: stri
           <span className="text-2xl">◎</span>
         </div>
         <CardTitle>Solana Network</CardTitle>
-        <CardDescription>اتصل بمحفظة Solana المتوافقة مع سطح المكتب</CardDescription>
+        <CardDescription>اتصل بمحفظة Ledger Hardware</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="wallet-adapter-modal-wrapper">
@@ -49,8 +47,11 @@ const SolanaWalletContent: React.FC<{ onConnect: (account: string, balance: stri
         </div>
         
         {connected && (
-          <div className="text-center text-sm text-muted-foreground">
-            ✅ متصل بشبكة Solana
+          <div className="space-y-3">
+            <div className="text-center text-sm text-muted-foreground">
+              ✅ متصل بشبكة Solana Mainnet
+            </div>
+            <WalletDisconnectButton className="!bg-red-600 hover:!bg-red-700 !rounded-lg !font-medium !text-white w-full justify-center" />
           </div>
         )}
       </CardContent>
@@ -63,13 +64,11 @@ interface SolanaWalletProps {
 }
 
 export const SolanaWallet: React.FC<SolanaWalletProps> = ({ onConnect }) => {
-  const network = WalletAdapterNetwork.Devnet;
+  const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   
   const wallets = useMemo(
     () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
       new LedgerWalletAdapter()
     ],
     []
@@ -77,7 +76,7 @@ export const SolanaWallet: React.FC<SolanaWalletProps> = ({ onConnect }) => {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets}>
         <WalletModalProvider>
           <SolanaWalletContent onConnect={onConnect} />
         </WalletModalProvider>
