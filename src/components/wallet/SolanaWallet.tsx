@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Wallet, Shield, Zap, ExternalLink } from 'lucide-react';
+import { Wallet, Shield, Zap, ExternalLink, Coins } from 'lucide-react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { ConnectionProvider, WalletProvider, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { LedgerWalletAdapter } from '@solana/wallet-adapter-wallets';
@@ -15,18 +16,77 @@ const SolanaWalletContent = () => {
   const { connection } = useConnection();
   const { publicKey, connected } = useWallet();
   const [balance, setBalance] = useState<number>(0);
+  const [tokens, setTokens] = useState<Array<{symbol: string, balance: string, mint: string}>>([]);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  // Popular SPL tokens on Solana
+  const popularTokens = [
+    { symbol: 'USDC', mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', decimals: 6 },
+    { symbol: 'USDT', mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', decimals: 6 },
+    { symbol: 'SOL', mint: 'So11111111111111111111111111111111111111112', decimals: 9 },
+  ];
 
   const fetchBalance = async () => {
     if (!publicKey || !connection) return;
     
     try {
       setIsLoadingBalance(true);
-      const balance = await connection.getBalance(publicKey);
-      setBalance(balance / LAMPORTS_PER_SOL);
+      console.log('جاري جلب الأرصدة...');
+      
+      // جلب رصيد SOL
+      const solBalance = await connection.getBalance(publicKey);
+      setBalance(solBalance / LAMPORTS_PER_SOL);
+      console.log('رصيد SOL:', solBalance / LAMPORTS_PER_SOL);
+      
+      // جلب رصيد الرموز المميزة
+      const tokenBalances = [];
+      
+      for (const token of popularTokens) {
+        try {
+          if (token.mint === 'So11111111111111111111111111111111111111112') {
+            // SOL نفسه
+            tokenBalances.push({
+              symbol: 'SOL',
+              balance: (solBalance / LAMPORTS_PER_SOL).toFixed(4),
+              mint: token.mint
+            });
+          } else {
+            // الرموز المميزة SPL
+            const tokenAccount = await getAssociatedTokenAddress(
+              new PublicKey(token.mint),
+              publicKey
+            );
+            
+            const accountInfo = await connection.getAccountInfo(tokenAccount);
+            
+            if (accountInfo) {
+              const accountData = accountInfo.data;
+              // قراءة الرصيد من البيانات (64 بت في البايت 64-71)
+              const balanceBuffer = accountData.slice(64, 72);
+              const balance = Buffer.from(balanceBuffer).readBigUInt64LE();
+              const formattedBalance = (Number(balance) / Math.pow(10, token.decimals)).toFixed(4);
+              
+              if (parseFloat(formattedBalance) > 0) {
+                tokenBalances.push({
+                  symbol: token.symbol,
+                  balance: formattedBalance,
+                  mint: token.mint
+                });
+              }
+            }
+          }
+        } catch (tokenError) {
+          console.log(`لم يتم العثور على رمز ${token.symbol}`);
+        }
+      }
+      
+      setTokens(tokenBalances);
+      console.log('الرموز المميزة:', tokenBalances);
+      
     } catch (error) {
-      console.error('Error fetching balance:', error);
+      console.error('خطأ في جلب الرصيد:', error);
       setBalance(0);
+      setTokens([]);
     } finally {
       setIsLoadingBalance(false);
     }
@@ -37,6 +97,7 @@ const SolanaWalletContent = () => {
       fetchBalance();
     } else {
       setBalance(0);
+      setTokens([]);
     }
   }, [connected, publicKey, connection]);
 
@@ -104,14 +165,39 @@ const SolanaWalletContent = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="p-4 bg-orange-50 rounded-lg">
-                    <h3 className="font-semibold mb-2">الرصيد الحالي</h3>
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Coins className="w-5 h-5" />
+                      الأرصدة الحالية
+                    </h3>
                     {isLoadingBalance ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
                         <span>جاري التحميل...</span>
                       </div>
+                    ) : tokens.length > 0 ? (
+                      <div className="space-y-3">
+                        {tokens.map((token, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-white rounded-lg border">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                {token.symbol.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="font-semibold">{token.symbol}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {token.mint.slice(0, 8)}...{token.mint.slice(-8)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-lg text-orange-700">{token.balance}</p>
+                              <p className="text-sm text-muted-foreground">{token.symbol}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <p className="text-2xl font-bold text-orange-700">{balance.toFixed(4)} SOL</p>
+                      <p className="text-gray-500">لا توجد رموز مميزة</p>
                     )}
                   </div>
                   
