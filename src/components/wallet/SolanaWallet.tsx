@@ -33,45 +33,108 @@ const SolanaWalletContent = () => {
       return;
     }
     
-    // عرض البيانات التجريبية مباشرة بسبب مشاكل RPC
-    console.log('🎮 عرض بيانات تجريبية بسبب مشاكل RPC endpoints');
-    setIsLoadingBalance(true);
-    
-    setTimeout(() => {
-      const demoTokens = [
-        {
+    try {
+      setIsLoadingBalance(true);
+      console.log('🔍 جاري جلب الأرصدة للمحفظة:', publicKey.toString());
+      console.log('🌐 RPC Endpoint:', connection.rpcEndpoint);
+      console.log('⏰ وقت البدء:', new Date().toISOString());
+      
+      let tokenBalances = [];
+      
+      // محاولة جلب رصيد SOL أولاً
+      console.log('📊 محاولة جلب رصيد SOL...');
+      try {
+        const solBalance = await connection.getBalance(publicKey, 'confirmed');
+        const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
+        console.log('✅ تم جلب رصيد SOL بنجاح:', solBalanceFormatted);
+        
+        tokenBalances.push({
           symbol: 'SOL',
-          balance: '2.450000',
+          balance: solBalanceFormatted.toFixed(6),
           mint: 'So11111111111111111111111111111111111111112',
           decimals: 9,
-          usdValue: 367.5,
-          change24h: 2.3
-        },
-        {
-          symbol: 'USDC',
-          balance: '1250.00',
-          mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-          decimals: 6,
-          usdValue: 1250.0,
-          change24h: 0.1
-        },
-        {
-          symbol: 'BONK',
-          balance: '50000.0000',
-          mint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
-          decimals: 5,
-          usdValue: 15.7,
-          change24h: -8.2
+          usdValue: solBalanceFormatted * 150,
+          change24h: Math.random() * 10 - 5
+        });
+        
+        setBalance(solBalanceFormatted);
+      } catch (solError) {
+        console.error('❌ فشل في جلب رصيد SOL:', solError);
+        
+        tokenBalances.push({
+          symbol: 'SOL',
+          balance: '0.000000',
+          mint: 'So11111111111111111111111111111111111111112',
+          decimals: 9,
+          usdValue: 0,
+          change24h: 0
+        });
+        setBalance(0);
+      }
+      try {
+        // جلب جميع حسابات الرموز المميزة للمحفظة
+        console.log('🔍 جاري البحث عن رموز SPL...');
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        }, 'confirmed');
+        
+        console.log('📊 تم العثور على', tokenAccounts.value.length, 'حساب رمز مميز');
+        
+        // معالجة رموز SPL
+        for (const account of tokenAccounts.value) {
+          try {
+            const parsedInfo = account.account.data.parsed.info;
+            const balance = parsedInfo.tokenAmount.uiAmount;
+            const mint = parsedInfo.mint;
+            const decimals = parsedInfo.tokenAmount.decimals;
+            
+            if (balance && balance > 0) {
+              const knownTokens: { [key: string]: string } = {
+                'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+                'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+                'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
+                'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+                'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP',
+              };
+              
+              const symbol = knownTokens[mint] || `${mint.slice(0, 4)}...${mint.slice(-4)}`;
+              
+              tokenBalances.push({
+                symbol,
+                balance: balance.toFixed(4),
+                mint,
+                decimals,
+                usdValue: balance * (Math.random() * 50 + 1),
+                change24h: Math.random() * 20 - 10
+              });
+              
+              console.log('✅ تمت إضافة الرمز:', symbol, 'بقيمة:', balance);
+            }
+          } catch (accountError) {
+            console.warn('⚠️ خطأ في معالجة حساب الرمز:', accountError);
+          }
         }
-      ];
+      } catch (tokenError) {
+        console.warn('⚠️ خطأ في جلب حسابات الرموز المميزة:', tokenError);
+      }
       
-      setTokens(demoTokens);
-      setBalance(2.45);
-      setTotalUsdValue(1633.2);
+      // حساب إجمالي القيمة بالدولار
+      const totalValue = tokenBalances.reduce((sum, token) => sum + (token.usdValue || 0), 0);
+      setTotalUsdValue(totalValue);
+      
+      setTokens(tokenBalances);
+      console.log('📋 إجمالي الرموز المعروضة:', tokenBalances.length);
+      console.log('💼 الرموز النهائية:', tokenBalances);
+      console.log('💰 إجمالي القيمة:', totalValue);
+      
+    } catch (error) {
+      console.error('❌ خطأ عام في جلب الرصيد:', error);
+      setTokens([]);
+      setBalance(0);
+      setTotalUsdValue(0);
+    } finally {
       setIsLoadingBalance(false);
-      
-      console.log('✅ تم عرض البيانات التجريبية بنجاح');
-    }, 1500); // محاكاة وقت التحميل
+    }
   };
 
   React.useEffect(() => {
@@ -170,7 +233,7 @@ const SolanaWallet = () => {
   const network = WalletAdapterNetwork.Mainnet;
   
   // استخدام QuickNode المجاني - أكثر استقراراً
-  const endpoint = 'https://rpc.ankr.com/solana';
+  const endpoint = 'https://solana-rpc.publicnode.com';
   
   const wallets = useMemo(() => [
     new LedgerWalletAdapter(),
