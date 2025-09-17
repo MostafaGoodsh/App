@@ -23,67 +23,98 @@ const SolanaWalletContent = () => {
     
     try {
       setIsLoadingBalance(true);
-      console.log('جاري جلب الأرصدة...');
+      console.log('🔍 جاري جلب الأرصدة للمحفظة:', publicKey.toString());
       
-      // جلب رصيد SOL
+      // جلب رصيد SOL أولاً
       const solBalance = await connection.getBalance(publicKey);
-      setBalance(solBalance / LAMPORTS_PER_SOL);
-      console.log('رصيد SOL:', solBalance / LAMPORTS_PER_SOL);
-      
-      // جلب جميع حسابات الرموز المميزة للمحفظة باستخدام Solana RPC
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
-        programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), // SPL Token Program ID
-      });
+      const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
+      setBalance(solBalanceFormatted);
+      console.log('💰 رصيد SOL:', solBalanceFormatted);
       
       const tokenBalances = [];
       
-      // إضافة رصيد SOL
+      // إضافة رصيد SOL دائماً إلى القائمة
       tokenBalances.push({
         symbol: 'SOL',
-        balance: (solBalance / LAMPORTS_PER_SOL).toFixed(4),
+        balance: solBalanceFormatted.toFixed(4),
         mint: 'So11111111111111111111111111111111111111112',
         decimals: 9
       });
       
-      // معالجة رموز SPL
-      for (const account of tokenAccounts.value) {
-        const parsedInfo = account.account.data.parsed.info;
-        const balance = parsedInfo.tokenAmount.uiAmount;
-        const mint = parsedInfo.mint;
-        const decimals = parsedInfo.tokenAmount.decimals;
+      try {
+        // جلب جميع حسابات الرموز المميزة للمحفظة
+        console.log('🔍 جاري البحث عن رموز SPL...');
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), // SPL Token Program ID
+        });
         
-        if (balance && balance > 0) {
-          // محاولة الحصول على رمز العملة المعروف
-          let symbol = 'UNKNOWN';
-          
-          // بعض الرموز المعروفة
-          const knownTokens: { [key: string]: string } = {
-            'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
-            'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
-            'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
-            'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
-            'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP',
-            'rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof': 'RAY',
-          };
-          
-          symbol = knownTokens[mint] || `${mint.slice(0, 4)}...${mint.slice(-4)}`;
-          
-          tokenBalances.push({
-            symbol,
-            balance: balance.toFixed(4),
-            mint,
-            decimals
-          });
+        console.log('📊 تم العثور على', tokenAccounts.value.length, 'حساب رمز مميز');
+        
+        // معالجة رموز SPL
+        for (const account of tokenAccounts.value) {
+          try {
+            const parsedInfo = account.account.data.parsed.info;
+            const balance = parsedInfo.tokenAmount.uiAmount;
+            const mint = parsedInfo.mint;
+            const decimals = parsedInfo.tokenAmount.decimals;
+            
+            console.log('🪙 رمز مميز:', {
+              mint: mint.slice(0, 8) + '...',
+              balance,
+              decimals
+            });
+            
+            if (balance && balance > 0) {
+              // بعض الرموز المعروفة
+              const knownTokens: { [key: string]: string } = {
+                'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+                'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+                'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
+                'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+                'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'JUP',
+                'rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof': 'RAY',
+                'SHDWyBxihqiCj6YekG2GUr7wqKLeLAMK1gHZck9pL6y': 'SHDW',
+                'hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux': 'HNT',
+              };
+              
+              const symbol = knownTokens[mint] || `${mint.slice(0, 4)}...${mint.slice(-4)}`;
+              
+              tokenBalances.push({
+                symbol,
+                balance: balance.toFixed(4),
+                mint,
+                decimals
+              });
+              
+              console.log('✅ تمت إضافة الرمز:', symbol, 'بقيمة:', balance);
+            }
+          } catch (accountError) {
+            console.warn('⚠️ خطأ في معالجة حساب الرمز:', accountError);
+          }
         }
+      } catch (tokenError) {
+        console.warn('⚠️ خطأ في جلب حسابات الرموز المميزة:', tokenError);
+        // حتى لو فشل في جلب SPL tokens، يمكننا عرض SOL على الأقل
       }
       
       setTokens(tokenBalances);
-      console.log('الرموز المميزة:', tokenBalances);
+      console.log('📋 إجمالي الرموز المعروضة:', tokenBalances.length);
+      console.log('💼 الرموز النهائية:', tokenBalances);
       
     } catch (error) {
-      console.error('خطأ في جلب الرصيد:', error);
+      console.error('❌ خطأ عام في جلب الرصيد:', error);
+      // في حالة الخطأ، عرض رصيد SOL على الأقل إذا كان متاحاً
+      const tokenBalances = [];
+      if (balance > 0) {
+        tokenBalances.push({
+          symbol: 'SOL',
+          balance: balance.toFixed(4),
+          mint: 'So11111111111111111111111111111111111111112',
+          decimals: 9
+        });
+      }
+      setTokens(tokenBalances);
       setBalance(0);
-      setTokens([]);
     } finally {
       setIsLoadingBalance(false);
     }
