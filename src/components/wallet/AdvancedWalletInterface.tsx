@@ -239,14 +239,28 @@ const AdvancedWalletInterface: React.FC<AdvancedWalletInterfaceProps> = ({
                     <Coins className="w-8 h-8 text-gray-400" />
                   </div>
                   <div>
-                    <p className="text-lg font-medium text-gray-500">لا توجد أرصدة</p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      تأكد من اتصال المحفظة أو قم بإضافة بعض العملات
+                    <p className="text-lg font-medium text-red-600">لم يتم العثور على أرصدة</p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      يمكن أن يكون السبب:
                     </p>
+                    <ul className="text-sm text-gray-500 mt-2 space-y-1 text-right list-disc list-inside">
+                      <li>مشكلة في الاتصال بشبكة Solana</li>
+                      <li>المحفظة لا تحتوي على أرصدة</li>
+                      <li>خطأ في جلب البيانات من الشبكة</li>
+                    </ul>
                   </div>
-                  <Button onClick={onRefresh} variant="outline" size="sm">
-                    إعادة المحاولة
-                  </Button>
+                  <div className="flex gap-2 justify-center">
+                    <Button 
+                      onClick={onRefresh} 
+                      variant="outline" 
+                      size="sm"
+                      disabled={isLoadingBalance}
+                      className="gap-2"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isLoadingBalance ? 'animate-spin' : ''}`} />
+                      {isLoadingBalance ? 'جاري المحاولة...' : 'إعادة المحاولة'}
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>

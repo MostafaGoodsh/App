@@ -21,8 +21,15 @@ const SolanaWalletContent = () => {
   const [totalUsdValue, setTotalUsdValue] = useState<number>(0);
 
   const fetchBalance = async (retryCount = 0) => {
+    console.log('🔄 بدء fetchBalance - محاولة رقم:', retryCount + 1);
+    
     if (!publicKey || !connection) {
-      console.log('❌ لا يمكن جلب الرصيد: محفظة غير متصلة أو connection غير متاح');
+      console.log('❌ لا يمكن جلب الرصيد:', {
+        hasPublicKey: !!publicKey,
+        hasConnection: !!connection,
+        publicKey: publicKey?.toString(),
+        connectionEndpoint: connection?.rpcEndpoint
+      });
       return;
     }
     
@@ -30,6 +37,7 @@ const SolanaWalletContent = () => {
       setIsLoadingBalance(true);
       console.log('🔍 جاري جلب الأرصدة للمحفظة:', publicKey.toString());
       console.log('🌐 RPC Endpoint:', connection.rpcEndpoint);
+      console.log('⏰ وقت البدء:', new Date().toISOString());
       
       let tokenBalances = [];
       
@@ -162,14 +170,26 @@ const SolanaWalletContent = () => {
   };
 
   React.useEffect(() => {
-    console.log('🎯 useEffect triggered:', { connected, publicKey: publicKey?.toString() });
-    if (connected && publicKey) {
-      console.log('✅ المحفظة متصلة، سأبدأ في جلب الأرصدة...');
+    console.log('🎯 useEffect triggered:', {
+      connected,
+      publicKey: publicKey?.toString(),
+      hasConnection: !!connection,
+      rpcEndpoint: connection?.rpcEndpoint
+    });
+    
+    if (connected && publicKey && connection) {
+      console.log('✅ جميع المتطلبات متوفرة، بدء جلب الأرصدة...');
+      console.log('📊 محاولة جلب الأرصدة للعنوان:', publicKey.toString());
       fetchBalance();
     } else {
-      console.log('❌ المحفظة غير متصلة، إعادة تعيين البيانات');
+      console.log('❌ المتطلبات غير مكتملة:', {
+        connected,
+        hasPublicKey: !!publicKey,
+        hasConnection: !!connection
+      });
       setBalance(0);
       setTokens([]);
+      setTotalUsdValue(0);
     }
   }, [connected, publicKey, connection]);
 
@@ -225,7 +245,10 @@ const SolanaWalletContent = () => {
           tokens={tokens}
           totalUsdValue={totalUsdValue}
           isLoadingBalance={isLoadingBalance}
-          onRefresh={() => fetchBalance()}
+          onRefresh={() => {
+            console.log('🔄 المستخدم طلب تحديث الأرصدة يدوياً');
+            fetchBalance();
+          }}
         />
       )}
 
