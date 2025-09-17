@@ -264,14 +264,14 @@ const SolanaWalletContent = () => {
 const SolanaWallet = () => {
   const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => {
-    // استخدام RPC endpoints مجانية متعددة مع fallbacks
+    // استخدام RPC endpoints مجانية لا تتطلب API key
     const endpoints = [
-      'https://rpc.ankr.com/solana',
-      'https://solana-api.projectserum.com',
-      'https://api.mainnet-beta.solana.com',
-      'https://solana.public-rpc.com'
+      'https://api.mainnet-beta.solana.com', // الرسمي من Solana Labs
+      'https://solana.public-rpc.com',       // مجاني عام
+      'https://rpc.helius.xyz/',             // Helius مجاني
+      'https://mainnet.helius-rpc.com'       // Helius backup
     ];
-    return endpoints[0]; // البدء بـ Ankr RPC المجاني
+    return endpoints[0]; // البدء بالـ RPC الرسمي
   }, []);
   
   const wallets = useMemo(() => [
