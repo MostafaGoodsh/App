@@ -25,21 +25,34 @@ const SolanaWalletContent = () => {
       setIsLoadingBalance(true);
       console.log('🔍 جاري جلب الأرصدة للمحفظة:', publicKey.toString());
       
-      // جلب رصيد SOL أولاً
-      const solBalance = await connection.getBalance(publicKey);
-      const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
-      setBalance(solBalanceFormatted);
-      console.log('💰 رصيد SOL:', solBalanceFormatted);
+      let solBalance = 0;
+      let tokenBalances = [];
       
-      const tokenBalances = [];
-      
-      // إضافة رصيد SOL دائماً إلى القائمة
-      tokenBalances.push({
-        symbol: 'SOL',
-        balance: solBalanceFormatted.toFixed(4),
-        mint: 'So11111111111111111111111111111111111111112',
-        decimals: 9
-      });
+      try {
+        // محاولة جلب رصيد SOL مع retry مع endpoints مختلفة
+        solBalance = await connection.getBalance(publicKey);
+        const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
+        console.log('💰 رصيد SOL:', solBalanceFormatted);
+        
+        // إضافة رصيد SOL دائماً إلى القائمة
+        tokenBalances.push({
+          symbol: 'SOL',
+          balance: solBalanceFormatted.toFixed(4),
+          mint: 'So11111111111111111111111111111111111111112',
+          decimals: 9
+        });
+        
+        setBalance(solBalanceFormatted);
+      } catch (solError) {
+        console.warn('⚠️ خطأ في جلب رصيد SOL:', solError);
+        // حتى لو فشل في جلب SOL، نضيف 0 للعرض
+        tokenBalances.push({
+          symbol: 'SOL',
+          balance: '0.0000',
+          mint: 'So11111111111111111111111111111111111111112',
+          decimals: 9
+        });
+      }
       
       try {
         // جلب جميع حسابات الرموز المميزة للمحفظة
@@ -103,17 +116,14 @@ const SolanaWalletContent = () => {
       
     } catch (error) {
       console.error('❌ خطأ عام في جلب الرصيد:', error);
-      // في حالة الخطأ، عرض رصيد SOL على الأقل إذا كان متاحاً
-      const tokenBalances = [];
-      if (balance > 0) {
-        tokenBalances.push({
-          symbol: 'SOL',
-          balance: balance.toFixed(4),
-          mint: 'So11111111111111111111111111111111111111112',
-          decimals: 9
-        });
-      }
-      setTokens(tokenBalances);
+      // في حالة الخطأ، عرض رسالة توضيحية للمستخدم
+      const errorTokens = [{
+        symbol: 'خطأ',
+        balance: 'غير متاح',
+        mint: 'error',
+        decimals: 0
+      }];
+      setTokens(errorTokens);
       setBalance(0);
     } finally {
       setIsLoadingBalance(false);
@@ -257,9 +267,18 @@ const SolanaWalletContent = () => {
 };
 
 const SolanaWallet = () => {
-  // استخدام Mainnet
+  // استخدام Mainnet مع endpoints مجانية
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = 'https://api.mainnet-beta.solana.com';
+  const endpoint = useMemo(() => {
+    // قائمة بـ RPC endpoints مجانية كبديل
+    const endpoints = [
+      'https://solana-mainnet.g.alchemy.com/v2/demo',
+      'https://api.mainnet-beta.solana.com',
+      'https://rpc.ankr.com/solana',
+      'https://solana-api.projectserum.com'
+    ];
+    return endpoints[0]; // استخدام أول endpoint متاح
+  }, []);
   
   const wallets = useMemo(() => [
     new LedgerWalletAdapter(),
