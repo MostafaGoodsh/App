@@ -4,7 +4,9 @@ import { ConnectionProvider, WalletProvider, useConnection, useWallet } from '@s
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { 
-  LedgerWalletAdapter
+  LedgerWalletAdapter,
+  PhantomWalletAdapter,
+  SolflareWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
@@ -39,7 +41,7 @@ const SolanaWalletContent: React.FC<{ onConnect: (account: string, balance: stri
           <span className="text-2xl">◎</span>
         </div>
         <CardTitle>Solana Network</CardTitle>
-        <CardDescription>اتصل بمحفظة Ledger</CardDescription>
+        <CardDescription>اتصل بمحفظة Solana المتوافقة مع سطح المكتب</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="wallet-adapter-modal-wrapper">
@@ -66,6 +68,8 @@ export const SolanaWallet: React.FC<SolanaWalletProps> = ({ onConnect }) => {
   
   const wallets = useMemo(
     () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
       new LedgerWalletAdapter()
     ],
     []
