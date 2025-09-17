@@ -41,11 +41,24 @@ const SolanaWalletContent = () => {
       
       let tokenBalances = [];
       
+      // استخدام connection مخصص إذا فشل الحالي
+      let workingConnection = connection;
+      if (retryCount > 0) {
+        const backupEndpoints = [
+          'https://api.devnet.solana.com', // تجريبي للاختبار
+          'https://api.testnet.solana.com', // تجريبي للاختبار
+          'https://rpc.ankr.com/solana'    // مع إمكانية قيود
+        ];
+        const endpointToUse = backupEndpoints[retryCount - 1] || connection.rpcEndpoint;
+        console.log('🔄 استخدام endpoint احتياطي:', endpointToUse);
+        workingConnection = new Connection(endpointToUse, 'confirmed');
+      }
+      
       // محاولة جلب رصيد SOL أولاً مع retry logic
       console.log('📊 محاولة جلب رصيد SOL...');
       try {
-        // استخدام commitment مختلف لتحسين التوافقية
-        const solBalance = await connection.getBalance(publicKey, 'confirmed');
+        // استخدام finalized للحصول على بيانات مؤكدة أكثر
+        const solBalance = await workingConnection.getBalance(publicKey, 'finalized');
         const solBalanceFormatted = solBalance / LAMPORTS_PER_SOL;
         console.log('✅ تم جلب رصيد SOL بنجاح:', solBalanceFormatted);
         
@@ -66,9 +79,9 @@ const SolanaWalletContent = () => {
           publicKey: publicKey.toString()
         });
         
-        // محاولة استخدام RPC endpoint مختلف
+        // محاولة endpoint آخر
         if (retryCount < 2) {
-          console.log('🔄 محاولة RPC endpoint مختلف...');
+          console.log('🔄 محاولة endpoint مختلف...');
           setTimeout(() => fetchBalance(retryCount + 1), 2000);
           return;
         }
@@ -88,9 +101,9 @@ const SolanaWalletContent = () => {
       try {
         // جلب جميع حسابات الرموز المميزة للمحفظة مع commitment محدد
         console.log('🔍 جاري البحث عن رموز SPL...');
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
+        const tokenAccounts = await workingConnection.getParsedTokenAccountsByOwner(publicKey, {
           programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), // SPL Token Program ID
-        }, 'confirmed');
+        }, 'finalized');
         
         console.log('📊 تم العثور على', tokenAccounts.value.length, 'حساب رمز مميز');
         
@@ -263,16 +276,9 @@ const SolanaWalletContent = () => {
 
 const SolanaWallet = () => {
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => {
-    // استخدام RPC endpoints مجانية لا تتطلب API key
-    const endpoints = [
-      'https://api.mainnet-beta.solana.com', // الرسمي من Solana Labs
-      'https://solana.public-rpc.com',       // مجاني عام
-      'https://rpc.helius.xyz/',             // Helius مجاني
-      'https://mainnet.helius-rpc.com'       // Helius backup
-    ];
-    return endpoints[0]; // البدء بالـ RPC الرسمي
-  }, []);
+  
+  // استخدام endpoint موثوق ومجاني
+  const endpoint = 'https://api.mainnet-beta.solana.com';
   
   const wallets = useMemo(() => [
     new LedgerWalletAdapter(),
