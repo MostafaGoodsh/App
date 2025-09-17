@@ -146,8 +146,9 @@ const SolanaWalletContent = () => {
     });
     
     if (connected && publicKey && connection) {
-      console.log('✅ جميع المتطلبات متوفرة، بدء جلب الأرصدة...');
+      console.log('✅ جميع المتطلبات متوفرة، بدء جلب الأرصدة الحقيقية...');
       console.log('📊 محاولة جلب الأرصدة للعنوان:', publicKey.toString());
+      console.log('🌐 استخدام RPC:', connection.rpcEndpoint);
       fetchBalance();
     } else {
       console.log('❌ المتطلبات غير مكتملة:', {
