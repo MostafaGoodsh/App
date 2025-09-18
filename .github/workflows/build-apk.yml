@@ -1,5 +1,6 @@
 name: Build Android APK
-
+rm package-lock.json
+npm install
 on:
   push:
     branches: [ main, master ]
