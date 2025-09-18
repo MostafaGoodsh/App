@@ -6,7 +6,8 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch: # Allow manual trigger
-
+rm package-lock.json
+npm install
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -62,7 +63,9 @@ jobs:
       with:
         name: app-debug-apk
         path: android/app/build/outputs/apk/debug/app-debug.apk
-        
+        git add package-lock.json
+git commit -m "fix: regenerate package-lock.json to include missing dependencies"
+git push
     - name: Create Release
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
