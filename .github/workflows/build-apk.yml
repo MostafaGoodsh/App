@@ -42,10 +42,16 @@ jobs:
     - name: Sync Capacitor
       run: npx cap sync android
       
+    - name: Make gradlew executable
+      run: chmod +x android/gradlew
+      
+    - name: Accept Android licenses
+      run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+      
     - name: Build APK
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace --info
         
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
