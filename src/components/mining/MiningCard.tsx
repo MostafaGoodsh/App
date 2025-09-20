@@ -8,8 +8,8 @@ const MiningCard = () => {
     <Link to="/mining" className="group">
       <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
         <img 
-          src={getContent('mining', 'https://wnwfnziozwarlihrnjex.supabase.co/storage/v1/object/public/learning-media/app-content/0.730897697342736.jpg')} 
-          alt={getAltText('mining', 'خلفية كارت تعدين Ms-Ra')} 
+          src="/lovable-uploads/egyptian-ankh-reels-bg.jpg" 
+          alt="خلفية كارت تعدين Ms-Ra" 
           className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
           loading="lazy" 
         />
