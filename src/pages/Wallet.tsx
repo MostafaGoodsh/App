@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
+import { WalletDashboard } from '@/components/wallet/WalletDashboard';
+import { ConnectedWalletsGrid } from '@/components/wallet/ConnectedWalletsGrid';
+import { WalletConnectSetup } from '@/components/wallet/WalletConnectSetup';
 import { SolanaWalletCard } from '@/components/wallet/SolanaWalletCard';
 import { SolanaTokenTransfer } from '@/components/wallet/SolanaTokenTransfer';
 import { SolanaTokenList } from '@/components/wallet/SolanaTokenList';
@@ -11,11 +14,12 @@ import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
 import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
+import { useWalletConnect, ConnectedWallet } from '@/hooks/useWalletConnect';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Coins, Gift, TrendingUp, Zap, ArrowLeftRight } from 'lucide-react';
+import { Coins, Gift, TrendingUp, Zap, ArrowLeftRight, Wallet, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
@@ -26,8 +30,18 @@ const WalletContent = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [showHybridSwap, setShowHybridSwap] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [connectedWallets, setConnectedWallets] = useState<ConnectedWallet[]>([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  
   const { requestAirdrop } = useSolanaWallet();
   const { walletData, addAirdropReward, getTransactionHistory } = useSolanaWalletData();
+  const { 
+    connectedWallet, 
+    isConnecting, 
+    connectWallet, 
+    disconnectWallet, 
+    refreshBalance 
+  } = useWalletConnect();
 
   const handleAirdrop = async () => {
     try {
@@ -54,24 +68,93 @@ const WalletContent = () => {
     setTransactions(txHistory);
   };
 
+  const handleConnectWallet = async () => {
+    try {
+      const wallet = await connectWallet();
+      if (wallet) {
+        setConnectedWallets(prev => [...prev, wallet]);
+        toast.success('تم توصيل المحفظة بنجاح!');
+      }
+    } catch (error) {
+      toast.error('فشل في توصيل المحفظة');
+    }
+  };
+
+  const handleRefreshBalance = async (wallet: ConnectedWallet) => {
+    try {
+      await refreshBalance();
+      toast.success('تم تحديث الرصيد');
+    } catch (error) {
+      toast.error('فشل في تحديث الرصيد');
+    }
+  };
+
+  const handleSendTransaction = async (wallet: ConnectedWallet, toAddress: string, amount: string): Promise<string> => {
+    // Simulate transaction
+    return 'transaction_id_123';
+  };
+
+  const handleDisconnectWallet = (walletId: string) => {
+    disconnectWallet();
+    setConnectedWallets(prev => prev.filter(w => w.id !== walletId));
+    toast.success('تم قطع اتصال المحفظة');
+  };
+
   useEffect(() => {
     if (walletData) {
       loadTransactions();
     }
   }, [walletData]);
 
+  useEffect(() => {
+    if (connectedWallet) {
+      setConnectedWallets(prev => {
+        const exists = prev.find(w => w.id === connectedWallet.id);
+        return exists ? prev : [...prev, connectedWallet];
+      });
+    }
+  }, [connectedWallet]);
+
   return (
     <>
-      {/* زر الاتصال بالمحفظة */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>اتصال المحفظة</CardTitle>
-          <CardDescription>اتصل بمحفظة Phantom الخاصة بك</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <WalletMultiButton className="!bg-primary hover:!bg-primary/90 !text-primary-foreground !border-0 !rounded-lg !px-6 !py-3 !text-base !font-medium !transition-colors" />
-        </CardContent>
-      </Card>
+      {/* أزرار الاتصال بالمحافظ */}
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        {/* اتصال WalletConnect */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" />
+              WalletConnect
+            </CardTitle>
+            <CardDescription>اتصل بمحافظ متعددة الشبكات</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleConnectWallet}
+              disabled={isConnecting}
+              className="w-full"
+              size="lg"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {isConnecting ? 'جاري الاتصال...' : 'توصيل محفظة WalletConnect'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* اتصال Solana */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Coins className="w-5 h-5" />
+              محفظة Solana
+            </CardTitle>
+            <CardDescription>اتصل بمحفظة Phantom الخاصة بك</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WalletMultiButton className="!bg-primary hover:!bg-primary/90 !text-primary-foreground !border-0 !rounded-lg !px-6 !py-3 !text-base !font-medium !transition-colors !w-full" />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* إحصائيات المحفظة */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -107,8 +190,12 @@ const WalletContent = () => {
       </div>
 
         {/* التبويبات الرئيسية */}
-        <Tabs defaultValue="hybrid" className="mb-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <Wallet className="w-4 h-4" />
+              لوحة التحكم
+            </TabsTrigger>
             <TabsTrigger value="hybrid" className="flex items-center gap-2">
               <Coins className="w-4 h-4" />
               المحفظة الهجين
@@ -126,6 +213,25 @@ const WalletContent = () => {
               تحويل النقاط
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* لوحة تحكم المحافظ المتقدمة */}
+            {connectedWallets.length > 0 ? (
+              <WalletDashboard
+                wallets={connectedWallets}
+                onRefreshBalance={handleRefreshBalance}
+                onSendTransaction={handleSendTransaction}
+                onDisconnect={handleDisconnectWallet}
+              />
+            ) : (
+              <ConnectedWalletsGrid
+                wallets={connectedWallets}
+                onRefreshBalance={handleRefreshBalance}
+                onSendTransaction={handleSendTransaction}
+                onDisconnect={handleDisconnectWallet}
+              />
+            )}
+          </TabsContent>
 
           <TabsContent value="hybrid" className="space-y-6">
             {/* المحفظة الهجين */}
