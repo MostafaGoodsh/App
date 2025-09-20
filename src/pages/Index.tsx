@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
+import MiningCard from "@/components/mining/MiningCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 
@@ -132,7 +133,10 @@ const Index = () => {
           {/* Daily Tasks Card */}
           <DailyTasksCard />
           
-          {/* Identity, Wallet and Mining Cards */}
+          {/* Mining Card - Ms-Ra Mining */}
+          <MiningCard />
+          
+          {/* Identity and Wallet Cards */}
           {[
             { 
               imageKey: 'identity_card_image',
@@ -145,12 +149,6 @@ const Index = () => {
               titleKey: 'wallet_card_title', 
               descriptionKey: 'wallet_card_description',
               href: "/wallet"
-            },
-            { 
-              imageKey: 'mining_card_image',
-              titleKey: 'msra_mining_card_title', 
-              descriptionKey: 'mining_feature_desc',
-              href: "/mining"
             },
           ].map((card) => (
             <Link key={card.titleKey} to={card.href} className="group">
