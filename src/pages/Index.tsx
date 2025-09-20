@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAppContent } from "@/hooks/useAppContent";
-
+import { MsRaCurrencyCard } from "@/components/wallet/MsRaCurrencyCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
@@ -172,13 +172,10 @@ const Index = () => {
           <AnubisCard />
         </section>
         
-        {/* Wallet Section - قريباً */}
+        {/* Ms-Ra Currency Section */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-4xl">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold">محفظة العملات الرقمية</h2>
-              <p className="text-muted-foreground">قريباً - مع WalletConnect</p>
-            </div>
+            <MsRaCurrencyCard isVerified={isIdentityVerified} />
           </div>
         </section>
 
