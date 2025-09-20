@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
-import MiningCard from "@/components/engagement/MiningCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 
@@ -133,10 +132,7 @@ const Index = () => {
           {/* Daily Tasks Card */}
           <DailyTasksCard />
           
-          {/* Mining Card */}
-          <MiningCard />
-          
-          {/* Identity and Wallet Cards */}
+          {/* Identity, Wallet and Mining Cards */}
           {[
             { 
               imageKey: 'identity_card_image',
