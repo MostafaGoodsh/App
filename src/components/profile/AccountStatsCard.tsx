@@ -4,12 +4,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RefreshCw, Coins, Shield, TrendingUp, Zap } from "lucide-react";
-import { usePointsConversion } from "@/hooks/usePointsConversion";
+// import { usePointsConversion } from "@/hooks/usePointsConversion"; // تم إزالته مؤقتاً
 import { useMining } from "@/hooks/useMining";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 
 export function AccountStatsCard() {
-  const { pointsBalance, getPointsBalance, loading: pointsLoading } = usePointsConversion();
+  // مؤقتاً - حتى يتم إعادة إنشاء النظام الجديد
+  const pointsBalance = { total_points: 0, available_points: 0, converted_points: 0 };
+  const getPointsBalance = () => {};
+  const pointsLoading = false;
   const { 
     profile: miningProfile, 
     updateMiningProgress, 
