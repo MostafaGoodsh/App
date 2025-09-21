@@ -325,6 +325,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 value={solanaAddress}
                 onChange={(e) => setSolanaAddress(e.target.value)}
                 className="font-mono text-sm"
+                onClick={(e) => e.stopPropagation()}
+                onFocus={(e) => e.stopPropagation()}
               />
             </div>
             <Button 
@@ -389,141 +391,6 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 </Button>
               </div>
             )}
-
-            {/* Registered Address Display */}
-            <div className="bg-card/80 p-3 rounded-lg border border-border">
-              <div className="flex items-center gap-2 text-primary mb-1">
-                <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">عنوان Solana مسجل</span>
-              </div>
-              <p className="text-xs text-muted-foreground font-mono break-all">
-                {solanaAddress}
-              </p>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" onClick={() => navigate('/mining')}>
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-10"
-        style={{ backgroundImage: `url(${cardBackground})` }}
-      />
-        <CardHeader className="relative z-10">
-          <CardTitle className="flex items-center gap-2 text-center w-full flex-col mb-2">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-primary" />
-              {cardTitle}
-              <ExternalLink className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <div className="text-lg text-primary font-normal">
-              Origin & Fate | الأصل و المصير
-            </div>
-          </CardTitle>
-          <CardDescription className="text-center">
-            <div className="mb-2">عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة</div>
-            <div className="text-sm italic text-muted-foreground/80">From Egypt With Love</div>
-          </CardDescription>
-        </CardHeader>
-        
-        {/* Mining Stats Always Visible */}
-        <div className="relative z-10 px-6 pb-4">
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="col-span-2 text-center">
-                <div className="text-xs text-muted-foreground mb-1">Balance | الرصيد</div>
-                <div className="text-xl font-bold text-primary">{msRaBalance.toFixed(1)}</div>
-                <div className="text-sm text-primary">$Ms-Ra</div>
-              </div>
-            </div>
-            <div className="mt-3">
-              <div className="flex justify-between text-xs mb-1">
-                <span>Next Mining | التعدين التالي</span>
-                <span className="text-primary">{getTimeUntilNextMining()}</span>
-              </div>
-              <Progress value={miningProgress} className="h-2" />
-            </div>
-          </div>
-        </div>
-      <CardContent className="relative z-10 space-y-6">
-        {/* Solana Address Registration */}
-        {!isRegistered ? (
-          <div className="bg-card/80 p-4 rounded-lg space-y-4 border border-border">
-            <div className="flex items-center gap-2 text-primary">
-              <Wallet className="w-4 h-4" />
-              <span className="font-medium">تسجيل عنوان Solana</span>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="solana-address">عنوان محفظة Solana</Label>
-              <Input
-                id="solana-address"
-                placeholder="ادخل عنوان محفظة Solana..."
-                value={solanaAddress}
-                onChange={(e) => setSolanaAddress(e.target.value)}
-                className="font-mono text-sm"
-              />
-            </div>
-            <Button 
-              onClick={handleRegisterSolanaAddress}
-              disabled={isSubmitting || !solanaAddress.trim()}
-              className="w-full"
-            >
-              {isSubmitting ? "جاري التسجيل..." : "تسجيل العنوان"}
-            </Button>
-          </div>
-        ) : (
-          <>
-            {/* Balance Display */}
-            <div className="bg-card/80 p-4 rounded-lg border border-border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">رصيد Ms-Ra</span>
-                <TrendingUp className="w-4 h-4 text-primary" />
-              </div>
-              <div className="text-2xl font-bold text-primary">
-                {msRaBalance.toFixed(2)} MS-RA
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Mining Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="font-medium">مؤشر التعدين EVM</span>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>{miningProgress.toFixed(1)}%</span>
-                </div>
-                <Progress value={miningProgress} className="h-2" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span>التعدين التالي: {getTimeUntilNextMining()}</span>
-                </div>
-                <div className="text-right">
-                  <Badge variant={miningProgress >= 100 ? "default" : "secondary"}>
-                    {miningProgress >= 100 ? "جاهز للتعدين" : "في الانتظار"}
-                  </Badge>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleStartMining}
-                disabled={miningProgress < 100}
-                className="w-full"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                {miningProgress >= 100 ? "بدء التعدين" : "انتظر 24 ساعة"}
-              </Button>
-            </div>
 
             {/* Registered Address Display */}
             <div className="bg-card/80 p-3 rounded-lg border border-border">
