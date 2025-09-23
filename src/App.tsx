@@ -43,6 +43,7 @@ import Reels from "./pages/Reels";
 import ReelsCardAdmin from "./pages/ReelsCardAdmin";
 import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
 import ReelsCategories from "./pages/ReelsCategories";
+import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => {
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
                   <Route path="admin/survey-responses" element={<RequireAdmin><SurveyResponsesAdmin /></RequireAdmin>} />
                   <Route path="admin/learning" element={<RequireAdmin><LearningAdmin /></RequireAdmin>} />
+                  <Route path="admin/content-approval" element={<RequireAdmin><ContentApprovalAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
                   <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
                   <Route path="admin/anubis-card" element={<RequireAdmin><AnubisCardAdmin /></RequireAdmin>} />

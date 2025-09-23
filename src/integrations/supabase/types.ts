@@ -2032,6 +2032,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_content: {
+        Args: { p_admin_notes?: string; p_content_id: string }
+        Returns: boolean
+      }
       calculate_account_strength: {
         Args: { p_user_id: string }
         Returns: number
@@ -2148,6 +2152,10 @@ export type Database = {
       register_trusted_device: {
         Args: { p_device_fingerprint: string; p_device_name?: string }
         Returns: Json
+      }
+      reject_content: {
+        Args: { p_admin_notes?: string; p_content_id: string }
+        Returns: boolean
       }
       secure_wallet_access: {
         Args: {

@@ -37,6 +37,9 @@ interface LearningPost {
   difficulty_level: string;
   is_published: boolean;
   category: 'crypto' | 'general' | 'divine';
+  author_name?: string;
+  language?: string;
+  text_direction?: string;
   profile?: {
     full_name: string;
   };
@@ -83,11 +86,28 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   const fetchPosts = async () => {
     try {
-      // First get the posts filtered by category
+      // First get the posts filtered by category and approved status
       const { data: postsData, error: postsError } = await supabase
         .from('learning_content')
-        .select('*')
-        .eq('is_published', true)
+        .select(`
+          id,
+          title,
+          content,
+          media_urls,
+          media_type,
+          likes_count,
+          comments_count,
+          created_at,
+          created_by,
+          tags,
+          difficulty_level,
+          is_published,
+          category,
+          author_name,
+          language,
+          text_direction
+        `)
+        .eq('approval_status', 'approved')
         .eq('category', category)
         .order('created_at', { ascending: false });
 
@@ -529,9 +549,16 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold">{post.profile?.full_name || 'مجهول'}</p>
+                    <p className="font-semibold">
+                      {post.author_name || post.profile?.full_name || 'مؤلف مجهول'}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(post.created_at).toLocaleDateString('ar-SA')}
+                      {post.language && post.language !== 'ar' && (
+                        <span className="ml-2 text-xs">
+                          • {post.language === 'en' ? 'English' : post.language === 'both' ? 'ثنائي اللغة' : post.language}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -551,9 +578,13 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
             
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-bold text-lg mb-2">{post.title}</h3>
+                <h3 className="font-bold text-lg mb-2" dir={post.text_direction || 'rtl'}>
+                  {post.title}
+                </h3>
                 {post.content && (
-                  <p className="text-muted-foreground whitespace-pre-wrap">{post.content}</p>
+                  <p className="text-muted-foreground whitespace-pre-wrap" dir={post.text_direction || 'rtl'}>
+                    {post.content}
+                  </p>
                 )}
               </div>
 

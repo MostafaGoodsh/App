@@ -1,9 +1,16 @@
 import { Helmet } from "react-helmet-async";
 import LearningTimeline from "@/components/learning/LearningTimeline";
+import { ContentSubmissionForm } from "@/components/learning/ContentSubmissionForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { Plus, FileText } from "lucide-react";
 
 export default function Learning() {
   const canonical = `${window.location.origin}/learning`;
+  const { user } = useAuth();
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
 
   return (
     <>
@@ -25,10 +32,24 @@ export default function Learning() {
         <div className="min-h-screen bg-background/90">
           <section className="py-8 arabic-content">
         <div className="container mx-auto px-4 mb-8 text-center">
-          <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4 arabic-text">Timeline | المنصة التفاعلية</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto arabic-text">
-            تعلم، شارك، وتفاعل مع مجتمع المتداولين والمستثمرين في العملات الرقمية
-          </p>
+          <div className="flex flex-col items-center justify-center gap-4">
+            <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4 arabic-text">Timeline | المنصة التفاعلية</h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto arabic-text">
+              تعلم، شارك، وتفاعل مع مجتمع المتداولين والمستثمرين في العملات الرقمية
+            </p>
+            
+            {/* زر إضافة محتوى للمستخدمين المسجلين */}
+            {user && (
+              <Button
+                onClick={() => setShowSubmissionForm(true)}
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4" />
+                <FileText className="w-4 h-4" />
+                شارك محتوى تعليمي
+              </Button>
+            )}
+          </div>
         </div>
         
         <div className="container mx-auto px-4">
@@ -70,6 +91,15 @@ export default function Learning() {
           </section>
         </div>
       </div>
+      
+      {/* Content Submission Form */}
+      <ContentSubmissionForm
+        open={showSubmissionForm}
+        onOpenChange={setShowSubmissionForm}
+        onSuccess={() => {
+          // يمكن إضافة منطق إضافي هنا إذا لزم الأمر
+        }}
+      />
     </>
   );
 }

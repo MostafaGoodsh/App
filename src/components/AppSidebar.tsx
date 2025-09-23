@@ -32,6 +32,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },
   { title: "إجابات الاستبيانات", url: "/admin/survey-responses", icon: ClipboardList },
   { title: getContent("admin_learning_management", "إدارة التعلم"), url: "/admin/learning", icon: BookOpen },
+  { title: "موافقة المحتوى التعليمي", url: "/admin/content-approval", icon: BookOpen },
   { title: getContent("admin_content_management", "إدارة محتوى التطبيق"), url: "/admin/content", icon: Settings },
   { title: getContent("admin_updates_management", "إدارة التحديثات"), url: "/admin/updates", icon: Settings },
   { title: "إدارة كارت أنوبيس", url: "/admin/anubis-card", icon: Star },
