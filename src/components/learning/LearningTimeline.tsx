@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { LanguageWrapper, TextWrapper } from "@/components/ui/language-wrapper";
+import { getLanguageClass, getTextDirection } from "@/utils/language";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -578,14 +580,19 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
             
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-bold text-lg mb-2" dir={post.text_direction || 'rtl'}>
-                  {post.title}
-                </h3>
-                {post.content && (
-                  <p className="text-muted-foreground whitespace-pre-wrap" dir={post.text_direction || 'rtl'}>
-                    {post.content}
-                  </p>
-                )}
+                <LanguageWrapper 
+                  language={post.language as "ar" | "en"}
+                  textDirection={post.text_direction as "rtl" | "ltr"}
+                >
+                  <h3 className="font-bold text-lg mb-2">
+                    {post.title}
+                  </h3>
+                  {post.content && (
+                    <p className="text-muted-foreground whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                  )}
+                </LanguageWrapper>
               </div>
 
               {renderMedia(post)}

@@ -103,18 +103,44 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 
-  /* Arabic text alignment and direction */
-  .arabic-text {
+  /* Unified language and direction system */
+  .lang-ar {
     direction: rtl;
     text-align: right;
+    font-family: 'Cairo', sans-serif;
+  }
+  
+  .lang-en {
+    direction: ltr;
+    text-align: left;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .content-ar {
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+  }
+  
+  .content-en {
+    direction: ltr;
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .content-ar * {
+    text-align: right;
+  }
+  
+  .content-en * {
+    text-align: left;
+  }
+  
+  /* Legacy support for existing components */
+  .arabic-text {
+    @apply lang-ar;
   }
   
   .arabic-content {
-    direction: rtl;
-  }
-  
-  .arabic-content * {
-    text-align: right;
+    @apply content-ar;
   }
   
   /* Honor personalities grid */

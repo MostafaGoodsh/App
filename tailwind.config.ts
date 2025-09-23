@@ -93,6 +93,11 @@ export default {
       fontFamily: {
         playfair: ['"Playfair Display"', 'serif'],
         cairo: ['Cairo', 'sans-serif'],
+      },
+      // إضافة متغيرات اللغة للنظام الموحد
+      spacing: {
+        'rtl': '0 0 0 0.5rem',
+        'ltr': '0 0.5rem 0 0',
       }
 		}
 	},

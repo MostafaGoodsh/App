@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { LanguageWrapper } from '@/components/ui/language-wrapper';
+import { getTextDirection } from '@/utils/language';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, FileText, Video, Image as ImageIcon, Link, Send } from 'lucide-react';
 
@@ -35,6 +37,19 @@ export const ContentSubmissionForm = ({ open, onOpenChange, onSuccess }: Content
 
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // معالج تلقائي لتغيير اتجاه النص عند تغيير اللغة
+  useEffect(() => {
+    if (formData.language !== 'both') {
+      const newDirection = getTextDirection(formData.language as "ar" | "en");
+      if (formData.text_direction !== newDirection) {
+        setFormData(prev => ({
+          ...prev,
+          text_direction: newDirection
+        }));
+      }
+    }
+  }, [formData.language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,43 +157,46 @@ export const ContentSubmissionForm = ({ open, onOpenChange, onSuccess }: Content
             <CardContent className="p-4 space-y-4">
               <h3 className="font-semibold text-lg border-b pb-2">معلومات أساسية</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">عنوان المحتوى *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => handleInputChange('title', e.target.value)}
-                    placeholder="أدخل عنوان المحتوى..."
-                    className="w-full"
-                    dir={formData.text_direction}
-                  />
+              <LanguageWrapper
+                language={formData.language as "ar" | "en"}
+                textDirection={formData.text_direction as "rtl" | "ltr"}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">عنوان المحتوى *</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange('title', e.target.value)}
+                      placeholder="أدخل عنوان المحتوى..."
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="author_name">اسم المؤلف (اختياري)</Label>
+                    <Input
+                      id="author_name"
+                      value={formData.author_name}
+                      onChange={(e) => handleInputChange('author_name', e.target.value)}
+                      placeholder="اسمك أو اسم مستعار..."
+                      className="w-full"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="author_name">اسم المؤلف (اختياري)</Label>
-                  <Input
-                    id="author_name"
-                    value={formData.author_name}
-                    onChange={(e) => handleInputChange('author_name', e.target.value)}
-                    placeholder="اسمك أو اسم مستعار..."
-                    className="w-full"
-                    dir={formData.text_direction}
+                  <Label htmlFor="content">محتوى المقال *</Label>
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) => handleInputChange('content', e.target.value)}
+                    placeholder="اكتب محتوى المقال هنا..."
+                    className="min-h-[200px] w-full"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">محتوى المقال *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => handleInputChange('content', e.target.value)}
-                  placeholder="اكتب محتوى المقال هنا..."
-                  className="min-h-[200px] w-full"
-                  dir={formData.text_direction}
-                />
-              </div>
+              </LanguageWrapper>
             </CardContent>
           </Card>
 
@@ -268,14 +286,18 @@ export const ContentSubmissionForm = ({ open, onOpenChange, onSuccess }: Content
 
               <div className="space-y-2">
                 <Label htmlFor="tags">الكلمات المفتاحية (مفصولة بفواصل)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) => handleInputChange('tags', e.target.value)}
-                  placeholder="مثال: بيتكوين، تداول، استثمار"
-                  className="w-full"
-                  dir={formData.text_direction}
-                />
+                <LanguageWrapper
+                  language={formData.language as "ar" | "en"}
+                  textDirection={formData.text_direction as "rtl" | "ltr"}
+                >
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => handleInputChange('tags', e.target.value)}
+                    placeholder="مثال: بيتكوين، تداول، استثمار"
+                    className="w-full"
+                  />
+                </LanguageWrapper>
               </div>
             </CardContent>
           </Card>
@@ -304,14 +326,18 @@ export const ContentSubmissionForm = ({ open, onOpenChange, onSuccess }: Content
 
               <div className="space-y-2">
                 <Label htmlFor="submission_notes">ملاحظات للإدارة (اختياري)</Label>
-                <Textarea
-                  id="submission_notes"
-                  value={formData.submission_notes}
-                  onChange={(e) => handleInputChange('submission_notes', e.target.value)}
-                  placeholder="أي ملاحظات أو طلبات خاصة للإدارة..."
-                  className="min-h-[80px] w-full"
-                  dir={formData.text_direction}
-                />
+                <LanguageWrapper
+                  language={formData.language as "ar" | "en"}
+                  textDirection={formData.text_direction as "rtl" | "ltr"}
+                >
+                  <Textarea
+                    id="submission_notes"
+                    value={formData.submission_notes}
+                    onChange={(e) => handleInputChange('submission_notes', e.target.value)}
+                    placeholder="أي ملاحظات أو طلبات خاصة للإدارة..."
+                    className="min-h-[80px] w-full"
+                  />
+                </LanguageWrapper>
               </div>
             </CardContent>
           </Card>
