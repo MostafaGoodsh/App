@@ -1075,6 +1075,41 @@ export type Database = {
         }
         Relationships: []
       }
+      reels_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          reel_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          reel_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          reel_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_comments_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reels_content: {
         Row: {
           category_id: string | null
@@ -1133,6 +1168,35 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "reels_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reels_likes: {
+        Row: {
+          created_at: string
+          id: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_likes_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels_content"
             referencedColumns: ["id"]
           },
         ]

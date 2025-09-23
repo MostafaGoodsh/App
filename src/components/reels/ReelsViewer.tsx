@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ReelsContent {
   id: string;
@@ -17,6 +18,8 @@ interface ReelsContent {
   thumbnail_url: string;
   view_count: number;
   category_id?: string;
+  likes_count?: number;
+  comments_count?: number;
 }
 
 interface ReelsCategory {
@@ -41,9 +44,14 @@ export const ReelsViewer = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [likedVideos, setLikedVideos] = useState<Set<string>>(new Set());
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     fetchData();
@@ -148,15 +156,36 @@ export const ReelsViewer = () => {
         setCategories(categoriesData);
       }
 
-      // جلب الفيديوهات
+      // جلب الفيديوهات مع عدد اللايكات والتعليقات
       const { data, error } = await supabase
         .from('reels_content')
-        .select('*')
+        .select(`
+          *,
+          likes_count:reels_likes(count),
+          comments_count:reels_comments(count)
+        `)
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
       if (error) throw error;
-      setReelsContent(data || []);
+      const processedData = data?.map(reel => ({
+        ...reel,
+        likes_count: reel.likes_count?.[0]?.count || 0,
+        comments_count: reel.comments_count?.[0]?.count || 0
+      })) || [];
+      setReelsContent(processedData);
+
+      // Load user's liked videos if authenticated
+      if (user) {
+        const { data: likesData } = await supabase
+          .from('reels_likes')
+          .select('reel_id')
+          .eq('user_id', user.id);
+        
+        if (likesData) {
+          setLikedVideos(new Set(likesData.map(like => like.reel_id)));
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -224,6 +253,14 @@ export const ReelsViewer = () => {
   };
 
   const handleEditClick = () => {
+    if (!isAdmin) {
+      toast({
+        title: "غير مسموح",
+        description: "هذه الميزة متاحة للإدارة فقط",
+        variant: "destructive"
+      });
+      return;
+    }
     const currentReel = filteredContent[currentVideoIndex];
     setEditTitle(currentReel.title);
     setEditDescription(currentReel.description);
@@ -274,6 +311,162 @@ export const ReelsViewer = () => {
     setIsEditing(false);
     setEditTitle('');
     setEditDescription('');
+  };
+
+  const handleLikeToggle = async () => {
+    if (!user) {
+      toast({
+        title: "يجب تسجيل الدخول",
+        description: "قم بتسجيل الدخول أولاً للتفاعل مع الفيديوهات",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const currentReel = filteredContent[currentVideoIndex];
+    const isLiked = likedVideos.has(currentReel.id);
+
+    try {
+      if (isLiked) {
+        // إلغاء الإعجاب
+        await supabase
+          .from('reels_likes')
+          .delete()
+          .eq('reel_id', currentReel.id)
+          .eq('user_id', user.id);
+        
+        setLikedVideos(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(currentReel.id);
+          return newSet;
+        });
+
+        // تحديث العدد محلياً
+        setFilteredContent(prev => prev.map(reel => 
+          reel.id === currentReel.id 
+            ? { ...reel, likes_count: (reel.likes_count || 0) - 1 }
+            : reel
+        ));
+      } else {
+        // إضافة إعجاب
+        await supabase
+          .from('reels_likes')
+          .insert({ reel_id: currentReel.id, user_id: user.id });
+        
+        setLikedVideos(prev => new Set([...prev, currentReel.id]));
+
+        // تحديث العدد محلياً
+        setFilteredContent(prev => prev.map(reel => 
+          reel.id === currentReel.id 
+            ? { ...reel, likes_count: (reel.likes_count || 0) + 1 }
+            : reel
+        ));
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء التفاعل مع الفيديو",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShowComments = async () => {
+    if (!user) {
+      toast({
+        title: "يجب تسجيل الدخول",
+        description: "قم بتسجيل الدخول أولاً لمشاهدة التعليقات",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const currentReel = filteredContent[currentVideoIndex];
+    setShowComments(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('reels_comments')
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          profiles!inner(full_name, avatar_url)
+        `)
+        .eq('reel_id', currentReel.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setComments(data || []);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!user || !newComment.trim()) return;
+
+    const currentReel = filteredContent[currentVideoIndex];
+    
+    try {
+      const { error } = await supabase
+        .from('reels_comments')
+        .insert({
+          reel_id: currentReel.id,
+          user_id: user.id,
+          content: newComment.trim()
+        });
+
+      if (error) throw error;
+
+      setNewComment('');
+      toast({
+        title: "تم إضافة التعليق",
+        description: "تم إضافة تعليقك بنجاح"
+      });
+
+      // إعادة تحميل التعليقات
+      handleShowComments();
+
+      // تحديث عدد التعليقات محلياً
+      setFilteredContent(prev => prev.map(reel => 
+        reel.id === currentReel.id 
+          ? { ...reel, comments_count: (reel.comments_count || 0) + 1 }
+          : reel
+      ));
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء إضافة التعليق",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    const currentReel = filteredContent[currentVideoIndex];
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: currentReel.title,
+          text: currentReel.description,
+          url: window.location.href + `?video=${currentReel.id}`
+        });
+      } catch (error) {
+        console.log('Share canceled');
+      }
+    } else {
+      // Fallback for browsers without Web Share API
+      navigator.clipboard.writeText(window.location.href + `?video=${currentReel.id}`);
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ رابط الفيديو إلى الحافظة"
+      });
+    }
   };
 
   if (loading) {
@@ -414,26 +607,41 @@ export const ReelsViewer = () => {
           {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-black/20 text-white hover:bg-black/40"
-        >
-          <Heart className="w-6 h-6" />
-        </Button>
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`w-12 h-12 rounded-full bg-black/20 text-white hover:bg-black/40 ${
+              likedVideos.has(currentReel.id) ? 'text-red-500' : ''
+            }`}
+            onClick={handleLikeToggle}
+          >
+            <Heart className={`w-6 h-6 ${likedVideos.has(currentReel.id) ? 'fill-red-500' : ''}`} />
+          </Button>
+          <span className="text-white text-xs mt-1">
+            {currentReel.likes_count || 0}
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-12 h-12 rounded-full bg-black/20 text-white hover:bg-black/40"
+            onClick={handleShowComments}
+          >
+            <MessageCircle className="w-6 h-6" />
+          </Button>
+          <span className="text-white text-xs mt-1">
+            {currentReel.comments_count || 0}
+          </span>
+        </div>
 
         <Button
           variant="ghost"
           size="icon"
           className="w-12 h-12 rounded-full bg-black/20 text-white hover:bg-black/40"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-full bg-black/20 text-white hover:bg-black/40"
+          onClick={handleShare}
         >
           <Share className="w-6 h-6" />
         </Button>
@@ -484,23 +692,91 @@ export const ReelsViewer = () => {
               <h3 className="font-bold text-lg mb-2 font-cairo flex-1">
                 {currentReel.title}
               </h3>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleEditClick}
-                className="text-white/80 hover:bg-white/10 p-1 ml-2"
-              >
-                <Edit3 className="w-4 h-4" />
-              </Button>
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleEditClick}
+                  className="text-white/80 hover:bg-white/10 p-1 ml-2"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Button>
+              )}
             </div>
             <p className="text-sm opacity-80 font-cairo leading-relaxed">
               {currentReel.description}
             </p>
             <div className="mt-2 text-xs opacity-60">
-              {currentReel.view_count} مشاهدة
+              {currentReel.view_count} مشاهدة • {currentReel.likes_count || 0} إعجاب
             </div>
           </>
         )}
+      </div>
+      
+      {/* Comments Modal */}
+      {showComments && (
+        <div className="absolute inset-0 bg-black/80 flex items-end justify-center z-20">
+          <div className="bg-white rounded-t-xl w-full max-w-md h-2/3 flex flex-col">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="font-bold text-lg">التعليقات</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowComments(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3">
+                  <img
+                    src={comment.profiles?.avatar_url || '/placeholder-avatar.png'}
+                    alt=""
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-sm">{comment.profiles?.full_name || 'مستخدم'}</div>
+                    <div className="text-sm text-muted-foreground">{comment.content}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(comment.created_at).toLocaleString('ar')}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-4 border-t flex gap-2">
+              <Input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="اكتب تعليق..."
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
+              />
+              <Button onClick={handleAddComment} size="sm">
+                إرسال
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Progress indicator */}
+      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-1">
+        {filteredContent.map((_, index) => (
+          <div
+            key={index}
+            className={`w-1 h-8 rounded-full transition-colors duration-300 ${
+              index === currentVideoIndex 
+                ? 'bg-white' 
+                : index < currentVideoIndex 
+                  ? 'bg-white/50' 
+                  : 'bg-white/20'
+            }`}
+          />
+        ))}
       </div>
 
       {/* Progress Indicator */}
