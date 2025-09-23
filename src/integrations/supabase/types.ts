@@ -593,6 +593,11 @@ export type Database = {
       }
       learning_content: {
         Row: {
+          admin_notes: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          author_name: string | null
           category: string | null
           comments_count: number | null
           content: string | null
@@ -602,14 +607,23 @@ export type Database = {
           difficulty_level: string | null
           id: string
           is_published: boolean | null
+          language: string | null
           likes_count: number | null
           media_type: string | null
           media_urls: string[] | null
+          rejected_at: string | null
+          submission_notes: string | null
           tags: string[] | null
+          text_direction: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          author_name?: string | null
           category?: string | null
           comments_count?: number | null
           content?: string | null
@@ -619,14 +633,23 @@ export type Database = {
           difficulty_level?: string | null
           id?: string
           is_published?: boolean | null
+          language?: string | null
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          rejected_at?: string | null
+          submission_notes?: string | null
           tags?: string[] | null
+          text_direction?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          author_name?: string | null
           category?: string | null
           comments_count?: number | null
           content?: string | null
@@ -636,10 +659,14 @@ export type Database = {
           difficulty_level?: string | null
           id?: string
           is_published?: boolean | null
+          language?: string | null
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          rejected_at?: string | null
+          submission_notes?: string | null
           tags?: string[] | null
+          text_direction?: string | null
           title?: string
           updated_at?: string
         }
