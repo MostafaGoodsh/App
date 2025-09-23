@@ -312,12 +312,15 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
         {/* Solana Address Registration - Always visible */}
         {!isRegistered ? (
-          <div className="bg-card/80 p-4 rounded-lg space-y-4 border border-border">
+          <div 
+            className="bg-card/80 p-4 rounded-lg space-y-4 border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center gap-2 text-primary">
               <Wallet className="w-4 h-4" />
               <span className="font-medium">تسجيل عنوان Solana</span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
               <Label htmlFor="solana-address">عنوان محفظة Solana</Label>
               <Input
                 id="solana-address"
@@ -327,10 +330,11 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 className="font-mono text-sm"
                 onClick={(e) => e.stopPropagation()}
                 onFocus={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
               />
             </div>
             <Button 
-              onClick={handleRegisterSolanaAddress}
+              onClick={(e) => { e.stopPropagation(); handleRegisterSolanaAddress(); }}
               disabled={isSubmitting || !solanaAddress.trim()}
               className="w-full"
             >
