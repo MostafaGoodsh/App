@@ -77,13 +77,13 @@ const Index = () => {
 
             <div className="flex flex-col items-center justify-center gap-4">
               <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/early-access">{getContent('hero_cta', 'انضم الآن | Join Now')}</Link>
+                <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/updates">{getContent('hero_cta_2', 'آخر التحديثات | Updates')}</Link>
+                <Link to="/updates">{getContent('hero_cta_2', 'Updates | آخر التحديثات')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/call-out">{getContent('hero_cta_5', 'إستدعاء شرفي | Call out')}</Link>
+                <Link to="/call-out">{getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
                 <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
