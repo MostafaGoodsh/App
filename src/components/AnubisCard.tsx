@@ -1,8 +1,6 @@
 import { useAppContent } from "@/hooks/useAppContent";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { LanguageWrapper } from "@/components/ui/language-wrapper";
-import { detectLanguage } from "@/utils/language";
 
 const AnubisCard = () => {
   const { getContent, getAltText, loading } = useAppContent();
@@ -42,14 +40,12 @@ const AnubisCard = () => {
           loading="lazy" 
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/95 via-background/70 to-transparent">
-          <LanguageWrapper language={detectLanguage(displayTitle)}>
-            <h2 className="text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
-              {displayTitle}
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
-              {displayDescription}
-            </p>
-          </LanguageWrapper>
+          <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+            {displayTitle}
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+            {displayDescription}
+          </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>
       </article>
@@ -57,11 +53,9 @@ const AnubisCard = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <LanguageWrapper language={detectLanguage(displayTitle)}>
-              <DialogTitle className="text-2xl md:text-3xl text-primary">
-                {displayTitle}
-              </DialogTitle>
-            </LanguageWrapper>
+            <DialogTitle className="font-playfair text-2xl md:text-3xl text-primary">
+              {displayTitle}
+            </DialogTitle>
           </DialogHeader>
           <div className="mt-6">
             <img 
@@ -69,13 +63,13 @@ const AnubisCard = () => {
               alt={getAltText('anubis_card_image', 'تمثال أنوبيس المصري الذهبي')}
               className="w-full h-64 object-cover rounded-lg mb-6" 
             />
-            <LanguageWrapper language={detectLanguage(introduction)} className="prose prose-lg max-w-none">
+            <div className="prose prose-lg max-w-none text-right" dir="rtl">
               {introduction.split('\n\n').map((paragraph, index) => (
                 <p key={index} className="mb-4 text-foreground/90 leading-relaxed">
                   {paragraph}
                 </p>
               ))}
-            </LanguageWrapper>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

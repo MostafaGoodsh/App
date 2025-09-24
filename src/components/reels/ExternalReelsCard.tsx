@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppContent } from '@/hooks/useAppContent';
-import { LanguageWrapper } from "@/components/ui/language-wrapper";
-import { detectLanguage } from "@/utils/language";
 
 interface ReelsCardContent {
   id: string;
@@ -46,8 +44,8 @@ export const ExternalReelsCard = () => {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80"></div>;
   }
 
-  const displayTitle = cardContent?.title || getContent('reels_card_title', 'Short Videos | الفيديوهات القصيرة');
-  const displayDescription = cardContent?.description || getContent('reels_card_description', 'Watch selected educational short videos | شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة');
+  const displayTitle = cardContent?.title || getContent('reels_card_title', 'الفيديوهات القصيرة');
+  const displayDescription = cardContent?.description || getContent('reels_card_description', 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة');
   const backgroundImage = (cardContent?.background_image_url && cardContent.background_image_url.trim() !== '') 
     ? cardContent.background_image_url 
     : '/lovable-uploads/egyptian-ankh-reels-bg.jpg';
@@ -62,14 +60,12 @@ export const ExternalReelsCard = () => {
           loading="lazy" 
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-          <LanguageWrapper language={detectLanguage(displayTitle)}>
-            <h2 className="text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
-              {displayTitle}
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
-              {displayDescription}
-            </p>
-          </LanguageWrapper>
+          <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+            {displayTitle}
+          </h2>
+          <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+            {displayDescription}
+          </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>
       </article>
