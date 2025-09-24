@@ -3,6 +3,8 @@ import { Play, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { VideoModal } from './VideoModal';
 import egyptianCatBg from '@/assets/egyptian-cat-bg.jpg';
+import { LanguageWrapper } from "@/components/ui/language-wrapper";
+import { detectLanguage } from "@/utils/language";
 
 interface ReelsContent {
   id: string;
@@ -104,14 +106,16 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
       
       {/* Content */}
       <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-        <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold flex items-center gap-3">
-          <Video className="w-6 h-6 text-primary" />
-          {cardContent?.title || 'الفيديوهات القصيرة'}
-        </h2>
-        
-        <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-4">
-          {cardContent?.description || 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية'}
-        </p>
+        <LanguageWrapper language={detectLanguage(cardContent?.title || 'Short Videos | الفيديوهات القصيرة')}>
+          <h2 className="text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold flex items-center gap-3">
+            <Video className="w-6 h-6 text-primary" />
+            {cardContent?.title || 'Short Videos | الفيديوهات القصيرة'}
+          </h2>
+          
+          <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-4">
+            {cardContent?.description || 'Watch selected educational short videos about Misr platform and cryptocurrencies | شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية'}
+          </p>
+        </LanguageWrapper>
         
         {/* Video thumbnails */}
         <div className="grid grid-cols-3 gap-2 mb-4">
@@ -151,13 +155,13 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
           )}
         </div>
         
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <LanguageWrapper language="ar" className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{reelsContent.length} فيديو متاح</span>
           <span className="flex items-center gap-1">
             <Play className="w-3 h-3" />
             شاهد الآن
           </span>
-        </div>
+        </LanguageWrapper>
         <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
       </div>
       
