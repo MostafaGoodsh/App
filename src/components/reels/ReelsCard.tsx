@@ -106,14 +106,14 @@ export const ReelsCard = ({ onClick }: { onClick?: () => void }) => {
       
       {/* Content */}
       <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-        <LanguageWrapper language={detectLanguage(cardContent?.title || 'الفيديوهات القصيرة | Short Videos')}>
+        <LanguageWrapper language={detectLanguage(cardContent?.title || 'Short Videos | الفيديوهات القصيرة')}>
           <h2 className="text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold flex items-center gap-3">
             <Video className="w-6 h-6 text-primary" />
-            {cardContent?.title || 'الفيديوهات القصيرة | Short Videos'}
+            {cardContent?.title || 'Short Videos | الفيديوهات القصيرة'}
           </h2>
           
           <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-4">
-            {cardContent?.description || 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية | Watch selected educational short videos about Misr platform and cryptocurrencies'}
+            {cardContent?.description || 'Watch selected educational short videos about Misr platform and cryptocurrencies | شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة حول منصة مصر والعملات الرقمية'}
           </p>
         </LanguageWrapper>
         
