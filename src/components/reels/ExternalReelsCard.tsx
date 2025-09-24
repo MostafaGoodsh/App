@@ -46,8 +46,8 @@ export const ExternalReelsCard = () => {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80"></div>;
   }
 
-  const displayTitle = cardContent?.title || getContent('reels_card_title', 'Short Videos | الفيديوهات القصيرة');
-  const displayDescription = cardContent?.description || getContent('reels_card_description', 'Watch selected educational short videos | شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة');
+  const displayTitle = cardContent?.title || getContent('reels_card_title', 'الفيديوهات القصيرة | Short Videos');
+  const displayDescription = cardContent?.description || getContent('reels_card_description', 'شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة | Watch selected educational short videos');
   const backgroundImage = (cardContent?.background_image_url && cardContent.background_image_url.trim() !== '') 
     ? cardContent.background_image_url 
     : '/lovable-uploads/egyptian-ankh-reels-bg.jpg';
