@@ -40,7 +40,7 @@ const AnubisCard = () => {
           loading="lazy" 
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/95 via-background/70 to-transparent">
-          <h2 className="font-playfair text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+          <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
             {displayTitle}
           </h2>
           <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
@@ -53,7 +53,7 @@ const AnubisCard = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-playfair text-2xl md:text-3xl text-primary">
+            <DialogTitle className="font-cairo text-2xl md:text-3xl text-primary">
               {displayTitle}
             </DialogTitle>
           </DialogHeader>
