@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAppContent } from '@/hooks/useAppContent';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LanguageWrapper } from '@/components/ui/language-wrapper';
+import { detectLanguage } from '@/utils/language';
 
 interface ReelsCategory {
   id: string;
@@ -76,13 +78,17 @@ const ReelsCategories = () => {
             >
               <ArrowRight className="h-5 w-5" />
             </Button>
-            <h1 className="font-cairo text-2xl md:text-3xl font-bold">
-              أقسام الفيديوهات القصيرة
-            </h1>
+            <LanguageWrapper language="ar">
+              <h1 className="text-2xl md:text-3xl font-bold">
+                أقسام الفيديوهات القصيرة
+              </h1>
+            </LanguageWrapper>
           </div>
-          <p className="font-cairo text-muted-foreground">
-            اختر القسم الذي تريد مشاهدة محتواه
-          </p>
+          <LanguageWrapper language="ar">
+            <p className="text-muted-foreground">
+              اختر القسم الذي تريد مشاهدة محتواه
+            </p>
+          </LanguageWrapper>
         </div>
       </div>
 
@@ -100,13 +106,17 @@ const ReelsCategories = () => {
                   <div className="text-2xl">
                     {category.icon || '🎬'}
                   </div>
-                  <h3 className="font-cairo text-xl font-bold group-hover:text-primary transition-colors">
-                    {category.title}
-                  </h3>
+                  <LanguageWrapper language={detectLanguage(category.title)}>
+                    <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
+                      {category.title}
+                    </h3>
+                  </LanguageWrapper>
                 </div>
-                <p className="font-cairo text-muted-foreground leading-relaxed">
-                  {category.description || 'مجموعة من الفيديوهات المختارة في هذا القسم'}
-                </p>
+                <LanguageWrapper language={detectLanguage(category.description || 'مجموعة من الفيديوهات المختارة في هذا القسم')}>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {category.description || 'مجموعة من الفيديوهات المختارة في هذا القسم'}
+                  </p>
+                </LanguageWrapper>
                 <div className="mt-4 w-8 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-16 transition-all duration-300"></div>
               </div>
             </div>
@@ -116,12 +126,14 @@ const ReelsCategories = () => {
         {categories.length === 0 && (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">🎬</div>
-            <h3 className="font-cairo text-xl font-bold text-muted-foreground mb-2">
-              لا توجد أقسام متاحة حالياً
-            </h3>
-            <p className="font-cairo text-muted-foreground">
-              سيتم إضافة أقسام جديدة قريباً
-            </p>
+            <LanguageWrapper language="ar">
+              <h3 className="text-xl font-bold text-muted-foreground mb-2">
+                لا توجد أقسام متاحة حالياً
+              </h3>
+              <p className="text-muted-foreground">
+                سيتم إضافة أقسام جديدة قريباً
+              </p>
+            </LanguageWrapper>
           </div>
         )}
       </div>
