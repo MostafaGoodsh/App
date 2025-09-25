@@ -158,7 +158,7 @@ const CallOut = () => {
                     <img 
                       src={cardContent.fixed_image_url} 
                       alt="شعار التكريم"
-                      className="w-full h-full object-cover rounded-full"
+                      className="w-4/5 h-4/5 object-contain rounded-full"
                     />
                   ) : (
                     <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
