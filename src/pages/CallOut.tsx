@@ -97,13 +97,37 @@ const CallOut = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Megaphone className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl md:text-4xl font-bold arabic-text">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Megaphone className="w-6 h-6 text-primary" />
+              <h1 className="text-xl md:text-2xl font-bold arabic-text">
                 Call out | استدعاء شرفي 
               </h1>
             </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto arabic-text">
+            
+            {/* Profile Cards Section */}
+            <div className="flex items-center justify-center gap-8 mb-8">
+              {/* Right Circle - Personality Image */}
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
+                    <Star className="w-8 h-8 text-primary/60" />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2 arabic-text">الشخصية المكرمة</p>
+              </div>
+              
+              {/* Left Circle - Fixed Image */}
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                  <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
+                    <Award className="w-8 h-8 text-secondary/60" />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2 arabic-text">شعار التكريم</p>
+              </div>
+            </div>
+            
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto arabic-text">
               العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.
               <br /><br />
               Faith and morals are our point of distinction and uniqueness, so we created this section specifically to send invitations for honorary summons to every influential person around the world and everyone who adopts and serves our faith and goals. We are happy to have you on the honorary summons list and we are honored by your acceptance.
