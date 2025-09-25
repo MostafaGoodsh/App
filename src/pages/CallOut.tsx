@@ -18,32 +18,60 @@ interface CalloutPersonality {
   category: string;
   is_featured: boolean;
   display_order: number;
+  contact_link: string;
+  contact_button_text: string;
+}
+
+interface CalloutCardContent {
+  id: string;
+  title: string;
+  description: string;
+  fixed_image_url: string;
+  contact_button_text: string;
+  contact_link: string;
 }
 
 const CallOut = () => {
   const { getContent, loading } = useAppContent();
   const [personalities, setPersonalities] = useState<CalloutPersonality[]>([]);
   const [personalitiesLoading, setPersonalitiesLoading] = useState(true);
+  const [cardContent, setCardContent] = useState<CalloutCardContent | null>(null);
+  const [featuredPersonality, setFeaturedPersonality] = useState<CalloutPersonality | null>(null);
 
   useEffect(() => {
-    const fetchPersonalities = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
+        // Fetch personalities
+        const { data: personalitiesData, error: personalitiesError } = await supabase
           .from('callout_personalities')
           .select('*')
           .eq('is_active', true)
           .order('display_order', { ascending: true });
         
-        if (error) throw error;
-        setPersonalities(data || []);
+        if (personalitiesError) throw personalitiesError;
+        setPersonalities(personalitiesData || []);
+        
+        // Find featured personality for the circle
+        const featured = personalitiesData?.find(p => p.is_featured);
+        setFeaturedPersonality(featured || null);
+        
+        // Fetch card content
+        const { data: cardData, error: cardError } = await supabase
+          .from('callout_card_content')
+          .select('*')
+          .eq('is_active', true)
+          .single();
+        
+        if (cardError) throw cardError;
+        setCardContent(cardData);
       } catch (error) {
-        console.error('Error fetching personalities:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setPersonalitiesLoading(false);
       }
     };
 
-    fetchPersonalities();
+    fetchData();
   }, []);
 
   const getCategoryIcon = (category: string) => {
@@ -72,14 +100,14 @@ const CallOut = () => {
     }
   };
 
-  if (loading || personalitiesLoading) {
+  if (loading || personalitiesLoading || !cardContent) {
     return <div className="flex justify-center items-center min-h-screen arabic-text">جاري التحميل...</div>;
   }
 
   return (
     <>
       <Helmet>
-        <title>قائمة الاستدعاء الشرفية - {getContent('app_name', 'Crypto-MSR')}</title>
+        <title>{cardContent.title} - {getContent('app_name', 'Crypto-MSR')}</title>
         <meta name="description" content="قائمة استدعاء شرفية للشخصيات العامة المصرية والعربية المتسقة مع قيم وأهداف المنصة" />
       </Helmet>
       
@@ -100,222 +128,152 @@ const CallOut = () => {
             <div className="flex items-center justify-center gap-2 mb-6">
               <Megaphone className="w-6 h-6 text-primary" />
               <h1 className="text-xl md:text-2xl font-bold arabic-text">
-                Call out | استدعاء شرفي 
+                {cardContent.title}
               </h1>
             </div>
             
             {/* Profile Cards Section */}
-            <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="flex items-center justify-center gap-12 mb-8">
               {/* Right Circle - Personality Image */}
               <div className="flex flex-col items-center">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
-                  <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                    <Star className="w-8 h-8 text-primary/60" />
-                  </div>
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                  {featuredPersonality?.image_url ? (
+                    <img 
+                      src={featuredPersonality.image_url} 
+                      alt={featuredPersonality.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
+                      <Star className="w-12 h-12 text-primary/60" />
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-2 arabic-text">الشخصية المكرمة</p>
               </div>
               
               {/* Left Circle - Fixed Image */}
               <div className="flex flex-col items-center">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-lg">
-                  <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                    <Award className="w-8 h-8 text-secondary/60" />
-                  </div>
+                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                  {cardContent.fixed_image_url ? (
+                    <img 
+                      src={cardContent.fixed_image_url} 
+                      alt="شعار التكريم"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
+                      <Award className="w-12 h-12 text-secondary/60" />
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-2 arabic-text">شعار التكريم</p>
               </div>
             </div>
             
+            {/* Contact Button */}
+            {featuredPersonality && featuredPersonality.contact_link !== '#' && (
+              <div className="mb-8">
+                <a 
+                  href={featuredPersonality.contact_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors arabic-text"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {featuredPersonality.contact_button_text || cardContent.contact_button_text}
+                </a>
+              </div>
+            )}
+            
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto arabic-text">
-              العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.
-              <br /><br />
-              Faith and morals are our point of distinction and uniqueness, so we created this section specifically to send invitations for honorary summons to every influential person around the world and everyone who adopts and serves our faith and goals. We are happy to have you on the honorary summons list and we are honored by your acceptance.
+              {cardContent.description}
             </p>
           </div>
 
-          {/* Honor Personalities Grid */}
+          {/* Personalities Archive Table */}
           {personalities.length > 0 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 arabic-text flex items-center gap-2">
-                <Star className="w-6 h-6 text-primary" />
-                الشخصيات المكرمة
-              </h2>
-              
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {personalities.map((personality) => (
-                  <Card key={personality.id} className="personality-card overflow-hidden">
-                    <div className="relative">
-                      {personality.image_url && (
-                        <div className="h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                          <img 
-                            src={personality.image_url} 
-                            alt={personality.name}
-                            className="w-24 h-24 rounded-full object-cover border-4 border-background shadow-lg"
-                          />
-                        </div>
-                      )}
-                      {personality.is_featured && (
-                        <Badge className="absolute top-2 right-2 bg-primary/90">
-                          <Star className="w-3 h-3 mr-1" />
-                          مميز
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline" className={getCategoryColor(personality.category)}>
-                          {getCategoryIcon(personality.category)}
-                        </Badge>
-                      </div>
-                      
-                      <h3 className="text-xl font-bold mb-2 arabic-text">{personality.name}</h3>
-                      
-                      {personality.title && (
-                        <p className="text-primary font-medium mb-3 arabic-text">{personality.title}</p>
-                      )}
-                      
-                      {personality.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed arabic-text">
-                          {personality.description}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="arabic-text flex items-center gap-2">
+                  <Star className="w-6 h-6 text-primary" />
+                  أرشيف الشخصيات المكرمة
+                </CardTitle>
+                <CardDescription className="arabic-text">
+                  جدول أرشيفي للشخصيات التي تم تكريمها على المنصة
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-right p-4 arabic-text">الاسم</th>
+                        <th className="text-right p-4 arabic-text">اللقب</th>
+                        <th className="text-right p-4 arabic-text">التصنيف</th>
+                        <th className="text-right p-4 arabic-text">الحالة</th>
+                        <th className="text-right p-4 arabic-text">التواصل</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {personalities.map((personality) => (
+                        <tr key={personality.id} className="border-b hover:bg-muted/50">
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              {personality.image_url ? (
+                                <img 
+                                  src={personality.image_url} 
+                                  alt={personality.name}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Star className="w-4 h-4 text-muted-foreground" />
+                                </div>
+                              )}
+                              <span className="font-medium arabic-text">{personality.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-4 arabic-text text-muted-foreground">{personality.title}</td>
+                          <td className="p-4">
+                            <Badge variant="outline" className={getCategoryColor(personality.category)}>
+                              {getCategoryIcon(personality.category)}
+                              <span className="mr-1">
+                                {personality.category === 'scientist' ? 'عالم' : 
+                                 personality.category === 'artist' ? 'فنان' : 
+                                 personality.category === 'intellectual' ? 'مفكر' : 'شخصية عامة'}
+                              </span>
+                            </Badge>
+                          </td>
+                          <td className="p-4">
+                            {personality.is_featured && (
+                              <Badge className="bg-primary/90">
+                                <Star className="w-3 h-3 ml-1" />
+                                مميز
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            {personality.contact_link && personality.contact_link !== '#' ? (
+                              <a 
+                                href={personality.contact_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm arabic-text"
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                {personality.contact_button_text || 'تواصل'}
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-sm arabic-text">غير متاح</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
           )}
-
-          {/* Community Stats */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardContent className="text-center pt-6">
-                <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">1,247</div>
-                <p className="text-sm text-muted-foreground arabic-text">أعضاء المجتمع</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="text-center pt-6">
-                <MessageCircle className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">3,856</div>
-                <p className="text-sm text-muted-foreground arabic-text">الرسائل والمقترحات</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="text-center pt-6">
-                <Megaphone className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">{personalities.length}</div>
-                <p className="text-sm text-muted-foreground arabic-text">الشخصيات المكرمة</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Feedback Form */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="arabic-text">
-                {getContent('feedback_title', 'شارك رأيك وأفكارك')}
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                {getContent('feedback_description', 'نحن نقدر ملاحظاتك ومقترحاتك لتحسين المنصة')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium arabic-text">الاسم</label>
-                  <Input placeholder="اسمك الكامل" className="arabic-text" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium arabic-text">البريد الإلكتروني</label>
-                  <Input type="email" placeholder="your@email.com" />
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium arabic-text">عنوان المقترح</label>
-                <Input placeholder="عنوان مقترحك أو فكرتك" className="arabic-text" />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium arabic-text">التفاصيل</label>
-                <Textarea 
-                  placeholder="اكتب تفاصيل مقترحك أو ملاحظاتك هنا..."
-                  rows={5}
-                  className="arabic-text"
-                />
-              </div>
-
-              <Button className="w-full md:w-auto">
-                <Send className="w-4 h-4 mr-2" />
-                <span className="arabic-text">إرسال المقترح</span>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Recent Suggestions */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="arabic-text">
-                {getContent('recent_suggestions_title', 'المقترحات الحديثة')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border-l-4 border-primary pl-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium arabic-text">تحسين واجهة التعدين</h4>
-                  <Badge variant="secondary">قيد المراجعة</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground arabic-text">
-                  اقتراح بإضافة مؤشرات أكثر تفصيلاً لعملية التعدين...
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 arabic-text">أحمد محمد - منذ 3 أيام</p>
-              </div>
-
-              <div className="border-l-4 border-green-500 pl-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium arabic-text">دعم اللغة الإنجليزية</h4>
-                  <Badge variant="default">تم التنفيذ</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground arabic-text">
-                  إضافة خيار تبديل اللغة بين العربية والإنجليزية...
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 arabic-text">سارة علي - منذ أسبوع</p>
-              </div>
-
-              <div className="border-l-4 border-orange-500 pl-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium arabic-text">تطبيق الهاتف المحمول</h4>
-                  <Badge variant="outline">تحت الدراسة</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground arabic-text">
-                  اقتراح بتطوير تطبيق للهاتف المحمول للمنصة...
-                </p>
-                <p className="text-xs text-muted-foreground mt-2 arabic-text">محمد حسن - منذ أسبوعين</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Community Guidelines */}
-          <Card className="border-dashed border-2 border-primary/30">
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4 text-center arabic-text">
-                {getContent('community_guidelines_title', 'إرشادات المجتمع')}
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground arabic-text">
-                <li>• كن محترماً ومهذباً في تعاملك مع الآخرين</li>
-                <li>• اكتب مقترحات واضحة ومفصلة</li>
-                <li>• تجنب المحتوى المسيء أو غير المناسب</li>
-                <li>• شارك أفكاراً بناءة لتطوير المنصة</li>
-                <li>• كن صبوراً في انتظار الردود والتحديثات</li>
-              </ul>
-            </CardContent>
-          </Card>
         </div>
           </main>
         </div>

@@ -28,6 +28,7 @@ import RWA from "./pages/RWA";
 import CallOut from "./pages/CallOut";
 import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
 import CalloutPersonalitiesAdmin from "./pages/CalloutPersonalitiesAdmin";
+import CalloutCardAdmin from "./pages/CalloutCardAdmin";
 import UpdatesAdmin from "./pages/UpdatesAdmin";
 import Profile from "./pages/Profile";
 import EngagementStatsAdmin from "./pages/EngagementStatsAdmin";
@@ -85,6 +86,7 @@ const App = () => {
                   <Route path="admin/anubis-card" element={<RequireAdmin><AnubisCardAdmin /></RequireAdmin>} />
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
+                  <Route path="admin/callout-card" element={<RequireAdmin><CalloutCardAdmin /></RequireAdmin>} />
                   <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />
                   <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />
                   <Route path="admin/media-content" element={<RequireAdmin><MediaContentAdmin /></RequireAdmin>} />

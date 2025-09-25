@@ -23,6 +23,8 @@ interface CalloutPersonality {
   display_order: number;
   is_active: boolean;
   created_at: string;
+  contact_link: string;
+  contact_button_text: string;
 }
 
 const CalloutPersonalitiesManagement = () => {
@@ -41,7 +43,9 @@ const CalloutPersonalitiesManagement = () => {
     category: "public_figure",
     is_featured: false,
     display_order: 0,
-    is_active: true
+    is_active: true,
+    contact_link: "#",
+    contact_button_text: "تواصل معي"
   });
 
   // Form state for page content
@@ -137,16 +141,18 @@ const CalloutPersonalitiesManagement = () => {
 
   const handleEdit = (personality: CalloutPersonality) => {
     setEditingPersonality(personality);
-    setFormData({
-      name: personality.name,
-      title: personality.title || "",
-      description: personality.description || "",
-      image_url: personality.image_url || "",
-      category: personality.category,
-      is_featured: personality.is_featured,
-      display_order: personality.display_order,
-      is_active: personality.is_active
-    });
+      setFormData({
+        name: personality.name,
+        title: personality.title || "",
+        description: personality.description || "",
+        image_url: personality.image_url || "",
+        category: personality.category,
+        is_featured: personality.is_featured,
+        display_order: personality.display_order,
+        contact_link: personality.contact_link || '#',
+        contact_button_text: personality.contact_button_text || 'تواصل معي',
+        is_active: personality.is_active
+      });
     setIsDialogOpen(true);
   };
 
@@ -178,7 +184,9 @@ const CalloutPersonalitiesManagement = () => {
       category: "public_figure",
       is_featured: false,
       display_order: 0,
-      is_active: true
+      is_active: true,
+      contact_link: "#",
+      contact_button_text: "تواصل معي"
     });
     setEditingPersonality(null);
   };
@@ -356,6 +364,27 @@ const CalloutPersonalitiesManagement = () => {
                     onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
                     placeholder="0"
                     min="0"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">رابط التواصل</label>
+                  <Input
+                    value={formData.contact_link}
+                    onChange={(e) => setFormData({ ...formData, contact_link: e.target.value })}
+                    placeholder="https://wa.me/1234567890"
+                    type="url"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">نص زر التواصل</label>
+                  <Input
+                    value={formData.contact_button_text}
+                    onChange={(e) => setFormData({ ...formData, contact_button_text: e.target.value })}
+                    placeholder="تواصل معي"
                   />
                 </div>
               </div>

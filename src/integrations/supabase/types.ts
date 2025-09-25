@@ -56,9 +56,50 @@ export type Database = {
         }
         Relationships: []
       }
+      callout_card_content: {
+        Row: {
+          contact_button_text: string | null
+          contact_link: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          fixed_image_url: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contact_button_text?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          fixed_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_button_text?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          fixed_image_url?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       callout_personalities: {
         Row: {
           category: string | null
+          contact_button_text: string | null
+          contact_link: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -73,6 +114,8 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          contact_button_text?: string | null
+          contact_link?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -87,6 +130,8 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          contact_button_text?: string | null
+          contact_link?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
