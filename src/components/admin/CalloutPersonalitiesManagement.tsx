@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Star, Award, Sparkles, Users } from "lucide-react";
+import { CameraCapture } from "@/components/ui/camera-capture";
+import { Plus, Edit, Trash2, Star, Award, Sparkles, Users, Upload, Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -33,6 +34,9 @@ const CalloutPersonalitiesManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isContentDialogOpen, setIsContentDialogOpen] = useState(false);
   const [editingPersonality, setEditingPersonality] = useState<CalloutPersonality | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   
   // Form state for personalities
   const [formData, setFormData] = useState({
@@ -80,6 +84,45 @@ const CalloutPersonalitiesManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `personalities/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const imageUrl = await uploadImage(file);
+      setFormData({ ...formData, image_url: imageUrl });
+      setImagePreview(imageUrl);
+      toast.success('تم رفع الصورة بنجاح');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('فشل في رفع الصورة');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCameraCapture = (file: File) => {
+    handleFileUpload(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,6 +196,7 @@ const CalloutPersonalitiesManagement = () => {
         contact_button_text: personality.contact_button_text || 'تواصل معي',
         is_active: personality.is_active
       });
+      setImagePreview(personality.image_url || null);
     setIsDialogOpen(true);
   };
 
@@ -189,6 +233,7 @@ const CalloutPersonalitiesManagement = () => {
       contact_button_text: "تواصل معي"
     });
     setEditingPersonality(null);
+    setImagePreview(null);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -324,12 +369,61 @@ const CalloutPersonalitiesManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium">رابط الصورة</label>
+                <label className="text-sm font-medium">صورة الشخصية</label>
+                
+                {imagePreview && (
+                  <div className="flex justify-center mb-4">
+                    <img
+                      src={imagePreview}
+                      alt="معاينة الصورة"
+                      className="w-24 h-24 rounded-full object-cover border"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file);
+                    }}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={uploading}
+                    className="flex-1"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploading ? 'جاري الرفع...' : 'رفع من الجهاز'}
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCamera(true)}
+                    disabled={uploading}
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    التقاط صورة
+                  </Button>
+                </div>
+                
                 <Input
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="رابط صورة الشخصية"
+                  onChange={(e) => {
+                    setFormData({ ...formData, image_url: e.target.value });
+                    setImagePreview(e.target.value);
+                  }}
+                  placeholder="أو أدخل رابط الصورة"
                   type="url"
+                  className="text-sm"
                 />
               </div>
               
@@ -512,6 +606,13 @@ const CalloutPersonalitiesManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      <CameraCapture
+        isOpen={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handleCameraCapture}
+        title="التقاط صورة الشخصية"
+      />
     </div>
   );
 };
