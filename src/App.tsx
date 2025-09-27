@@ -45,6 +45,7 @@ import ReelsCardAdmin from "./pages/ReelsCardAdmin";
 import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
 import ReelsCategories from "./pages/ReelsCategories";
 import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
+import ActiveCalloutAdmin from "./pages/ActiveCalloutAdmin";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => {
                   <Route path="admin/anubis-card" element={<RequireAdmin><AnubisCardAdmin /></RequireAdmin>} />
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
+                  <Route path="admin/active-callout" element={<RequireAdmin><ActiveCalloutAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-card" element={<RequireAdmin><CalloutCardAdmin /></RequireAdmin>} />
                   <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />
                   <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />

@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_callouts: {
+        Row: {
+          callout_text: string
+          contact_button_text: string | null
+          contact_link: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          personality_description: string | null
+          personality_image_url: string | null
+          personality_name: string
+          personality_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          callout_text?: string
+          contact_button_text?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          personality_description?: string | null
+          personality_image_url?: string | null
+          personality_name: string
+          personality_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          callout_text?: string
+          contact_button_text?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          personality_description?: string | null
+          personality_image_url?: string | null
+          personality_name?: string
+          personality_title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_content: {
         Row: {
           alt_text: string | null
@@ -2096,6 +2138,18 @@ export type Database = {
       create_initial_internal_balances: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      create_new_callout: {
+        Args: {
+          p_callout_text?: string
+          p_contact_button_text?: string
+          p_contact_link?: string
+          p_personality_description?: string
+          p_personality_image_url?: string
+          p_personality_name: string
+          p_personality_title?: string
+        }
+        Returns: Json
       }
       create_wallet_mfa_session: {
         Args: { p_wallet_id: string }

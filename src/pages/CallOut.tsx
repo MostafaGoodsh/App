@@ -36,12 +36,12 @@ const CallOut = () => {
   const [personalities, setPersonalities] = useState<CalloutPersonality[]>([]);
   const [personalitiesLoading, setPersonalitiesLoading] = useState(true);
   const [cardContent, setCardContent] = useState<CalloutCardContent | null>(null);
-  const [featuredPersonality, setFeaturedPersonality] = useState<CalloutPersonality | null>(null);
+  const [activeCallout, setActiveCallout] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch personalities
+        // Fetch personalities for archive
         const { data: personalitiesData, error: personalitiesError } = await supabase
           .from('callout_personalities')
           .select('*')
@@ -51,9 +51,18 @@ const CallOut = () => {
         if (personalitiesError) throw personalitiesError;
         setPersonalities(personalitiesData || []);
         
-        // Find featured personality for the circle
-        const featured = personalitiesData?.find(p => p.is_featured);
-        setFeaturedPersonality(featured || null);
+        // Fetch active callout
+        const { data: activeCalloutData, error: activeCalloutError } = await supabase
+          .from('active_callouts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (activeCalloutError && activeCalloutError.code !== 'PGRST116') {
+          throw activeCalloutError;
+        }
+        setActiveCallout(activeCalloutData);
         
         // Fetch card content
         const { data: cardData, error: cardError } = await supabase
@@ -134,13 +143,13 @@ const CallOut = () => {
             
             {/* Profile Cards Section */}
             <div className="flex items-center justify-center gap-12 mb-8">
-              {/* Right Circle - Personality Image */}
+              {/* Right Circle - Active Callout Image */}
               <div className="flex flex-col items-center">
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
-                  {featuredPersonality?.image_url ? (
+                  {activeCallout?.personality_image_url ? (
                     <img 
-                      src={featuredPersonality.image_url} 
-                      alt={featuredPersonality.name}
+                      src={activeCallout.personality_image_url} 
+                      alt={activeCallout.personality_name}
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
@@ -170,22 +179,22 @@ const CallOut = () => {
             </div>
             
             {/* Contact Button */}
-            {featuredPersonality && featuredPersonality.contact_link !== '#' && (
+            {activeCallout && activeCallout.contact_link !== '#' && (
               <div className="mb-8">
                 <a 
-                  href={featuredPersonality.contact_link}
+                  href={activeCallout.contact_link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors arabic-text"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  {featuredPersonality.contact_button_text || cardContent.contact_button_text}
+                  {activeCallout.contact_button_text || cardContent?.contact_button_text}
                 </a>
               </div>
             )}
             
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto arabic-text">
-              {cardContent.description}
+              {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
             </p>
           </div>
 
