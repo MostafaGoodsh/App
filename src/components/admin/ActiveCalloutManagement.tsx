@@ -167,7 +167,10 @@ const ActiveCalloutManagement = () => {
       }
       
       setIsDialogOpen(false);
-      fetchActiveCallout();
+      // إعادة تحميل البيانات مع تأخير قصير للتأكد من التحديث
+      setTimeout(() => {
+        fetchActiveCallout();
+      }, 500);
     } catch (error) {
       console.error('Error creating callout:', error);
       toast.error('حدث خطأ في إنشاء الاستدعاء');

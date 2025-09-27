@@ -81,6 +81,11 @@ const CallOut = () => {
     };
 
     fetchData();
+    
+    // إعداد تحديث دوري للبيانات كل 30 ثانية
+    const interval = setInterval(fetchData, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const getCategoryIcon = (category: string) => {
@@ -130,22 +135,28 @@ const CallOut = () => {
         }}
       >
         <div className="min-h-screen bg-background/90">
-          <main className="container mx-auto px-4 py-8 arabic-content">
-        <div className="max-w-6xl mx-auto">
+          <main className="container mx-auto px-4 py-6 arabic-content max-w-7xl">
+        <div className="max-w-5xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="text-center mb-8">
+            {/* العنوان */}
+            <div className="flex items-center justify-center gap-2 mb-4">
               <Megaphone className="w-6 h-6 text-primary" />
               <h1 className="text-xl md:text-2xl font-bold arabic-text">
                 {cardContent.title}
               </h1>
             </div>
             
-            {/* Profile Cards Section */}
-            <div className="flex items-center justify-center gap-12 mb-8">
-              {/* Right Circle - Active Callout Image */}
+            {/* المقدمة التعريفية تحت العنوان مباشرة */}
+            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto arabic-text mb-8">
+              {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
+            </p>
+            
+            {/* الدوائر */}
+            <div className="flex items-center justify-center gap-8 md:gap-12 mb-6">
+              {/* الدائرة اليمنى - صورة الاستدعاء النشط */}
               <div className="flex flex-col items-center">
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
                   {activeCallout?.personality_image_url ? (
                     <img 
                       src={activeCallout.personality_image_url} 
@@ -154,33 +165,41 @@ const CallOut = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                      <Star className="w-12 h-12 text-primary/60" />
+                      <Star className="w-8 h-8 md:w-12 md:h-12 text-primary/60" />
                     </div>
                   )}
                 </div>
+                {activeCallout?.personality_name && (
+                  <p className="mt-2 text-sm font-medium arabic-text text-center max-w-[120px] truncate">
+                    {activeCallout.personality_name}
+                  </p>
+                )}
               </div>
               
-              {/* Left Circle - Fixed Image */}
+              {/* الدائرة اليسرى - الصورة الثابتة */}
               <div className="flex flex-col items-center">
-                <div className="w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-lg">
                   {cardContent.fixed_image_url ? (
                     <img 
                       src={cardContent.fixed_image_url} 
                       alt="شعار التكريم"
-                      className="w-4/5 h-4/5 object-contain rounded-full"
+                      className="w-3/4 h-3/4 object-contain rounded-full"
                     />
                   ) : (
                     <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                      <Award className="w-12 h-12 text-secondary/60" />
+                      <Award className="w-8 h-8 md:w-12 md:h-12 text-secondary/60" />
                     </div>
                   )}
                 </div>
+                <p className="mt-2 text-sm font-medium arabic-text text-center max-w-[120px]">
+                  شعار التكريم
+                </p>
               </div>
             </div>
             
-            {/* Contact Button */}
+            {/* زر التواصل */}
             {activeCallout && activeCallout.contact_link !== '#' && (
-              <div className="mb-8">
+              <div className="mb-6">
                 <a 
                   href={activeCallout.contact_link}
                   target="_blank"
@@ -192,10 +211,6 @@ const CallOut = () => {
                 </a>
               </div>
             )}
-            
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto arabic-text">
-              {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
-            </p>
           </div>
 
           {/* Personalities Archive Table */}
