@@ -148,9 +148,11 @@ const CallOut = () => {
             </div>
             
             {/* المقدمة التعريفية تحت العنوان مباشرة */}
-            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto arabic-text mb-8">
-              {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
-            </p>
+            <div className="text-base md:text-lg text-muted-foreground max-w-4xl mx-auto arabic-text mb-8 px-4">
+              <p className="whitespace-pre-wrap leading-relaxed">
+                {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
+              </p>
+            </div>
             
             {/* الدوائر */}
             <div className="flex items-center justify-center gap-8 md:gap-12 mb-6">

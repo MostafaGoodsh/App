@@ -410,13 +410,65 @@ const ActiveCalloutManagement = () => {
       {activeCallout ? (
         <Card>
           <CardHeader>
-            <CardTitle className="arabic-text flex items-center gap-2">
-              <Megaphone className="w-5 h-5 text-primary" />
-              الاستدعاء النشط الحالي
-            </CardTitle>
-            <CardDescription className="arabic-text">
-              تم إنشاؤه في {new Date(activeCallout.created_at).toLocaleDateString('ar-SA')}
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="arabic-text flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-primary" />
+                  الاستدعاء النشط الحالي
+                </CardTitle>
+                <CardDescription className="arabic-text">
+                  تم إنشاؤه في {new Date(activeCallout.created_at).toLocaleDateString('ar-SA')}
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFormData({
+                      personality_name: activeCallout.personality_name,
+                      personality_title: activeCallout.personality_title || "",
+                      personality_description: activeCallout.personality_description || "",
+                      personality_image_url: activeCallout.personality_image_url || "",
+                      callout_text: activeCallout.callout_text,
+                      contact_link: activeCallout.contact_link,
+                      contact_button_text: activeCallout.contact_button_text
+                    });
+                    setImagePreview(activeCallout.personality_image_url);
+                    setIsDialogOpen(true);
+                  }}
+                  className="arabic-text"
+                >
+                  <Edit className="w-4 h-4 ml-1" />
+                  تعديل
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (confirm('هل أنت متأكد من حذف الاستدعاء النشط؟')) {
+                      try {
+                        const { error } = await supabase
+                          .from('active_callouts')
+                          .delete()
+                          .eq('id', activeCallout.id);
+                        
+                        if (error) throw error;
+                        
+                        toast.success('تم حذف الاستدعاء بنجاح');
+                        fetchActiveCallout();
+                      } catch (error) {
+                        console.error('Error deleting callout:', error);
+                        toast.error('حدث خطأ في حذف الاستدعاء');
+                      }
+                    }
+                  }}
+                  className="arabic-text text-destructive hover:text-destructive"
+                >
+                  حذف
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
