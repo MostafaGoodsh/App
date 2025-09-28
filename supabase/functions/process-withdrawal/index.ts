@@ -1,9 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.4'
+import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.0'
 import { getOrCreateAssociatedTokenAccount, createTransferInstruction, TOKEN_PROGRAM_ID } from 'https://esm.sh/@solana/spl-token@0.4.13'
-// Import Buffer for Deno environment
-import { Buffer } from 'https://deno.land/std@0.190.0/node/buffer.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -72,6 +70,7 @@ serve(async (req) => {
       .from('internal_wallet_balances')
       .select(`
         balance,
+        token_id,
         internal_tokens (
           symbol,
           exchange_rate_usd,
@@ -103,7 +102,7 @@ serve(async (req) => {
     if (target_token === 'SOL') {
       // Convert to SOL using USD rates
       const solPrice = 100 // Approximate SOL price in USD - should be fetched from API
-      const internalTokenUsdValue = internal_amount * tokenBalance.internal_tokens.exchange_rate_usd
+      const internalTokenUsdValue = internal_amount * (tokenBalance.internal_tokens as any).exchange_rate_usd
       targetAmount = internalTokenUsdValue / solPrice
       conversionRate = targetAmount / internal_amount
     } else {
@@ -153,11 +152,12 @@ serve(async (req) => {
           const keyArray = JSON.parse(hotWalletKey)
           hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
         } catch (parseError) {
-          // If JSON parsing fails, try base64 format
+          // If JSON parsing fails, try base58 format
           try {
-            hotWallet = Keypair.fromSecretKey(Buffer.from(hotWalletKey, 'base64'))
-          } catch (base64Error) {
-            throw new Error('Invalid private key format. Please provide as JSON array or base64 string')
+            const keyBytes = new TextEncoder().encode(hotWalletKey)
+            hotWallet = Keypair.fromSecretKey(keyBytes.slice(0, 64))
+          } catch (base58Error) {
+            throw new Error('Invalid private key format. Please provide as JSON array or base58 string')
           }
         }
 

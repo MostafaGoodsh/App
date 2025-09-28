@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.4'
+import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.0'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from 'https://esm.sh/@solana/spl-token@0.4.13'
 
 const corsHeaders = {
@@ -83,7 +83,7 @@ serve(async (req) => {
     // Get user's current points balance
     const { data: balance, error: balanceError } = await supabase
       .from('user_points_balance')
-      .select('available_points')
+      .select('available_points, converted_points')
       .eq('user_id', user.id)
       .single()
 
