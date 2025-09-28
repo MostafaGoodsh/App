@@ -1,7 +1,7 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.95.2'
-import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from 'https://esm.sh/@solana/spl-token@0.4.8'
+import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.4'
+import { createMint, getOrCreateAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from 'https://esm.sh/@solana/spl-token@0.4.13'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,39 +20,48 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting points to tokens conversion...')
-    
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    // Get user from JWT
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('Missing authorization header')
-    }
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    
-    if (authError || !user) {
-      throw new Error('Invalid token or user not found')
-    }
-
-    console.log('Authenticated user:', user.id)
-
     const { points_amount, user_wallet_address }: ConversionRequest = await req.json()
 
+    // Validate input
     if (!points_amount || points_amount <= 0) {
-      throw new Error('Invalid points amount')
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid points amount' }),
+        { status: 400, headers: corsHeaders }
+      )
     }
 
     if (!user_wallet_address) {
-      throw new Error('Wallet address is required')
+      return new Response(
+        JSON.stringify({ success: false, error: 'User wallet address required' }),
+        { status: 400, headers: corsHeaders }
+      )
     }
 
-    console.log('Conversion request:', { points_amount, user_wallet_address })
+    // Initialize Supabase
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Get user from auth header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: corsHeaders }
+      )
+    }
+
+    // Extract and verify JWT
+    const jwt = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid authentication' }),
+        { status: 401, headers: corsHeaders }
+      )
+    }
 
     // Get conversion settings
     const { data: settings, error: settingsError } = await supabase
@@ -62,94 +71,75 @@ serve(async (req) => {
       .single()
 
     if (settingsError || !settings) {
-      throw new Error('Conversion settings not found')
+      return new Response(
+        JSON.stringify({ success: false, error: 'Conversion settings not found' }),
+        { status: 500, headers: corsHeaders }
+      )
     }
 
-    console.log('Conversion settings:', settings)
+    // Calculate tokens to mint
+    const tokensToMint = points_amount * settings.points_to_token_rate
 
-    // Validate conversion limits
-    if (points_amount < settings.minimum_conversion_points) {
-      throw new Error(`Minimum conversion is ${settings.minimum_conversion_points} points`)
-    }
-
-    if (points_amount > settings.maximum_conversion_points) {
-      throw new Error(`Maximum conversion is ${settings.maximum_conversion_points} points`)
-    }
-
-    // Check daily limit
-    const today = new Date().toISOString().split('T')[0]
-    const { data: todayConversions, error: dailyError } = await supabase
-      .from('point_to_token_conversions')
-      .select('points_amount')
+    // Get user's current points balance
+    const { data: balance, error: balanceError } = await supabase
+      .from('user_points_balance')
+      .select('available_points')
       .eq('user_id', user.id)
-      .gte('created_at', today)
-      .eq('status', 'completed')
-
-    if (dailyError) {
-      console.error('Error checking daily limit:', dailyError)
-    }
-
-    const todayTotal = todayConversions?.reduce((sum, conv) => sum + conv.points_amount, 0) || 0
-    if (todayTotal + points_amount > settings.daily_conversion_limit) {
-      throw new Error(`Daily conversion limit exceeded. Limit: ${settings.daily_conversion_limit}, Used: ${todayTotal}`)
-    }
-
-    // Check user's available points
-    const { data: pointsBalance, error: pointsError } = await supabase
-      .rpc('update_user_points_balance', { p_user_id: user.id })
-
-    if (pointsError) {
-      console.error('Error getting points balance:', pointsError)
-      throw new Error('Failed to get points balance')
-    }
-
-    console.log('User points balance:', pointsBalance)
-
-    if (pointsBalance.available_points < points_amount) {
-      throw new Error(`Insufficient points. Available: ${pointsBalance.available_points}, Required: ${points_amount}`)
-    }
-
-    // Calculate token amount
-    const token_amount = points_amount / settings.points_to_token_rate
-
-    console.log('Token amount to mint:', token_amount)
-
-    // Create conversion record
-    const { data: conversion, error: conversionError } = await supabase
-      .from('point_to_token_conversions')
-      .insert({
-        user_id: user.id,
-        points_amount,
-        token_amount,
-        conversion_rate: settings.points_to_token_rate,
-        status: 'processing'
-      })
-      .select()
       .single()
 
-    if (conversionError) {
-      console.error('Error creating conversion record:', conversionError)
-      throw new Error('Failed to create conversion record')
+    if (balanceError || !balance || balance.available_points < points_amount) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Insufficient points balance' }),
+        { status: 400, headers: corsHeaders }
+      )
     }
 
-    console.log('Created conversion record:', conversion.id)
+    // Initialize Solana connection
+    const connection = new Connection(
+      settings.solana_rpc_url || 'https://api.devnet.solana.com',
+      'confirmed'
+    )
 
-    // Connect to Solana Devnet
-    const connection = new Connection('https://api.devnet.solana.com', 'confirmed')
-    
-    // Generate a keypair for the mint authority
-    const mintAuthority = Keypair.generate()
-    
-    console.log('Generated mint authority:', mintAuthority.publicKey.toString())
+    // Get hot wallet from environment
+    const hotWalletKey = Deno.env.get('HOT_WALLET_PRIVATE_KEY')
+    if (!hotWalletKey) {
+      throw new Error('Hot wallet private key not configured')
+    }
 
-    // Airdrop SOL to mint authority for transaction fees
+    let hotWallet: Keypair
     try {
-      const airdropSig = await connection.requestAirdrop(mintAuthority.publicKey, 0.1 * LAMPORTS_PER_SOL)
-      await connection.confirmTransaction(airdropSig, 'confirmed')
-      console.log('Airdrop completed for mint authority')
-    } catch (airdropError) {
-      console.error('Airdrop failed:', airdropError)
-      // Continue anyway, might have enough SOL already
+      // Try parsing as JSON array first
+      const keyArray = JSON.parse(hotWalletKey)
+      hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
+    } catch (parseError) {
+      // If JSON parsing fails, try base58 format
+      try {
+        const keyBytes = new TextEncoder().encode(hotWalletKey)
+        hotWallet = Keypair.fromSecretKey(keyBytes.slice(0, 64))
+      } catch (base58Error) {
+        throw new Error('Invalid private key format. Please provide as JSON array or base58 string')
+      }
+    }
+
+    console.log('Hot wallet public key:', hotWallet.publicKey.toString())
+
+    // Check if hot wallet has enough SOL for operations
+    const hotWalletBalance = await connection.getBalance(hotWallet.publicKey)
+    const requiredSOL = 0.01 * LAMPORTS_PER_SOL // 0.01 SOL minimum
+    
+    if (hotWalletBalance < requiredSOL) {
+      console.log('Hot wallet balance too low, requesting airdrop...')
+      try {
+        const signature = await connection.requestAirdrop(
+          hotWallet.publicKey,
+          0.1 * LAMPORTS_PER_SOL
+        )
+        await connection.confirmTransaction(signature)
+        console.log('Airdrop successful')
+      } catch (airdropError) {
+        console.error('Airdrop failed:', airdropError)
+        // Continue anyway, might have enough SOL already
+      }
     }
 
     // Create token mint
@@ -158,8 +148,8 @@ serve(async (req) => {
     try {
       tokenMint = await createMint(
         connection,
-        mintAuthority,
-        mintAuthority.publicKey,
+        hotWallet,
+        hotWallet.publicKey,
         null,
         settings.token_decimals || 9
       )
@@ -170,101 +160,99 @@ serve(async (req) => {
       throw new Error('Failed to create token mint')
     }
 
-    // Get user's wallet public key
-    const userWalletPubkey = new PublicKey(user_wallet_address)
-    
     // Get or create user's token account
-    const userTokenAccount = await getOrCreateAssociatedTokenAccount(
-      connection,
-      mintAuthority,
-      tokenMint,
-      userWalletPubkey
-    )
-
-    console.log('User token account:', userTokenAccount.address.toString())
-
-    // Mint tokens to user
-    const mintAmount = BigInt(Math.floor(token_amount * Math.pow(10, settings.token_decimals || 9)))
-    
-    console.log('Minting amount:', mintAmount.toString(), 'to account:', userTokenAccount.address.toString())
-    
+    let userTokenAccount
     try {
-      const mintTx = await mintTo(
+      const userPublicKey = new PublicKey(user_wallet_address)
+      userTokenAccount = await getOrCreateAssociatedTokenAccount(
         connection,
-        mintAuthority,
+        hotWallet,
         tokenMint,
-        userTokenAccount.address,
-        mintAuthority,
-        mintAmount
+        userPublicKey
       )
-
-      console.log('Minted tokens, transaction signature:', mintTx)
-
-      // Update conversion record as completed
-      const { error: updateError } = await supabase
-        .from('point_to_token_conversions')
-        .update({
-          status: 'completed',
-          token_mint_address: tokenMint.toString(),
-          transaction_signature: mintTx,
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', conversion.id)
-
-      if (updateError) {
-        console.error('Error updating conversion record:', updateError)
-        // Don't throw here as the tokens were already minted
-      }
-
-      // Update user points balance
-      await supabase.rpc('update_user_points_balance', { p_user_id: user.id })
-
-      console.log('Conversion completed successfully')
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: 'Points converted to tokens successfully',
-          data: {
-            conversion_id: conversion.id,
-            points_converted: points_amount,
-            tokens_received: token_amount,
-            token_mint: tokenMint.toString(),
-            transaction_signature: mintTx,
-            token_account: userTokenAccount.address.toString()
-          }
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      )
-
-    } catch (mintError) {
-      console.error('Error minting tokens:', mintError)
       
-      // Update conversion record as failed
-      await supabase
-        .from('point_to_token_conversions')
-        .update({
-          status: 'failed'
-        })
-        .eq('id', conversion.id)
-      
-      throw new Error('Failed to mint tokens to user account')
+      console.log('User token account:', userTokenAccount.address.toString())
+    } catch (accountError) {
+      console.error('Error creating user token account:', accountError)
+      throw new Error('Failed to create user token account')
     }
 
-  } catch (error) {
-    console.error('Conversion error:', error)
-    
+    // Mint tokens to user
+    try {
+      const mintSignature = await mintTo(
+        connection,
+        hotWallet,
+        tokenMint,
+        userTokenAccount.address,
+        hotWallet.publicKey,
+        tokensToMint * (10 ** (settings.token_decimals || 9)) // Convert to token units
+      )
+      
+      console.log('Mint signature:', mintSignature)
+    } catch (mintToError) {
+      console.error('Error minting tokens:', mintToError)
+      throw new Error('Failed to mint tokens')
+    }
+
+    // Record the conversion in database
+    const { error: conversionError } = await supabase
+      .from('point_to_token_conversions')
+      .insert({
+        user_id: user.id,
+        points_amount: points_amount,
+        tokens_amount: tokensToMint,
+        conversion_rate: settings.points_to_token_rate,
+        token_mint_address: tokenMint.toString(),
+        user_wallet_address: user_wallet_address,
+        status: 'completed',
+        blockchain_tx_hash: tokenMint.toString() // Using mint address as reference
+      })
+
+    if (conversionError) {
+      console.error('Error recording conversion:', conversionError)
+      // Don't fail the whole operation, just log the error
+    }
+
+    // Update user's points balance
+    const { error: updateError } = await supabase
+      .from('user_points_balance')
+      .update({
+        available_points: balance.available_points - points_amount,
+        converted_points: (balance.converted_points || 0) + points_amount
+      })
+      .eq('user_id', user.id)
+
+    if (updateError) {
+      console.error('Error updating points balance:', updateError)
+      // Don't fail the whole operation
+    }
+
+    console.log(`Successfully converted ${points_amount} points to ${tokensToMint} tokens for user ${user.id}`)
+
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Failed to convert points to tokens'
+      JSON.stringify({ 
+        success: true, 
+        tokens_minted: tokensToMint,
+        token_mint_address: tokenMint.toString(),
+        user_token_account: userTokenAccount.address.toString(),
+        points_converted: points_amount
       }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+      { 
+        status: 200, 
+        headers: corsHeaders 
+      }
+    )
+
+  } catch (error) {
+    console.error('Function error:', error)
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to convert points to tokens'
+      }),
+      { 
+        status: 500, 
+        headers: corsHeaders 
       }
     )
   }
