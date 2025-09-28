@@ -37,7 +37,7 @@ const ActiveCalloutManagement = () => {
     personality_title: "",
     personality_description: "",
     personality_image_url: "",
-    callout_text: "العقيدة و الأخلاق هي نقطة تميزنا و تفردنا",
+      callout_text: "العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.",
     contact_link: "#",
     contact_button_text: "تواصل مع الشخصية"
   });
@@ -185,7 +185,7 @@ const ActiveCalloutManagement = () => {
       personality_title: "",
       personality_description: "",
       personality_image_url: "",
-      callout_text: "العقيدة و الأخلاق هي نقطة تميزنا و تفردنا",
+      callout_text: "العقيدة و الأخلاق هي نقطة تميزنا و تفردنا ، لذلك انشأنا هذا القسم خصيصا لارسال دعوات استدعاء شرفي لكل انسان مؤثر حول العالم و كل من يتبني و يخدم عقيدتنا و أهدافنا ،،، سعدنا بوضعك في قائمة الاستدعاء الشرفيه و يثرينا قبولك.",
       contact_link: "#",
       contact_button_text: "تواصل مع الشخصية"
     });
