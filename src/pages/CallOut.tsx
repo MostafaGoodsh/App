@@ -135,8 +135,8 @@ const CallOut = () => {
         }}
       >
         <div className="min-h-screen bg-background/90">
-          <main className="container mx-auto px-4 py-6 arabic-content max-w-7xl">
-        <div className="max-w-5xl mx-auto">
+          <main className="container mx-auto px-4 py-4 arabic-content max-w-4xl">
+        <div className="max-w-3xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-8">
             {/* العنوان */}

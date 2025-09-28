@@ -90,13 +90,13 @@ const ActiveCalloutManagement = () => {
       const filePath = `personalities/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from('callout-images')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
-        .from('avatars')
+        .from('callout-images')
         .getPublicUrl(filePath);
 
       const imageUrl = urlData.publicUrl;
