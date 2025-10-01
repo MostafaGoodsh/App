@@ -180,7 +180,7 @@ const CallOut = () => {
               
               {/* الدائرة اليسرى - الصورة الثابتة (أكبر) */}
               <div className="flex flex-col items-center">
-                <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-3 sm:border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
+                <div className="w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-3 sm:border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
                   {cardContent.fixed_image_url ? (
                     <img 
                       src={cardContent.fixed_image_url} 
