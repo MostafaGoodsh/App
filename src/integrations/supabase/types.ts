@@ -1135,6 +1135,48 @@ export type Database = {
           },
         ]
       }
+      quran_pages: {
+        Row: {
+          arabic_text: string
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          juz_number: number
+          page_number: number
+          points_reward: number | null
+          surah_name: string
+          translation_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          arabic_text: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          juz_number: number
+          page_number: number
+          points_reward?: number | null
+          surah_name: string
+          translation_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arabic_text?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          juz_number?: number
+          page_number?: number
+          points_reward?: number | null
+          surah_name?: string
+          translation_text?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reels_card_content: {
         Row: {
           background_image_url: string | null
@@ -1842,6 +1884,44 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "learning_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_quran_completions: {
+        Row: {
+          completed_date: string
+          created_at: string
+          id: string
+          page_id: string
+          points_earned: number | null
+          reading_time_seconds: number
+          user_id: string
+        }
+        Insert: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          page_id: string
+          points_earned?: number | null
+          reading_time_seconds: number
+          user_id: string
+        }
+        Update: {
+          completed_date?: string
+          created_at?: string
+          id?: string
+          page_id?: string
+          points_earned?: number | null
+          reading_time_seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quran_completions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "quran_pages"
             referencedColumns: ["id"]
           },
         ]

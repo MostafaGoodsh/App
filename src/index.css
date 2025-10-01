@@ -142,6 +142,13 @@ All colors MUST be HSL.
   .arabic-content {
     @apply content-ar;
   }
+
+  /* Quran text styling with beautiful Arabic font */
+  .font-arabic {
+    font-family: 'Amiri Quran', 'Amiri', 'Cairo', sans-serif;
+    font-size: 1.125rem;
+    line-height: 2;
+  }
   
   /* Honor personalities grid */
   .personality-card {

@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StreakDisplay from "@/components/engagement/StreakDisplay";
-import MediaContentTab from "@/components/tasks/MediaContentTab";
+import QuranTab from "@/components/tasks/QuranTab";
 import PersonalityTab from "@/components/tasks/PersonalityTab";
 import DailyTasksTab from "@/components/tasks/DailyTasksTab";
 import SectionIntroduction from "@/components/tasks/SectionIntroduction";
@@ -70,10 +70,10 @@ const DailyTasks = () => {
             <CardTitle className="text-center arabic-text">مهامك اليومية</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="media" className="w-full">
+            <Tabs defaultValue="quran" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="media" className="arabic-text text-xs sm:text-sm">
-                  وسائط
+                <TabsTrigger value="quran" className="arabic-text text-xs sm:text-sm">
+                  📖 قرآن
                 </TabsTrigger>
                 <TabsTrigger value="personality" className="arabic-text text-xs sm:text-sm">
                   شخصية
@@ -83,9 +83,9 @@ const DailyTasks = () => {
                 </TabsTrigger>
               </TabsList>
               
-              <TabsContent value="media" className="space-y-4">
-                <SectionIntroduction sectionType="media_content" />
-                <MediaContentTab />
+              <TabsContent value="quran" className="space-y-4">
+                <SectionIntroduction sectionType="quran_reading" />
+                <QuranTab />
               </TabsContent>
               
               <TabsContent value="personality" className="space-y-4">
