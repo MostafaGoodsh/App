@@ -135,30 +135,30 @@ const CallOut = () => {
         }}
       >
         <div className="min-h-screen bg-background/90">
-          <main className="container mx-auto px-4 py-8 arabic-content">
-        <div className="max-w-3xl mx-auto">
+          <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 arabic-content">
+        <div className="max-w-2xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             {/* العنوان */}
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Megaphone className="w-6 h-6 text-primary" />
-              <h1 className="text-xl md:text-2xl font-bold arabic-text">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold arabic-text">
                 {cardContent.title}
               </h1>
             </div>
             
             {/* المقدمة التعريفية تحت العنوان مباشرة */}
-            <div className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto arabic-text mb-8 px-4">
+            <div className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-full mx-auto arabic-text mb-6 px-2 sm:px-4">
               <p className="whitespace-pre-wrap leading-relaxed">
                 {activeCallout?.callout_text || cardContent?.description || 'العقيدة و الأخلاق هي نقطة تميزنا و تفردنا'}
               </p>
             </div>
             
             {/* الدوائر */}
-            <div className="flex items-center justify-center gap-6 md:gap-8 mb-8">
+            <div className="flex items-center justify-center gap-3 sm:gap-6 md:gap-8 mb-6">
               {/* الدائرة اليمنى - صورة الاستدعاء النشط */}
               <div className="flex flex-col items-center">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-4 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 sm:border-3 border-primary/30 flex items-center justify-center overflow-hidden shadow-lg">
                   {activeCallout?.personality_image_url ? (
                     <img 
                       src={activeCallout.personality_image_url} 
@@ -167,12 +167,12 @@ const CallOut = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                      <Star className="w-6 h-6 md:w-10 md:h-10 text-primary/60" />
+                      <Star className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-primary/60" />
                     </div>
                   )}
                 </div>
                 {activeCallout?.personality_name && (
-                  <p className="mt-2 text-xs md:text-sm font-medium arabic-text text-center max-w-[100px] truncate">
+                  <p className="mt-1.5 text-xs sm:text-sm font-medium arabic-text text-center max-w-[80px] sm:max-w-[100px] truncate">
                     {activeCallout.personality_name}
                   </p>
                 )}
@@ -180,7 +180,7 @@ const CallOut = () => {
               
               {/* الدائرة اليسرى - الصورة الثابتة (أكبر) */}
               <div className="flex flex-col items-center">
-                <div className="w-36 h-36 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
+                <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-3 sm:border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
                   {cardContent.fixed_image_url ? (
                     <img 
                       src={cardContent.fixed_image_url} 
@@ -189,11 +189,11 @@ const CallOut = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-muted/50 flex items-center justify-center rounded-full">
-                      <Award className="w-10 h-10 md:w-16 md:h-16 text-secondary/60" />
+                      <Award className="w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 text-secondary/60" />
                     </div>
                   )}
                 </div>
-                <p className="mt-2 text-sm md:text-base font-medium arabic-text text-center max-w-[140px]">
+                <p className="mt-1.5 text-xs sm:text-sm md:text-base font-medium arabic-text text-center max-w-[100px] sm:max-w-[140px]">
                   شعار التكريم
                 </p>
               </div>
@@ -201,23 +201,23 @@ const CallOut = () => {
             
             {/* منطقة وصف الشخصية والمحتوى الإضافي */}
             {activeCallout && (
-              <Card className="mb-8 bg-card/50 backdrop-blur-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="arabic-text text-lg md:text-xl text-center">
+              <Card className="mb-6 bg-card/50 backdrop-blur-sm">
+                <CardHeader className="pb-3 px-3 sm:px-6">
+                  <CardTitle className="arabic-text text-base sm:text-lg md:text-xl text-center">
                     {activeCallout.personality_title && `${activeCallout.personality_name} - ${activeCallout.personality_title}`}
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   {activeCallout.personality_description && (
-                    <div className="arabic-text text-center mb-6">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    <div className="arabic-text text-center mb-4">
+                      <p className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                         {activeCallout.personality_description}
                       </p>
                     </div>
                   )}
                   
                   {/* منطقة للصور أو الفيديوهات الإضافية - قابلة للتطوير في المستقبل */}
-                  <div className="text-center text-sm text-muted-foreground arabic-text">
+                  <div className="text-center text-xs sm:text-sm text-muted-foreground arabic-text">
                     <p className="italic">
                       * يمكن إضافة صور أو فيديوهات تعريفية عن الشخصية من خلال لوحة الإدارة *
                     </p>
@@ -233,7 +233,7 @@ const CallOut = () => {
                   href={activeCallout.contact_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors arabic-text"
+                  className="inline-flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors arabic-text text-sm sm:text-base"
                 >
                   <MessageCircle className="w-4 h-4" />
                   {activeCallout.contact_button_text || cardContent?.contact_button_text}
@@ -245,78 +245,78 @@ const CallOut = () => {
           {/* Personalities Archive Table */}
           {personalities.length > 0 && (
             <Card>
-              <CardHeader>
-                <CardTitle className="arabic-text flex items-center gap-2">
-                  <Star className="w-6 h-6 text-primary" />
+              <CardHeader className="px-3 sm:px-6">
+                <CardTitle className="arabic-text flex items-center gap-2 text-base sm:text-lg md:text-xl">
+                  <Star className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   أرشيف الشخصيات المكرمة
                 </CardTitle>
-                <CardDescription className="arabic-text">
+                <CardDescription className="arabic-text text-xs sm:text-sm">
                   جدول أرشيفي للشخصيات التي تم تكريمها على المنصة
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
+              <CardContent className="px-2 sm:px-6">
+                <div className="overflow-x-auto -mx-2 sm:mx-0">
+                  <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-right p-4 arabic-text">الاسم</th>
-                        <th className="text-right p-4 arabic-text">اللقب</th>
-                        <th className="text-right p-4 arabic-text">التصنيف</th>
-                        <th className="text-right p-4 arabic-text">الحالة</th>
-                        <th className="text-right p-4 arabic-text">التواصل</th>
+                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">الاسم</th>
+                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm hidden sm:table-cell">اللقب</th>
+                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">التصنيف</th>
+                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm hidden md:table-cell">الحالة</th>
+                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">التواصل</th>
                       </tr>
                     </thead>
                     <tbody>
                       {personalities.map((personality) => (
                         <tr key={personality.id} className="border-b hover:bg-muted/50">
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
+                          <td className="p-2 sm:p-3">
+                            <div className="flex items-center gap-2">
                               {personality.image_url ? (
                                 <img 
                                   src={personality.image_url} 
                                   alt={personality.name}
-                                  className="w-10 h-10 rounded-full object-cover"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
                                 />
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                  <Star className="w-4 h-4 text-muted-foreground" />
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
                                 </div>
                               )}
-                              <span className="font-medium arabic-text">{personality.name}</span>
+                              <span className="font-medium arabic-text text-xs sm:text-sm truncate">{personality.name}</span>
                             </div>
                           </td>
-                          <td className="p-4 arabic-text text-muted-foreground">{personality.title}</td>
-                          <td className="p-4">
-                            <Badge variant="outline" className={getCategoryColor(personality.category)}>
-                              {getCategoryIcon(personality.category)}
-                              <span className="mr-1">
+                          <td className="p-2 sm:p-3 arabic-text text-muted-foreground text-xs sm:text-sm hidden sm:table-cell">{personality.title}</td>
+                          <td className="p-2 sm:p-3">
+                            <Badge variant="outline" className={`${getCategoryColor(personality.category)} text-xs`}>
+                              <span className="hidden sm:inline">{getCategoryIcon(personality.category)}</span>
+                              <span className="sm:mr-1">
                                 {personality.category === 'scientist' ? 'عالم' : 
                                  personality.category === 'artist' ? 'فنان' : 
-                                 personality.category === 'intellectual' ? 'مفكر' : 'شخصية عامة'}
+                                 personality.category === 'intellectual' ? 'مفكر' : 'عامة'}
                               </span>
                             </Badge>
                           </td>
-                          <td className="p-4">
+                          <td className="p-2 sm:p-3 hidden md:table-cell">
                             {personality.is_featured && (
-                              <Badge className="bg-primary/90">
-                                <Star className="w-3 h-3 ml-1" />
+                              <Badge className="bg-primary/90 text-xs">
+                                <Star className="w-2 h-2 sm:w-3 sm:h-3 ml-1" />
                                 مميز
                               </Badge>
                             )}
                           </td>
-                          <td className="p-4">
+                          <td className="p-2 sm:p-3">
                             {personality.contact_link && personality.contact_link !== '#' ? (
                               <a 
                                 href={personality.contact_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm arabic-text"
+                                className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-xs sm:text-sm arabic-text"
                               >
                                 <MessageCircle className="w-3 h-3" />
-                                {personality.contact_button_text || 'تواصل'}
+                                <span className="hidden sm:inline">{personality.contact_button_text || 'تواصل'}</span>
                               </a>
                             ) : (
-                              <span className="text-muted-foreground text-sm arabic-text">غير متاح</span>
+                              <span className="text-muted-foreground text-xs arabic-text">-</span>
                             )}
                           </td>
                         </tr>
