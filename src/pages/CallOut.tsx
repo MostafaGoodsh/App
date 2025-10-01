@@ -180,7 +180,7 @@ const CallOut = () => {
               
               {/* الدائرة اليسرى - الصورة الثابتة (أكبر) */}
               <div className="flex flex-col items-center">
-                <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-3 sm:border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
+                <div className="w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 border-3 sm:border-4 border-secondary/30 flex items-center justify-center overflow-hidden shadow-xl">
                   {cardContent.fixed_image_url ? (
                     <img 
                       src={cardContent.fixed_image_url} 
@@ -193,9 +193,6 @@ const CallOut = () => {
                     </div>
                   )}
                 </div>
-                <p className="mt-1.5 text-xs sm:text-sm md:text-base font-medium arabic-text text-center max-w-[100px] sm:max-w-[140px]">
-                  شعار التكريم
-                </p>
               </div>
             </div>
             
