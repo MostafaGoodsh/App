@@ -28,6 +28,7 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
   { title: getContent("admin_users_management", "إدارة المستخدمين"), url: "/admin/users", icon: Users },
+  { title: "إدارة الحسابات المعتمدة", url: "/admin/verified-accounts", icon: Shield },
   { title: getContent("admin_kyc_management", "إدارة الهوية"), url: "/admin/kyc", icon: Shield },
   { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },
   { title: "إجابات الاستبيانات", url: "/admin/survey-responses", icon: ClipboardList },

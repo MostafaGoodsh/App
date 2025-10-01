@@ -18,6 +18,11 @@ export interface Profile {
   website_url: string | null;
   preferred_language: string | null;
   solana_address: string | null;
+  is_verified: boolean | null;
+  verified_at: string | null;
+  verified_by: string | null;
+  followers_count: number | null;
+  following_count: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -1029,9 +1029,12 @@ export type Database = {
           created_at: string
           email: string | null
           facebook_url: string | null
+          followers_count: number | null
+          following_count: number | null
           full_name: string | null
           id: string
           instagram_url: string | null
+          is_verified: boolean | null
           linkedin_url: string | null
           phone: string | null
           preferred_language: string | null
@@ -1039,6 +1042,8 @@ export type Database = {
           twitter_url: string | null
           updated_at: string
           user_id: string
+          verified_at: string | null
+          verified_by: string | null
           website_url: string | null
         }
         Insert: {
@@ -1047,9 +1052,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           facebook_url?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id?: string
           instagram_url?: string | null
+          is_verified?: boolean | null
           linkedin_url?: string | null
           phone?: string | null
           preferred_language?: string | null
@@ -1057,6 +1065,8 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
           website_url?: string | null
         }
         Update: {
@@ -1065,9 +1075,12 @@ export type Database = {
           created_at?: string
           email?: string | null
           facebook_url?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id?: string
           instagram_url?: string | null
+          is_verified?: boolean | null
           linkedin_url?: string | null
           phone?: string | null
           preferred_language?: string | null
@@ -1075,6 +1088,8 @@ export type Database = {
           twitter_url?: string | null
           updated_at?: string
           user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -1625,6 +1640,27 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weekly_logins?: number | null
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
         }
         Relationships: []
       }
@@ -2265,6 +2301,10 @@ export type Database = {
         }
         Returns: Json
       }
+      unverify_user_profile: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       update_kyc_status: {
         Args: {
           admin_notes?: string
@@ -2297,6 +2337,10 @@ export type Database = {
           p_wallet_id: string
         }
         Returns: Json
+      }
+      verify_user_profile: {
+        Args: { p_user_id: string }
+        Returns: boolean
       }
     }
     Enums: {

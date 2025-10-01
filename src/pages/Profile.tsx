@@ -24,6 +24,7 @@ import { SecuritySettingsDialog } from '@/components/profile/SecuritySettingsDia
 import { NotificationSettingsDialog } from '@/components/profile/NotificationSettingsDialog';
 import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
 import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
+import { FollowStats } from '@/components/profile/FollowStats';
 
 export default function Profile() {
   const { profile, loading } = useProfile();
@@ -187,9 +188,10 @@ export default function Profile() {
           </Card>
 
           {/* Account Stats and Engagement */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <AccountStatsCard />
             <EngagementStatsCard />
+            {profile.user_id && <FollowStats userId={profile.user_id} />}
           </div>
         </TabsContent>
 

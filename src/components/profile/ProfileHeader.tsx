@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Camera, Trash2, User } from 'lucide-react';
+import { Camera, Trash2, User, BadgeCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useProfile, type Profile } from '@/hooks/useProfile';
+import { FollowButton } from './FollowButton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -12,7 +15,9 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const { uploadAvatar, deleteAvatar, uploading } = useProfile();
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const isOwnProfile = user?.id === profile.user_id;
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -105,13 +110,28 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
         </div>
         
         <div className="w-full text-center">
-          <h1 className="text-sm sm:text-base font-bold mb-1 text-center">
-            {profile.full_name || 'المستخدم'}
-          </h1>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <h1 className="text-sm sm:text-base font-bold">
+              {profile.full_name || 'المستخدم'}
+            </h1>
+            {profile.is_verified && (
+              <Badge variant="default" className="flex items-center gap-1 text-xs">
+                <BadgeCheck className="w-3 h-3" />
+                <span className="arabic-text">معتمد</span>
+              </Badge>
+            )}
+          </div>
           
           <p className="text-xs text-muted-foreground mb-2 text-center">
             {profile.email}
           </p>
+          
+          {/* Follow button - only show for verified profiles when viewing others' profiles */}
+          {!isOwnProfile && profile.is_verified && profile.user_id && (
+            <div className="flex justify-center mb-2">
+              <FollowButton userId={profile.user_id} isVerified={profile.is_verified} />
+            </div>
+          )}
           
           {profile.bio && (
             <p className="text-xs leading-relaxed max-w-sm mx-auto line-clamp-2 mb-2">

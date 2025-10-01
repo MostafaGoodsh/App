@@ -46,6 +46,7 @@ import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
 import ReelsCategories from "./pages/ReelsCategories";
 import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
 import ActiveCalloutAdmin from "./pages/ActiveCalloutAdmin";
+import VerifiedAccountsAdmin from "./pages/VerifiedAccountsAdmin";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,7 @@ const App = () => {
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
+                  <Route path="admin/verified-accounts" element={<RequireAdmin><VerifiedAccountsAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
                   <Route path="admin/survey-responses" element={<RequireAdmin><SurveyResponsesAdmin /></RequireAdmin>} />
