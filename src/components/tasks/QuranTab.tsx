@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Circle, Coins, BookOpen, Clock } from "lucide-react";
+import { CheckCircle2, Circle, Coins, BookOpen, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,6 +27,7 @@ const QuranTab = () => {
   const [readingPageId, setReadingPageId] = useState<string | null>(null);
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   // حساب وقت القراءة بناءً على طول النص
   const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
@@ -147,139 +148,233 @@ const QuranTab = () => {
     }
   };
 
+  const currentPage = quranPages[currentPageIndex];
+  const isCompleted = currentPage ? completedPages.includes(currentPage.id) : false;
+  const isReading = currentPage ? readingPageId === currentPage.id : false;
+  const minReadingTime = currentPage ? getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length) : 0;
+
+  const handleNextPage = () => {
+    if (currentPageIndex < quranPages.length - 1) {
+      setCurrentPageIndex(currentPageIndex + 1);
+      setReadingPageId(null);
+      setReadingStartTime(null);
+      setReadingProgress(0);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      setCurrentPageIndex(currentPageIndex - 1);
+      setReadingPageId(null);
+      setReadingStartTime(null);
+      setReadingProgress(0);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="space-y-3">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
-        ))}
+      <div className="flex items-center justify-center py-20">
+        <div className="space-y-4 text-center">
+          <div className="h-20 w-20 mx-auto bg-gradient-to-br from-primary/20 to-primary/5 animate-pulse rounded-2xl" />
+          <p className="text-muted-foreground animate-pulse">جاري تحميل صفحات القرآن الكريم...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (quranPages.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl w-32 h-32 mx-auto mb-6 flex items-center justify-center shadow-lg">
+          <BookOpen className="h-16 w-16 text-primary" />
+        </div>
+        <h3 className="text-2xl font-bold text-foreground mb-2">لا توجد صفحات قرآن متاحة</h3>
+        <p className="text-muted-foreground">سيتم إضافة صفحات القرآن الكريم قريباً</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {quranPages.map((page) => {
-        const isCompleted = completedPages.includes(page.id);
-        const isReading = readingPageId === page.id;
-        const minReadingTime = getMinimumReadingTime(page.page_number, page.arabic_text.length);
+    <div className="space-y-6">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 rounded-2xl border border-primary/20">
+        <Button
+          onClick={handlePrevPage}
+          disabled={currentPageIndex === 0}
+          variant="outline"
+          size="lg"
+          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+        >
+          <ChevronRight className="h-5 w-5" />
+          الصفحة السابقة
+        </Button>
         
-        return (
-          <Card 
-            key={page.id}
-            className={`transition-all duration-300 ${
-              isReading 
-                ? 'border-primary shadow-xl ring-2 ring-primary/20' 
-                : isCompleted 
-                ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent'
-                : 'border-border hover:border-primary/30 hover:shadow-md'
-            }`}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
+        <div className="text-center">
+          <div className="text-sm text-muted-foreground mb-1">الصفحة</div>
+          <div className="text-2xl font-bold text-primary">
+            {currentPageIndex + 1} / {quranPages.length}
+          </div>
+        </div>
+        
+        <Button
+          onClick={handleNextPage}
+          disabled={currentPageIndex === quranPages.length - 1}
+          variant="outline"
+          size="lg"
+          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+        >
+          الصفحة التالية
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Quran Page Display */}
+      {currentPage && (
+        <Card className={`transition-all duration-300 border-2 shadow-2xl ${
+          isReading 
+            ? 'border-primary shadow-[0_0_50px_rgba(var(--primary)/0.3)] scale-[1.01]' 
+            : isCompleted 
+            ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent'
+            : 'border-border hover:border-primary/30 hover:shadow-xl'
+        }`}>
+          <CardContent className="p-8">
+            {/* Page Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-primary/20">
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => {
                     if (!isReading && !isCompleted) {
-                      startReading(page.id);
+                      startReading(currentPage.id);
                     }
                   }}
-                  className="flex-shrink-0 mt-1 transition-transform hover:scale-110"
+                  className="flex-shrink-0 transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isCompleted}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="h-7 w-7 text-primary animate-scale-in" />
+                    <CheckCircle2 className="h-10 w-10 text-primary animate-scale-in drop-shadow-lg" />
                   ) : (
-                    <Circle className="h-7 w-7 text-muted-foreground hover:text-primary transition-colors" />
+                    <Circle className="h-10 w-10 text-muted-foreground hover:text-primary transition-colors" />
                   )}
                 </button>
                 
-                <div className="flex-1 space-y-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <BookOpen className="h-5 w-5 text-primary" />
-                      <h4 className="font-semibold text-lg text-foreground">
-                        صفحة {page.page_number} - {page.surah_name}
-                      </h4>
-                      <Badge variant="secondary" className="text-xs px-2 py-1">
-                        الجزء {page.juz_number}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs px-2 py-1">
-                        ⏱️ {minReadingTime}ث
-                      </Badge>
-                    </div>
-                    
-                    {/* النص العربي */}
-                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl mb-3 text-right border border-primary/20" dir="rtl">
-                      <p className="font-arabic text-xl leading-[2.5] text-foreground">
-                        {page.arabic_text}
-                      </p>
-                    </div>
-                    
-                    {/* الترجمة */}
-                    {page.translation_text && (
-                      <div className="bg-muted/30 p-4 rounded-xl border border-border" dir="ltr">
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {page.translation_text}
-                        </p>
-                      </div>
-                    )}
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                    <h3 className="font-bold text-2xl text-foreground">
+                      {currentPage.surah_name}
+                    </h3>
                   </div>
-
-                  {/* شريط التقدم للقراءة */}
-                  {isReading && (
-                    <div className="space-y-3 bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-xl border border-primary/30">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-5 w-5 text-primary animate-pulse" />
-                          <span className="font-medium text-foreground">
-                            جاري القراءة... ({Math.floor(readingProgress)}%)
-                          </span>
-                        </div>
-                        <span className="text-xs text-muted-foreground font-medium">
-                          الحد الأدنى: {minReadingTime}ث
-                        </span>
-                      </div>
-                      <Progress value={readingProgress} className="h-3" />
-                      
-                      {readingProgress >= 100 && (
-                        <Button
-                          onClick={() => completeReading(page.id, page.points_reward)}
-                          className="w-full shadow-lg hover:shadow-xl transition-all"
-                          size="lg"
-                        >
-                          <CheckCircle2 className="h-5 w-5 ml-2" />
-                          إنهاء القراءة واحصل على {page.points_reward} نقطة
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
-                      <Coins className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-semibold text-foreground">{page.points_reward} نقطة</span>
-                    </div>
-                    
-                    {isCompleted && (
-                      <Badge variant="default" className="bg-primary text-primary-foreground shadow-md px-3 py-1.5">
-                        ✓ مكتملة
-                      </Badge>
-                    )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Badge variant="secondary" className="text-sm px-3 py-1.5 shadow-md">
+                      صفحة {currentPage.page_number}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm px-3 py-1.5">
+                      الجزء {currentPage.juz_number}
+                    </Badge>
+                    <Badge variant="outline" className="text-sm px-3 py-1.5 gap-1">
+                      <Clock className="h-4 w-4" />
+                      {minReadingTime}ث
+                    </Badge>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-      
-      {quranPages.length === 0 && (
-        <div className="text-center py-12">
-          <div className="bg-muted/50 rounded-full w-24 h-24 mx-auto mb-4 flex items-center justify-center">
-            <BookOpen className="h-12 w-12 text-muted-foreground" />
-          </div>
-          <p className="text-muted-foreground text-lg">لا توجد صفحات قرآن متاحة حالياً</p>
-        </div>
+              
+              <div className="flex items-center gap-2 bg-gradient-to-br from-primary/20 to-primary/10 px-4 py-3 rounded-xl shadow-lg border border-primary/30">
+                <Coins className="h-6 w-6 text-primary" />
+                <span className="text-lg font-bold text-foreground">{currentPage.points_reward}</span>
+              </div>
+            </div>
+
+            {/* Arabic Text with Mushaf-like styling */}
+            <div className="relative mb-6">
+              <div 
+                className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-10 rounded-3xl text-center border-4 border-double border-primary/30 shadow-inner"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%),
+                    linear-gradient(-45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%)
+                  `,
+                  backgroundSize: '20px 20px'
+                }}
+              >
+                {/* Decorative corners */}
+                <div className="absolute top-2 right-2 w-8 h-8 border-t-4 border-r-4 border-primary/30 rounded-tr-lg"></div>
+                <div className="absolute top-2 left-2 w-8 h-8 border-t-4 border-l-4 border-primary/30 rounded-tl-lg"></div>
+                <div className="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-primary/30 rounded-br-lg"></div>
+                <div className="absolute bottom-2 left-2 w-8 h-8 border-b-4 border-l-4 border-primary/30 rounded-bl-lg"></div>
+                
+                <p 
+                  className="font-arabic text-3xl leading-[3.5] text-foreground/95 font-semibold tracking-wide"
+                  dir="rtl"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
+                >
+                  {currentPage.arabic_text}
+                </p>
+              </div>
+            </div>
+
+            {/* Translation */}
+            {currentPage.translation_text && (
+              <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-6 rounded-2xl border-2 border-border shadow-md mb-6" dir="ltr">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-1 w-12 bg-primary/40 rounded-full"></div>
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Translation</span>
+                </div>
+                <p className="text-base text-muted-foreground leading-relaxed">
+                  {currentPage.translation_text}
+                </p>
+              </div>
+            )}
+
+            {/* Reading Progress */}
+            {isReading && (
+              <div className="space-y-4 bg-gradient-to-br from-primary/15 via-primary/10 to-transparent p-6 rounded-2xl border-2 border-primary/40 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Clock className="h-7 w-7 text-primary animate-pulse" />
+                      <div className="absolute inset-0 h-7 w-7 text-primary animate-ping opacity-30"></div>
+                    </div>
+                    <div>
+                      <span className="block text-lg font-bold text-foreground">
+                        جاري القراءة... ({Math.floor(readingProgress)}%)
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        استمر في القراءة حتى اكتمال الوقت
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-sm px-3 py-2 font-medium">
+                    الحد الأدنى: {minReadingTime}ث
+                  </Badge>
+                </div>
+                
+                <Progress value={readingProgress} className="h-4 shadow-inner" />
+                
+                {readingProgress >= 100 && (
+                  <Button
+                    onClick={() => completeReading(currentPage.id, currentPage.points_reward)}
+                    className="w-full shadow-xl hover:shadow-2xl transition-all text-lg py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                    size="lg"
+                  >
+                    <CheckCircle2 className="h-6 w-6 ml-2" />
+                    إنهاء القراءة واحصل على {currentPage.points_reward} نقطة
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Completion Badge */}
+            {isCompleted && (
+              <div className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-4 rounded-2xl border-2 border-primary/40 text-center">
+                <Badge variant="default" className="bg-primary text-primary-foreground shadow-lg px-6 py-2.5 text-base">
+                  <CheckCircle2 className="h-5 w-5 ml-2" />
+                  ✓ تم إكمال هذه الصفحة - بارك الله فيك
+                </Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
