@@ -1137,6 +1137,8 @@ export type Database = {
       }
       quran_pages: {
         Row: {
+          admin_notes: string | null
+          arabic_image_url: string | null
           arabic_text: string
           created_at: string
           display_order: number | null
@@ -1146,10 +1148,13 @@ export type Database = {
           page_number: number
           points_reward: number | null
           surah_name: string
+          translation_image_url: string | null
           translation_text: string | null
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
+          arabic_image_url?: string | null
           arabic_text: string
           created_at?: string
           display_order?: number | null
@@ -1159,10 +1164,13 @@ export type Database = {
           page_number: number
           points_reward?: number | null
           surah_name: string
+          translation_image_url?: string | null
           translation_text?: string | null
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
+          arabic_image_url?: string | null
           arabic_text?: string
           created_at?: string
           display_order?: number | null
@@ -1172,6 +1180,7 @@ export type Database = {
           page_number?: number
           points_reward?: number | null
           surah_name?: string
+          translation_image_url?: string | null
           translation_text?: string | null
           updated_at?: string
         }

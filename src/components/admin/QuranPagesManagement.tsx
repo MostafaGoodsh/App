@@ -30,6 +30,9 @@ interface QuranPage {
   surah_name: string;
   arabic_text: string;
   translation_text: string | null;
+  arabic_image_url: string | null;
+  translation_image_url: string | null;
+  admin_notes: string | null;
   points_reward: number;
   is_active: boolean;
   display_order: number;
@@ -48,7 +51,11 @@ const QuranPagesManagement = () => {
     translation_text: "",
     points_reward: "10",
     display_order: "0",
+    admin_notes: "",
   });
+  const [arabicImageFile, setArabicImageFile] = useState<File | null>(null);
+  const [translationImageFile, setTranslationImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     fetchPages();
@@ -71,16 +78,52 @@ const QuranPagesManagement = () => {
     }
   };
 
+  const uploadImage = async (file: File, path: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('quran-pages')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('quran-pages')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      setUploadingImage(true);
+
+      let arabicImageUrl = editingPage?.arabic_image_url || null;
+      let translationImageUrl = editingPage?.translation_image_url || null;
+
+      // Upload Arabic image if provided
+      if (arabicImageFile) {
+        arabicImageUrl = await uploadImage(arabicImageFile, 'arabic');
+      }
+
+      // Upload translation image if provided
+      if (translationImageFile) {
+        translationImageUrl = await uploadImage(translationImageFile, 'translation');
+      }
+
       const pageData = {
         page_number: parseInt(formData.page_number),
         juz_number: parseInt(formData.juz_number),
         surah_name: formData.surah_name,
         arabic_text: formData.arabic_text,
         translation_text: formData.translation_text || null,
+        arabic_image_url: arabicImageUrl,
+        translation_image_url: translationImageUrl,
+        admin_notes: formData.admin_notes || null,
         points_reward: parseInt(formData.points_reward),
         display_order: parseInt(formData.display_order),
       };
@@ -108,6 +151,8 @@ const QuranPagesManagement = () => {
     } catch (error) {
       console.error('Error saving page:', error);
       toast.error('حدث خطأ أثناء حفظ الصفحة');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -121,7 +166,10 @@ const QuranPagesManagement = () => {
       translation_text: page.translation_text || "",
       points_reward: page.points_reward.toString(),
       display_order: page.display_order.toString(),
+      admin_notes: page.admin_notes || "",
     });
+    setArabicImageFile(null);
+    setTranslationImageFile(null);
     setDialogOpen(true);
   };
 
@@ -153,7 +201,10 @@ const QuranPagesManagement = () => {
       translation_text: "",
       points_reward: "10",
       display_order: "0",
+      admin_notes: "",
     });
+    setArabicImageFile(null);
+    setTranslationImageFile(null);
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -244,30 +295,90 @@ const QuranPagesManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="arabic_text" className="text-base font-semibold">النص العربي</Label>
+                  <Label htmlFor="arabic_image" className="text-base font-semibold">
+                    صورة الصفحة العربية *
+                  </Label>
+                  <Input
+                    id="arabic_image"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={(e) => setArabicImageFile(e.target.files?.[0] || null)}
+                    required={!editingPage?.arabic_image_url}
+                    className="h-11"
+                  />
+                  {editingPage?.arabic_image_url && (
+                    <p className="text-sm text-muted-foreground">
+                      ✓ توجد صورة محفوظة - يمكنك رفع صورة جديدة لاستبدالها
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="translation_image" className="text-base font-semibold">
+                    صورة الترجمة الإنجليزية (اختياري)
+                  </Label>
+                  <Input
+                    id="translation_image"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={(e) => setTranslationImageFile(e.target.files?.[0] || null)}
+                    className="h-11"
+                  />
+                  {editingPage?.translation_image_url && (
+                    <p className="text-sm text-muted-foreground">
+                      ✓ توجد صورة محفوظة - يمكنك رفع صورة جديدة لاستبدالها
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="arabic_text" className="text-base font-semibold">
+                    النص العربي (للبحث والأرشفة)
+                  </Label>
                   <Textarea
                     id="arabic_text"
                     value={formData.arabic_text}
                     onChange={(e) => setFormData({...formData, arabic_text: e.target.value})}
-                    rows={8}
+                    rows={4}
                     className="font-arabic text-lg leading-loose"
                     dir="rtl"
                     required
-                    placeholder="أدخل النص القرآني هنا..."
+                    placeholder="أدخل النص القرآني هنا للأرشفة..."
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="translation_text" className="text-base font-semibold text-right">الترجمة الإنجليزية (اختياري)</Label>
+                  <Label htmlFor="translation_text" className="text-base font-semibold text-right">
+                    الترجمة الإنجليزية (للبحث - اختياري)
+                  </Label>
                   <Textarea
                     id="translation_text"
                     value={formData.translation_text}
                     onChange={(e) => setFormData({...formData, translation_text: e.target.value})}
-                    rows={8}
+                    rows={4}
                     dir="ltr"
-                    placeholder="Enter English translation here..."
+                    placeholder="Enter English translation for archiving..."
                     className="text-base text-left"
                   />
+                </div>
+
+                <div className="space-y-2 bg-muted/30 p-4 rounded-lg border">
+                  <Label htmlFor="admin_notes" className="text-base font-semibold flex items-center gap-2">
+                    <span>📝</span>
+                    تعليقات المدير (خاصة)
+                  </Label>
+                  <Textarea
+                    id="admin_notes"
+                    value={formData.admin_notes}
+                    onChange={(e) => setFormData({...formData, admin_notes: e.target.value})}
+                    rows={3}
+                    dir="rtl"
+                    placeholder="أضف ملاحظاتك الخاصة حول هذه الصفحة..."
+                    className="bg-background"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    هذه التعليقات خاصة بالإدارة فقط ولن تظهر للمستخدمين
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
@@ -298,11 +409,11 @@ const QuranPagesManagement = () => {
                 </div>
 
                 <div className="flex gap-3 justify-end pt-4 border-t">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} size="lg">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} size="lg" disabled={uploadingImage}>
                     إلغاء
                   </Button>
-                  <Button type="submit" size="lg" className="shadow-md hover:shadow-lg transition-all">
-                    {editingPage ? '✓ تحديث الصفحة' : '+ إضافة الصفحة'}
+                  <Button type="submit" size="lg" className="shadow-md hover:shadow-lg transition-all" disabled={uploadingImage}>
+                    {uploadingImage ? '⏳ جاري الرفع...' : editingPage ? '✓ تحديث الصفحة' : '+ إضافة الصفحة'}
                   </Button>
                 </div>
               </form>
