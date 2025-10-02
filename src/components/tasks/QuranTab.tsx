@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import SectionIntroduction from "./SectionIntroduction";
 
 interface QuranPage {
   id: string;
@@ -18,6 +19,21 @@ interface QuranPage {
   points_reward: number;
   is_active: boolean;
 }
+
+// دالة لفصل البسملة وإضافة أرقام الآيات
+const formatQuranText = (text: string) => {
+  const basmala = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+  let formattedText = text;
+  let hasBasmala = false;
+  
+  // فصل البسملة إذا كانت موجودة في بداية النص
+  if (text.includes(basmala)) {
+    hasBasmala = true;
+    formattedText = text.replace(basmala, "").trim();
+  }
+  
+  return { basmala: hasBasmala ? basmala : null, text: formattedText };
+};
 
 const QuranTab = () => {
   const { user } = useAuth();
@@ -152,11 +168,12 @@ const QuranTab = () => {
   const isCompleted = currentPage ? completedPages.includes(currentPage.id) : false;
   const isReading = currentPage ? readingPageId === currentPage.id : false;
   const minReadingTime = currentPage ? getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length) : 0;
+  const formattedText = currentPage ? formatQuranText(currentPage.arabic_text) : { basmala: null, text: "" };
 
   const handleNextPage = () => {
     if (currentPageIndex < quranPages.length - 1) {
       const nextPage = quranPages[currentPageIndex + 1];
-      setCurrentPageIndex(currentPageIndex + 1);
+      setCurrentPageIndex(prev => prev + 1);
       setReadingPageId(null);
       setReadingStartTime(null);
       setReadingProgress(0);
@@ -170,7 +187,7 @@ const QuranTab = () => {
 
   const handlePrevPage = () => {
     if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1);
+      setCurrentPageIndex(prev => prev - 1);
       setReadingPageId(null);
       setReadingStartTime(null);
       setReadingProgress(0);
@@ -202,6 +219,9 @@ const QuranTab = () => {
 
   return (
     <div className="space-y-6" dir="rtl">
+      {/* Section Introduction */}
+      <SectionIntroduction sectionType="quran" />
+      
       {/* Navigation Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-3 sm:p-4 rounded-2xl border border-primary/20">
         <Button
@@ -309,13 +329,28 @@ const QuranTab = () => {
                 <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-r-2 sm:border-r-4 border-primary/30 rounded-br-lg"></div>
                 <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-primary/30 rounded-bl-lg"></div>
                 
+                {/* البسملة في سطر منفصل */}
+                {formattedText.basmala && (
+                  <div className="mb-6 pb-4 border-b-2 border-primary/20">
+                    <p 
+                      className="font-arabic text-2xl sm:text-3xl text-primary font-bold"
+                      dir="rtl"
+                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                    >
+                      {formattedText.basmala}
+                    </p>
+                  </div>
+                )}
+                
+                {/* النص القرآني */}
                 <p 
                   className="font-arabic text-xl sm:text-2xl leading-[2.8] sm:leading-[3.2] text-foreground/95 font-semibold tracking-wide"
                   dir="rtl"
                   style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
-                >
-                  {currentPage.arabic_text}
-                </p>
+                  dangerouslySetInnerHTML={{ 
+                    __html: formattedText.text.replace(/(\d+)/g, ' ﴿$1﴾ ')
+                  }}
+                />
               </div>
             </div>
 
