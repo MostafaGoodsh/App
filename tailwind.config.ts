@@ -93,6 +93,7 @@ export default {
       fontFamily: {
         playfair: ['"Playfair Display"', 'serif'],
         cairo: ['Cairo', 'sans-serif'],
+        arabic: ['Amiri Quran', 'Amiri', 'Cairo', 'serif'],
       },
       // إضافة متغيرات اللغة للنظام الموحد
       spacing: {

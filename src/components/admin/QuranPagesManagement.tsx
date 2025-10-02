@@ -168,26 +168,40 @@ const QuranPagesManagement = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 arabic-content">
-      <Card className="border-primary/20 shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <BookOpen className="h-6 w-6 text-primary" />
-            </div>
-            إدارة صفحات القرآن الكريم
-          </CardTitle>
+    <div className="container mx-auto p-6 space-y-6" dir="rtl">
+      {/* عنوان الصفحة الرئيسي */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
+          <div className="bg-gradient-to-br from-primary to-primary/70 p-3 rounded-xl shadow-lg">
+            <BookOpen className="h-8 w-8 text-white" />
+          </div>
+          إدارة صفحات القرآن الكريم
+        </h1>
+        <p className="text-muted-foreground text-lg mr-16">
+          إضافة وتعديل وإدارة صفحات القرآن الكريم مع الترجمة والنقاط
+        </p>
+      </div>
+
+      <Card className="border-primary/20 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-bold text-foreground">
+              قائمة الصفحات
+            </CardTitle>
+          </div>
           <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
-              <Button size="lg" className="shadow-md hover:shadow-lg transition-all">
+              <Button size="lg" className="shadow-lg hover:shadow-xl transition-all">
                 <Plus className="h-5 w-5 ml-2" />
                 إضافة صفحة جديدة
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
               <DialogHeader className="border-b pb-4">
-                <DialogTitle className="text-2xl flex items-center gap-2">
-                  <BookOpen className="h-6 w-6 text-primary" />
+                <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
                   {editingPage ? 'تعديل صفحة القرآن' : 'إضافة صفحة قرآن جديدة'}
                 </DialogTitle>
               </DialogHeader>
@@ -244,7 +258,7 @@ const QuranPagesManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="translation_text" className="text-base font-semibold">الترجمة الإنجليزية (اختياري)</Label>
+                  <Label htmlFor="translation_text" className="text-base font-semibold text-right">الترجمة الإنجليزية (اختياري)</Label>
                   <Textarea
                     id="translation_text"
                     value={formData.translation_text}
@@ -252,7 +266,7 @@ const QuranPagesManagement = () => {
                     rows={8}
                     dir="ltr"
                     placeholder="Enter English translation here..."
-                    className="text-base"
+                    className="text-base text-left"
                   />
                 </div>
 
@@ -299,40 +313,40 @@ const QuranPagesManagement = () => {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-bold">رقم الصفحة</TableHead>
-                  <TableHead className="font-bold">الجزء</TableHead>
-                  <TableHead className="font-bold">السورة</TableHead>
-                  <TableHead className="font-bold">النقاط</TableHead>
-                  <TableHead className="font-bold">الحالة</TableHead>
-                  <TableHead className="text-left font-bold">الإجراءات</TableHead>
+                <TableRow className="bg-gradient-to-r from-muted/50 to-muted/20">
+                  <TableHead className="font-bold text-right">رقم الصفحة</TableHead>
+                  <TableHead className="font-bold text-right">الجزء</TableHead>
+                  <TableHead className="font-bold text-right">السورة</TableHead>
+                  <TableHead className="font-bold text-right">النقاط</TableHead>
+                  <TableHead className="font-bold text-right">الحالة</TableHead>
+                  <TableHead className="font-bold text-right">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pages.map((page) => (
-                  <TableRow key={page.id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-semibold text-primary">{page.page_number}</TableCell>
-                    <TableCell className="font-medium">{page.juz_number}</TableCell>
-                    <TableCell className="font-medium">{page.surah_name}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-md w-fit">
-                        <span className="font-semibold">{page.points_reward}</span>
-                        <span className="text-xs">نقطة</span>
+                  <TableRow key={page.id} className="hover:bg-primary/5 transition-colors">
+                    <TableCell className="font-bold text-primary text-right">{page.page_number}</TableCell>
+                    <TableCell className="font-semibold text-right">{page.juz_number}</TableCell>
+                    <TableCell className="font-semibold text-right">{page.surah_name}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-lg w-fit">
+                        <span className="font-bold text-primary">{page.points_reward}</span>
+                        <span className="text-xs text-muted-foreground">نقطة</span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right">
                       {page.is_active ? (
-                        <span className="inline-flex items-center gap-1 bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-sm font-medium">
+                        <span className="inline-flex items-center gap-1.5 bg-green-500/15 text-green-700 dark:text-green-400 px-3 py-1.5 rounded-lg text-sm font-bold border border-green-500/20">
                           ✓ نشط
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 bg-gray-500/10 text-gray-700 dark:text-gray-400 px-2 py-1 rounded-full text-sm font-medium">
+                        <span className="inline-flex items-center gap-1.5 bg-gray-500/15 text-gray-700 dark:text-gray-400 px-3 py-1.5 rounded-lg text-sm font-bold border border-gray-500/20">
                           ✗ غير نشط
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-left">
-                      <div className="flex gap-2">
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
                         <Button
                           variant="ghost"
                           size="sm"

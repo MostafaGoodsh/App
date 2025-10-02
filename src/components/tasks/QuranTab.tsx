@@ -201,7 +201,7 @@ const QuranTab = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir="rtl">
       {/* Navigation Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-3 sm:p-4 rounded-2xl border border-primary/20">
         <Button
