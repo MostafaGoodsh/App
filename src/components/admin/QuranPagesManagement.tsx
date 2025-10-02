@@ -169,162 +169,193 @@ const QuranPagesManagement = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6 arabic-content">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            إدارة صفحات القرآن
+      <Card className="border-primary/20 shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <BookOpen className="h-6 w-6 text-primary" />
+            </div>
+            إدارة صفحات القرآن الكريم
           </CardTitle>
           <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 ml-2" />
+              <Button size="lg" className="shadow-md hover:shadow-lg transition-all">
+                <Plus className="h-5 w-5 ml-2" />
                 إضافة صفحة جديدة
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader className="border-b pb-4">
+                <DialogTitle className="text-2xl flex items-center gap-2">
+                  <BookOpen className="h-6 w-6 text-primary" />
                   {editingPage ? 'تعديل صفحة القرآن' : 'إضافة صفحة قرآن جديدة'}
                 </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="page_number">رقم الصفحة</Label>
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="page_number" className="text-base font-semibold">رقم الصفحة</Label>
                     <Input
                       id="page_number"
                       type="number"
                       value={formData.page_number}
                       onChange={(e) => setFormData({...formData, page_number: e.target.value})}
                       required
+                      className="h-11"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="juz_number">رقم الجزء</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="juz_number" className="text-base font-semibold">رقم الجزء</Label>
                     <Input
                       id="juz_number"
                       type="number"
                       value={formData.juz_number}
                       onChange={(e) => setFormData({...formData, juz_number: e.target.value})}
                       required
+                      className="h-11"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="surah_name">اسم السورة</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="surah_name" className="text-base font-semibold">اسم السورة</Label>
                   <Input
                     id="surah_name"
                     value={formData.surah_name}
                     onChange={(e) => setFormData({...formData, surah_name: e.target.value})}
                     required
+                    className="h-11"
+                    placeholder="مثال: سورة الفاتحة"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="arabic_text">النص العربي</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="arabic_text" className="text-base font-semibold">النص العربي</Label>
                   <Textarea
                     id="arabic_text"
                     value={formData.arabic_text}
                     onChange={(e) => setFormData({...formData, arabic_text: e.target.value})}
-                    rows={6}
-                    className="font-arabic"
+                    rows={8}
+                    className="font-arabic text-lg leading-loose"
                     dir="rtl"
                     required
+                    placeholder="أدخل النص القرآني هنا..."
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="translation_text">الترجمة (اختياري)</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="translation_text" className="text-base font-semibold">الترجمة الإنجليزية (اختياري)</Label>
                   <Textarea
                     id="translation_text"
                     value={formData.translation_text}
                     onChange={(e) => setFormData({...formData, translation_text: e.target.value})}
-                    rows={6}
+                    rows={8}
                     dir="ltr"
+                    placeholder="Enter English translation here..."
+                    className="text-base"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="points_reward">النقاط</Label>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="points_reward" className="text-base font-semibold">النقاط المكتسبة</Label>
                     <Input
                       id="points_reward"
                       type="number"
                       value={formData.points_reward}
                       onChange={(e) => setFormData({...formData, points_reward: e.target.value})}
                       required
+                      className="h-11"
+                      placeholder="10"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="display_order">ترتيب العرض</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="display_order" className="text-base font-semibold">ترتيب العرض</Label>
                     <Input
                       id="display_order"
                       type="number"
                       value={formData.display_order}
                       onChange={(e) => setFormData({...formData, display_order: e.target.value})}
                       required
+                      className="h-11"
+                      placeholder="0"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <div className="flex gap-3 justify-end pt-4 border-t">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} size="lg">
                     إلغاء
                   </Button>
-                  <Button type="submit">
-                    {editingPage ? 'تحديث' : 'إضافة'}
+                  <Button type="submit" size="lg" className="shadow-md hover:shadow-lg transition-all">
+                    {editingPage ? '✓ تحديث الصفحة' : '+ إضافة الصفحة'}
                   </Button>
                 </div>
               </form>
             </DialogContent>
           </Dialog>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>رقم الصفحة</TableHead>
-                <TableHead>الجزء</TableHead>
-                <TableHead>السورة</TableHead>
-                <TableHead>النقاط</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pages.map((page) => (
-                <TableRow key={page.id}>
-                  <TableCell>{page.page_number}</TableCell>
-                  <TableCell>{page.juz_number}</TableCell>
-                  <TableCell>{page.surah_name}</TableCell>
-                  <TableCell>{page.points_reward}</TableCell>
-                  <TableCell>
-                    {page.is_active ? '✓ نشط' : '✗ غير نشط'}
-                  </TableCell>
-                  <TableCell className="text-left">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(page)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(page.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-bold">رقم الصفحة</TableHead>
+                  <TableHead className="font-bold">الجزء</TableHead>
+                  <TableHead className="font-bold">السورة</TableHead>
+                  <TableHead className="font-bold">النقاط</TableHead>
+                  <TableHead className="font-bold">الحالة</TableHead>
+                  <TableHead className="text-left font-bold">الإجراءات</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {pages.map((page) => (
+                  <TableRow key={page.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-semibold text-primary">{page.page_number}</TableCell>
+                    <TableCell className="font-medium">{page.juz_number}</TableCell>
+                    <TableCell className="font-medium">{page.surah_name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-md w-fit">
+                        <span className="font-semibold">{page.points_reward}</span>
+                        <span className="text-xs">نقطة</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {page.is_active ? (
+                        <span className="inline-flex items-center gap-1 bg-green-500/10 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-sm font-medium">
+                          ✓ نشط
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-gray-500/10 text-gray-700 dark:text-gray-400 px-2 py-1 rounded-full text-sm font-medium">
+                          ✗ غير نشط
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-left">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(page)}
+                          className="hover:bg-primary/10 hover:text-primary transition-colors"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(page.id)}
+                          className="hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

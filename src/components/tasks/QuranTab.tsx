@@ -28,7 +28,17 @@ const QuranTab = () => {
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
   const [readingProgress, setReadingProgress] = useState(0);
 
-  const MINIMUM_READING_TIME = 120; // دقيقتان بالثواني
+  // حساب وقت القراءة بناءً على طول النص
+  const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
+    // أول صفحتين: 30 ثانية
+    if (pageNumber <= 2) return 30;
+    
+    // الصفحات الطويلة (أكثر من 500 حرف): 60 ثانية
+    if (textLength > 500) return 60;
+    
+    // باقي الصفحات: 45 ثانية
+    return 45;
+  };
 
   useEffect(() => {
     if (user) {
@@ -41,17 +51,22 @@ const QuranTab = () => {
     let interval: NodeJS.Timeout;
     
     if (readingPageId && readingStartTime) {
-      interval = setInterval(() => {
-        const elapsedSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
-        const progress = Math.min((elapsedSeconds / MINIMUM_READING_TIME) * 100, 100);
-        setReadingProgress(progress);
-      }, 100);
+      const currentPage = quranPages.find(p => p.id === readingPageId);
+      if (currentPage) {
+        const minTime = getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length);
+        
+        interval = setInterval(() => {
+          const elapsedSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
+          const progress = Math.min((elapsedSeconds / minTime) * 100, 100);
+          setReadingProgress(progress);
+        }, 100);
+      }
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [readingPageId, readingStartTime]);
+  }, [readingPageId, readingStartTime, quranPages]);
 
   const fetchQuranPages = async () => {
     try {
@@ -74,11 +89,11 @@ const QuranTab = () => {
     if (!user) return;
 
     try {
+      // إزالة قيد التاريخ للسماح بإكمال المزيد من الصفحات
       const { data, error } = await supabase
         .from('user_quran_completions')
         .select('page_id')
-        .eq('user_id', user.id)
-        .eq('completed_date', new Date().toISOString().split('T')[0]);
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setCompletedPages(data?.map(completion => completion.page_id) || []);
@@ -96,10 +111,14 @@ const QuranTab = () => {
   const completeReading = async (pageId: string, pointsReward: number) => {
     if (!user || !readingStartTime) return;
 
-    const readingTimeSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
+    const currentPage = quranPages.find(p => p.id === pageId);
+    if (!currentPage) return;
 
-    if (readingTimeSeconds < MINIMUM_READING_TIME) {
-      toast.error(`يجب قراءة الصفحة لمدة دقيقتين على الأقل. لقد قرأت ${Math.floor(readingTimeSeconds / 60)} دقيقة و ${readingTimeSeconds % 60} ثانية`);
+    const readingTimeSeconds = Math.floor((Date.now() - readingStartTime) / 1000);
+    const minTime = getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length);
+
+    if (readingTimeSeconds < minTime) {
+      toast.error(`يجب قراءة الصفحة للوقت المحدد. لقد قرأت ${readingTimeSeconds} ثانية من ${minTime} ثانية`);
       return;
     }
 
@@ -139,56 +158,66 @@ const QuranTab = () => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {quranPages.map((page) => {
         const isCompleted = completedPages.includes(page.id);
         const isReading = readingPageId === page.id;
+        const minReadingTime = getMinimumReadingTime(page.page_number, page.arabic_text.length);
         
         return (
           <Card 
             key={page.id}
-            className={`transition-all ${isReading ? 'border-primary shadow-lg' : 'border-border'}`}
+            className={`transition-all duration-300 ${
+              isReading 
+                ? 'border-primary shadow-xl ring-2 ring-primary/20' 
+                : isCompleted 
+                ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent'
+                : 'border-border hover:border-primary/30 hover:shadow-md'
+            }`}
           >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
                 <button
                   onClick={() => {
                     if (!isReading && !isCompleted) {
                       startReading(page.id);
                     }
                   }}
-                  className="flex-shrink-0 mt-1"
+                  className="flex-shrink-0 mt-1 transition-transform hover:scale-110"
                   disabled={isCompleted}
                 >
                   {isCompleted ? (
-                    <CheckCircle2 className="h-6 w-6 text-primary animate-scale-in" />
+                    <CheckCircle2 className="h-7 w-7 text-primary animate-scale-in" />
                   ) : (
-                    <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
+                    <Circle className="h-7 w-7 text-muted-foreground hover:text-primary transition-colors" />
                   )}
                 </button>
                 
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 space-y-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="h-4 w-4 text-primary" />
-                      <h4 className="font-medium text-foreground">
+                    <div className="flex items-center gap-3 mb-3">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <h4 className="font-semibold text-lg text-foreground">
                         صفحة {page.page_number} - {page.surah_name}
                       </h4>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs px-2 py-1">
                         الجزء {page.juz_number}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs px-2 py-1">
+                        ⏱️ {minReadingTime}ث
                       </Badge>
                     </div>
                     
                     {/* النص العربي */}
-                    <div className="bg-muted/30 p-4 rounded-lg mb-2 text-right" dir="rtl">
-                      <p className="font-arabic text-lg leading-loose text-foreground">
+                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 rounded-xl mb-3 text-right border border-primary/20" dir="rtl">
+                      <p className="font-arabic text-xl leading-[2.5] text-foreground">
                         {page.arabic_text}
                       </p>
                     </div>
                     
                     {/* الترجمة */}
                     {page.translation_text && (
-                      <div className="bg-muted/20 p-3 rounded-lg" dir="ltr">
+                      <div className="bg-muted/30 p-4 rounded-xl border border-border" dir="ltr">
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {page.translation_text}
                         </p>
@@ -198,42 +227,42 @@ const QuranTab = () => {
 
                   {/* شريط التقدم للقراءة */}
                   {isReading && (
-                    <div className="space-y-2">
+                    <div className="space-y-3 bg-gradient-to-r from-primary/10 to-transparent p-4 rounded-xl border border-primary/30">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-primary animate-pulse" />
-                          <span className="text-muted-foreground">
+                          <Clock className="h-5 w-5 text-primary animate-pulse" />
+                          <span className="font-medium text-foreground">
                             جاري القراءة... ({Math.floor(readingProgress)}%)
                           </span>
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          الحد الأدنى: دقيقتان
+                        <span className="text-xs text-muted-foreground font-medium">
+                          الحد الأدنى: {minReadingTime}ث
                         </span>
                       </div>
-                      <Progress value={readingProgress} className="h-2" />
+                      <Progress value={readingProgress} className="h-3" />
                       
                       {readingProgress >= 100 && (
                         <Button
                           onClick={() => completeReading(page.id, page.points_reward)}
-                          className="w-full"
-                          size="sm"
+                          className="w-full shadow-lg hover:shadow-xl transition-all"
+                          size="lg"
                         >
-                          <CheckCircle2 className="h-4 w-4 ml-2" />
-                          إنهاء القراءة
+                          <CheckCircle2 className="h-5 w-5 ml-2" />
+                          إنهاء القراءة واحصل على {page.points_reward} نقطة
                         </Button>
                       )}
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-2">
-                      <Coins className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">{page.points_reward} نقطة</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-2 rounded-lg">
+                      <Coins className="h-5 w-5 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">{page.points_reward} نقطة</span>
                     </div>
                     
                     {isCompleted && (
-                      <Badge variant="default" className="bg-primary text-primary-foreground">
-                        مكتملة ✓
+                      <Badge variant="default" className="bg-primary text-primary-foreground shadow-md px-3 py-1.5">
+                        ✓ مكتملة
                       </Badge>
                     )}
                   </div>
@@ -245,9 +274,11 @@ const QuranTab = () => {
       })}
       
       {quranPages.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد صفحات قرآن متاحة حالياً</p>
+        <div className="text-center py-12">
+          <div className="bg-muted/50 rounded-full w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+            <BookOpen className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <p className="text-muted-foreground text-lg">لا توجد صفحات قرآن متاحة حالياً</p>
         </div>
       )}
     </div>
