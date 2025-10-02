@@ -155,10 +155,16 @@ const QuranTab = () => {
 
   const handleNextPage = () => {
     if (currentPageIndex < quranPages.length - 1) {
+      const nextPage = quranPages[currentPageIndex + 1];
       setCurrentPageIndex(currentPageIndex + 1);
       setReadingPageId(null);
       setReadingStartTime(null);
       setReadingProgress(0);
+      
+      // عرض رسالة إذا انتقلنا لسورة جديدة
+      if (currentPage && nextPage.surah_name !== currentPage.surah_name) {
+        toast.success(`انتقلت إلى سورة ${nextPage.surah_name}`);
+      }
     }
   };
 
@@ -197,21 +203,21 @@ const QuranTab = () => {
   return (
     <div className="space-y-6">
       {/* Navigation Header */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 rounded-2xl border border-primary/20">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-3 sm:p-4 rounded-2xl border border-primary/20">
         <Button
           onClick={handlePrevPage}
           disabled={currentPageIndex === 0}
           variant="outline"
-          size="lg"
-          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+          size="sm"
+          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50 w-full sm:w-auto text-xs sm:text-sm"
         >
-          <ChevronRight className="h-5 w-5" />
-          الصفحة السابقة
+          <ChevronRight className="h-4 w-4" />
+          السابقة
         </Button>
         
         <div className="text-center">
-          <div className="text-sm text-muted-foreground mb-1">الصفحة</div>
-          <div className="text-2xl font-bold text-primary">
+          <div className="text-xs text-muted-foreground mb-1">الصفحة</div>
+          <div className="text-lg sm:text-2xl font-bold text-primary">
             {currentPageIndex + 1} / {quranPages.length}
           </div>
         </div>
@@ -220,11 +226,11 @@ const QuranTab = () => {
           onClick={handleNextPage}
           disabled={currentPageIndex === quranPages.length - 1}
           variant="outline"
-          size="lg"
-          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+          size="sm"
+          className="gap-2 shadow-md hover:shadow-xl transition-all disabled:opacity-50 w-full sm:w-auto text-xs sm:text-sm"
         >
-          الصفحة التالية
-          <ChevronLeft className="h-5 w-5" />
+          التالية
+          <ChevronLeft className="h-4 w-4" />
         </Button>
       </div>
 
@@ -237,7 +243,7 @@ const QuranTab = () => {
             ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent'
             : 'border-border hover:border-primary/30 hover:shadow-xl'
         }`}>
-          <CardContent className="p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             {/* Page Header */}
             <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-primary/20">
               <div className="flex items-center gap-4">
@@ -286,9 +292,9 @@ const QuranTab = () => {
             </div>
 
             {/* Arabic Text with Mushaf-like styling */}
-            <div className="relative mb-6">
+            <div className="relative mb-4 sm:mb-6">
               <div 
-                className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-10 rounded-3xl text-center border-4 border-double border-primary/30 shadow-inner"
+                className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-4 sm:p-6 lg:p-10 rounded-2xl sm:rounded-3xl text-center border-2 sm:border-4 border-double border-primary/30 shadow-inner"
                 style={{
                   backgroundImage: `
                     linear-gradient(45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%),
@@ -298,13 +304,13 @@ const QuranTab = () => {
                 }}
               >
                 {/* Decorative corners */}
-                <div className="absolute top-2 right-2 w-8 h-8 border-t-4 border-r-4 border-primary/30 rounded-tr-lg"></div>
-                <div className="absolute top-2 left-2 w-8 h-8 border-t-4 border-l-4 border-primary/30 rounded-tl-lg"></div>
-                <div className="absolute bottom-2 right-2 w-8 h-8 border-b-4 border-r-4 border-primary/30 rounded-br-lg"></div>
-                <div className="absolute bottom-2 left-2 w-8 h-8 border-b-4 border-l-4 border-primary/30 rounded-bl-lg"></div>
+                <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-r-2 sm:border-r-4 border-primary/30 rounded-tr-lg"></div>
+                <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-l-2 sm:border-l-4 border-primary/30 rounded-tl-lg"></div>
+                <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-r-2 sm:border-r-4 border-primary/30 rounded-br-lg"></div>
+                <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-primary/30 rounded-bl-lg"></div>
                 
                 <p 
-                  className="font-arabic text-3xl leading-[3.5] text-foreground/95 font-semibold tracking-wide"
+                  className="font-arabic text-xl sm:text-2xl leading-[2.8] sm:leading-[3.2] text-foreground/95 font-semibold tracking-wide"
                   dir="rtl"
                   style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
                 >
@@ -315,12 +321,12 @@ const QuranTab = () => {
 
             {/* Translation */}
             {currentPage.translation_text && (
-              <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-6 rounded-2xl border-2 border-border shadow-md mb-6" dir="ltr">
+              <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-4 sm:p-6 rounded-2xl border-2 border-border shadow-md mb-6" dir="ltr">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-1 w-12 bg-primary/40 rounded-full"></div>
                   <span className="text-xs font-semibold text-primary uppercase tracking-wider">Translation</span>
                 </div>
-                <p className="text-base text-muted-foreground leading-relaxed">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-left">
                   {currentPage.translation_text}
                 </p>
               </div>
