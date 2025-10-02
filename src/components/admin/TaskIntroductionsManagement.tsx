@@ -131,6 +131,7 @@ const TaskIntroductionsManagement = () => {
       case 'daily_tasks': return 'المهام العامة';
       case 'media_content': return 'محتوى الوسائط';
       case 'personality_tasks': return 'مهام تطوير الشخصية';
+      case 'quran': return 'قراءة القرآن الكريم';
       default: return type;
     }
   };
@@ -175,6 +176,7 @@ const TaskIntroductionsManagement = () => {
                       <SelectItem value="daily_tasks">المهام العامة</SelectItem>
                       <SelectItem value="media_content">محتوى الوسائط</SelectItem>
                       <SelectItem value="personality_tasks">مهام تطوير الشخصية</SelectItem>
+                      <SelectItem value="quran">قراءة القرآن الكريم</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
