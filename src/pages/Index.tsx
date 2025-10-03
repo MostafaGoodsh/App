@@ -10,7 +10,7 @@ import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import sphinxBg from "@/assets/sphinx-bg.jpg";
-import egyptianReliefBg from "@/assets/egyptian-relief-bg.jpg";
+import pharaohStatueBg from "@/assets/pharaoh-statue-bg.jpg";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -112,7 +112,28 @@ const Index = () => {
           {/* Reels Card - Second Card */}
           <ExternalReelsCard />
           
-          {/* Call Out Card - New */}
+          {/* Updates Card - Third Card */}
+          <Link to="/updates" className="group">
+            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+              <img 
+                src={pharaohStatueBg} 
+                alt="تمثال فرعوني - آخر التحديثات" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+                loading="lazy" 
+              />
+              <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+                  {getContent('hero_cta_2', 'Updates | آخر التحديثات')}
+                </h2>
+                <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+                  تابع آخر التحديثات والأخبار حول المنصة
+                </p>
+                <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
+              </div>
+            </article>
+          </Link>
+
+          {/* Call Out Card - Fourth Card */}
           <Link to="/call-out" className="group">
             <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
               <img 
@@ -127,27 +148,6 @@ const Index = () => {
                 </h2>
                 <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
                   استدعاء شرفي للمشاركة في بناء مستقبل مصر الرقمي
-                </p>
-                <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
-              </div>
-            </article>
-          </Link>
-
-          {/* Updates Card - New */}
-          <Link to="/updates" className="group">
-            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
-              <img 
-                src={egyptianReliefBg} 
-                alt="نقش مصري قديم - آخر التحديثات" 
-                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
-                loading="lazy" 
-              />
-              <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-                <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
-                  {getContent('hero_cta_2', 'Updates | آخر التحديثات')}
-                </h2>
-                <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
-                  تابع آخر التحديثات والأخبار حول المنصة
                 </p>
                 <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
               </div>
