@@ -53,7 +53,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[85vh] flex items-center justify-center bg-background">
+        <section className="relative min-h-[85vh] flex items-end justify-center bg-background">
           <img
             src={getContent('hero_background', '/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')}
             alt={getAltText('hero_background', 'هرم مصري عند الغروب - خلفية أسود وذهبي')}
@@ -61,7 +61,7 @@ const Index = () => {
             loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-          <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="relative z-10 container mx-auto px-4 text-center pb-16">
             <div className="flex items-center justify-center mb-6">
               <div className="text-center">
                 <h1 className="font-playfair text-3xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-1 md:mb-2">
