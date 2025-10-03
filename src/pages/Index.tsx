@@ -53,7 +53,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[85vh] flex items-center justify-center bg-background">
+        <section className="relative min-h-[85vh] flex items-start justify-center pt-20 bg-background">
           <img
             src={getContent('hero_background', '/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')}
             alt={getAltText('hero_background', 'هرم مصري عند الغروب - خلفية أسود وذهبي')}
