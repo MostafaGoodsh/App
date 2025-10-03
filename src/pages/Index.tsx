@@ -11,7 +11,6 @@ import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import sphinxBg from "@/assets/sphinx-bg.jpg";
 import egyptianReliefBg from "@/assets/egyptian-relief-bg.jpg";
-import goldenAnkhBg from "@/assets/golden-ankh-bg.png";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -117,8 +116,8 @@ const Index = () => {
           <Link to="/call-out" className="group">
             <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
               <img 
-                src={goldenAnkhBg} 
-                alt="عنخ ذهبي - الاستدعاء الشرفي" 
+                src={sphinxBg} 
+                alt="أبو الهول - الاستدعاء الشرفي" 
                 className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
                 loading="lazy" 
               />
