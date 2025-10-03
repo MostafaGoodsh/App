@@ -32,7 +32,10 @@ export const useNotifications = () => {
       
       const { data, error } = await supabase.rpc("count_unread_notifications");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching unread count:", error);
+        return 0;
+      }
       return (data as number) || 0;
     },
     enabled: !!user,

@@ -31,7 +31,7 @@ export const NotificationsList = () => {
     <div className="flex flex-col">
       <div className="flex items-center justify-between p-4 border-b">
         <h3 className="font-semibold">الإشعارات</h3>
-        {typeof unreadCount === "number" && unreadCount > 0 && (
+        {unreadCount > 0 && (
           <Button
             variant="ghost"
             size="sm"
