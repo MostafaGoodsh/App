@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SectionIntroduction from "./SectionIntroduction";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface QuranPage {
   id: string;
@@ -46,6 +47,7 @@ const QuranTab = () => {
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
   const [readingProgress, setReadingProgress] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // حساب وقت القراءة بناءً على طول النص
   const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
@@ -220,9 +222,23 @@ const QuranTab = () => {
   }
 
   return (
-    <div className="space-y-6" dir="rtl">
-      {/* Section Introduction */}
-      <SectionIntroduction sectionType="quran" />
+    <>
+      {/* Full Screen Image Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2">
+          {selectedImage && (
+            <img 
+              src={selectedImage} 
+              alt="Quran Page Full Screen" 
+              className="w-full h-full object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <div className="space-y-6" dir="rtl">
+        {/* Section Introduction */}
+        <SectionIntroduction sectionType="quran" />
       
       {/* Navigation Header */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-3 sm:p-4 rounded-2xl border border-primary/20">
@@ -326,7 +342,8 @@ const QuranTab = () => {
                   <img 
                     src={currentPage.arabic_image_url} 
                     alt={`صفحة ${currentPage.page_number} - ${currentPage.surah_name}`}
-                    className="w-full h-auto rounded-lg"
+                    className="w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setSelectedImage(currentPage.arabic_image_url)}
                   />
                 </div>
               ) : (
@@ -384,7 +401,8 @@ const QuranTab = () => {
                     <img 
                       src={currentPage.translation_image_url} 
                       alt={`Translation - Page ${currentPage.page_number}`}
-                      className="w-full h-auto rounded-lg"
+                      className="w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => setSelectedImage(currentPage.translation_image_url)}
                     />
                   </div>
                 ) : currentPage.translation_text && (
@@ -451,7 +469,8 @@ const QuranTab = () => {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
