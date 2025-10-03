@@ -73,12 +73,7 @@ const Index = () => {
                 <div className="text-3xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
                   𓂀
                 </div>
-                
               </div>
-            </div>
-
-            <div className="text-xl md:text-2xl text-primary/80 mb-4">
-              𓂀
             </div>
           </div>
         </section>
