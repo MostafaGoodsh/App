@@ -61,7 +61,7 @@ const Index = () => {
             loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-          <div className="relative z-10 container mx-auto px-4 text-center pb-16">
+          <div className="relative z-10 container mx-auto px-4 text-center pb-24 md:pb-32">
             <div className="flex items-center justify-center mb-6">
               <div className="text-center">
                 <h1 className="font-playfair text-3xl md:text-6xl lg:text-7xl font-bold text-white/90 mb-1 md:mb-2">
