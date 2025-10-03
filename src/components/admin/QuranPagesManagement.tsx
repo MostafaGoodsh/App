@@ -333,7 +333,7 @@ const QuranPagesManagement = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="arabic_text" className="text-base font-semibold">
-                    النص العربي (للبحث والأرشفة)
+                    النص العربي (اختياري - للبحث والأرشفة)
                   </Label>
                   <Textarea
                     id="arabic_text"
@@ -342,14 +342,13 @@ const QuranPagesManagement = () => {
                     rows={4}
                     className="font-arabic text-lg leading-loose"
                     dir="rtl"
-                    required
-                    placeholder="أدخل النص القرآني هنا للأرشفة..."
+                    placeholder="أدخل النص القرآني هنا للأرشفة (اختياري)..."
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="translation_text" className="text-base font-semibold text-right">
-                    الترجمة الإنجليزية (للبحث - اختياري)
+                    الترجمة الإنجليزية (اختياري - للبحث)
                   </Label>
                   <Textarea
                     id="translation_text"
@@ -357,7 +356,7 @@ const QuranPagesManagement = () => {
                     onChange={(e) => setFormData({...formData, translation_text: e.target.value})}
                     rows={4}
                     dir="ltr"
-                    placeholder="Enter English translation for archiving..."
+                    placeholder="Enter English translation for archiving (optional)..."
                     className="text-base text-left"
                   />
                 </div>

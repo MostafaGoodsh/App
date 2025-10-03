@@ -16,6 +16,8 @@ interface QuranPage {
   surah_name: string;
   arabic_text: string;
   translation_text: string | null;
+  arabic_image_url: string | null;
+  translation_image_url: string | null;
   points_reward: number;
   is_active: boolean;
 }
@@ -311,59 +313,91 @@ const QuranTab = () => {
               </div>
             </div>
 
-            {/* Arabic Text with Mushaf-like styling */}
+            {/* Arabic Page Image or Text */}
             <div className="relative mb-4 sm:mb-6">
-              <div 
-                className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-4 sm:p-6 lg:p-10 rounded-2xl sm:rounded-3xl text-center border-2 sm:border-4 border-double border-primary/30 shadow-inner"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%),
-                    linear-gradient(-45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%)
-                  `,
-                  backgroundSize: '20px 20px'
-                }}
-              >
-                {/* Decorative corners */}
-                <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-r-2 sm:border-r-4 border-primary/30 rounded-tr-lg"></div>
-                <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-l-2 sm:border-l-4 border-primary/30 rounded-tl-lg"></div>
-                <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-r-2 sm:border-r-4 border-primary/30 rounded-br-lg"></div>
-                <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-primary/30 rounded-bl-lg"></div>
-                
-                {/* البسملة في سطر منفصل */}
-                {formattedText.basmala && (
-                  <div className="mb-6 pb-4 border-b-2 border-primary/20">
-                    <p 
-                      className="font-arabic text-2xl sm:text-3xl text-primary font-bold"
-                      dir="rtl"
-                      style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                    >
-                      {formattedText.basmala}
+              {currentPage.arabic_image_url ? (
+                <div className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 sm:border-4 border-double border-primary/30 shadow-inner">
+                  {/* Decorative corners */}
+                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-r-2 sm:border-r-4 border-primary/30 rounded-tr-lg"></div>
+                  <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-l-2 sm:border-l-4 border-primary/30 rounded-tl-lg"></div>
+                  <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-r-2 sm:border-r-4 border-primary/30 rounded-br-lg"></div>
+                  <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-primary/30 rounded-bl-lg"></div>
+                  
+                  <img 
+                    src={currentPage.arabic_image_url} 
+                    alt={`صفحة ${currentPage.page_number} - ${currentPage.surah_name}`}
+                    className="w-full h-auto rounded-lg"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/30 dark:from-primary/5 dark:via-background dark:to-primary/10 p-4 sm:p-6 lg:p-10 rounded-2xl sm:rounded-3xl text-center border-2 sm:border-4 border-double border-primary/30 shadow-inner"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%),
+                      linear-gradient(-45deg, transparent 48%, rgba(var(--primary)/0.05) 49%, rgba(var(--primary)/0.05) 51%, transparent 52%)
+                    `,
+                    backgroundSize: '20px 20px'
+                  }}
+                >
+                  {/* Decorative corners */}
+                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-r-2 sm:border-r-4 border-primary/30 rounded-tr-lg"></div>
+                  <div className="absolute top-1 left-1 sm:top-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-t-2 sm:border-t-4 border-l-2 sm:border-l-4 border-primary/30 rounded-tl-lg"></div>
+                  <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-r-2 sm:border-r-4 border-primary/30 rounded-br-lg"></div>
+                  <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 w-6 h-6 sm:w-8 sm:h-8 border-b-2 sm:border-b-4 border-l-2 sm:border-l-4 border-primary/30 rounded-bl-lg"></div>
+                  
+                  {/* البسملة في سطر منفصل */}
+                  {formattedText.basmala && (
+                    <div className="mb-6 pb-4 border-b-2 border-primary/20">
+                      <p 
+                        className="font-arabic text-2xl sm:text-3xl text-primary font-bold"
+                        dir="rtl"
+                        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                      >
+                        {formattedText.basmala}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* النص القرآني */}
+                  <p 
+                    className="font-arabic text-xl sm:text-2xl leading-[2.8] sm:leading-[3.2] text-foreground/95 font-semibold tracking-wide"
+                    dir="rtl"
+                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: formattedText.text.replace(/(\d+)/g, ' ﴿$1﴾ ')
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Translation - Image or Text */}
+            {(currentPage.translation_image_url || currentPage.translation_text) && (
+              <div className="mb-6">
+                {currentPage.translation_image_url ? (
+                  <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-4 sm:p-6 rounded-2xl border-2 border-border shadow-md" dir="ltr">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="h-1 w-12 bg-primary/40 rounded-full"></div>
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wider">Translation</span>
+                    </div>
+                    <img 
+                      src={currentPage.translation_image_url} 
+                      alt={`Translation - Page ${currentPage.page_number}`}
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                ) : currentPage.translation_text && (
+                  <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-4 sm:p-6 rounded-2xl border-2 border-border shadow-md" dir="ltr">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="h-1 w-12 bg-primary/40 rounded-full"></div>
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wider">Translation</span>
+                    </div>
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-left">
+                      {currentPage.translation_text}
                     </p>
                   </div>
                 )}
-                
-                {/* النص القرآني */}
-                <p 
-                  className="font-arabic text-xl sm:text-2xl leading-[2.8] sm:leading-[3.2] text-foreground/95 font-semibold tracking-wide"
-                  dir="rtl"
-                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
-                  dangerouslySetInnerHTML={{ 
-                    __html: formattedText.text.replace(/(\d+)/g, ' ﴿$1﴾ ')
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Translation */}
-            {currentPage.translation_text && (
-              <div className="bg-gradient-to-br from-muted/50 to-muted/30 p-4 sm:p-6 rounded-2xl border-2 border-border shadow-md mb-6" dir="ltr">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-1 w-12 bg-primary/40 rounded-full"></div>
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Translation</span>
-                </div>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-left">
-                  {currentPage.translation_text}
-                </p>
               </div>
             )}
 
