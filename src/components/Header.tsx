@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const Header = () => {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ const Header = () => {
           </NavigationMenu>
         </nav>
         <div className="flex items-center gap-3">
+          {user && <NotificationBell />}
           <Button asChild size="default" className="px-5">
             <Link to="/early-access">{getContent('hero_cta', 'انضم الآن')}</Link>
           </Button>
