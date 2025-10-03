@@ -132,8 +132,11 @@ const Index = () => {
               </div>
             </article>
           </Link>
+          
+          {/* Daily Tasks Card - Fourth Card */}
+          <DailyTasksCard />
 
-          {/* Call Out Card - Fourth Card */}
+          {/* Call Out Card - Fifth Card */}
           <Link to="/call-out" className="group">
             <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
               <img 
@@ -153,9 +156,6 @@ const Index = () => {
               </div>
             </article>
           </Link>
-          
-          {/* Daily Tasks Card */}
-          <DailyTasksCard />
           
           {/* Identity and Wallet Cards */}
           {[
