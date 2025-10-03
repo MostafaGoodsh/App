@@ -9,6 +9,8 @@ import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
+import sphinxBg from "@/assets/sphinx-bg.jpg";
+import egyptianReliefBg from "@/assets/egyptian-relief-bg.jpg";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
@@ -75,22 +77,8 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center gap-4">
-              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/updates">{getContent('hero_cta_2', 'Updates | آخر التحديثات')}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/call-out">{getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px] bg-transparent border-white/10 text-white hover:bg-white/5 hover:border-white/20">
-                <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
-              </Button>
+            <div className="text-xl md:text-2xl text-primary/80 mb-4">
+              𓂀
             </div>
           </div>
         </section>
@@ -128,6 +116,48 @@ const Index = () => {
 
           {/* Reels Card - Second Card */}
           <ExternalReelsCard />
+          
+          {/* Call Out Card - New */}
+          <Link to="/call-out" className="group">
+            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+              <img 
+                src={sphinxBg} 
+                alt="أبو الهول - الاستدعاء الشرفي" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+                loading="lazy" 
+              />
+              <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+                  {getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}
+                </h2>
+                <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+                  استدعاء شرفي للمشاركة في بناء مستقبل مصر الرقمي
+                </p>
+                <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
+              </div>
+            </article>
+          </Link>
+
+          {/* Updates Card - New */}
+          <Link to="/updates" className="group">
+            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+              <img 
+                src={egyptianReliefBg} 
+                alt="نقش مصري قديم - آخر التحديثات" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+                loading="lazy" 
+              />
+              <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+                  {getContent('hero_cta_2', 'Updates | آخر التحديثات')}
+                </h2>
+                <p className="font-cairo text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+                  تابع آخر التحديثات والأخبار حول المنصة
+                </p>
+                <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
+              </div>
+            </article>
+          </Link>
           
           {/* Daily Tasks Card */}
           <DailyTasksCard />
@@ -170,6 +200,19 @@ const Index = () => {
 
           {/* Anubis Card - Last Card */}
           <AnubisCard />
+
+          {/* Action Buttons Section */}
+          <div className="flex flex-col items-center justify-center gap-4 mt-8">
+            <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
+              <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
+              <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
+              <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
+            </Button>
+          </div>
         </section>
         
         {/* Ms-Ra Currency Section */}
