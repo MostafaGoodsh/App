@@ -884,6 +884,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          is_admin_notification: boolean | null
+          is_read: boolean | null
+          message: string
+          read_at: string | null
+          related_id: string | null
+          related_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_admin_notification?: boolean | null
+          is_read?: boolean | null
+          message: string
+          read_at?: string | null
+          related_id?: string | null
+          related_type?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_admin_notification?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          read_at?: string | null
+          related_id?: string | null
+          related_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pending_deposits: {
         Row: {
           amount: number
@@ -2260,6 +2305,14 @@ export type Database = {
         Args: { p_task_id: string }
         Returns: Json
       }
+      count_admin_unread_notifications: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      count_unread_notifications: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       create_initial_internal_balances: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -2275,6 +2328,19 @@ export type Database = {
           p_personality_title?: string
         }
         Returns: Json
+      }
+      create_notification: {
+        Args: {
+          p_action_url?: string
+          p_is_admin?: boolean
+          p_message: string
+          p_related_id?: string
+          p_related_type?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       create_wallet_mfa_session: {
         Args: { p_wallet_id: string }
@@ -2357,6 +2423,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      mark_all_notifications_read: {
+        Args: { p_is_admin?: boolean; p_user_id: string }
+        Returns: number
+      }
       mask_contact_info: {
         Args: { email: string; phone: string }
         Returns: {
@@ -2372,6 +2442,17 @@ export type Database = {
           p_wallet_id: string
         }
         Returns: Json
+      }
+      notify_all_admins: {
+        Args: {
+          p_action_url?: string
+          p_message: string
+          p_related_id?: string
+          p_related_type?: string
+          p_title: string
+          p_type: string
+        }
+        Returns: number
       }
       register_trusted_device: {
         Args: { p_device_fingerprint: string; p_device_name?: string }
