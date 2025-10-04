@@ -28,14 +28,19 @@ export const useNotifications = () => {
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["notifications-unread-count", user?.id],
     queryFn: async () => {
-      if (!user) return 0;
+      if (!user) {
+        console.log("useNotifications: No user");
+        return 0;
+      }
       
+      console.log("useNotifications: Fetching unread count for user:", user.id);
       const { data, error } = await supabase.rpc("count_unread_notifications");
 
       if (error) {
-        console.error("Error fetching unread count:", error);
+        console.error("useNotifications: Error fetching unread count:", error);
         return 0;
       }
+      console.log("useNotifications: Unread count data:", data);
       return (data as number) || 0;
     },
     enabled: !!user,

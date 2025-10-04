@@ -14,6 +14,8 @@ export const NotificationBell = () => {
   const { unreadCount } = useNotifications();
   useNotificationsRealtime();
 
+  console.log("NotificationBell rendered, unreadCount:", unreadCount);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
