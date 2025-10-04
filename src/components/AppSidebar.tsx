@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -24,10 +24,12 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
   { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
   { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
   { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
+  { title: "الدعم الفني", url: "/support", icon: MessageSquare, requireAuth: true },
 ];
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
   { title: getContent("admin_users_management", "إدارة المستخدمين"), url: "/admin/users", icon: Users },
+  { title: "رسائل الدعم", url: "/admin/support", icon: MessageSquare },
   { title: "إدارة الحسابات المعتمدة", url: "/admin/verified-accounts", icon: Shield },
   { title: getContent("admin_kyc_management", "إدارة الهوية"), url: "/admin/kyc", icon: Shield },
   { title: getContent("admin_surveys_management", "إدارة الاستبيانات"), url: "/admin/surveys", icon: ClipboardList },

@@ -20,6 +20,8 @@ import SurveysAdmin from "./pages/SurveysAdmin";
 import LearningAdmin from "./pages/LearningAdmin";
 import ContentAdmin from "./pages/ContentAdmin";
 import UsersAdmin from "./pages/UsersAdmin";
+import Support from "./pages/Support";
+import SupportAdmin from "./pages/SupportAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
 import Updates from "./pages/Updates";
@@ -70,6 +72,7 @@ const App = () => {
                   <Route path="learning" element={<Learning />} />
                   <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
                   <Route path="updates" element={<Updates />} />
+                  <Route path="support" element={<RequireAuth><Support /></RequireAuth>} />
                   <Route path="stable-coin" element={<StableCoin />} />
                   <Route path="rwa" element={<RWA />} />
                   <Route path="call-out" element={<CallOut />} />
@@ -78,6 +81,7 @@ const App = () => {
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
+                  <Route path="admin/support" element={<RequireAdmin><SupportAdmin /></RequireAdmin>} />
                   <Route path="admin/verified-accounts" element={<RequireAdmin><VerifiedAccountsAdmin /></RequireAdmin>} />
                   <Route path="admin/kyc" element={<RequireAdmin><KYCAdmin /></RequireAdmin>} />
                   <Route path="admin/surveys" element={<RequireAdmin><SurveysAdmin /></RequireAdmin>} />
