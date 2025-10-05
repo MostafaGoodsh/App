@@ -2352,7 +2352,7 @@ export type Database = {
         Returns: number
       }
       count_unread_notifications: {
-        Args: { p_user_id: string }
+        Args: Record<PropertyKey, never> | { p_user_id: string }
         Returns: number
       }
       create_initial_internal_balances: {
