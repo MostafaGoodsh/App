@@ -20,34 +20,34 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="font-cairo text-base font-bold">
+        <Link to="/" className="font-cairo text-base font-bold text-white">
           {getContent('app_name', 'منصة مصر الرقمية')}
         </Link>
         <nav aria-label="التنقل الرئيسي">
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavLink to="/wallet" className={navigationMenuTriggerStyle()}>
+                <NavLink to="/wallet" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
                   المحفظة (Wallet)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/early-access" className={navigationMenuTriggerStyle()}>
+                <NavLink to="/early-access" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
                   الوصول المبكر (Early Access)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/identity" className={navigationMenuTriggerStyle()}>
+                <NavLink to="/identity" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
                    الهوية (Identity)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/learning" className={navigationMenuTriggerStyle()}>
+                <NavLink to="/learning" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
                   الحقيقة و العلم  (Learning)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/surveys" className={navigationMenuTriggerStyle()}>
+                <NavLink to="/surveys" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
                 التأهيل و الاستبيانات (Surveys)
                 </NavLink>
               </NavigationMenuItem>

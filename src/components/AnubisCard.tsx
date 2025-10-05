@@ -40,10 +40,10 @@ const AnubisCard = () => {
           loading="lazy" 
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/95 via-background/70 to-transparent">
-          <h2 className="font-cairo text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors duration-300 font-bold">
+          <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
             {displayTitle}
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground/90 leading-relaxed">
+          <p className="text-sm md:text-base text-white/90 leading-relaxed">
             {displayDescription}
           </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
