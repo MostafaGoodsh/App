@@ -929,6 +929,86 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          failed_at: string | null
+          id: string
+          internal_token_id: string | null
+          ip_address: unknown | null
+          notes: string | null
+          payment_details: Json | null
+          payment_method: string
+          phone_number: string | null
+          provider: string
+          provider_reference: string | null
+          provider_response: Json | null
+          provider_transaction_id: string | null
+          status: string
+          tokens_credited: number | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          failed_at?: string | null
+          id?: string
+          internal_token_id?: string | null
+          ip_address?: unknown | null
+          notes?: string | null
+          payment_details?: Json | null
+          payment_method: string
+          phone_number?: string | null
+          provider: string
+          provider_reference?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status?: string
+          tokens_credited?: number | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          failed_at?: string | null
+          id?: string
+          internal_token_id?: string | null
+          ip_address?: unknown | null
+          notes?: string | null
+          payment_details?: Json | null
+          payment_method?: string
+          phone_number?: string | null
+          provider?: string
+          provider_reference?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status?: string
+          tokens_credited?: number | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_internal_token_id_fkey"
+            columns: ["internal_token_id"]
+            isOneToOne: false
+            referencedRelation: "internal_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pending_deposits: {
         Row: {
           amount: number
