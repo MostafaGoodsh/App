@@ -125,55 +125,68 @@ const Support = () => {
           backgroundAttachment: 'fixed'
         }}
       >
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">الدعم الفني</h1>
-            <p className="text-muted-foreground">تواصل مع فريق الإدارة للحصول على المساعدة</p>
-          </div>
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold lang-ar">الدعم الفني</h1>
+          <h2 className="text-2xl font-semibold lang-en">Technical Support</h2>
+          <p className="text-muted-foreground lang-ar">تواصل مع فريق الإدارة للحصول على المساعدة</p>
+          <p className="text-sm text-muted-foreground lang-en">Contact our team for assistance</p>
+        </div>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Send className="h-5 w-5" />
-                إرسال رسالة جديدة
+                <span className="lang-ar">إرسال رسالة جديدة</span>
+                <span className="lang-en text-lg">Send New Message</span>
               </CardTitle>
               <CardDescription>
-                املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن
+                <span className="lang-ar">املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن</span>
+                <span className="lang-en">Fill out the form below and we will respond as soon as possible</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">الموضوع</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    <span className="lang-ar">الموضوع</span>
+                    <span className="lang-en">Subject</span>
+                  </label>
                   <Input
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    placeholder="عنوان الرسالة"
+                    placeholder="عنوان الرسالة / Message title"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">الأولوية</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    <span className="lang-ar">الأولوية</span>
+                    <span className="lang-en">Priority</span>
+                  </label>
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">منخفض</SelectItem>
-                      <SelectItem value="normal">عادي</SelectItem>
-                      <SelectItem value="high">عالي</SelectItem>
-                      <SelectItem value="urgent">عاجل</SelectItem>
+                      <SelectItem value="low"><span className="lang-ar">منخفض</span><span className="lang-en">Low</span></SelectItem>
+                      <SelectItem value="normal"><span className="lang-ar">عادي</span><span className="lang-en">Normal</span></SelectItem>
+                      <SelectItem value="high"><span className="lang-ar">عالي</span><span className="lang-en">High</span></SelectItem>
+                      <SelectItem value="urgent"><span className="lang-ar">عاجل</span><span className="lang-en">Urgent</span></SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">الرسالة</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    <span className="lang-ar">الرسالة</span>
+                    <span className="lang-en">Message</span>
+                  </label>
                   <Textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="اكتب رسالتك هنا..."
+                    placeholder="اكتب رسالتك هنا / Write your message here..."
                     rows={6}
                     required
                   />
@@ -181,14 +194,16 @@ const Support = () => {
 
                 <Button type="submit" disabled={isSubmitting} className="w-full">
                   <Send className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "جاري الإرسال..." : "إرسال الرسالة"}
+                  <span className="lang-ar">{isSubmitting ? "جاري الإرسال..." : "إرسال الرسالة"}</span>
+                  <span className="lang-en">{isSubmitting ? "Sending..." : "Send Message"}</span>
                 </Button>
               </form>
             </CardContent>
           </Card>
 
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold">رسائلك السابقة</h2>
+            <h2 className="text-2xl font-bold lang-ar">رسائلك السابقة</h2>
+            <h3 className="text-xl font-semibold lang-en">Your Previous Messages</h3>
             {messages && messages.length > 0 ? (
               messages.map((msg: any) => (
                 <Card key={msg.id}>
@@ -214,7 +229,10 @@ const Support = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <p className="text-sm font-medium mb-1">رسالتك:</p>
+                      <p className="text-sm font-medium mb-1">
+                        <span className="lang-ar">رسالتك:</span>
+                        <span className="lang-en">Your message:</span>
+                      </p>
                       <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {msg.message}
                       </p>
@@ -223,7 +241,8 @@ const Support = () => {
                     {msg.admin_response && (
                       <div className="border-t pt-4">
                         <p className="text-sm font-medium mb-1 text-primary">
-                          رد الإدارة:
+                          <span className="lang-ar">رد الإدارة:</span>
+                          <span className="lang-en">Admin Response:</span>
                         </p>
                         <p className="text-sm whitespace-pre-wrap">
                           {msg.admin_response}
@@ -248,7 +267,8 @@ const Support = () => {
               <Card>
                 <CardContent className="text-center py-12">
                   <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">لا توجد رسائل سابقة</p>
+                  <p className="text-muted-foreground lang-ar">لا توجد رسائل سابقة</p>
+                  <p className="text-sm text-muted-foreground lang-en">No previous messages</p>
                 </CardContent>
               </Card>
             )}

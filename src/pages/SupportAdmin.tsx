@@ -189,24 +189,33 @@ const SupportAdmin = () => {
       >
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">إدارة رسائل الدعم</h1>
-            <p className="text-muted-foreground">عرض والرد على رسائل المستخدمين</p>
+            <h1 className="text-3xl font-bold lang-ar">إدارة رسائل الدعم</h1>
+            <h2 className="text-2xl font-semibold lang-en">Support Messages Management</h2>
+            <p className="text-muted-foreground lang-ar">عرض والرد على رسائل المستخدمين</p>
+            <p className="text-sm text-muted-foreground lang-en">View and respond to user messages</p>
           </div>
 
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="all">الكل ({messages?.length || 0})</TabsTrigger>
+              <TabsTrigger value="all">
+                <span className="lang-ar">الكل ({messages?.length || 0})</span>
+                <span className="lang-en">All ({messages?.length || 0})</span>
+              </TabsTrigger>
               <TabsTrigger value="pending">
-                قيد الانتظار ({filterMessages("pending").length})
+                <span className="lang-ar">قيد الانتظار ({filterMessages("pending").length})</span>
+                <span className="lang-en">Pending ({filterMessages("pending").length})</span>
               </TabsTrigger>
               <TabsTrigger value="in_progress">
-                قيد المعالجة ({filterMessages("in_progress").length})
+                <span className="lang-ar">قيد المعالجة ({filterMessages("in_progress").length})</span>
+                <span className="lang-en">In Progress ({filterMessages("in_progress").length})</span>
               </TabsTrigger>
               <TabsTrigger value="resolved">
-                تم الحل ({filterMessages("resolved").length})
+                <span className="lang-ar">تم الحل ({filterMessages("resolved").length})</span>
+                <span className="lang-en">Resolved ({filterMessages("resolved").length})</span>
               </TabsTrigger>
               <TabsTrigger value="closed">
-                مغلق ({filterMessages("closed").length})
+                <span className="lang-ar">مغلق ({filterMessages("closed").length})</span>
+                <span className="lang-en">Closed ({filterMessages("closed").length})</span>
               </TabsTrigger>
             </TabsList>
 
@@ -217,7 +226,8 @@ const SupportAdmin = () => {
                 <Card>
                   <CardContent className="text-center py-12">
                     <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">لا توجد رسائل</p>
+                    <p className="text-muted-foreground lang-ar">لا توجد رسائل</p>
+                    <p className="text-sm text-muted-foreground lang-en">No messages</p>
                   </CardContent>
                 </Card>
               )}
@@ -261,33 +271,42 @@ const SupportAdmin = () => {
 
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">رسالة المستخدم:</p>
+              <p className="text-sm font-medium mb-2">
+                <span className="lang-ar">رسالة المستخدم:</span>
+                <span className="lang-en">User Message:</span>
+              </p>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-muted p-4 rounded-lg">
                 {selectedMessage?.message}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">تغيير الحالة</label>
+              <label className="text-sm font-medium mb-2 block">
+                <span className="lang-ar">تغيير الحالة</span>
+                <span className="lang-en">Change Status</span>
+              </label>
               <Select value={newStatus} onValueChange={setNewStatus}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">قيد الانتظار</SelectItem>
-                  <SelectItem value="in_progress">قيد المعالجة</SelectItem>
-                  <SelectItem value="resolved">تم الحل</SelectItem>
-                  <SelectItem value="closed">مغلق</SelectItem>
+                  <SelectItem value="pending"><span className="lang-ar">قيد الانتظار</span><span className="lang-en">Pending</span></SelectItem>
+                  <SelectItem value="in_progress"><span className="lang-ar">قيد المعالجة</span><span className="lang-en">In Progress</span></SelectItem>
+                  <SelectItem value="resolved"><span className="lang-ar">تم الحل</span><span className="lang-en">Resolved</span></SelectItem>
+                  <SelectItem value="closed"><span className="lang-ar">مغلق</span><span className="lang-en">Closed</span></SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">الرد على الرسالة</label>
+              <label className="text-sm font-medium mb-2 block">
+                <span className="lang-ar">الرد على الرسالة</span>
+                <span className="lang-en">Reply to Message</span>
+              </label>
               <Textarea
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
-                placeholder="اكتب ردك هنا..."
+                placeholder="اكتب ردك هنا / Write your response here..."
                 rows={6}
               />
             </div>
@@ -298,7 +317,8 @@ const SupportAdmin = () => {
               className="w-full"
             >
               <Send className="h-4 w-4 mr-2" />
-              {isSubmitting ? "جاري الإرسال..." : "إرسال الرد"}
+              <span className="lang-ar">{isSubmitting ? "جاري الإرسال..." : "إرسال الرد"}</span>
+              <span className="lang-en">{isSubmitting ? "Sending..." : "Send Reply"}</span>
             </Button>
           </div>
         </DialogContent>
