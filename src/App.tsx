@@ -49,6 +49,7 @@ import ReelsCategories from "./pages/ReelsCategories";
 import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
 import ActiveCalloutAdmin from "./pages/ActiveCalloutAdmin";
 import VerifiedAccountsAdmin from "./pages/VerifiedAccountsAdmin";
+import Recharge from "./pages/Recharge";
 import QuranPagesAdmin from "./pages/QuranPagesAdmin";
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => {
                   <Route index element={<Index />} />
                   <Route path="auth" element={<Auth />} />
                   <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+                  <Route path="recharge" element={<RequireAuth><Recharge /></RequireAuth>} />
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
