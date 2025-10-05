@@ -20,9 +20,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="font-cairo text-base font-bold flex items-center gap-1">
-          <span className="text-primary font-bold">Crypto-msr</span>
-          <span className="text-white/90">(منصة مصر الرقمية)</span>
+        <Link to="/" className="font-cairo text-base font-bold flex items-center gap-1 text-primary">
+          <span className="font-bold">Crypto-msr</span>
+          <span>(منصة مصر الرقمية)</span>
         </Link>
         <nav aria-label="التنقل الرئيسي">
           <NavigationMenu>
