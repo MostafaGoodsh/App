@@ -27,27 +27,42 @@ const Header = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavLink to="/wallet" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
+                <NavLink 
+                  to="/wallet" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
                   المحفظة (Wallet)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/early-access" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
+                <NavLink 
+                  to="/early-access" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
                   الوصول المبكر (Early Access)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/identity" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
+                <NavLink 
+                  to="/identity" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
                    الهوية (Identity)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/learning" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
+                <NavLink 
+                  to="/learning" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
                   الحقيقة و العلم  (Learning)
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink to="/surveys" className={`${navigationMenuTriggerStyle()} text-white hover:text-primary`}>
+                <NavLink 
+                  to="/surveys" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
                 التأهيل و الاستبيانات (Surveys)
                 </NavLink>
               </NavigationMenuItem>
