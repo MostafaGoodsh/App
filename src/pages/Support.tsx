@@ -126,24 +126,18 @@ const Support = () => {
         }}
       >
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold lang-ar">الدعم الفني</h1>
-          <h2 className="text-2xl font-semibold lang-en">Technical Support</h2>
-          <p className="text-muted-foreground lang-ar">تواصل مع فريق الإدارة للحصول على المساعدة</p>
-          <p className="text-sm text-muted-foreground lang-en">Contact our team for assistance</p>
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl font-bold lang-ar">رسالة جديدة</h1>
+          <h2 className="text-xl font-semibold lang-en">New Message</h2>
         </div>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Send className="h-5 w-5" />
-                <span className="lang-ar">إرسال رسالة جديدة</span>
-                <span className="lang-en text-lg">Send New Message</span>
+                <span className="lang-ar">إرسال الرسالة</span>
+                <span className="lang-en">Send Message</span>
               </CardTitle>
-              <CardDescription>
-                <span className="lang-ar">املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن</span>
-                <span className="lang-en">Fill out the form below and we will respond as soon as possible</span>
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -202,8 +196,8 @@ const Support = () => {
           </Card>
 
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold lang-ar">رسائلك السابقة</h2>
-            <h3 className="text-xl font-semibold lang-en">Your Previous Messages</h3>
+            <h2 className="text-xl font-bold lang-ar">رسائلك السابقة</h2>
+            <h3 className="text-lg font-semibold lang-en">Previous Messages</h3>
             {messages && messages.length > 0 ? (
               messages.map((msg: any) => (
                 <Card key={msg.id}>

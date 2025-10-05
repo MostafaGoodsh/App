@@ -24,7 +24,7 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
   { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
   { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
   { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
-  { title: "الدعم الفني", url: "/support", icon: MessageSquare, requireAuth: true },
+  { title: getContent("sidebar_support", "رسالة جديدة"), url: "/support", icon: MessageSquare, requireAuth: true },
 ];
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
