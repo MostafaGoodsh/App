@@ -185,40 +185,58 @@ serve(async (req) => {
       .eq('id', transaction.id);
 
     // Step 3: Get payment key (for mobile wallets or cards)
+    const paymentKeyData = {
+      auth_token: paymob_token,
+      amount_cents: amount * 100,
+      expiration: 3600,
+      order_id: order.id,
+      billing_data: {
+        phone_number: phone_number || '01000000000',
+        first_name: 'User',
+        last_name: 'User',
+        email: user.email || 'user@example.com',
+        apartment: 'NA',
+        floor: 'NA',
+        street: 'NA',
+        building: 'NA',
+        shipping_method: 'NA',
+        postal_code: 'NA',
+        city: 'Cairo',
+        country: 'EG',
+        state: 'Cairo'
+      },
+      currency: 'EGP',
+      integration_id: payment_method === 'card' ? 966436 : 
+                      payment_method === 'vodafone_cash' ? 966435 : 
+                      payment_method === 'orange_cash' || payment_method === 'etisalat_cash' ? 5347471 :
+                      payment_method === 'fawry' ? 5347367 : 966436
+    };
+    
+    console.log('Requesting payment key with data:', {
+      ...paymentKeyData,
+      auth_token: '***' // Hide token in logs
+    });
+    
     const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        auth_token: paymob_token,
-        amount_cents: amount * 100,
-        expiration: 3600,
-        order_id: order.id,
-        billing_data: {
-          phone_number: phone_number || '01000000000',
-          first_name: 'User',
-          last_name: 'User',
-          email: user.email || 'user@example.com',
-          apartment: 'NA',
-          floor: 'NA',
-          street: 'NA',
-          building: 'NA',
-          shipping_method: 'NA',
-          postal_code: 'NA',
-          city: 'Cairo',
-          country: 'EG',
-          state: 'Cairo'
-        },
-        currency: 'EGP',
-        integration_id: payment_method === 'card' ? 966436 : 
-                        payment_method === 'vodafone_cash' ? 966435 : 
-                        payment_method === 'orange_cash' || payment_method === 'etisalat_cash' ? 5347471 :
-                        payment_method === 'fawry' ? 5347367 : 966436
-      })
+      body: JSON.stringify(paymentKeyData)
     });
 
     if (!paymentKeyResponse.ok) {
+      const errorData = await paymentKeyResponse.json().catch(() => ({}));
+      console.error('Paymob payment key error:', {
+        status: paymentKeyResponse.status,
+        statusText: paymentKeyResponse.statusText,
+        errorData
+      });
+      
       return new Response(
-        JSON.stringify({ error: 'Failed to generate payment key' }),
+        JSON.stringify({ 
+          error: 'Failed to generate payment key',
+          details: errorData,
+          status: paymentKeyResponse.status
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
