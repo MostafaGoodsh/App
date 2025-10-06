@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Recharge = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { processPayment, loading, getSupportedMethods, transactions, getTransactions } = usePayment();
   const { tokens } = useInternalWallet();
@@ -27,18 +27,31 @@ const Recharge = () => {
   const quickAmounts = [50, 100, 200, 500, 1000];
 
   useEffect(() => {
+    // Don't redirect until auth loading is complete
+    if (authLoading) return;
+    
     if (!user) {
       navigate('/auth');
     } else {
       getTransactions();
     }
-  }, [user, navigate, getTransactions]);
+  }, [user, authLoading, navigate, getTransactions]);
 
   useEffect(() => {
     if (tokens.length > 0 && !selectedToken) {
       setSelectedToken(tokens[0].symbol);
     }
   }, [tokens, selectedToken]);
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>جاري التحميل...</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
