@@ -10,14 +10,19 @@ export const useAuth = () => {
   const [adminLoading, setAdminLoading] = useState(true);
 
   useEffect(() => {
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log('Auth state changed:', event, newSession?.user?.email);
       setSession(newSession);
       setUser(newSession?.user ?? null);
+      setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session loaded:', session?.user?.email);
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 

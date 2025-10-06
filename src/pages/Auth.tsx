@@ -1,15 +1,18 @@
 import { Helmet } from "react-helmet-async";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { cleanupAuthState } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/auth";
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,20 +20,24 @@ const Auth = () => {
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
+
   const onSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      cleanupAuthState();
-      try { await supabase.auth.signOut({ scope: 'global' }); } catch {}
-
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      window.location.href = "/";
+      toast({ title: "تم تسجيل الدخول بنجاح", description: "مرحباً بك في منصة مصر" });
+      // Navigation will happen automatically via useEffect
     } catch (error: any) {
       toast({ title: "فشل تسجيل الدخول", description: error?.message || "تحقق من البيانات", variant: "destructive" });
-    } finally {
       setIsSubmitting(false);
     }
   };
