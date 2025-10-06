@@ -115,7 +115,7 @@ const Recharge = () => {
     : '0';
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl" dir="rtl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
             <Wallet className="h-8 w-8 text-primary" />
@@ -199,7 +199,6 @@ const Recharge = () => {
                       >
                         <div className="text-3xl mb-2">{method.icon}</div>
                         <div className="text-sm font-bold">{method.name}</div>
-                        <div className="text-xs text-muted-foreground mt-1">{method.name_en}</div>
                       </button>
                     ))}
                   </div>
