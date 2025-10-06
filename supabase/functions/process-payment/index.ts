@@ -207,9 +207,9 @@ serve(async (req) => {
       },
       currency: 'EGP',
       integration_id: payment_method === 'card' ? 5347367 : 
-                      payment_method === 'vodafone_cash' ? 5347983 : 
+                      payment_method === 'vodafone_cash' ? 5347471 : 
                       payment_method === 'orange_cash' || payment_method === 'etisalat_cash' ? 5347471 :
-                      payment_method === 'fawry' ? 5347983 : 5347367
+                      payment_method === 'fawry' ? 5347471 : 5347367
     };
     
     console.log('Requesting payment key with data:', {
