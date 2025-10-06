@@ -78,6 +78,11 @@ export const usePayment = () => {
         description: `سيتم إضافة ${response.data.tokens_to_credit.toFixed(2)} ${request.internal_token_symbol}`,
       });
 
+      // فتح صفحة الدفع في نافذة جديدة
+      if (response.data.payment_url) {
+        window.open(response.data.payment_url, '_blank', 'width=600,height=800');
+      }
+
       // Refresh transactions history
       await getTransactions();
 
