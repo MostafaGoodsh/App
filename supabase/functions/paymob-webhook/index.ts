@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import { createHmac } from "https://deno.land/std@0.192.0/node/crypto.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,13 +20,26 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Paymob webhook received:', JSON.stringify(payload, null, 2));
 
-    // Verify HMAC signature
+    // Verify HMAC signature (optional - add PAYMOB_HMAC_SECRET if needed)
     const PAYMOB_HMAC = Deno.env.get('PAYMOB_HMAC_SECRET');
     if (PAYMOB_HMAC) {
       const receivedHmac = req.headers.get('x-paymob-hmac');
-      const calculatedHmac = createHmac('sha512', PAYMOB_HMAC)
-        .update(JSON.stringify(payload))
-        .digest('hex');
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(PAYMOB_HMAC);
+      const messageData = encoder.encode(JSON.stringify(payload));
+      
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-512' },
+        false,
+        ['sign']
+      );
+      
+      const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+      const calculatedHmac = Array.from(new Uint8Array(signature))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
 
       if (receivedHmac !== calculatedHmac) {
         console.error('Invalid HMAC signature');
