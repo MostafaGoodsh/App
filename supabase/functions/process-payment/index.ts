@@ -209,8 +209,10 @@ serve(async (req) => {
           state: 'Cairo'
         },
         currency: 'EGP',
-        integration_id: payment_method === 'vodafone_cash' ? 'VODAFONE_INTEGRATION_ID' : 
-                        payment_method === 'card' ? 'CARD_INTEGRATION_ID' : 'DEFAULT_INTEGRATION_ID'
+        integration_id: payment_method === 'card' ? 966436 : 
+                        payment_method === 'vodafone_cash' ? 966435 : 
+                        payment_method === 'orange_cash' || payment_method === 'etisalat_cash' ? 5347471 :
+                        payment_method === 'fawry' ? 5347367 : 966436
       })
     });
 
@@ -224,9 +226,7 @@ serve(async (req) => {
     const { token: payment_token } = await paymentKeyResponse.json();
 
     // Return payment URL or iframe token
-    const payment_url = payment_method === 'vodafone_cash' 
-      ? `https://accept.paymob.com/api/acceptance/iframes/IFRAME_ID?payment_token=${payment_token}`
-      : `https://accept.paymob.com/api/acceptance/iframes/IFRAME_ID?payment_token=${payment_token}`;
+    const payment_url = `https://accept.paymob.com/api/acceptance/iframes/966436?payment_token=${payment_token}`;
 
     return new Response(
       JSON.stringify({
