@@ -244,7 +244,7 @@ serve(async (req) => {
     const { token: payment_token } = await paymentKeyResponse.json();
 
     // Return payment URL or iframe token
-    const payment_url = `https://accept.paymob.com/api/acceptance/iframes/966436?payment_token=${payment_token}`;
+    const payment_url = `https://accept.paymob.com/api/acceptance/iframes/966662?payment_token=${payment_token}`;
 
     return new Response(
       JSON.stringify({
