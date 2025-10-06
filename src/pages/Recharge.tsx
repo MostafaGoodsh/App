@@ -167,26 +167,34 @@ const Recharge = () => {
                 </div>
 
                 {/* Payment Method */}
-                <div className="space-y-2">
-                  <Label>طريقة الدفع</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-3">
+                  <Label>طريقة الدفع ({paymentMethods.length} طريقة متاحة)</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {paymentMethods.map((method) => (
                       <button
                         key={method.id}
                         type="button"
-                        onClick={() => setSelectedMethod(method.id)}
-                        className={`p-4 rounded-lg border-2 transition-all ${
+                        onClick={() => {
+                          console.log('Selected method:', method.id);
+                          setSelectedMethod(method.id);
+                        }}
+                        className={`p-4 rounded-lg border-2 transition-all text-center ${
                           selectedMethod === method.id
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border hover:border-primary/50'
+                            ? 'border-primary bg-primary/10 shadow-md'
+                            : 'border-border hover:border-primary/50 hover:shadow'
                         }`}
                       >
-                        <div className="text-2xl mb-1">{method.icon}</div>
-                        <div className="text-sm font-medium">{method.name}</div>
-                        <div className="text-xs text-muted-foreground">{method.name_en}</div>
+                        <div className="text-3xl mb-2">{method.icon}</div>
+                        <div className="text-sm font-bold">{method.name}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{method.name_en}</div>
                       </button>
                     ))}
                   </div>
+                  {paymentMethods.length === 0 && (
+                    <div className="text-sm text-muted-foreground text-center py-4">
+                      لا توجد طرق دفع متاحة
+                    </div>
+                  )}
                 </div>
 
                 {/* Phone Number (for mobile wallets) */}
