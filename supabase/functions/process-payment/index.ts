@@ -112,10 +112,12 @@ serve(async (req) => {
       );
     }
 
-    // Get integration ID based on payment method
-    const integration_id = payment_method === 'card' ? 5347367 : 
-                          payment_method === 'fawry' ? 5348776 :
-                          5347471; // Wallet for vodafone_cash, orange_cash, etisalat_cash
+    // Get integration ID based on payment method (من Paymob Dashboard)
+    // ملاحظة: تأكد من تفعيل الـ integration في Dashboard قبل الاستخدام
+    const integration_id = payment_method === 'card' ? 5348776 :      // Accept Kiosk (NOT enabled - activate in dashboard)
+                          payment_method === 'fawry' ? 5348776 :      // Fawry
+                          payment_method === 'vodafone_cash' ? 5347983 : // Vodafone Cash (ENABLED ✓)
+                          5347471; // Etisalat Cash (NOT enabled - activate in dashboard)
 
     // Create Payment Intention using Flash API
     const intentionData = {
