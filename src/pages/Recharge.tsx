@@ -93,10 +93,17 @@ const Recharge = () => {
     }
 
     try {
+      // Format phone number with country code
+      let formattedPhone = phoneNumber;
+      if (phoneNumber && !phoneNumber.startsWith('+')) {
+        // Remove leading zero if exists and add +20
+        formattedPhone = '+20' + phoneNumber.replace(/^0+/, '');
+      }
+
       const result = await processPayment({
         amount: parseFloat(amount),
         payment_method: selectedMethod as any,
-        phone_number: phoneNumber || undefined,
+        phone_number: formattedPhone || undefined,
         internal_token_symbol: selectedToken
       });
 
@@ -223,6 +230,9 @@ const Recharge = () => {
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       dir="ltr"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      ⚠️ تأكد أن الرقم مسجل في المحفظة الإلكترونية
+                    </p>
                   </div>
                 )}
 
