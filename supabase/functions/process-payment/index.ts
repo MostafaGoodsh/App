@@ -113,12 +113,10 @@ serve(async (req) => {
     }
 
     // Get integration ID based on payment method
-    // Integration IDs من Paymob Dashboard - كلهم في Test Mode
-    const integration_id = payment_method === 'card' ? 5348776 :           // Accept Kiosk
-                          payment_method === 'fawry' ? 5348776 :          // Fawry (نفس Accept Kiosk)
-                          payment_method === 'vodafone_cash' ? 5347983 :  // Vodafone Cash
-                          payment_method === 'orange_cash' ? 5347471 :    // Orange Cash (نفس Etisalat)
-                          5347471;                                        // Etisalat Cash (default)
+    // Integration IDs من Paymob Dashboard (Test Mode) - تم التأكيد من Support
+    const integration_id = payment_method === 'card' ? 5347367 :           // Card integration
+                          payment_method === 'fawry' ? 5348776 :          // Kiosk (Fawry)
+                          5347471;                                        // Wallet (All mobile wallets: Vodafone, Etisalat, Orange)
 
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
 
