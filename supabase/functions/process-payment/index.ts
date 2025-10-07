@@ -120,30 +120,33 @@ serve(async (req) => {
 
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
 
-    // Create Payment Intention using Flash API
+    // Create Payment Intention using Flash API (حسب Postman Collection من Paymob)
     const intentionData = {
-      amount: amount * 100, // Convert to cents
+      amount: amount, // Amount in EGP (not cents)
       currency: 'EGP',
       payment_methods: [integration_id],
       billing_data: {
-        phone_number: phone_number || '01000000000',
-        first_name: 'User',
-        last_name: 'User',
-        email: user.email || 'user@example.com',
         apartment: 'NA',
-        floor: 'NA',
+        first_name: user.user_metadata?.full_name || 'User',
+        last_name: 'User',
         street: 'NA',
         building: 'NA',
-        shipping_method: 'NA',
-        postal_code: 'NA',
+        phone_number: phone_number || '+201000000000',
         city: 'Cairo',
         country: 'EG',
+        email: user.email || 'user@example.com',
+        floor: 'NA',
         state: 'Cairo'
       },
-      special_reference: transaction.id,
+      customer: {
+        first_name: user.user_metadata?.full_name || 'User',
+        last_name: 'User',
+        email: user.email || 'user@example.com'
+      },
       items: [{
         name: `شحن ${internal_token_symbol}`,
-        amount: amount * 100,
+        amount: amount,
+        description: `Recharge ${internal_token_symbol} tokens`,
         quantity: 1
       }]
     };
@@ -206,8 +209,11 @@ serve(async (req) => {
       })
       .eq('id', transaction.id);
 
-    // Build redirect URL with client_secret
-    const payment_url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_API_KEY}&clientSecret=${intentionResult.client_secret}`;
+    // Get Public Key from environment
+    const PAYMOB_PUBLIC_KEY = Deno.env.get('PAYMOB_PUBLIC_KEY');
+    
+    // Build redirect URL with client_secret (حسب Postman Collection)
+    const payment_url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${intentionResult.client_secret}`;
 
     return new Response(
       JSON.stringify({
