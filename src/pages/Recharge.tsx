@@ -275,42 +275,62 @@ const Recharge = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">آخر العمليات</CardTitle>
+                  <CardDescription className="text-xs">
+                    💡 إذا فشلت عملية الدفع، يمكنك بدء عملية جديدة من الأعلى
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                     {transactions.slice(0, 3).map((tx) => (
-                      <div key={tx.id} className="space-y-2">
-                        <div className="flex justify-between items-center text-sm">
-                          <div>
-                            <div className="font-medium">{tx.amount} ج.م</div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(tx.created_at).toLocaleDateString('ar-EG')}
-                            </div>
-                          </div>
-                          <div className={`px-2 py-1 rounded text-xs ${
-                            tx.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            tx.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {tx.status === 'completed' ? 'مكتمل' :
-                             tx.status === 'pending' ? 'معلق' :
-                             tx.status === 'processing' ? 'قيد المعالجة' :
-                             'فشل'}
-                          </div>
-                        </div>
-                        {tx.status === 'processing' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full text-xs"
-                            onClick={() => checkPaymentStatus(tx.id)}
-                          >
-                            تحقق من الحالة
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+                     {transactions.slice(0, 3).map((tx) => {
+                       const isOld = new Date().getTime() - new Date(tx.created_at).getTime() > 10 * 60 * 1000; // أكثر من 10 دقائق
+                       const isProcessing = tx.status === 'processing';
+                       
+                       return (
+                         <div key={tx.id} className="space-y-2 p-3 rounded-lg border">
+                           <div className="flex justify-between items-center text-sm">
+                             <div>
+                               <div className="font-medium">{tx.amount} ج.م</div>
+                               <div className="text-xs text-muted-foreground">
+                                 {new Date(tx.created_at).toLocaleDateString('ar-EG', {
+                                   day: 'numeric',
+                                   month: 'short',
+                                   hour: '2-digit',
+                                   minute: '2-digit'
+                                 })}
+                               </div>
+                             </div>
+                             <div className={`px-2 py-1 rounded text-xs font-medium ${
+                               tx.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                               tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                               tx.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                               'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                             }`}>
+                               {tx.status === 'completed' ? '✓ مكتمل' :
+                                tx.status === 'pending' ? '⏳ معلق' :
+                                tx.status === 'processing' ? '🔄 قيد المعالجة' :
+                                '✗ فشل'}
+                             </div>
+                           </div>
+                           
+                           {isProcessing && isOld && (
+                             <div className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950 p-2 rounded">
+                               ⚠️ هذه المعاملة قيد المعالجة لفترة طويلة. إذا لم تكمل الدفع، يمكنك التحقق من الحالة أو بدء عملية جديدة.
+                             </div>
+                           )}
+                           
+                           {isProcessing && (
+                             <Button
+                               size="sm"
+                               variant="outline"
+                               className="w-full text-xs"
+                               onClick={() => checkPaymentStatus(tx.id)}
+                             >
+                               🔍 تحقق من الحالة
+                             </Button>
+                           )}
+                         </div>
+                       );
+                     })}
                   </div>
                 </CardContent>
               </Card>
