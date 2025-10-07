@@ -147,8 +147,15 @@ export const usePayment = () => {
   // Check payment status
   const checkPaymentStatus = useCallback(async (transactionId: string) => {
     try {
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session found');
+
       const { data, error } = await supabase.functions.invoke('check-payment-status', {
-        body: { transaction_id: transactionId }
+        body: { transaction_id: transactionId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) throw error;
