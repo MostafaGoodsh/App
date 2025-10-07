@@ -270,13 +270,28 @@ const Recharge = () => {
               </CardContent>
             </Card>
 
+            {/* Payment Help Card */}
+            <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  ℹ️ معلومات مهمة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs space-y-2">
+                <p>• تأكد من إدخال بيانات الدفع الصحيحة</p>
+                <p>• في حالة الاختبار، استخدم بطاقة اختبار صالحة</p>
+                <p>• لا تحاول أكثر من 3 مرات - الجلسة تنتهي تلقائياً</p>
+                <p>• إذا فشل الدفع، ابدأ عملية جديدة من الأعلى</p>
+              </CardContent>
+            </Card>
+
             {/* Recent Transactions */}
             {transactions.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">آخر العمليات</CardTitle>
                   <CardDescription className="text-xs">
-                    💡 إذا فشلت عملية الدفع، يمكنك بدء عملية جديدة من الأعلى
+                    💡 تتحدث الحالة تلقائياً عند اكتمال/فشل الدفع
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -329,11 +344,18 @@ const Recharge = () => {
                               </Button>
                             )}
                             
-                            {tx.status === 'failed' && (
-                              <div className="text-xs text-destructive bg-red-50 dark:bg-red-950 p-2 rounded">
-                                ✗ فشل الدفع. يمكنك بدء عملية دفع جديدة من الأعلى.
+                             {tx.status === 'failed' && (
+                              <div className="text-xs bg-red-50 dark:bg-red-950 p-2 rounded space-y-1">
+                                <p className="text-destructive font-medium">✗ فشل الدفع</p>
+                                <p className="text-muted-foreground">الأسباب المحتملة:</p>
+                                <ul className="text-muted-foreground mr-4 list-disc">
+                                  <li>بيانات الدفع غير صحيحة</li>
+                                  <li>رصيد غير كافٍ</li>
+                                  <li>انتهاء مدة الجلسة (بعد 3 محاولات)</li>
+                                </ul>
+                                <p className="text-primary font-medium mt-2">💡 ابدأ عملية دفع جديدة من الأعلى</p>
                               </div>
-                            )}
+                             )}
                          </div>
                        );
                      })}
