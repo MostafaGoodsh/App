@@ -90,13 +90,14 @@ serve(async (req) => {
 
     console.log('Checking payment status for intention:', intentionId);
 
-    // Query Paymob API for payment intention status
+    // Query Paymob API for payment intention status using POST
     const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Authorization': `Token ${PAYMOB_API_KEY}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({})
     });
 
     if (!statusResponse.ok) {
