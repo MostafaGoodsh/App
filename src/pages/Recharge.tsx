@@ -15,7 +15,7 @@ const Recharge = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { processPayment, loading, getSupportedMethods, transactions, getTransactions } = usePayment();
+  const { processPayment, checkPaymentStatus, loading, getSupportedMethods, transactions, getTransactions } = usePayment();
   const { tokens } = useInternalWallet();
   
   const [amount, setAmount] = useState('');
@@ -278,25 +278,37 @@ const Recharge = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {transactions.slice(0, 3).map((tx) => (
-                      <div key={tx.id} className="flex justify-between items-center text-sm">
-                        <div>
-                          <div className="font-medium">{tx.amount} ج.م</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(tx.created_at).toLocaleDateString('ar-EG')}
+                     {transactions.slice(0, 3).map((tx) => (
+                      <div key={tx.id} className="space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                          <div>
+                            <div className="font-medium">{tx.amount} ج.م</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(tx.created_at).toLocaleDateString('ar-EG')}
+                            </div>
+                          </div>
+                          <div className={`px-2 py-1 rounded text-xs ${
+                            tx.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            tx.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {tx.status === 'completed' ? 'مكتمل' :
+                             tx.status === 'pending' ? 'معلق' :
+                             tx.status === 'processing' ? 'قيد المعالجة' :
+                             'فشل'}
                           </div>
                         </div>
-                        <div className={`px-2 py-1 rounded text-xs ${
-                          tx.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          tx.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          tx.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {tx.status === 'completed' ? 'مكتمل' :
-                           tx.status === 'pending' ? 'معلق' :
-                           tx.status === 'processing' ? 'قيد المعالجة' :
-                           'فشل'}
-                        </div>
+                        {tx.status === 'processing' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full text-xs"
+                            onClick={() => checkPaymentStatus(tx.id)}
+                          >
+                            تحقق من الحالة
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>

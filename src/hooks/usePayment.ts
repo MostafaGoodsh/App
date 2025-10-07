@@ -144,11 +144,43 @@ export const usePayment = () => {
     ];
   }, []);
 
+  // Check payment status
+  const checkPaymentStatus = useCallback(async (transactionId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-payment-status', {
+        body: { transaction_id: transactionId }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: data.status === 'completed' ? '✅ تم الدفع بنجاح' : 
+               data.status === 'failed' ? '❌ فشل الدفع' : 
+               'ℹ️ الدفع قيد المعالجة',
+        description: data.message
+      });
+
+      // Refresh transactions list
+      await getTransactions();
+
+      return data;
+    } catch (error: any) {
+      console.error('Check payment status error:', error);
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل التحقق من حالة الدفع",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast, getTransactions]);
+
   return {
     loading,
     transactions,
     getTransactions,
     processPayment,
+    checkPaymentStatus,
     getSupportedMethods
   };
 };
