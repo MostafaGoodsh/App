@@ -90,118 +90,47 @@ serve(async (req) => {
 
     console.log('Checking payment status for intention:', intentionId);
 
-    // Query Paymob API for payment intention status using POST
-    const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${PAYMOB_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    });
+    // Check if transaction is too old (more than 30 minutes)
+    const transactionAge = Date.now() - new Date(transaction.created_at).getTime();
+    const thirtyMinutes = 30 * 60 * 1000;
 
-    if (!statusResponse.ok) {
-      const errorData = await statusResponse.json().catch(() => ({}));
-      console.error('Paymob status check error:', {
-        status: statusResponse.status,
-        statusText: statusResponse.statusText,
-        errorData
-      });
+    if (transactionAge > thirtyMinutes) {
+      // Mark as failed/expired
+      await supabaseClient
+        .from('payment_transactions')
+        .update({
+          status: 'failed',
+          failed_at: new Date().toISOString(),
+          notes: 'Payment session expired. Please start a new payment.',
+          provider_response: { error: 'Session expired after 30 minutes' }
+        })
+        .eq('id', transaction_id);
 
       return new Response(
-        JSON.stringify({ 
-          error: 'Failed to check payment status',
-          details: errorData,
-          status: statusResponse.status
+        JSON.stringify({
+          status: 'failed',
+          message: 'انتهت صلاحية الدفع. يرجى بدء عملية دفع جديدة',
+          transaction: {
+            ...transaction,
+            status: 'failed',
+            notes: 'Payment session expired'
+          }
         }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const intentionData = await statusResponse.json();
-    console.log('Payment intention status:', {
-      id: intentionData.id,
-      status: intentionData.status,
-      confirmed: intentionData.confirmed
-    });
-
-    // Update transaction based on Paymob status
-    let newStatus = transaction.status;
-    let updateData: any = {
-      provider_response: intentionData
-    };
-
-    if (intentionData.confirmed && intentionData.status === 'SUCCESSFUL') {
-      // Payment successful - complete the transaction
-      const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
-      
-      newStatus = 'completed';
-      updateData = {
-        ...updateData,
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        tokens_credited: tokens_to_credit
-      };
-
-      // Credit user's internal wallet
-      await supabaseClient.rpc('increment_balance', {
-        p_user_id: user.id,
-        p_token_id: transaction.internal_token_id,
-        p_amount: tokens_to_credit
-      }).catch(async () => {
-        // If RPC fails, try direct insert
-        await supabaseClient
-          .from('internal_wallet_balances')
-          .upsert({
-            user_id: user.id,
-            token_id: transaction.internal_token_id,
-            balance: tokens_to_credit
-          }, {
-            onConflict: 'user_id,token_id'
-          });
-      });
-
-      console.log('Payment completed successfully:', {
-        transaction_id,
-        tokens_credited: tokens_to_credit
-      });
-    } else if (intentionData.status === 'FAILED' || intentionData.status === 'EXPIRED') {
-      // Payment failed or expired
-      newStatus = 'failed';
-      updateData = {
-        ...updateData,
-        status: 'failed',
-        failed_at: new Date().toISOString(),
-        notes: `Payment ${intentionData.status.toLowerCase()}`
-      };
-
-      console.log('Payment failed:', {
-        transaction_id,
-        reason: intentionData.status
-      });
-    }
-
-    // Update transaction in database
-    await supabaseClient
-      .from('payment_transactions')
-      .update(updateData)
-      .eq('id', transaction_id);
-
+    // Since Paymob doesn't support direct polling, we rely on webhook
+    // For now, we'll mark as failed if it's been processing for too long
     return new Response(
       JSON.stringify({
-        status: newStatus,
-        paymob_status: intentionData.status,
-        confirmed: intentionData.confirmed,
-        message: newStatus === 'completed' ? 'تم الدفع بنجاح' :
-                 newStatus === 'failed' ? 'فشل الدفع' :
-                 'الدفع قيد المعالجة',
-        transaction: {
-          ...transaction,
-          ...updateData
-        }
+        status: transaction.status,
+        message: 'لا يمكن التحقق من الحالة مباشرة. إذا أكملت الدفع، سيتم تحديث الحالة تلقائياً. إذا فشل الدفع، يرجى بدء عملية دفع جديدة.',
+        transaction
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
 
   } catch (error) {
     console.error('Check payment status error:', error);

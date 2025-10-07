@@ -312,22 +312,28 @@ const Recharge = () => {
                              </div>
                            </div>
                            
-                           {isProcessing && isOld && (
-                             <div className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950 p-2 rounded">
-                               ⚠️ هذه المعاملة قيد المعالجة لفترة طويلة. إذا لم تكمل الدفع، يمكنك التحقق من الحالة أو بدء عملية جديدة.
-                             </div>
-                           )}
-                           
-                           {isProcessing && (
-                             <Button
-                               size="sm"
-                               variant="outline"
-                               className="w-full text-xs"
-                               onClick={() => checkPaymentStatus(tx.id)}
-                             >
-                               🔍 تحقق من الحالة
-                             </Button>
-                           )}
+                            {isProcessing && isOld && (
+                              <div className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950 p-2 rounded">
+                                ⚠️ هذه المعاملة قيد المعالجة لفترة طويلة. إذا لم تكمل الدفع، يمكنك التحقق من الحالة أو بدء عملية جديدة.
+                              </div>
+                            )}
+                            
+                            {isProcessing && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full text-xs"
+                                onClick={() => checkPaymentStatus(tx.id)}
+                              >
+                                🔍 تحقق من الحالة
+                              </Button>
+                            )}
+                            
+                            {tx.status === 'failed' && (
+                              <div className="text-xs text-destructive bg-red-50 dark:bg-red-950 p-2 rounded">
+                                ✗ فشل الدفع. يمكنك بدء عملية دفع جديدة من الأعلى.
+                              </div>
+                            )}
                          </div>
                        );
                      })}
