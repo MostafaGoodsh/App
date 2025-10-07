@@ -90,11 +90,10 @@ serve(async (req) => {
       );
     }
 
-    // Paymob Integration
+    // Paymob Integration - Using Flash API (Unified Intention API)
     const PAYMOB_API_KEY = Deno.env.get('PAYMOB_API_KEY');
     
     if (!PAYMOB_API_KEY) {
-      // Update transaction as failed
       await supabaseClient
         .from('payment_transactions')
         .update({ 
@@ -113,83 +112,16 @@ serve(async (req) => {
       );
     }
 
-    // Step 1: Get Paymob auth token
-    const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: PAYMOB_API_KEY })
-    });
+    // Get integration ID based on payment method
+    const integration_id = payment_method === 'card' ? 5347367 : 
+                          payment_method === 'fawry' ? 5348776 :
+                          5347471; // Wallet for vodafone_cash, orange_cash, etisalat_cash
 
-    if (!authResponse.ok) {
-      await supabaseClient
-        .from('payment_transactions')
-        .update({ 
-          status: 'failed', 
-          failed_at: new Date().toISOString(),
-          notes: 'Paymob authentication failed'
-        })
-        .eq('id', transaction.id);
-
-      return new Response(
-        JSON.stringify({ error: 'Payment provider authentication failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { token: paymob_token } = await authResponse.json();
-
-    // Step 2: Create Paymob order
-    const orderResponse = await fetch('https://accept.paymob.com/api/ecommerce/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        auth_token: paymob_token,
-        delivery_needed: false,
-        amount_cents: amount * 100, // Convert to cents
-        currency: 'EGP',
-        merchant_order_id: transaction.id,
-        items: [{
-          name: `شحن ${internal_token_symbol}`,
-          amount_cents: amount * 100,
-          quantity: 1
-        }]
-      })
-    });
-
-    if (!orderResponse.ok) {
-      await supabaseClient
-        .from('payment_transactions')
-        .update({ 
-          status: 'failed', 
-          failed_at: new Date().toISOString(),
-          notes: 'Failed to create Paymob order'
-        })
-        .eq('id', transaction.id);
-
-      return new Response(
-        JSON.stringify({ error: 'Failed to create payment order' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const order = await orderResponse.json();
-
-    // Update transaction with Paymob reference
-    await supabaseClient
-      .from('payment_transactions')
-      .update({ 
-        status: 'processing',
-        provider_transaction_id: order.id.toString(),
-        provider_response: order
-      })
-      .eq('id', transaction.id);
-
-    // Step 3: Get payment key (for mobile wallets or cards)
-    const paymentKeyData = {
-      auth_token: paymob_token,
-      amount_cents: amount * 100,
-      expiration: 3600,
-      order_id: order.id,
+    // Create Payment Intention using Flash API
+    const intentionData = {
+      amount: amount * 100, // Convert to cents
+      currency: 'EGP',
+      payment_methods: [integration_id],
       billing_data: {
         phone_number: phone_number || '01000000000',
         first_name: 'User',
@@ -205,53 +137,82 @@ serve(async (req) => {
         country: 'EG',
         state: 'Cairo'
       },
-      currency: 'EGP',
-      integration_id: payment_method === 'card' ? 5347367 : 
-                      payment_method === 'vodafone_cash' ? 5347471 : 
-                      payment_method === 'orange_cash' || payment_method === 'etisalat_cash' ? 5347471 :
-                      payment_method === 'fawry' ? 5347471 : 5347367
+      special_reference: transaction.id,
+      items: [{
+        name: `شحن ${internal_token_symbol}`,
+        amount: amount * 100,
+        quantity: 1
+      }]
     };
-    
-    console.log('Requesting payment key with data:', {
-      ...paymentKeyData,
-      auth_token: '***' // Hide token in logs
-    });
-    
-    const paymentKeyResponse = await fetch('https://accept.paymob.com/api/acceptance/payment_keys', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(paymentKeyData)
+
+    console.log('Creating payment intention with data:', {
+      ...intentionData,
+      billing_data: { ...intentionData.billing_data, phone_number: '***' }
     });
 
-    if (!paymentKeyResponse.ok) {
-      const errorData = await paymentKeyResponse.json().catch(() => ({}));
-      console.error('Paymob payment key error:', {
-        status: paymentKeyResponse.status,
-        statusText: paymentKeyResponse.statusText,
+    const intentionResponse = await fetch('https://accept.paymob.com/v1/intention/', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${PAYMOB_API_KEY}`
+      },
+      body: JSON.stringify(intentionData)
+    });
+
+    if (!intentionResponse.ok) {
+      const errorData = await intentionResponse.json().catch(() => ({}));
+      console.error('Paymob intention creation error:', {
+        status: intentionResponse.status,
+        statusText: intentionResponse.statusText,
         errorData
       });
-      
+
+      await supabaseClient
+        .from('payment_transactions')
+        .update({ 
+          status: 'failed', 
+          failed_at: new Date().toISOString(),
+          notes: 'Failed to create payment intention',
+          provider_response: errorData
+        })
+        .eq('id', transaction.id);
+
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to generate payment key',
+          error: 'Failed to create payment intention',
           details: errorData,
-          status: paymentKeyResponse.status
+          status: intentionResponse.status
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { token: payment_token } = await paymentKeyResponse.json();
+    const intentionResult = await intentionResponse.json();
+    console.log('Payment intention created successfully:', {
+      intention_id: intentionResult.id,
+      client_secret: intentionResult.client_secret ? 'present' : 'missing'
+    });
 
-    // Return payment URL or iframe token
-    const payment_url = `https://accept.paymob.com/api/acceptance/iframes/966662?payment_token=${payment_token}`;
+    // Update transaction with Paymob reference
+    await supabaseClient
+      .from('payment_transactions')
+      .update({ 
+        status: 'processing',
+        provider_transaction_id: intentionResult.id?.toString(),
+        provider_response: intentionResult
+      })
+      .eq('id', transaction.id);
+
+    // Build redirect URL with client_secret
+    const payment_url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_API_KEY}&clientSecret=${intentionResult.client_secret}`;
 
     return new Response(
       JSON.stringify({
         success: true,
         transaction_id: transaction.id,
         payment_url,
-        payment_token,
+        client_secret: intentionResult.client_secret,
+        intention_id: intentionResult.id,
         tokens_to_credit,
         message: 'Payment initiated successfully'
       }),
