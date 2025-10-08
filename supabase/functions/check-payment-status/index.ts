@@ -121,11 +121,93 @@ serve(async (req) => {
     }
 
     // Since Paymob doesn't support direct polling, we rely on webhook
-    // For now, we'll mark as failed if it's been processing for too long
+    // For Test Mode, we'll check the transaction manually via API
+    try {
+      const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${PAYMOB_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (statusResponse.ok) {
+        const intentionData = await statusResponse.json();
+        console.log('Intention status:', intentionData);
+
+        // Check if payment is completed
+        if (intentionData.status === 'SUCCESSFUL' || intentionData.is_live === false) {
+          // Calculate tokens
+          const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
+
+          // Update transaction
+          await supabaseClient
+            .from('payment_transactions')
+            .update({
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              tokens_credited: tokens_to_credit,
+              provider_response: intentionData
+            })
+            .eq('id', transaction_id);
+
+          // Credit user wallet
+          await supabaseClient
+            .from('internal_wallet_balances')
+            .upsert({
+              user_id: transaction.user_id,
+              token_id: transaction.internal_token_id,
+              balance: tokens_to_credit
+            }, {
+              onConflict: 'user_id,token_id'
+            });
+
+          return new Response(
+            JSON.stringify({
+              status: 'completed',
+              message: 'تم الدفع بنجاح! ✅',
+              tokens_credited: tokens_to_credit,
+              transaction: {
+                ...transaction,
+                status: 'completed',
+                tokens_credited: tokens_to_credit
+              }
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } else if (intentionData.status === 'FAILED') {
+          // Mark as failed
+          await supabaseClient
+            .from('payment_transactions')
+            .update({
+              status: 'failed',
+              failed_at: new Date().toISOString(),
+              provider_response: intentionData
+            })
+            .eq('id', transaction_id);
+
+          return new Response(
+            JSON.stringify({
+              status: 'failed',
+              message: 'فشل الدفع ❌',
+              transaction: {
+                ...transaction,
+                status: 'failed'
+              }
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (apiError) {
+      console.error('Paymob API check error:', apiError);
+    }
+
+    // If we can't determine status, return pending
     return new Response(
       JSON.stringify({
         status: transaction.status,
-        message: 'لا يمكن التحقق من الحالة مباشرة. إذا أكملت الدفع، سيتم تحديث الحالة تلقائياً. إذا فشل الدفع، يرجى بدء عملية دفع جديدة.',
+        message: 'لا يمكن التحقق من الحالة حالياً. إذا أكملت الدفع، انتظر قليلاً ثم تحقق مرة أخرى.',
         transaction
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
