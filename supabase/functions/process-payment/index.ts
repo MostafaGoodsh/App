@@ -119,6 +119,7 @@ serve(async (req) => {
                           5347471;                                        // Wallet (All mobile wallets: Vodafone, Etisalat, Orange)
 
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
+    console.log('Phone number received:', phone_number);
 
     // Create Payment Intention using Flash API (حسب Postman Collection من Paymob)
     const intentionData = {
