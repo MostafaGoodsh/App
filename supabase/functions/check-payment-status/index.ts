@@ -124,32 +124,15 @@ serve(async (req) => {
       );
     }
 
-    // Check payment status via Paymob Flash API - Flash API uses POST with client_secret
+    // Check payment status via Paymob Flash API - GET request
     console.log('About to call Paymob Flash API for intention:', intentionId);
-    
-    // Get client_secret from payment_details
-    const clientSecret = transaction.payment_details?.client_secret;
-    if (!clientSecret) {
-      console.error('No client_secret found in transaction payment_details');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Cannot verify payment - missing client secret' 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
     
     try {
       const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Authorization': `Token ${PAYMOB_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          client_secret: clientSecret
-        })
+          'Authorization': `Token ${PAYMOB_API_KEY}`
+        }
       });
 
       console.log('Paymob API Status Code:', statusResponse.status);

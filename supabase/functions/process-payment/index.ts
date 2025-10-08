@@ -153,7 +153,8 @@ serve(async (req) => {
         description: `Recharge ${internal_token_symbol} tokens`,
         quantity: 1
       }],
-      redirection_url: webhookUrl,  // Paymob سيرسل إشعار تلقائي هنا عند اكتمال الدفع
+      notification_url: webhookUrl,  // Webhook للإشعارات التلقائية
+      redirection_url: `${Deno.env.get('SUPABASE_URL')?.replace('/supabase.co', '.supabase.co')}/recharge?status=success`,  // صفحة الرجوع بعد الدفع
       special_reference: transaction.id // معرّف المعاملة للربط
     };
 
