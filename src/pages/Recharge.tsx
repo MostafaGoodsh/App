@@ -22,6 +22,7 @@ const Recharge = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('');
   const [selectedToken, setSelectedToken] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   const paymentMethods = getSupportedMethods();
   const quickAmounts = [50, 100, 200, 500, 1000];
@@ -335,10 +336,14 @@ const Recharge = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => getTransactions()}
-                      disabled={loading}
+                      onClick={async () => {
+                        setRefreshing(true);
+                        await getTransactions();
+                        setRefreshing(false);
+                      }}
+                      disabled={refreshing}
                     >
-                      {loading ? (
+                      {refreshing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <RefreshCw className="h-4 w-4" />
