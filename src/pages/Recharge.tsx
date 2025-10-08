@@ -290,12 +290,23 @@ const Recharge = () => {
                   ℹ️ معلومات مهمة
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs space-y-2">
-                <p>• تأكد من إدخال بيانات الدفع الصحيحة</p>
-                <p>• <strong>للمحافظ الإلكترونية:</strong> الرقم لازم يكون مسجل ومفعل في المحفظة</p>
-                <p>• في حالة الاختبار، استخدم بطاقة اختبار صالحة</p>
-                <p>• لا تحاول أكثر من 3 مرات - الجلسة تنتهي تلقائياً</p>
-                <p>• إذا فشل الدفع، ابدأ عملية جديدة من الأعلى</p>
+              <CardContent className="text-xs space-y-3">
+                <div className="bg-amber-50 dark:bg-amber-950 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+                  <p className="font-bold text-amber-700 dark:text-amber-300 mb-2">🧪 وضع الاختبار - Test Mode</p>
+                  <p className="font-semibold mb-1">استخدم بطاقة الاختبار هذه:</p>
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
+                    <p className="font-mono font-bold">4987 6543 2109 8769</p>
+                  </div>
+                  <p className="mt-2">CVV: أي 3 أرقام (مثل 123)</p>
+                  <p>التاريخ: أي تاريخ مستقبلي</p>
+                  <p className="text-red-600 dark:text-red-400 font-semibold mt-2">⚠️ لا تستخدم بطاقة حقيقية!</p>
+                </div>
+                
+                <div className="space-y-1">
+                  <p>• <strong>للمحافظ الإلكترونية:</strong> الرقم لازم يكون مسجل ومفعل في المحفظة</p>
+                  <p>• لا تحاول أكثر من 3 مرات - الجلسة تنتهي تلقائياً</p>
+                  <p>• إذا فشل الدفع، ابدأ عملية جديدة من الأعلى</p>
+                </div>
               </CardContent>
             </Card>
 
