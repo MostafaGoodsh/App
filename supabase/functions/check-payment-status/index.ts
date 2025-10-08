@@ -144,13 +144,23 @@ serve(async (req) => {
         console.log('Intention status field:', intentionData.status);
         console.log('Is live?:', intentionData.is_live);
 
-        // In Test Mode, check multiple success indicators
-        // Test mode payments might have different status values
+        // Check for success statuses
         const isSuccessful = 
           intentionData.status === 'PROCESSED' ||
           intentionData.status === 'SUCCESSFUL' ||
           intentionData.status === 'SUCCESS' ||
-          (intentionData.is_live === false && intentionData.status !== 'FAILED');
+          intentionData.status === 'CAPTURED';
+
+        // Check for failure statuses
+        const isFailed = 
+          intentionData.status === 'FAILED' ||
+          intentionData.status === 'EXPIRED' ||
+          intentionData.status === 'CANCELLED' ||
+          intentionData.status === 'VOIDED' ||
+          intentionData.status === 'DECLINED' ||
+          intentionData.status === 'REJECTED';
+
+        console.log('Payment evaluation - isSuccessful:', isSuccessful, 'isFailed:', isFailed);
 
         if (isSuccessful) {
           // Calculate tokens
@@ -191,13 +201,14 @@ serve(async (req) => {
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
-        } else if (intentionData.status === 'FAILED') {
+        } else if (isFailed) {
           // Mark as failed
           await supabaseClient
             .from('payment_transactions')
             .update({
               status: 'failed',
               failed_at: new Date().toISOString(),
+              notes: `Payment ${intentionData.status.toLowerCase()}`,
               provider_response: intentionData
             })
             .eq('id', transaction_id);
@@ -206,6 +217,7 @@ serve(async (req) => {
             JSON.stringify({
               status: 'failed',
               message: 'فشل الدفع ❌',
+              reason: intentionData.status,
               transaction: {
                 ...transaction,
                 status: 'failed'
