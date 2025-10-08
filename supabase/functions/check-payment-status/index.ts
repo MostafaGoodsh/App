@@ -124,133 +124,126 @@ serve(async (req) => {
       );
     }
 
-    // Check payment status via Paymob Flash API - GET request
-    console.log('About to call Paymob Flash API for intention:', intentionId);
+    // Authenticate with Paymob Accept API to search for transaction
+    console.log('Authenticating with Paymob Accept API');
     
     try {
-      const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
-        method: 'GET',
+      // Step 1: Get authentication token
+      const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
+        method: 'POST',
         headers: {
-          'Authorization': `Token ${PAYMOB_API_KEY}`
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          api_key: PAYMOB_API_KEY
+        })
       });
 
-      console.log('Paymob API Status Code:', statusResponse.status);
-      console.log('Paymob API Response Text:', await statusResponse.clone().text());
-
-      // If 404, the intention doesn't exist or expired
-      if (statusResponse.status === 404) {
-        console.log('Intention not found (404), marking as failed');
-        await supabaseClient
-          .from('payment_transactions')
-          .update({
-            status: 'failed',
-            failed_at: new Date().toISOString(),
-            notes: 'Payment intention not found or expired',
-            provider_response: { error: 'Intention not found (404)' }
-          })
-          .eq('id', transaction_id);
-
-        return new Response(
-          JSON.stringify({
-            status: 'failed',
-            message: 'انتهت صلاحية الدفع أو لم يكتمل ❌',
-            transaction: {
-              ...transaction,
-              status: 'failed'
-            }
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      if (!authResponse.ok) {
+        throw new Error('Failed to authenticate with Paymob');
       }
 
-      if (statusResponse.ok) {
-        const intentionData = await statusResponse.json();
-        console.log('Full Intention Response:', JSON.stringify(intentionData, null, 2));
-        console.log('Intention status field:', intentionData.status);
-        console.log('Is live?:', intentionData.is_live);
+      const authData = await authResponse.json();
+      const paymobToken = authData.token;
+      console.log('Paymob authentication successful');
 
-        // Check for success statuses
-        const isSuccessful = 
-          intentionData.status === 'PROCESSED' ||
-          intentionData.status === 'SUCCESSFUL' ||
-          intentionData.status === 'SUCCESS' ||
-          intentionData.status === 'CAPTURED';
+      // Step 2: Search for transaction using special_reference (our transaction ID)
+      const ordersResponse = await fetch(
+        `https://accept.paymob.com/api/ecommerce/orders?special_reference=${transaction_id}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${paymobToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
-        // Check for failure statuses
-        const isFailed = 
-          intentionData.status === 'FAILED' ||
-          intentionData.status === 'EXPIRED' ||
-          intentionData.status === 'CANCELLED' ||
-          intentionData.status === 'VOIDED' ||
-          intentionData.status === 'DECLINED' ||
-          intentionData.status === 'REJECTED';
+      console.log('Orders API Status:', ordersResponse.status);
+      
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json();
+        console.log('Orders found:', ordersData.count);
+        
+        if (ordersData.count > 0 && ordersData.results && ordersData.results.length > 0) {
+          const order = ordersData.results[0];
+          console.log('Order status:', order.status);
+          console.log('Order paid_amount_cents:', order.paid_amount_cents);
+          console.log('Order is_paid:', order.is_paid);
+          
+          // Check if payment is successful
+          if (order.is_paid || order.paid_amount_cents > 0) {
+            console.log('Payment confirmed! Crediting tokens...');
+            
+            // Calculate tokens
+            const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
 
-        console.log('Payment evaluation - isSuccessful:', isSuccessful, 'isFailed:', isFailed);
-
-        if (isSuccessful) {
-          // Calculate tokens
-          const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
-
-          // Update transaction
-          await supabaseClient
-            .from('payment_transactions')
-            .update({
-              status: 'completed',
-              completed_at: new Date().toISOString(),
-              tokens_credited: tokens_to_credit,
-              provider_response: intentionData
-            })
-            .eq('id', transaction_id);
-
-          // Credit user wallet
-          await supabaseClient
-            .from('internal_wallet_balances')
-            .upsert({
-              user_id: transaction.user_id,
-              token_id: transaction.internal_token_id,
-              balance: tokens_to_credit
-            }, {
-              onConflict: 'user_id,token_id'
-            });
-
-          return new Response(
-            JSON.stringify({
-              status: 'completed',
-              message: 'تم الدفع بنجاح! ✅',
-              tokens_credited: tokens_to_credit,
-              transaction: {
-                ...transaction,
+            // Update transaction
+            await supabaseClient
+              .from('payment_transactions')
+              .update({
                 status: 'completed',
-                tokens_credited: tokens_to_credit
-              }
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        } else if (isFailed) {
-          // Mark as failed
-          await supabaseClient
-            .from('payment_transactions')
-            .update({
-              status: 'failed',
-              failed_at: new Date().toISOString(),
-              notes: `Payment ${intentionData.status.toLowerCase()}`,
-              provider_response: intentionData
-            })
-            .eq('id', transaction_id);
+                completed_at: new Date().toISOString(),
+                tokens_credited: tokens_to_credit,
+                provider_response: order
+              })
+              .eq('id', transaction_id);
 
-          return new Response(
-            JSON.stringify({
-              status: 'failed',
-              message: 'فشل الدفع ❌',
-              reason: intentionData.status,
-              transaction: {
-                ...transaction,
-                status: 'failed'
-              }
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+            // Credit user wallet
+            await supabaseClient
+              .from('internal_wallet_balances')
+              .upsert({
+                user_id: transaction.user_id,
+                token_id: transaction.internal_token_id,
+                balance: tokens_to_credit
+              }, {
+                onConflict: 'user_id,token_id'
+              });
+
+            return new Response(
+              JSON.stringify({
+                status: 'completed',
+                message: 'تم الدفع بنجاح! ✅',
+                tokens_credited: tokens_to_credit,
+                transaction: {
+                  ...transaction,
+                  status: 'completed',
+                  tokens_credited: tokens_to_credit
+                }
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          
+          // Check if payment failed
+          if (order.status === 'failed' || order.status === 'cancelled') {
+            await supabaseClient
+              .from('payment_transactions')
+              .update({
+                status: 'failed',
+                failed_at: new Date().toISOString(),
+                notes: `Payment ${order.status}`,
+                provider_response: order
+              })
+              .eq('id', transaction_id);
+
+            return new Response(
+              JSON.stringify({
+                status: 'failed',
+                message: 'فشل الدفع ❌',
+                reason: order.status,
+                transaction: {
+                  ...transaction,
+                  status: 'failed'
+                }
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          
+          console.log('Payment still pending...');
+        } else {
+          console.log('No orders found with this special_reference');
         }
       }
     } catch (apiError) {
