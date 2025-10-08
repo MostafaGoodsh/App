@@ -124,13 +124,13 @@ serve(async (req) => {
       );
     }
 
-    // Check payment status via Paymob Accept API
-    console.log('About to call Paymob API for intention:', intentionId);
+    // Check payment status via Paymob Flash API (same API used for creation)
+    console.log('About to call Paymob Flash API for intention:', intentionId);
     try {
-      const statusResponse = await fetch(`https://accept.paymob.com/api/acceptance/intentions/${intentionId}`, {
+      const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${PAYMOB_API_KEY}`,
+          'Authorization': `Token ${PAYMOB_API_KEY}`,
           'Content-Type': 'application/json'
         }
       });
