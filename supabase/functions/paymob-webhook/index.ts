@@ -50,37 +50,64 @@ serve(async (req) => {
       }
     }
 
-    // Extract payment data
-    const {
-      obj: {
-        id: paymob_transaction_id,
-        success,
-        amount_cents,
-        order: { merchant_order_id }
-      }
-    } = payload;
+    // Paymob Flash API webhook structure
+    console.log('Raw webhook payload:', JSON.stringify(payload, null, 2));
 
-    console.log('Processing payment:', {
-      transaction_id: merchant_order_id,
-      paymob_id: paymob_transaction_id,
-      success,
-      amount_cents
+    // Extract payment intention ID from webhook
+    const intentionId = payload.intention?.id || payload.id;
+    const transactionStatus = payload.intention?.status || payload.status;
+    const isSuccessful = transactionStatus === 'PROCESSED' || 
+                        transactionStatus === 'SUCCESSFUL' || 
+                        transactionStatus === 'CAPTURED';
+
+    console.log('Processing payment webhook:', {
+      intention_id: intentionId,
+      status: transactionStatus,
+      is_successful: isSuccessful
     });
 
-    // Update transaction status
-    if (success) {
-      // Get transaction details
-      const { data: transaction, error: txError } = await supabaseClient
-        .from('payment_transactions')
-        .select('*, internal_tokens(*)')
-        .eq('id', merchant_order_id)
-        .single();
+    if (!intentionId) {
+      console.error('No intention ID in webhook payload');
+      return new Response(
+        JSON.stringify({ error: 'Invalid webhook payload' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-      if (txError || !transaction) {
-        console.error('Transaction not found:', merchant_order_id);
+    // Find transaction by provider_transaction_id (intention ID)
+    const { data: transaction, error: txError } = await supabaseClient
+      .from('payment_transactions')
+      .select('*, internal_tokens(*)')
+      .eq('provider_transaction_id', intentionId)
+      .maybeSingle();
+
+    if (txError) {
+      console.error('Database error finding transaction:', txError);
+      return new Response(
+        JSON.stringify({ error: 'Database error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!transaction) {
+      console.warn('Transaction not found for intention:', intentionId);
+      return new Response(
+        JSON.stringify({ success: true, message: 'Transaction not found, ignoring' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Found transaction:', transaction.id, 'Current status:', transaction.status);
+
+    // Update transaction status
+    if (isSuccessful) {
+
+      // Skip if already completed
+      if (transaction.status === 'completed') {
+        console.log('Transaction already completed, skipping');
         return new Response(
-          JSON.stringify({ error: 'Transaction not found' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: true, message: 'Already processed' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -93,62 +120,87 @@ serve(async (req) => {
         .update({
           status: 'completed',
           completed_at: new Date().toISOString(),
-          provider_transaction_id: paymob_transaction_id.toString(),
           tokens_credited: tokens_to_credit,
           provider_response: payload
         })
-        .eq('id', merchant_order_id);
+        .eq('id', transaction.id);
 
       if (updateError) {
         console.error('Failed to update transaction:', updateError);
+        throw updateError;
       }
 
       // Credit user's internal wallet
-      const { error: balanceError } = await supabaseClient
+      // First, check if balance exists
+      const { data: existingBalance } = await supabaseClient
         .from('internal_wallet_balances')
-        .upsert({
-          user_id: transaction.user_id,
-          token_id: transaction.internal_token_id,
-          balance: tokens_to_credit
-        }, {
-          onConflict: 'user_id,token_id',
-          ignoreDuplicates: false
-        });
+        .select('balance')
+        .eq('user_id', transaction.user_id)
+        .eq('token_id', transaction.internal_token_id)
+        .maybeSingle();
 
-      // If balance doesn't exist, create it
-      if (balanceError) {
-        await supabaseClient
+      if (existingBalance) {
+        // Update existing balance
+        const { error: balanceError } = await supabaseClient
+          .from('internal_wallet_balances')
+          .update({
+            balance: existingBalance.balance + tokens_to_credit,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', transaction.user_id)
+          .eq('token_id', transaction.internal_token_id);
+
+        if (balanceError) {
+          console.error('Failed to update balance:', balanceError);
+        }
+      } else {
+        // Create new balance
+        const { error: balanceError } = await supabaseClient
           .from('internal_wallet_balances')
           .insert({
             user_id: transaction.user_id,
             token_id: transaction.internal_token_id,
             balance: tokens_to_credit
           });
-      } else {
-        // Update existing balance
-        await supabaseClient.rpc('increment_balance', {
-          p_user_id: transaction.user_id,
-          p_token_id: transaction.internal_token_id,
-          p_amount: tokens_to_credit
-        });
+
+        if (balanceError) {
+          console.error('Failed to create balance:', balanceError);
+        }
       }
 
-      console.log('Payment completed successfully:', {
-        transaction_id: merchant_order_id,
-        tokens_credited: tokens_to_credit
+      console.log('✅ Payment completed successfully via webhook:', {
+        transaction_id: transaction.id,
+        intention_id: intentionId,
+        tokens_credited: tokens_to_credit,
+        user_id: transaction.user_id
       });
     } else {
-      // Payment failed
-      await supabaseClient
-        .from('payment_transactions')
-        .update({
-          status: 'failed',
-          failed_at: new Date().toISOString(),
-          provider_response: payload
-        })
-        .eq('id', merchant_order_id);
+      // Payment failed or pending
+      const isFailed = transactionStatus === 'FAILED' || 
+                      transactionStatus === 'EXPIRED' || 
+                      transactionStatus === 'DECLINED';
 
-      console.log('Payment failed:', merchant_order_id);
+      if (isFailed) {
+        await supabaseClient
+          .from('payment_transactions')
+          .update({
+            status: 'failed',
+            failed_at: new Date().toISOString(),
+            notes: `Payment ${transactionStatus.toLowerCase()}`,
+            provider_response: payload
+          })
+          .eq('id', transaction.id);
+
+        console.log('❌ Payment failed via webhook:', {
+          transaction_id: transaction.id,
+          status: transactionStatus
+        });
+      } else {
+        console.log('⏳ Payment still pending:', {
+          transaction_id: transaction.id,
+          status: transactionStatus
+        });
+      }
     }
 
     return new Response(
