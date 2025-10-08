@@ -54,7 +54,9 @@ serve(async (req) => {
     }
 
     // If already completed or failed, return current status
+    console.log('Transaction current status:', transaction.status);
     if (transaction.status === 'completed' || transaction.status === 'failed') {
+      console.log('Transaction already finalized, returning status:', transaction.status);
       return new Response(
         JSON.stringify({
           status: transaction.status,
@@ -93,8 +95,10 @@ serve(async (req) => {
     // Check if transaction is too old (more than 30 minutes)
     const transactionAge = Date.now() - new Date(transaction.created_at).getTime();
     const thirtyMinutes = 30 * 60 * 1000;
+    console.log('Transaction age (ms):', transactionAge, 'Max allowed:', thirtyMinutes);
 
     if (transactionAge > thirtyMinutes) {
+      console.log('Transaction expired, marking as failed');
       // Mark as failed/expired
       await supabaseClient
         .from('payment_transactions')
@@ -122,6 +126,7 @@ serve(async (req) => {
 
     // Since Paymob doesn't support direct polling, we rely on webhook
     // For Test Mode, we'll check the transaction manually via API
+    console.log('About to call Paymob API for intention:', intentionId);
     try {
       const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
         method: 'GET',
