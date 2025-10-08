@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePayment } from '@/hooks/usePayment';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, ArrowRight, Wallet, TrendingUp } from 'lucide-react';
+import { Loader2, ArrowRight, Wallet, TrendingUp, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Recharge = () => {
@@ -325,10 +325,26 @@ const Recharge = () => {
             {transactions.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">آخر العمليات</CardTitle>
-                  <CardDescription className="text-xs">
-                    💡 تتحدث الحالة تلقائياً عند اكتمال/فشل الدفع
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">آخر العمليات</CardTitle>
+                      <CardDescription className="text-xs">
+                        💡 تتحدث الحالة تلقائياً عند اكتمال/فشل الدفع
+                      </CardDescription>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => getTransactions()}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
