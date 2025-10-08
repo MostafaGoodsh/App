@@ -131,12 +131,23 @@ serve(async (req) => {
         }
       });
 
+      console.log('Paymob API Status Code:', statusResponse.status);
+
       if (statusResponse.ok) {
         const intentionData = await statusResponse.json();
-        console.log('Intention status:', intentionData);
+        console.log('Full Intention Response:', JSON.stringify(intentionData, null, 2));
+        console.log('Intention status field:', intentionData.status);
+        console.log('Is live?:', intentionData.is_live);
 
-        // Check if payment is completed
-        if (intentionData.status === 'SUCCESSFUL' || intentionData.is_live === false) {
+        // In Test Mode, check multiple success indicators
+        // Test mode payments might have different status values
+        const isSuccessful = 
+          intentionData.status === 'PROCESSED' ||
+          intentionData.status === 'SUCCESSFUL' ||
+          intentionData.status === 'SUCCESS' ||
+          (intentionData.is_live === false && intentionData.status !== 'FAILED');
+
+        if (isSuccessful) {
           // Calculate tokens
           const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
 
