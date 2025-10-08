@@ -121,10 +121,7 @@ serve(async (req) => {
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
     console.log('Phone number received:', phone_number);
 
-    // Webhook URL - CRITICAL للتأكد من استلام إشعارات الدفع تلقائياً
-    const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/paymob-webhook`;
-    
-    // Create Payment Intention using Flash API (حسب Postman Collection من Paymob)
+    // Create Payment Intention using Flash API
     const intentionData = {
       amount: amount, // Amount in EGP (not cents)
       currency: 'EGP',
@@ -153,8 +150,6 @@ serve(async (req) => {
         description: `Recharge ${internal_token_symbol} tokens`,
         quantity: 1
       }],
-      notification_url: webhookUrl,  // Webhook للإشعارات التلقائية
-      redirection_url: `${Deno.env.get('SUPABASE_URL')?.replace('/supabase.co', '.supabase.co')}/recharge?status=success`,  // صفحة الرجوع بعد الدفع
       special_reference: transaction.id // معرّف المعاملة للربط
     };
 
