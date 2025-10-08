@@ -299,6 +299,17 @@ const Recharge = () => {
                   </div>
                   <p className="mt-2">CVV: أي 3 أرقام (مثل 123)</p>
                   <p>التاريخ: أي تاريخ مستقبلي</p>
+                  
+                  <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="font-semibold text-blue-700 dark:text-blue-300 mb-1">📝 صفحة ACS Emulator:</p>
+                    <p className="text-sm">لو ظهرتلك صفحة "ACS Emulator" بعد إدخال البطاقة:</p>
+                    <ul className="text-sm list-disc list-inside mt-1 space-y-1">
+                      <li>Custom ECI: اتركه <strong>فارغ</strong> أو اكتب "05"</li>
+                      <li>Custom CAVV: اكتب أي رقم زي "123"</li>
+                      <li>اضغط Submit لإتمام العملية</li>
+                    </ul>
+                  </div>
+                  
                   <p className="text-red-600 dark:text-red-400 font-semibold mt-2">⚠️ لا تستخدم بطاقة حقيقية!</p>
                 </div>
                 
