@@ -124,19 +124,19 @@ serve(async (req) => {
       );
     }
 
-    // Since Paymob doesn't support direct polling, we rely on webhook
-    // For Test Mode, we'll check the transaction manually via API
+    // Check payment status via Paymob Accept API
     console.log('About to call Paymob API for intention:', intentionId);
     try {
-      const statusResponse = await fetch(`https://accept.paymob.com/v1/intention/${intentionId}`, {
+      const statusResponse = await fetch(`https://accept.paymob.com/api/acceptance/intentions/${intentionId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Token ${PAYMOB_API_KEY}`,
+          'Authorization': `Bearer ${PAYMOB_API_KEY}`,
           'Content-Type': 'application/json'
         }
       });
 
       console.log('Paymob API Status Code:', statusResponse.status);
+      console.log('Paymob API Response Text:', await statusResponse.clone().text());
 
       if (statusResponse.ok) {
         const intentionData = await statusResponse.json();
