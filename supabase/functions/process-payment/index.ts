@@ -205,13 +205,17 @@ serve(async (req) => {
       client_secret: intentionResult.client_secret ? 'present' : 'missing'
     });
 
-    // Update transaction with Paymob reference
+    // Update transaction with Paymob reference and save client_secret
     await supabaseClient
       .from('payment_transactions')
       .update({ 
         status: 'processing',
         provider_transaction_id: intentionResult.id?.toString(),
-        provider_response: intentionResult
+        provider_response: intentionResult,
+        payment_details: {
+          client_secret: intentionResult.client_secret,
+          intention_id: intentionResult.id
+        }
       })
       .eq('id', transaction.id);
 
