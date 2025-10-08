@@ -138,6 +138,32 @@ serve(async (req) => {
       console.log('Paymob API Status Code:', statusResponse.status);
       console.log('Paymob API Response Text:', await statusResponse.clone().text());
 
+      // If 404, the intention doesn't exist or expired
+      if (statusResponse.status === 404) {
+        console.log('Intention not found (404), marking as failed');
+        await supabaseClient
+          .from('payment_transactions')
+          .update({
+            status: 'failed',
+            failed_at: new Date().toISOString(),
+            notes: 'Payment intention not found or expired',
+            provider_response: { error: 'Intention not found (404)' }
+          })
+          .eq('id', transaction_id);
+
+        return new Response(
+          JSON.stringify({
+            status: 'failed',
+            message: 'انتهت صلاحية الدفع أو لم يكتمل ❌',
+            transaction: {
+              ...transaction,
+              status: 'failed'
+            }
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       if (statusResponse.ok) {
         const intentionData = await statusResponse.json();
         console.log('Full Intention Response:', JSON.stringify(intentionData, null, 2));
