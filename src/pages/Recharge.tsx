@@ -383,36 +383,6 @@ const Recharge = () => {
                                 '✗ فشل'}
                              </div>
                            </div>
-                           
-                            {isProcessing && isOld && (
-                              <div className="text-xs text-muted-foreground bg-amber-50 dark:bg-amber-950 p-2 rounded">
-                                ⚠️ هذه المعاملة قيد المعالجة لفترة طويلة. إذا لم تكمل الدفع، يمكنك التحقق من الحالة أو بدء عملية جديدة.
-                              </div>
-                            )}
-                            
-                            {isProcessing && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full text-xs"
-                                onClick={() => checkPaymentStatus(tx.id)}
-                              >
-                                🔍 تحقق من الحالة
-                              </Button>
-                            )}
-                            
-                             {tx.status === 'failed' && (
-                              <div className="text-xs bg-red-50 dark:bg-red-950 p-2 rounded space-y-1">
-                                <p className="text-destructive font-medium">✗ فشل الدفع</p>
-                                <p className="text-muted-foreground">الأسباب المحتملة:</p>
-                                <ul className="text-muted-foreground mr-4 list-disc">
-                                  <li>بيانات الدفع غير صحيحة</li>
-                                  <li>رصيد غير كافٍ</li>
-                                  <li>انتهاء مدة الجلسة (بعد 3 محاولات)</li>
-                                </ul>
-                                <p className="text-primary font-medium mt-2">💡 ابدأ عملية دفع جديدة من الأعلى</p>
-                              </div>
-                             )}
                          </div>
                        );
                      })}
