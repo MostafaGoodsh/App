@@ -4,6 +4,7 @@ import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
 import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
 import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
+import { RechargeSection } from '@/components/wallet/RechargeSection';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,7 +53,7 @@ const WalletContent = () => {
     <>
       {/* المحفظة الداخلية فقط */}
       <div className="space-y-6">
-        {/* المحفظة الهجين */}
+        {/* محفظة XP و MS-RA */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HybridWalletCard 
             onSwapClick={() => setShowHybridSwap(true)}
@@ -61,41 +62,48 @@ const WalletContent = () => {
           <MsRaCurrencyCard isVerified={isVerified} />
         </div>
 
-        {/* XP to MSRA Conversion */}
-        <XpToMsRaConverter />
+        {/* Recharge & Conversion Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <RechargeSection />
+          <XpToMsRaConverter />
+        </div>
         
         {/* تاريخ السحوبات */}
         <WithdrawalHistory />
         
-        {/* معلومات النظام الموحد */}
+        {/* معلومات النظام */}
         <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              نظام XP الموحد
+              <span>نظام XP و MS-RA | XP & MS-RA System</span>
             </CardTitle>
-            <CardDescription>كل شيء الآن بنقاط XP واحدة - بسيط وسهل!</CardDescription>
+            <CardDescription>
+              نظام متكامل للنقاط والتعدين - Complete Points & Mining System
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
               <div className="p-3 bg-background rounded-lg">
                 <div className="text-2xl mb-1">💳</div>
-                <div className="text-sm font-medium">شحن XP</div>
+                <div className="text-sm font-medium">شحن XP | Recharge</div>
                 <div className="text-xs text-muted-foreground">Early Pre-Sale</div>
               </div>
               <div className="p-3 bg-background rounded-lg">
                 <div className="text-2xl mb-1">🔄</div>
-                <div className="text-sm font-medium">تحويل XP → MSRA</div>
+                <div className="text-sm font-medium">XP → MSRA</div>
                 <div className="text-xs text-muted-foreground">1000 XP = 1 MSRA</div>
               </div>
               <div className="p-3 bg-background rounded-lg">
                 <div className="text-2xl mb-1">⛏️</div>
-                <div className="text-sm font-medium">تعدين MSRA</div>
-                <div className="text-xs text-muted-foreground">كل 24 ساعة</div>
+                <div className="text-sm font-medium">تعدين | Mining</div>
+                <div className="text-xs text-muted-foreground">Every 24h</div>
               </div>
             </div>
             <div className="text-center text-sm text-primary font-medium">
               XP للشحن • MSRA للتعدين • تحويل سهل ومباشر!
+              <br />
+              <span className="text-xs">XP for Recharge • MSRA for Mining • Easy Conversion!</span>
             </div>
           </CardContent>
         </Card>
@@ -193,11 +201,13 @@ const WalletPage = () => {
           <div className="flex items-center justify-center gap-3 mb-2">
             <WalletIcon className="w-10 h-10 text-primary" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              المحفظة
+              المحفظة | Wallet
             </h1>
           </div>
           <p className="text-muted-foreground">
-            أدر عملاتك الداخلية وحولها بسهولة
+            أدر عملاتك الداخلية، اشحن، حول، واسحب بسهولة
+            <br />
+            <span className="text-xs">Manage, Recharge, Convert & Withdraw Easily</span>
           </p>
         </header>
 

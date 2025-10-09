@@ -86,10 +86,12 @@ export const XpToMsRaConverter = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary" />
-          تحويل XP إلى Ms-Ra
+          تحويل XP إلى Ms-Ra | XP to Ms-Ra Conversion
         </CardTitle>
         <CardDescription>
           حول نقاط XP الخاصة بك إلى عملة التعدين Ms-Ra
+          <br />
+          <span className="text-xs">Convert Your XP Points to Ms-Ra Mining Token</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -99,19 +101,23 @@ export const XpToMsRaConverter = () => {
             معدل التحويل: <strong>1,000 XP = 1 MSRA</strong>
             <br />
             الحد الأدنى: 1,000 XP
+            <br />
+            <span className="text-xs text-muted-foreground">
+              Conversion Rate: 1,000 XP = 1 MSRA | Minimum: 1,000 XP
+            </span>
           </AlertDescription>
         </Alert>
 
         {/* Current Balances */}
         <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
           <div>
-            <div className="text-xs text-muted-foreground mb-1">رصيد XP</div>
+            <div className="text-xs text-muted-foreground mb-1">رصيد XP | XP Balance</div>
             <div className="text-lg font-bold text-primary">
               {xpBalance.toLocaleString()}
             </div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground mb-1">رصيد MSRA</div>
+            <div className="text-xs text-muted-foreground mb-1">رصيد MSRA | MSRA Balance</div>
             <div className="text-lg font-bold text-primary">
               {msraBalance.toFixed(4)}
             </div>
@@ -120,7 +126,9 @@ export const XpToMsRaConverter = () => {
 
         {/* Conversion Input */}
         <div className="space-y-2">
-          <Label htmlFor="xp-amount">كمية XP للتحويل</Label>
+          <Label htmlFor="xp-amount">
+            كمية XP للتحويل | XP Amount to Convert
+          </Label>
           <div className="flex gap-2">
             <Input
               id="xp-amount"
@@ -137,23 +145,23 @@ export const XpToMsRaConverter = () => {
               onClick={setMaxAmount}
               disabled={isConverting || isLoading || xpBalance < conversionRate}
             >
-              الكل
+              الكل | Max
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            الرصيد المتاح: {xpBalance.toLocaleString()} XP
+            الرصيد المتاح: {xpBalance.toLocaleString()} XP | Available Balance
           </p>
         </div>
 
         {/* Conversion Preview */}
         <div className="flex items-center justify-center gap-3 p-4 bg-primary/5 rounded-lg">
           <div className="text-center">
-            <div className="text-sm text-muted-foreground">تحويل</div>
+            <div className="text-sm text-muted-foreground">تحويل | Convert</div>
             <div className="text-xl font-bold">{xpAmount || "0"} XP</div>
           </div>
           <ArrowRight className="w-5 h-5 text-primary" />
           <div className="text-center">
-            <div className="text-sm text-muted-foreground">تحصل على</div>
+            <div className="text-sm text-muted-foreground">تحصل على | You Get</div>
             <div className="text-xl font-bold text-primary">{msraAmount} MSRA</div>
           </div>
         </div>
@@ -166,11 +174,13 @@ export const XpToMsRaConverter = () => {
           size="lg"
         >
           <Zap className="w-4 h-4 mr-2" />
-          {isConverting ? "جاري التحويل..." : "تحويل إلى MSRA"}
+          {isConverting ? "جاري التحويل... | Converting..." : "تحويل إلى MSRA | Convert to MSRA"}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
           التحويل فوري وبدون رسوم
+          <br />
+          Instant Conversion with No Fees
         </p>
       </CardContent>
     </Card>
