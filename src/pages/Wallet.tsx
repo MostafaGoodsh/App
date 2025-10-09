@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { PointsToTokensConverter } from '@/components/wallet/PointsToTokensConverter';
 import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
 import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
 import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
@@ -38,17 +37,36 @@ const WalletContent = () => {
         {/* تاريخ السحوبات */}
         <WithdrawalHistory />
         
-        {/* تحويل النقاط */}
-        <Card>
+        {/* معلومات النظام الموحد */}
+        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              تحويل النقاط إلى عملات
+              نظام XP الموحد
             </CardTitle>
-            <CardDescription>حول نقاطك المكتسبة إلى عملات داخلية</CardDescription>
+            <CardDescription>كل شيء الآن بنقاط XP واحدة - بسيط وسهل!</CardDescription>
           </CardHeader>
-          <CardContent>
-            <PointsToTokensConverter />
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">✅</div>
+                <div className="text-sm font-medium">المهام اليومية</div>
+                <div className="text-xs text-muted-foreground">اكسب XP</div>
+              </div>
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">⛏️</div>
+                <div className="text-sm font-medium">التعدين</div>
+                <div className="text-xs text-muted-foreground">احصل على XP</div>
+              </div>
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">💳</div>
+                <div className="text-sm font-medium">الشحن</div>
+                <div className="text-xs text-muted-foreground">اشتري XP</div>
+              </div>
+            </div>
+            <div className="text-center text-sm text-primary font-medium">
+              كل النقاط موحدة الآن - لا داعي للتحويل!
+            </div>
           </CardContent>
         </Card>
       </div>

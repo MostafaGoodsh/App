@@ -40,7 +40,13 @@ const Recharge = () => {
 
   useEffect(() => {
     if (tokens.length > 0 && !selectedToken) {
-      setSelectedToken(tokens[0].symbol);
+      // تحديد XP تلقائياً
+      const xpToken = tokens.find(t => t.symbol === 'XP');
+      if (xpToken) {
+        setSelectedToken(xpToken.symbol);
+      } else if (tokens[0]) {
+        setSelectedToken(tokens[0].symbol);
+      }
     }
   }, [tokens, selectedToken]);
 
@@ -124,13 +130,46 @@ const Recharge = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl" dir="rtl">
+        {/* معلومات النظام الموحد */}
+        <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              نظام XP الموحد - بسيط وسريع!
+            </CardTitle>
+            <CardDescription>كل شيء الآن بنقاط XP واحدة</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">✅</div>
+                <div className="text-sm font-medium">المهام اليومية</div>
+                <div className="text-xs text-muted-foreground">اكسب XP</div>
+              </div>
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">⛏️</div>
+                <div className="text-sm font-medium">التعدين</div>
+                <div className="text-xs text-muted-foreground">احصل على XP</div>
+              </div>
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">💳</div>
+                <div className="text-sm font-medium">الشحن</div>
+                <div className="text-xs text-muted-foreground">اشتري XP</div>
+              </div>
+            </div>
+            <div className="text-center text-sm text-primary font-medium mt-3 p-2 bg-primary/5 rounded">
+              💡 كل النقاط موحدة - لا حاجة للتحويل بين العملات!
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
             <Wallet className="h-8 w-8 text-primary" />
-            شحن المحفظة
+            شحن نقاط XP
           </h1>
           <p className="text-muted-foreground">
-            اشحن محفظتك باستخدام طرق الدفع المحلية المصرية
+            اشحن نقاط XP باستخدام طرق الدفع المحلية المصرية
           </p>
         </div>
 
@@ -143,21 +182,25 @@ const Recharge = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Token Selection */}
+                {/* Token Selection - XP Only */}
                 <div className="space-y-2">
-                  <Label htmlFor="token">العملة المراد شحنها</Label>
-                  <Select value={selectedToken} onValueChange={setSelectedToken}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر العملة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tokens.map((token) => (
-                        <SelectItem key={token.id} value={token.symbol}>
-                          {token.name} ({token.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="token">نقاط XP - العملة الموحدة</Label>
+                  <div className="p-4 bg-primary/5 border-2 border-primary/20 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-bold">
+                          XP
+                        </div>
+                        <div>
+                          <div className="font-medium">نقاط الخبرة</div>
+                          <div className="text-xs text-muted-foreground">العملة الموحدة للمنصة</div>
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-primary">
+                        محددة تلقائياً
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Amount Input */}
@@ -279,16 +322,24 @@ const Recharge = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">العملة</span>
-                  <span className="font-medium">{selectedToken || '-'}</span>
+                  <span className="font-medium flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-sm font-bold">XP</span>
+                    نقاط الخبرة
+                  </span>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex items-center gap-2 text-primary">
                     <TrendingUp className="h-4 w-4" />
                     <span className="text-sm font-medium">ستحصل على</span>
                   </div>
-                  <div className="text-2xl font-bold mt-2">
-                    {estimatedTokens} {selectedToken}
+                  <div className="text-2xl font-bold mt-2 text-primary">
+                    {estimatedTokens} XP
                   </div>
+                  {selectedTokenData && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {(1 / selectedTokenData.exchange_rate_usd).toFixed(0)} XP لكل جنيه
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
