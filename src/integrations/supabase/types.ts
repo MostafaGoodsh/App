@@ -406,6 +406,39 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_tasks_card_content: {
+        Row: {
+          background_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          background_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       early_access: {
         Row: {
           created_at: string

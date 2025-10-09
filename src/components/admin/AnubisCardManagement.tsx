@@ -1,58 +1,52 @@
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Save, RefreshCw, Sparkles } from "lucide-react";
 
-interface AnubisCardContent {
-  title: string;
-  description: string;
-  introduction: string;
-}
-
-const AnubisCardManagement = () => {
-  const [content, setContent] = useState<AnubisCardContent>({
-    title: '',
-    description: '',
-    introduction: ''
-  });
+export default function AnubisCardManagement() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [introduction, setIntroduction] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchContent();
-  }, []);
-
   const fetchContent = async () => {
     try {
-      const { data } = await supabase
+      const { data: titleData } = await supabase
         .from('app_content')
-        .select('content_key, text_content')
-        .in('content_key', ['anubis_card_title', 'anubis_card_description', 'anubis_card_introduction'])
-        .eq('is_active', true);
+        .select('*')
+        .eq('content_key', 'anubis_card_title')
+        .eq('is_active', true)
+        .maybeSingle();
 
-      if (data) {
-        const contentMap = data.reduce((acc, item) => {
-          acc[item.content_key] = item.text_content || '';
-          return acc;
-        }, {} as Record<string, string>);
+      const { data: descData } = await supabase
+        .from('app_content')
+        .select('*')
+        .eq('content_key', 'anubis_card_description')
+        .eq('is_active', true)
+        .maybeSingle();
 
-        setContent({
-          title: contentMap['anubis_card_title'] || '',
-          description: contentMap['anubis_card_description'] || '',
-          introduction: contentMap['anubis_card_introduction'] || ''
-        });
-      }
+      const { data: introData } = await supabase
+        .from('app_content')
+        .select('*')
+        .eq('content_key', 'anubis_card_introduction')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      setTitle(titleData?.text_content || 'أنوبيس - حامي الأسرار');
+      setDescription(descData?.text_content || 'اضغط لاكتشاف أسرار أنوبيس القديمة');
+      setIntroduction(introData?.text_content || '');
     } catch (error) {
       console.error('Error fetching content:', error);
       toast({
         title: "خطأ",
-        description: "فشل في تحميل المحتوى",
+        description: "حدث خطأ في تحميل المحتوى",
         variant: "destructive",
       });
     } finally {
@@ -60,51 +54,61 @@ const AnubisCardManagement = () => {
     }
   };
 
-  const saveContent = async () => {
+  useEffect(() => {
+    fetchContent();
+  }, []);
+
+  const handleSave = async () => {
     setSaving(true);
     try {
-      const updates = [
-        {
+      // Save title
+      await supabase
+        .from('app_content')
+        .upsert({
           content_key: 'anubis_card_title',
-          text_content: content.title,
-          content_type: 'text'
-        },
-        {
-          content_key: 'anubis_card_description', 
-          text_content: content.description,
-          content_type: 'text'
-        },
-        {
-          content_key: 'anubis_card_introduction',
-          text_content: content.introduction,
-          content_type: 'text'
-        }
-      ];
+          content_type: 'text',
+          text_content: title,
+          is_active: true,
+          position_order: 0
+        }, {
+          onConflict: 'content_key'
+        });
 
-      for (const update of updates) {
-        await supabase
-          .from('app_content')
-          .upsert({
-            ...update,
-            is_active: true,
-            position_order: 0
-          }, {
-            onConflict: 'content_key'
-          });
-      }
+      // Save description
+      await supabase
+        .from('app_content')
+        .upsert({
+          content_key: 'anubis_card_description',
+          content_type: 'text',
+          text_content: description,
+          is_active: true,
+          position_order: 0
+        }, {
+          onConflict: 'content_key'
+        });
+
+      // Save introduction
+      await supabase
+        .from('app_content')
+        .upsert({
+          content_key: 'anubis_card_introduction',
+          content_type: 'text',
+          text_content: introduction,
+          is_active: true,
+          position_order: 0
+        }, {
+          onConflict: 'content_key'
+        });
 
       toast({
         title: "تم الحفظ",
         description: "تم حفظ محتوى كارت أنوبيس بنجاح",
       });
-
-      // Trigger content refresh
-      window.dispatchEvent(new CustomEvent('app-content-updated'));
     } catch (error) {
       console.error('Error saving content:', error);
       toast({
         title: "خطأ",
-        description: "فشل في حفظ المحتوى",
+        description: "حدث خطأ في حفظ المحتوى",
         variant: "destructive",
       });
     } finally {
@@ -114,72 +118,83 @@ const AnubisCardManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>إدارة كارت أنوبيس</CardTitle>
-          <CardDescription>
-            قم بتحرير عنوان ووصف كارت أنوبيس المعروض في الصفحة الرئيسية
-          </CardDescription>
+          <CardTitle className="arabic-text flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            إدارة محتوى كارت أنوبيس
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">العنوان</Label>
+            <Label htmlFor="title" className="arabic-text">العنوان الخارجي</Label>
             <Input
               id="title"
-              value={content.title}
-              onChange={(e) => setContent(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="أدخل عنوان الكارت"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="arabic-text"
+              placeholder="أنوبيس - حامي الأسرار"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">الوصف</Label>
+            <Label htmlFor="description" className="arabic-text">الوصف الخارجي</Label>
             <Textarea
               id="description"
-              value={content.description}
-              onChange={(e) => setContent(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="أدخل وصف الكارت"
-              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="arabic-text min-h-[80px]"
+              placeholder="وصف مختصر يظهر على الكارت"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="introduction">المقدمة الداخلية</Label>
+            <Label htmlFor="introduction" className="arabic-text">المقدمة الداخلية (تظهر عند الضغط)</Label>
             <Textarea
               id="introduction"
-              value={content.introduction}
-              onChange={(e) => setContent(prev => ({ ...prev, introduction: e.target.value }))}
-              placeholder="أدخل المقدمة التي ستظهر عند فتح الكارت"
-              rows={6}
+              value={introduction}
+              onChange={(e) => setIntroduction(e.target.value)}
+              className="arabic-text min-h-[200px]"
+              placeholder="نص مفصل يظهر في النافذة المنبثقة"
             />
+            <p className="text-xs text-muted-foreground">
+              يمكنك استخدام سطر فارغ بين الفقرات لتقسيم النص
+            </p>
           </div>
 
-          <Button 
-            onClick={saveContent} 
-            disabled={saving}
-            className="w-full"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                جاري الحفظ...
-              </>
-            ) : (
-              'حفظ التغييرات'
-            )}
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              onClick={handleSave} 
+              disabled={saving}
+              className="arabic-text"
+            >
+              {saving ? (
+                <RefreshCw className="w-4 h-4 ml-2 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4 ml-2" />
+              )}
+              حفظ التغييرات
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={fetchContent}
+              className="arabic-text"
+            >
+              <RefreshCw className="w-4 h-4 ml-2" />
+              إعادة تحميل
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-};
-
-export default AnubisCardManagement;
+}

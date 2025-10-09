@@ -2,18 +2,15 @@ import AnubisCardManagement from "@/components/admin/AnubisCardManagement";
 
 export default function AnubisCardAdmin() {
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
-      <div className="min-h-screen bg-background/90">
-        <AnubisCardManagement />
+    <div className="container mx-auto px-4 py-8 max-w-4xl" dir="rtl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">إدارة كارت أنوبيس</h1>
+        <p className="text-muted-foreground">
+          تحكم في محتوى كارت أنوبيس - العنوان الخارجي، الوصف، والمقدمة الداخلية
+        </p>
       </div>
+      
+      <AnubisCardManagement />
     </div>
   );
 }
