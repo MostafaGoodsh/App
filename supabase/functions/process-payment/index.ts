@@ -123,7 +123,7 @@ serve(async (req) => {
 
     // Create Payment Intention using Flash API
     const intentionData = {
-      amount: amount, // Amount in EGP (not cents)
+      amount: amount * 100, // Amount in cents (piasters)
       currency: 'EGP',
       payment_methods: [integration_id],
       billing_data: {
@@ -146,11 +146,12 @@ serve(async (req) => {
       },
       items: [{
         name: `شحن ${internal_token_symbol}`,
-        amount: amount,
+        amount: amount * 100, // Amount in cents
         description: `Recharge ${internal_token_symbol} tokens`,
         quantity: 1
       }],
-      special_reference: transaction.id // معرّف المعاملة للربط
+      special_reference: transaction.id, // معرّف المعاملة للربط
+      redirection_url: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/recharge?payment=success&transaction_id=${transaction.id}`
     };
 
     console.log('Creating payment intention with data:', {
