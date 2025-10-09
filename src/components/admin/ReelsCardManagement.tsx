@@ -132,20 +132,20 @@ export const ReelsCardManagement = () => {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `reels-bg-${Date.now()}.${fileExt}`;
-      const filePath = `backgrounds/${fileName}`;
+      const filePath = `reels/${fileName}`;
 
       // Delete old image if exists
       if (content.background_image_url) {
         const oldPath = content.background_image_url.split('/').pop();
         if (oldPath) {
           await supabase.storage
-            .from('reels-content')
-            .remove([`backgrounds/${oldPath}`]);
+            .from('content-backgrounds')
+            .remove([`reels/${oldPath}`]);
         }
       }
 
       const { error: uploadError } = await supabase.storage
-        .from('reels-content')
+        .from('content-backgrounds')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -157,7 +157,7 @@ export const ReelsCardManagement = () => {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('reels-content')
+        .from('content-backgrounds')
         .getPublicUrl(filePath);
 
       setContent(prev => ({

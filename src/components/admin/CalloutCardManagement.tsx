@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Save, RefreshCw } from "lucide-react";
+import { Save, RefreshCw, Upload, Loader2, ImageIcon } from "lucide-react";
 
 interface CalloutCardContent {
   id: string;
@@ -21,6 +21,7 @@ export default function CalloutCardManagement() {
   const [content, setContent] = useState<CalloutCardContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const fetchContent = async () => {
@@ -88,6 +89,81 @@ export default function CalloutCardManagement() {
     setContent({ ...content, [field]: value });
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !content) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "خطأ",
+        description: "يجب اختيار ملف صورة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "خطأ",
+        description: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `callout-${Date.now()}.${fileExt}`;
+      const filePath = `callout/${fileName}`;
+
+      // Delete old image if exists
+      if (content.fixed_image_url && content.fixed_image_url.includes('content-backgrounds')) {
+        const oldPath = content.fixed_image_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('content-backgrounds')
+            .remove([`callout/${oldPath}`]);
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('content-backgrounds')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(uploadError.message || 'فشل في رفع الصورة');
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-backgrounds')
+        .getPublicUrl(filePath);
+
+      setContent(prev => prev ? {
+        ...prev,
+        fixed_image_url: publicUrl
+      } : null);
+
+      toast({
+        title: "تم رفع الصورة بنجاح",
+        description: "يمكنك الآن حفظ التغييرات",
+      });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في رفع الصورة",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -136,7 +212,32 @@ export default function CalloutCardManagement() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="fixed_image_url" className="arabic-text">رابط الصورة الثابتة</Label>
+            <Label htmlFor="fixed_image_url" className="arabic-text">صورة الخلفية</Label>
+            <div className="flex items-center gap-4">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="flex-1"
+              />
+              <Button 
+                size="sm" 
+                variant="outline"
+                disabled={uploading}
+                onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                رفع صورة
+              </Button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              أو أدخل رابط الصورة مباشرة:
+            </div>
             <Input
               id="fixed_image_url"
               value={content.fixed_image_url}
