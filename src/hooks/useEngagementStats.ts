@@ -178,10 +178,6 @@ export const useEngagementStats = () => {
     if (!user) return false;
 
     try {
-      // Check if this is a one-time task
-      const task = dailyTasks.find(t => t.id === taskId);
-      const isOneTimeTask = task?.task_key === 'profile_update';
-
       const { data, error } = await supabase.rpc('complete_daily_task', {
         p_task_id: taskId
       });
@@ -198,15 +194,6 @@ export const useEngagementStats = () => {
 
       const result = data as any;
       if (result.success) {
-        // Mark as one-time if needed
-        if (isOneTimeTask) {
-          await supabase
-            .from('user_daily_task_completions')
-            .update({ is_one_time_task: true })
-            .eq('user_id', user.id)
-            .eq('task_id', taskId);
-        }
-
         // Add the completion to state immediately
         const newCompletion = {
           id: crypto.randomUUID(),
@@ -216,9 +203,10 @@ export const useEngagementStats = () => {
         };
         setCompletedTasks(prev => [...prev, newCompletion]);
 
+        const isOneTime = result.is_one_time || false;
         toast({
           title: "تم بنجاح",
-          description: `تم إكمال مهمة "${result.task_title}" وحصلت على ${result.points_earned} نقطة`,
+          description: `تم إكمال مهمة "${result.task_title}" وحصلت على ${result.points_earned} نقطة${isOneTime ? ' (مهمة لمرة واحدة)' : ''}`,
         });
         
         // Refresh tasks and stats
