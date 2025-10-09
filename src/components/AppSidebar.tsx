@@ -51,6 +51,9 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة مقدمات المهام", url: "/admin/task-introductions", icon: Settings },
   { title: "إدارة كارت الريلز", url: "/admin/reels-card", icon: BookOpen },
   { title: "إدارة أقسام الريلز", url: "/admin/reels-categories", icon: Tags },
+  { title: "إدارة كارت الاستدعاء", url: "/admin/callout-card", icon: Star },
+  { title: "إدارة كارت المهام اليومية", url: "/admin/daily-tasks-card", icon: Calendar },
+  { title: "إعدادات التحويل", url: "/admin/conversion-settings", icon: Settings },
 ];
 
 export function AppSidebar() {
