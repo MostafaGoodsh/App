@@ -50,6 +50,7 @@ import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
 import ActiveCalloutAdmin from "./pages/ActiveCalloutAdmin";
 import VerifiedAccountsAdmin from "./pages/VerifiedAccountsAdmin";
 import Recharge from "./pages/Recharge";
+import PaymentDemo from "./pages/PaymentDemo";
 import QuranPagesAdmin from "./pages/QuranPagesAdmin";
 import DailyTasksCardAdmin from "./pages/DailyTasksCardAdmin";
 import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
@@ -68,6 +69,7 @@ const App = () => {
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Index />} />
                   <Route path="auth" element={<Auth />} />
+                  <Route path="payment-demo" element={<PaymentDemo />} />
                   <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
                   <Route path="recharge" element={<RequireAuth><Recharge /></RequireAuth>} />
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
