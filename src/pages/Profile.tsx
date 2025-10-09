@@ -25,6 +25,7 @@ import { NotificationSettingsDialog } from '@/components/profile/NotificationSet
 import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
 import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
 import { FollowStats } from '@/components/profile/FollowStats';
+import { TodoList } from '@/components/profile/TodoList';
 
 export default function Profile() {
   const { profile, loading } = useProfile();
@@ -199,7 +200,9 @@ export default function Profile() {
           <ProfileEditForm profile={profile} />
         </TabsContent>
 
-        <TabsContent value="activity">
+        <TabsContent value="activity" className="space-y-6">
+          <TodoList />
+          
           <Card>
             <CardHeader>
               <CardTitle className="arabic-text">سجل النشاط</CardTitle>

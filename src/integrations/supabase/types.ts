@@ -1815,6 +1815,7 @@ export type Database = {
           completed_date: string
           created_at: string
           id: string
+          is_one_time_task: boolean | null
           points_earned: number | null
           task_id: string
           user_id: string
@@ -1823,6 +1824,7 @@ export type Database = {
           completed_date?: string
           created_at?: string
           id?: string
+          is_one_time_task?: boolean | null
           points_earned?: number | null
           task_id: string
           user_id: string
@@ -1831,6 +1833,7 @@ export type Database = {
           completed_date?: string
           created_at?: string
           id?: string
+          is_one_time_task?: boolean | null
           points_earned?: number | null
           task_id?: string
           user_id?: string
@@ -2154,6 +2157,45 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_todo_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          is_completed: boolean
+          priority: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          priority?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          priority?: string | null
+          title?: string
           updated_at?: string
           user_id?: string
         }
