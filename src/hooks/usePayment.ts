@@ -1,6 +1,11 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import vodafoneImg from '@/assets/payment-vodafone.jpeg';
+import orangeImg from '@/assets/payment-orange.jpg';
+import ecashImg from '@/assets/payment-ecash.jpg';
+import fawryImg from '@/assets/payment-fawry.jpeg';
+import cardImg from '@/assets/payment-visa-mastercard.jpeg';
 
 interface PaymentRequest {
   amount: number;
@@ -111,35 +116,40 @@ export const usePayment = () => {
         name: 'فودافون كاش', 
         name_en: 'Vodafone Cash',
         icon: '📱',
-        color: 'from-red-500 to-red-600'
+        color: 'from-red-500 to-red-600',
+        bgImage: vodafoneImg
       },
       { 
         id: 'orange_cash', 
         name: 'أورانج كاش', 
         name_en: 'Orange Cash',
         icon: '🍊',
-        color: 'from-orange-500 to-orange-600'
+        color: 'from-orange-500 to-orange-600',
+        bgImage: orangeImg
       },
       { 
         id: 'etisalat_cash', 
         name: 'اتصالات كاش', 
         name_en: 'Etisalat Cash',
         icon: '💚',
-        color: 'from-green-500 to-green-600'
+        color: 'from-green-500 to-green-600',
+        bgImage: ecashImg
       },
       { 
         id: 'fawry', 
         name: 'فوري', 
         name_en: 'Fawry',
         icon: '🏪',
-        color: 'from-yellow-500 to-yellow-600'
+        color: 'from-yellow-500 to-yellow-600',
+        bgImage: fawryImg
       },
       { 
         id: 'card', 
         name: 'بطاقة ائتمان', 
         name_en: 'Credit Card',
         icon: '💳',
-        color: 'from-blue-500 to-blue-600'
+        color: 'from-blue-500 to-blue-600',
+        bgImage: cardImg
       }
     ];
   }, []);

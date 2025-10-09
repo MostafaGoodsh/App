@@ -199,14 +199,23 @@ const Recharge = () => {
                           console.log('Selected method:', method.id);
                           setSelectedMethod(method.id);
                         }}
-                        className={`p-4 rounded-lg border-2 transition-all text-center ${
+                        className={`relative h-24 rounded-lg border-2 transition-all overflow-hidden ${
                           selectedMethod === method.id
-                            ? 'border-primary bg-primary/10 shadow-md'
+                            ? 'border-primary shadow-lg scale-105'
                             : 'border-border hover:border-primary/50 hover:shadow'
                         }`}
                       >
-                        <div className="text-3xl mb-2">{method.icon}</div>
-                        <div className="text-sm font-bold">{method.name}</div>
+                        <img 
+                          src={method.bgImage} 
+                          alt={method.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        {selectedMethod === method.id && (
+                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                            ✓
+                          </div>
+                        )}
                       </button>
                     ))}
                   </div>
