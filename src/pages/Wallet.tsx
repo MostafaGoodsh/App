@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
 import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
 import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
+import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
+import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Wallet as WalletIcon } from 'lucide-react';
@@ -12,8 +16,28 @@ const WalletContent = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [showHybridSwap, setShowHybridSwap] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   
+  const { user } = useAuth();
   const { getTransactionHistory } = useSolanaWalletData();
+
+  // Check verification status
+  useEffect(() => {
+    const checkVerification = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('identity_verification')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      setIsVerified(!!data);
+    };
+    
+    checkVerification();
+  }, [user]);
 
   const loadTransactions = async () => {
     const txHistory = await getTransactionHistory();
@@ -29,10 +53,16 @@ const WalletContent = () => {
       {/* المحفظة الداخلية فقط */}
       <div className="space-y-6">
         {/* المحفظة الهجين */}
-        <HybridWalletCard 
-          onSwapClick={() => setShowHybridSwap(true)}
-          onWithdrawClick={() => setShowWithdraw(true)}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <HybridWalletCard 
+            onSwapClick={() => setShowHybridSwap(true)}
+            onWithdrawClick={() => setShowWithdraw(true)}
+          />
+          <MsRaCurrencyCard isVerified={isVerified} />
+        </div>
+
+        {/* XP to MSRA Conversion */}
+        <XpToMsRaConverter />
         
         {/* تاريخ السحوبات */}
         <WithdrawalHistory />
@@ -49,23 +79,23 @@ const WalletContent = () => {
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
               <div className="p-3 bg-background rounded-lg">
-                <div className="text-2xl mb-1">✅</div>
-                <div className="text-sm font-medium">المهام اليومية</div>
-                <div className="text-xs text-muted-foreground">اكسب XP</div>
+                <div className="text-2xl mb-1">💳</div>
+                <div className="text-sm font-medium">شحن XP</div>
+                <div className="text-xs text-muted-foreground">Early Pre-Sale</div>
+              </div>
+              <div className="p-3 bg-background rounded-lg">
+                <div className="text-2xl mb-1">🔄</div>
+                <div className="text-sm font-medium">تحويل XP → MSRA</div>
+                <div className="text-xs text-muted-foreground">1000 XP = 1 MSRA</div>
               </div>
               <div className="p-3 bg-background rounded-lg">
                 <div className="text-2xl mb-1">⛏️</div>
-                <div className="text-sm font-medium">التعدين</div>
-                <div className="text-xs text-muted-foreground">احصل على XP</div>
-              </div>
-              <div className="p-3 bg-background rounded-lg">
-                <div className="text-2xl mb-1">💳</div>
-                <div className="text-sm font-medium">الشحن</div>
-                <div className="text-xs text-muted-foreground">اشتري XP</div>
+                <div className="text-sm font-medium">تعدين MSRA</div>
+                <div className="text-xs text-muted-foreground">كل 24 ساعة</div>
               </div>
             </div>
             <div className="text-center text-sm text-primary font-medium">
-              كل النقاط موحدة الآن - لا داعي للتحويل!
+              XP للشحن • MSRA للتعدين • تحويل سهل ومباشر!
             </div>
           </CardContent>
         </Card>
