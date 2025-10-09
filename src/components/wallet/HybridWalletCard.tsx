@@ -87,13 +87,14 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
                   className="flex items-center justify-between p-3 bg-white/30 rounded-lg border"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
-                      {balance.token.symbol.slice(0, 2)}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/60 flex items-center justify-center text-white text-sm font-bold">
+                      XP
                     </div>
                     <div>
                       <div className="font-medium">{balance.token.name}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
                         {balance.token.symbol}
+                        <span className="text-blue-600">• نقاط الخبرة</span>
                       </div>
                     </div>
                   </div>
