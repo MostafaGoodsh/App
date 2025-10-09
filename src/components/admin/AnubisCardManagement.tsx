@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Save, RefreshCw, Sparkles } from "lucide-react";
+import { Save, RefreshCw, Sparkles, Upload, Loader2 } from "lucide-react";
 
 export default function AnubisCardManagement() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [introduction, setIntroduction] = useState("");
+  const [backgroundImage, setBackgroundImage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const fetchContent = async () => {
@@ -39,9 +41,17 @@ export default function AnubisCardManagement() {
         .eq('is_active', true)
         .maybeSingle();
 
+      const { data: bgData } = await supabase
+        .from('app_content')
+        .select('*')
+        .eq('content_key', 'anubis_card_background')
+        .eq('is_active', true)
+        .maybeSingle();
+
       setTitle(titleData?.text_content || 'أنوبيس - حامي الأسرار');
       setDescription(descData?.text_content || 'اضغط لاكتشاف أسرار أنوبيس القديمة');
       setIntroduction(introData?.text_content || '');
+      setBackgroundImage(bgData?.image_url || '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
     } catch (error) {
       console.error('Error fetching content:', error);
       toast({
@@ -58,47 +68,100 @@ export default function AnubisCardManagement() {
     fetchContent();
   }, []);
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "خطأ",
+        description: "يجب اختيار ملف صورة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "خطأ",
+        description: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `anubis-bg-${Date.now()}.${fileExt}`;
+      const filePath = `anubis/${fileName}`;
+
+      if (backgroundImage && backgroundImage.includes('content-backgrounds')) {
+        const oldPath = backgroundImage.split('/').slice(-2).join('/');
+        await supabase.storage.from('content-backgrounds').remove([oldPath]);
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('content-backgrounds')
+        .upload(filePath, file, { cacheControl: '3600', upsert: true });
+
+      if (uploadError) throw new Error(uploadError.message || 'فشل في رفع الصورة');
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-backgrounds')
+        .getPublicUrl(filePath);
+
+      setBackgroundImage(publicUrl);
+
+      toast({
+        title: "تم رفع الصورة بنجاح",
+        description: "يمكنك الآن حفظ التغييرات",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في رفع الصورة",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Save title
-      await supabase
-        .from('app_content')
-        .upsert({
-          content_key: 'anubis_card_title',
-          content_type: 'text',
-          text_content: title,
-          is_active: true,
-          position_order: 0
-        }, {
-          onConflict: 'content_key'
-        });
+      await supabase.from('app_content').upsert({
+        content_key: 'anubis_card_title',
+        content_type: 'text',
+        text_content: title,
+        is_active: true,
+        position_order: 0
+      }, { onConflict: 'content_key' });
 
-      // Save description
-      await supabase
-        .from('app_content')
-        .upsert({
-          content_key: 'anubis_card_description',
-          content_type: 'text',
-          text_content: description,
-          is_active: true,
-          position_order: 0
-        }, {
-          onConflict: 'content_key'
-        });
+      await supabase.from('app_content').upsert({
+        content_key: 'anubis_card_description',
+        content_type: 'text',
+        text_content: description,
+        is_active: true,
+        position_order: 0
+      }, { onConflict: 'content_key' });
 
-      // Save introduction
-      await supabase
-        .from('app_content')
-        .upsert({
-          content_key: 'anubis_card_introduction',
-          content_type: 'text',
-          text_content: introduction,
-          is_active: true,
-          position_order: 0
-        }, {
-          onConflict: 'content_key'
-        });
+      await supabase.from('app_content').upsert({
+        content_key: 'anubis_card_introduction',
+        content_type: 'text',
+        text_content: introduction,
+        is_active: true,
+        position_order: 0
+      }, { onConflict: 'content_key' });
+
+      await supabase.from('app_content').upsert({
+        content_key: 'anubis_card_background',
+        content_type: 'image',
+        image_url: backgroundImage,
+        is_active: true,
+        position_order: 0
+      }, { onConflict: 'content_key' });
 
       toast({
         title: "تم الحفظ",
@@ -168,6 +231,41 @@ export default function AnubisCardManagement() {
             <p className="text-xs text-muted-foreground">
               يمكنك استخدام سطر فارغ بين الفقرات لتقسيم النص
             </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="background" className="arabic-text">صورة الخلفية</Label>
+            <div className="flex items-center gap-4">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="flex-1"
+              />
+              <Button 
+                size="sm" 
+                variant="outline"
+                disabled={uploading}
+                onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                رفع صورة
+              </Button>
+            </div>
+            {backgroundImage && (
+              <div className="mt-2">
+                <img 
+                  src={backgroundImage} 
+                  alt="معاينة الخلفية"
+                  className="w-32 h-20 object-cover rounded border"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">

@@ -12,8 +12,8 @@ const AnubisCard = () => {
 
   const title = getContent('anubis_card_title', '');
   const description = getContent('anubis_card_description', '');
+  const backgroundImage = getContent('anubis_card_background', '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
 
-  // Show card even without content, with placeholder text
   const displayTitle = title || 'أنوبيس - حامي الأسرار';
   const displayDescription = description || 'اضغط لاكتشاف أسرار أنوبيس القديمة';
 
@@ -34,7 +34,7 @@ const AnubisCard = () => {
         onClick={() => setIsOpen(true)}
       >
         <img 
-          src="/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png"
+          src={backgroundImage}
           alt={getAltText('anubis_card_image', 'تمثال أنوبيس المصري الذهبي')}
           className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-300" 
           loading="lazy" 
@@ -59,7 +59,7 @@ const AnubisCard = () => {
           </DialogHeader>
           <div className="mt-6">
             <img 
-              src="/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png"
+              src={backgroundImage}
               alt={getAltText('anubis_card_image', 'تمثال أنوبيس المصري الذهبي')}
               className="w-full h-64 object-cover rounded-lg mb-6" 
             />
