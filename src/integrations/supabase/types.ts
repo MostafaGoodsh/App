@@ -1685,6 +1685,45 @@ export type Database = {
         }
         Relationships: []
       }
+      todo_list_introduction: {
+        Row: {
+          content: string
+          content_en: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          text_direction: string
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          text_direction?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          text_direction?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number

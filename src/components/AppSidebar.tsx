@@ -54,6 +54,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة كارت الاستدعاء", url: "/admin/callout-card", icon: Star },
   { title: "إدارة كارت المهام اليومية", url: "/admin/daily-tasks-card", icon: Calendar },
   { title: "إعدادات التحويل", url: "/admin/conversion-settings", icon: Settings },
+  { title: "إدارة مقدمة قائمة الأعمال", url: "/admin/todo-introduction", icon: Calendar },
 ];
 
 export function AppSidebar() {

@@ -21,8 +21,19 @@ interface TodoItem {
   created_at: string;
 }
 
+interface TodoIntroduction {
+  id: string;
+  title: string;
+  title_en?: string;
+  content: string;
+  content_en?: string;
+  text_direction: string;
+  is_active: boolean;
+}
+
 export const TodoList = () => {
   const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [introduction, setIntroduction] = useState<TodoIntroduction | null>(null);
   const [loading, setLoading] = useState(true);
   const [newTodo, setNewTodo] = useState({
     title: "",
@@ -35,7 +46,26 @@ export const TodoList = () => {
 
   useEffect(() => {
     fetchTodos();
+    fetchIntroduction();
   }, []);
+
+  const fetchIntroduction = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('todo_list_introduction')
+        .select('*')
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+      
+      setIntroduction(data);
+    } catch (error) {
+      console.error('Error fetching introduction:', error);
+    }
+  };
 
   const fetchTodos = async () => {
     try {
@@ -180,10 +210,17 @@ export const TodoList = () => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
-          قائمة الأعمال
-        </CardTitle>
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            {introduction?.title || "قائمة الأعمال"}
+          </CardTitle>
+          {introduction?.content && (
+            <p className="text-sm text-muted-foreground mt-2" dir={introduction.text_direction}>
+              {introduction.content}
+            </p>
+          )}
+        </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">

@@ -52,6 +52,7 @@ import VerifiedAccountsAdmin from "./pages/VerifiedAccountsAdmin";
 import Recharge from "./pages/Recharge";
 import QuranPagesAdmin from "./pages/QuranPagesAdmin";
 import DailyTasksCardAdmin from "./pages/DailyTasksCardAdmin";
+import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -108,6 +109,7 @@ const App = () => {
                   <Route path="admin/reels-card" element={<RequireAdmin><ReelsCardAdmin /></RequireAdmin>} />
                   <Route path="admin/reels-categories" element={<RequireAdmin><ReelsCategoriesAdmin /></RequireAdmin>} />
                   <Route path="admin/daily-tasks-card" element={<RequireAdmin><DailyTasksCardAdmin /></RequireAdmin>} />
+                  <Route path="admin/todo-introduction" element={<RequireAdmin><TodoIntroductionAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
