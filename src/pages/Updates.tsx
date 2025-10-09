@@ -60,7 +60,7 @@ const Updates = () => {
       <div 
         className="min-h-screen"
         style={{
-          backgroundImage: `url('/lovable-uploads/updates-bg.jpg')`,
+          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
