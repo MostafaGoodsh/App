@@ -266,13 +266,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            <span className="text-right">$MsRa تعدين</span>
+            <span className="text-right font-cairo" dir="rtl">تعدين $MS-RA</span>
           </div>
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
-        <CardDescription className="text-xs">
-          <div className="text-right">الأصل و المصير</div>
-          <div className="text-left italic text-muted-foreground/80">Origin & Fate</div>
+        <CardDescription className="text-xs space-y-1">
+          <div className="text-right font-cairo" dir="rtl">الأصل والمصير</div>
+          <div className="text-left italic text-muted-foreground/80 font-playfair" dir="ltr">Origin & Fate</div>
         </CardDescription>
       </CardHeader>
       
@@ -282,24 +282,22 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <div className="bg-gradient-to-r from-amber-500/20 to-yellow-600/20 backdrop-blur-sm p-3 rounded-lg border border-yellow-600/30">
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-right">التعدين</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">التعدين</div>
                 <div className="text-sm font-bold text-primary">{msRaBalance.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-left">المحفظة</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">المحفظة</div>
                 <div className="text-sm font-bold text-primary">{internalMsraBalance.toFixed(2)}</div>
               </div>
             </div>
-            <div className="pt-2 border-t border-yellow-600/30 text-center">
-              <div className="text-xs text-muted-foreground mb-1">
-                <span className="text-right inline-block w-full">الرصيد الكلي</span>
-                <span className="text-left inline-block w-full text-[10px]">Total Balance</span>
-              </div>
+            <div className="pt-2 border-t border-yellow-600/30 text-center space-y-1">
+              <div className="text-xs text-muted-foreground font-cairo" dir="rtl">الرصيد الكلي</div>
               <div className="text-xl font-bold text-primary">{totalMsRaBalance.toFixed(2)}</div>
+              <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">Total Balance</div>
             </div>
             <div className="mt-2">
               <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-right">التعدين التالي</span>
+                <span className="text-right font-cairo" dir="rtl">التعدين التالي</span>
                 <span className="text-primary font-medium">{getTimeUntilNextMining()}</span>
               </div>
               <Progress value={miningProgress} className="h-1.5" />
@@ -327,16 +325,16 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
         {/* Solana Address Registration - Always visible */}
         {!isRegistered ? (
-          <div 
+            <div 
             className="bg-black/60 p-4 rounded-lg space-y-4 border border-yellow-600/30"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2 text-primary">
+            <div className="flex items-center gap-2 text-primary font-cairo" dir="rtl">
               <Wallet className="w-4 h-4" />
               <span className="font-medium">تسجيل عنوان Solana</span>
             </div>
             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-              <Label htmlFor="solana-address">عنوان محفظة Solana</Label>
+              <Label htmlFor="solana-address" className="font-cairo" dir="rtl">عنوان محفظة Solana</Label>
               <Input
                 id="solana-address"
                 placeholder="ادخل عنوان محفظة Solana..."
@@ -363,25 +361,28 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <div className="bg-black/60 p-4 rounded-lg border border-yellow-600/30">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Mining Balance | رصيد التعدين</span>
+                    <span className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد التعدين</span>
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-xl font-bold text-primary">
                     {msRaBalance.toFixed(2)} MS-RA
                   </div>
+                  <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Mining Balance</div>
                   
                   <Separator />
                   
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Wallet Balance | رصيد المحفظة</span>
-                    <span className="font-medium">{internalMsraBalance.toFixed(2)} MS-RA</span>
+                  <div className="space-y-1">
+                    <div className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد المحفظة</div>
+                    <div className="text-lg font-medium">{internalMsraBalance.toFixed(2)} MS-RA</div>
+                    <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Wallet Balance</div>
                   </div>
                   
                   <Separator />
                   
-                  <div className="flex items-center justify-between pt-2 border-t-2 border-yellow-600/30">
-                    <span className="text-sm font-medium">Total | الإجمالي</span>
-                    <span className="text-2xl font-bold text-primary">{totalMsRaBalance.toFixed(2)} MS-RA</span>
+                  <div className="pt-2 border-t-2 border-yellow-600/30 space-y-1">
+                    <div className="text-sm font-medium font-cairo" dir="rtl">الإجمالي</div>
+                    <div className="text-2xl font-bold text-primary">{totalMsRaBalance.toFixed(2)} MS-RA</div>
+                    <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Total Balance</div>
                   </div>
                 </div>
               </div>
