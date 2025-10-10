@@ -101,20 +101,17 @@ export const XpToMsRaConverter = () => {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription className="space-y-1">
-            <div className="font-cairo" dir="rtl">
-              <strong>1000 XP = 1 MS-RA</strong>
+            <div className="font-cairo text-center" dir="rtl">
+              الحد الأدنى للتحويل: 1000 XP
             </div>
-            <div className="font-cairo" dir="rtl">
-              الحد الأدنى: 1000 XP
-            </div>
-            <div className="text-xs text-muted-foreground font-playfair" dir="ltr">
-              Minimum: 1000 XP
+            <div className="text-xs text-muted-foreground font-playfair text-center" dir="ltr">
+              Minimum Conversion: 1000 XP
             </div>
           </AlertDescription>
         </Alert>
 
         {/* Current Balances */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-black/50 rounded-lg border border-yellow-600/30">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-black/50 rounded-lg border border-primary/20">
           <div className="text-center">
             <div className="text-xs text-muted-foreground mb-1 font-cairo" dir="rtl">رصيد XP</div>
             <div className="text-base sm:text-lg font-bold text-primary">
@@ -166,7 +163,7 @@ export const XpToMsRaConverter = () => {
         </div>
 
         {/* Conversion Preview */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-black/50 rounded-lg border border-yellow-600/20">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-black/50 rounded-lg border border-primary/20">
           <div className="text-center flex-1">
             <div className="text-xs sm:text-sm text-muted-foreground font-cairo" dir="rtl">تحويل</div>
             <div className="text-base sm:text-xl font-bold break-all">{xpAmount || "0"} XP</div>

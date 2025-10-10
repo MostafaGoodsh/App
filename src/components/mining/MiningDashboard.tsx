@@ -266,7 +266,7 @@ const MiningDashboard = () => {
           </div>
 
           {profile?.is_mining_active && currentMined > 0 && (
-            <div className="bg-black/60 p-3 rounded-lg border border-yellow-600/30">
+            <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
               <p className="text-sm font-medium">التعدين الحالي</p>
               <p className="text-lg font-bold text-primary">
                 +{currentMined.toFixed(8)} عملة
@@ -310,7 +310,7 @@ const MiningDashboard = () => {
             </div>
 
             {nextLevel && (
-              <div className="bg-black/60 p-3 rounded-lg border border-yellow-600/30">
+              <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
                 <p className="text-sm font-medium">المستوى التالي</p>
                 <p className="text-lg font-bold">{nextLevel.level_name}</p>
                 <p className="text-xs text-muted-foreground">

@@ -69,7 +69,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
       
       <CardContent className="space-y-6">
         {/* إجمالي القيمة */}
-        <div className="text-center p-3 bg-black/60 rounded-lg border border-yellow-600/30 space-y-1">
+        <div className="text-center p-3 bg-black/60 rounded-lg border border-primary/20 space-y-1">
           <div className="text-xs text-muted-foreground font-cairo" dir="rtl">إجمالي القيمة</div>
           <div className="text-2xl font-bold text-primary">${totalValue.toFixed(2)}</div>
           <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Total Value</div>
@@ -96,7 +96,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
               {balances.map((balance) => (
                 <div
                   key={balance.id}
-                  className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-yellow-600/20"
+                  className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-primary/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/60 flex items-center justify-center text-white text-sm font-bold">
