@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
 import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
-import { WithdrawalHistory } from '@/components/wallet/WithdrawalHistory';
 import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { RechargeSection } from '@/components/wallet/RechargeSection';
@@ -67,9 +66,6 @@ const WalletContent = () => {
           <RechargeSection />
           <XpToMsRaConverter />
         </div>
-        
-        {/* تاريخ السحوبات */}
-        <WithdrawalHistory />
       </div>
 
       {/* نافذة التبديل السريع */}
