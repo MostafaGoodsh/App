@@ -62,7 +62,7 @@ const MiningDashboard = () => {
         setCurrentMined(0); // Reset display counter
         toast({
           title: "تم التحديث",
-          description: `تم تعدين ${result.mined_amount.toFixed(8)} عملة`,
+          description: `تم تعدين ${result.mined_amount.toFixed(8)} MS-RA`,
         });
       }
     } catch (err) {
@@ -191,10 +191,10 @@ const MiningDashboard = () => {
             <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-lg sm:text-2xl font-bold">
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
               {profile?.mining_rate_per_hour || 0}
             </div>
-            <p className="text-xs text-muted-foreground">/ساعة</p>
+            <p className="text-xs text-muted-foreground">MS-RA/ساعة</p>
           </CardContent>
         </Card>
 
@@ -225,7 +225,7 @@ const MiningDashboard = () => {
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-sm sm:text-lg font-bold truncate">
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
               {currentLevel?.level_name || 'غير محدد'}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -269,7 +269,7 @@ const MiningDashboard = () => {
             <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
               <p className="text-sm font-medium">التعدين الحالي</p>
               <p className="text-lg font-bold text-primary">
-                +{currentMined.toFixed(8)} عملة
+                +{currentMined.toFixed(8)} MS-RA
               </p>
               <p className="text-xs text-muted-foreground">
                 سيتم إضافتها عند التحديث التالي
@@ -314,7 +314,7 @@ const MiningDashboard = () => {
                 <p className="text-sm font-medium">المستوى التالي</p>
                 <p className="text-lg font-bold">{nextLevel.level_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  معدل التعدين: {nextLevel.mining_rate_per_hour} عملة/ساعة
+                  معدل التعدين: {nextLevel.mining_rate_per_hour} MS-RA/ساعة
                 </p>
               </div>
             )}
@@ -343,7 +343,7 @@ const MiningDashboard = () => {
                     label={{ value: 'عملة', angle: -90, position: 'insideLeft' }}
                   />
                   <Tooltip 
-                    formatter={(value: any) => [value.toFixed(8), 'عملة']}
+                    formatter={(value: any) => [value.toFixed(8), 'MS-RA']}
                     labelFormatter={(label) => `الساعة: ${label}`}
                   />
                   <Line 
@@ -408,12 +408,12 @@ const MiningDashboard = () => {
                   </p>
                   <p>
                     <span className="text-muted-foreground">معدل التعدين:</span>{' '}
-                    <span className="font-medium">{level.mining_rate_per_hour} عملة/ساعة</span>
+                    <span className="font-medium">{level.mining_rate_per_hour} MS-RA/ساعة</span>
                   </p>
                   {level.upgrade_cost > 0 && (
                     <p>
                       <span className="text-muted-foreground">تكلفة الترقية:</span>{' '}
-                      <span className="font-medium">{level.upgrade_cost} عملة</span>
+                      <span className="font-medium">{level.upgrade_cost} MS-RA</span>
                     </p>
                   )}
                 </div>
