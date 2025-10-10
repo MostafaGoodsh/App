@@ -83,17 +83,18 @@ export const XpToMsRaConverter = () => {
 
   return (
     <Card className="border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-primary" />
-          <div className="flex flex-col text-right">
-            <span>تحويل XP إلى Ms-Ra</span>
-            <span className="text-sm font-normal">XP to Ms-Ra Conversion</span>
+      <CardHeader className="space-y-3">
+        <CardTitle className="flex items-center justify-center gap-3 text-lg sm:text-xl">
+          <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+          <div className="flex items-center gap-2">
+            <span className="text-primary font-bold">XP</span>
+            <span className="text-muted-foreground">⟷</span>
+            <span className="text-primary font-bold">Ms-Ra</span>
           </div>
         </CardTitle>
-        <CardDescription>
-          <div className="text-right">حول نقاط XP الخاصة بك إلى عملة التعدين Ms-Ra</div>
-          <div className="text-left text-xs">Convert Your XP Points to Ms-Ra Mining Token</div>
+        <CardDescription className="text-center space-y-1">
+          <div className="text-sm sm:text-base">استبدال النقاط</div>
+          <div className="text-xs text-muted-foreground">Points Swap</div>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,25 +112,28 @@ export const XpToMsRaConverter = () => {
         </Alert>
 
         {/* Current Balances */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-black/50 rounded-lg border border-yellow-600/30">
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">رصيد XP | XP Balance</div>
-            <div className="text-lg font-bold text-primary">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-black/50 rounded-lg border border-yellow-600/30">
+          <div className="text-center">
+            <div className="text-xs text-muted-foreground mb-1">رصيد XP</div>
+            <div className="text-base sm:text-lg font-bold text-primary">
               {xpBalance.toLocaleString()}
             </div>
+            <div className="text-[10px] text-muted-foreground">XP Balance</div>
           </div>
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">رصيد MSRA | MSRA Balance</div>
-            <div className="text-lg font-bold text-primary">
+          <div className="text-center">
+            <div className="text-xs text-muted-foreground mb-1">رصيد MSRA</div>
+            <div className="text-base sm:text-lg font-bold text-primary">
               {msraBalance.toFixed(4)}
             </div>
+            <div className="text-[10px] text-muted-foreground">MSRA Balance</div>
           </div>
         </div>
 
         {/* Conversion Input */}
         <div className="space-y-2">
-          <Label htmlFor="xp-amount">
-            كمية XP للتحويل | XP Amount to Convert
+          <Label htmlFor="xp-amount" className="text-sm sm:text-base text-center block">
+            <div>كمية XP للتحويل</div>
+            <div className="text-xs text-muted-foreground">XP Amount to Convert</div>
           </Label>
           <div className="flex gap-2">
             <Input
@@ -141,30 +145,38 @@ export const XpToMsRaConverter = () => {
               min={conversionRate}
               step={conversionRate}
               disabled={isConverting || isLoading}
+              className="text-center text-base sm:text-lg"
             />
             <Button
               variant="outline"
               onClick={setMaxAmount}
               disabled={isConverting || isLoading || xpBalance < conversionRate}
+              className="whitespace-nowrap px-3 sm:px-4"
             >
-              الكل | Max
+              <span className="hidden sm:inline">الكل</span>
+              <span className="sm:hidden">Max</span>
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            الرصيد المتاح: {xpBalance.toLocaleString()} XP | Available Balance
+          <p className="text-xs text-center text-muted-foreground">
+            <span>الرصيد المتاح: {xpBalance.toLocaleString()} XP</span>
+            <br className="sm:hidden" />
+            <span className="hidden sm:inline"> | </span>
+            <span>Available Balance</span>
           </p>
         </div>
 
         {/* Conversion Preview */}
-        <div className="flex items-center justify-center gap-3 p-4 bg-black/50 rounded-lg border border-yellow-600/20">
-          <div className="text-center">
-            <div className="text-sm text-muted-foreground">تحويل | Convert</div>
-            <div className="text-xl font-bold">{xpAmount || "0"} XP</div>
+        <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-black/50 rounded-lg border border-yellow-600/20">
+          <div className="text-center flex-1">
+            <div className="text-xs sm:text-sm text-muted-foreground">تحويل</div>
+            <div className="text-base sm:text-xl font-bold break-all">{xpAmount || "0"} XP</div>
+            <div className="text-[10px] text-muted-foreground">Convert</div>
           </div>
-          <ArrowRight className="w-5 h-5 text-primary" />
-          <div className="text-center">
-            <div className="text-sm text-muted-foreground">تحصل على | You Get</div>
-            <div className="text-xl font-bold text-primary">{msraAmount} MSRA</div>
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+          <div className="text-center flex-1">
+            <div className="text-xs sm:text-sm text-muted-foreground">تحصل على</div>
+            <div className="text-base sm:text-xl font-bold text-primary break-all">{msraAmount} MSRA</div>
+            <div className="text-[10px] text-muted-foreground">You Get</div>
           </div>
         </div>
 
@@ -172,17 +184,16 @@ export const XpToMsRaConverter = () => {
         <Button
           onClick={handleConvert}
           disabled={isConverting || isLoading || !xpAmount || parseFloat(xpAmount) < conversionRate}
-          className="w-full"
+          className="w-full text-sm sm:text-base"
           size="lg"
         >
-          <Zap className="w-4 h-4 mr-2" />
-          {isConverting ? "جاري التحويل... | Converting..." : "تحويل إلى MSRA | Convert to MSRA"}
+          <Zap className="w-4 h-4 ml-2 flex-shrink-0" />
+          <span>{isConverting ? "جاري التحويل..." : "تحويل إلى MSRA"}</span>
         </Button>
 
-        <p className="text-xs text-center text-muted-foreground">
-          التحويل فوري وبدون رسوم
-          <br />
-          Instant Conversion with No Fees
+        <p className="text-xs text-center text-muted-foreground space-y-1">
+          <div>التحويل فوري وبدون رسوم</div>
+          <div>Instant Conversion with No Fees</div>
         </p>
       </CardContent>
     </Card>
