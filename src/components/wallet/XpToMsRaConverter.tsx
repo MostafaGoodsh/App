@@ -82,8 +82,12 @@ export const XpToMsRaConverter = () => {
   };
 
   return (
-    <Card className="border-primary/20 bg-card">
-      <CardHeader className="space-y-3">
+    <Card className="border-primary/20 bg-card relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
+      />
+      <CardHeader className="space-y-3 relative z-10">
         <CardTitle className="flex items-center justify-center gap-3 text-lg sm:text-xl">
           <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
           <div className="flex items-center gap-2">
@@ -97,7 +101,7 @@ export const XpToMsRaConverter = () => {
           <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Points Swap</div>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-10">
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription className="space-y-1">

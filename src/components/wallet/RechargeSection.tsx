@@ -79,11 +79,15 @@ export const RechargeSection = () => {
   };
 
   return (
-    <Card className="border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border-primary/20 relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
+      />
+      <CardHeader className="relative z-10">
+        <CardTitle className="flex items-center gap-2 text-base">
           <CreditCard className="w-5 h-5 text-primary" />
-          شحن نقاط XP | Recharge XP
+          <span>Recharge XP | شحن نقاط XP</span>
         </CardTitle>
         <CardDescription>
           اشحن نقاط XP باستخدام طرق الدفع المحلية - Early Pre-Sale
@@ -92,7 +96,7 @@ export const RechargeSection = () => {
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="relative z-10">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Amount Input */}
           <div className="space-y-2">

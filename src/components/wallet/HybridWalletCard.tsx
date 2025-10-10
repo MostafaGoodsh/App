@@ -47,8 +47,12 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
   const totalValue = getTotalUSDValue();
 
   return (
-    <Card className="w-full bg-card border-primary/20">
-      <CardHeader>
+    <Card className="w-full bg-card border-primary/20 relative overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
+      />
+      <CardHeader className="relative z-10">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -67,7 +71,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 relative z-10">
         {/* إجمالي القيمة */}
         <div className="text-center p-3 bg-black/60 rounded-lg border border-primary/20 space-y-1">
           <div className="text-xs text-muted-foreground font-cairo" dir="rtl">إجمالي القيمة</div>
