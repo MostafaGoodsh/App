@@ -82,7 +82,7 @@ export const XpToMsRaConverter = () => {
   };
 
   return (
-    <Card className="border-primary/20">
+    <Card className="border-primary/20 bg-card">
       <CardHeader className="space-y-3">
         <CardTitle className="flex items-center justify-center gap-3 text-lg sm:text-xl">
           <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
@@ -101,11 +101,14 @@ export const XpToMsRaConverter = () => {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription className="space-y-1">
-            <div className="font-cairo text-center" dir="rtl">
-              الحد الأدنى للتحويل: 1000 XP
+            <div className="font-cairo font-bold text-center" dir="rtl">
+              معدل التحويل: 1000 XP = 1 MS-RA
             </div>
             <div className="text-xs text-muted-foreground font-playfair text-center" dir="ltr">
-              Minimum Conversion: 1000 XP
+              Conversion Rate
+            </div>
+            <div className="text-xs text-muted-foreground font-cairo text-center mt-2" dir="rtl">
+              الحد الأدنى: 1000 XP
             </div>
           </AlertDescription>
         </Alert>

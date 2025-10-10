@@ -257,7 +257,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   };
 
   return (
-    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" onClick={() => navigate('/mining')}>
+    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg bg-card" onClick={() => navigate('/mining')}>
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${cardBackground})` }}
@@ -279,7 +279,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       {/* Mining Stats - Only visible if verified */}
       {isVerified && (
         <div className="relative z-10 px-4 pb-3">
-          <div className="bg-gradient-to-r from-amber-500/20 to-yellow-600/20 backdrop-blur-sm p-3 rounded-lg border border-primary/20">
+          <div className="bg-black/50 p-3 rounded-lg border border-primary/20">
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
                 <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">التعدين</div>

@@ -47,7 +47,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
   const totalValue = getTotalUSDValue();
 
   return (
-    <Card className="w-full bg-gradient-to-br from-amber-500/10 to-yellow-600/10 border-primary/20">
+    <Card className="w-full bg-card border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
