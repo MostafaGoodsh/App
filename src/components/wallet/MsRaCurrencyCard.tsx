@@ -262,48 +262,47 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url(${cardBackground})` }}
       />
-      <CardHeader className="relative z-10">
-        <CardTitle className="flex items-center gap-2 text-center w-full flex-col mb-2">
+      <CardHeader className="relative z-10 pb-3">
+        <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            {cardTitle}
-            <ExternalLink className="w-4 h-4 text-muted-foreground" />
+            <span className="text-right">$MsRa تعدين</span>
           </div>
-          <div className="text-lg text-primary font-normal">
-            Origin & Fate | الأصل و المصير
-          </div>
+          <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
-        <CardDescription className="text-center">
-          <div className="mb-2">عملة رقمية مبتكرة مع نظام تعدين EVM كل 24 ساعة</div>
-          <div className="text-sm italic text-muted-foreground/80">From Egypt With Love</div>
+        <CardDescription className="text-xs">
+          <div className="text-right">الأصل و المصير</div>
+          <div className="text-left italic text-muted-foreground/80">Origin & Fate</div>
         </CardDescription>
       </CardHeader>
       
       {/* Mining Stats - Only visible if verified */}
       {isVerified && (
-        <div className="relative z-10 px-6 pb-4">
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-4 rounded-lg border border-primary/20">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div>
-                <div className="text-xs text-muted-foreground mb-1">Mining</div>
+        <div className="relative z-10 px-4 pb-3">
+          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-3 rounded-lg border border-primary/20">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1 text-right">التعدين</div>
                 <div className="text-sm font-bold text-primary">{msRaBalance.toFixed(2)}</div>
               </div>
-              <div>
-                <div className="text-xs text-muted-foreground mb-1">Wallet</div>
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1 text-left">المحفظة</div>
                 <div className="text-sm font-bold text-primary">{internalMsraBalance.toFixed(2)}</div>
               </div>
-              <div className="col-span-3 pt-2 border-t border-primary/20">
-                <div className="text-xs text-muted-foreground mb-1">Total Balance | الرصيد الكلي</div>
-                <div className="text-2xl font-bold text-primary">{totalMsRaBalance.toFixed(2)}</div>
-                <div className="text-sm text-primary">$MS-RA</div>
-              </div>
             </div>
-            <div className="mt-3">
-              <div className="flex justify-between text-xs mb-1">
-                <span>Next Mining | التعدين التالي</span>
-                <span className="text-primary">{getTimeUntilNextMining()}</span>
+            <div className="pt-2 border-t border-primary/20 text-center">
+              <div className="text-xs text-muted-foreground mb-1">
+                <span className="text-right inline-block w-full">الرصيد الكلي</span>
+                <span className="text-left inline-block w-full text-[10px]">Total Balance</span>
               </div>
-              <Progress value={miningProgress} className="h-2" />
+              <div className="text-xl font-bold text-primary">{totalMsRaBalance.toFixed(2)}</div>
+            </div>
+            <div className="mt-2">
+              <div className="flex justify-between text-[10px] mb-1">
+                <span className="text-right">التعدين التالي</span>
+                <span className="text-primary font-medium">{getTimeUntilNextMining()}</span>
+              </div>
+              <Progress value={miningProgress} className="h-1.5" />
             </div>
           </div>
         </div>

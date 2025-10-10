@@ -20,11 +20,11 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Wallet className="w-5 h-5" />
-            محفظة XP الداخلية | Internal XP Wallet
-          </CardTitle>
-          <CardDescription>نظام نقاط موحد سريع وفوري - Unified Points System</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          <Wallet className="w-5 h-5" />
+          <span className="text-right">المحفظة | Wallet</span>
+        </CardTitle>
+        <CardDescription>نظام موحد سريع - Unified System</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Skeleton className="h-8 w-32" />
@@ -48,36 +48,33 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
             <div className="p-2 rounded-lg bg-primary/10">
               <Wallet className="w-5 h-5 text-primary" />
             </div>
-            <div>
-              <div>محفظة XP الداخلية</div>
-              <div className="text-sm font-normal text-muted-foreground">Internal XP Wallet</div>
+            <div className="text-right">
+              <div className="text-lg">المحفظة</div>
+              <div className="text-sm font-normal text-muted-foreground text-left">Wallet</div>
             </div>
           </div>
           <Badge variant="secondary" className="bg-green-100 text-green-800">
             نشطة • Active
           </Badge>
         </CardTitle>
-        <CardDescription>
-          نظام نقاط موحد سريع وفوري مع إمكانية السحب الحقيقي
-          <br />
-          <span className="text-xs">Unified & Fast Points System with Real Withdrawal</span>
-        </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-6">
         {/* إجمالي القيمة */}
-        <div className="text-center p-4 bg-white/50 rounded-lg border">
-          <div className="text-sm text-muted-foreground mb-1">
-            إجمالي القيمة | Total Value
+        <div className="text-center p-3 bg-white/50 rounded-lg border">
+          <div className="text-xs text-muted-foreground mb-1">
+            <span className="text-right inline-block w-full">إجمالي القيمة</span>
+            <span className="text-left inline-block w-full">Total Value</span>
           </div>
           <div className="text-2xl font-bold text-primary">${totalValue.toFixed(2)}</div>
         </div>
 
         {/* قائمة الأرصدة */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Coins className="w-4 h-4" />
-            <span>أرصدة العملات | Balances</span>
+            <span className="text-right">الأرصدة</span>
+            <span className="text-left text-xs">Balances</span>
           </div>
           
           {balances.length === 0 ? (
@@ -98,10 +95,10 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
                       XP
                     </div>
                     <div>
-                      <div className="font-medium">{balance.token.name}</div>
+                      <div className="font-medium text-sm">{balance.token.name}</div>
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        {balance.token.symbol}
-                        <span className="text-blue-600">• نقاط الخبرة</span>
+                        <span className="text-right">{balance.token.symbol}</span>
+                        <span className="text-blue-600 text-left">• XP Points</span>
                       </div>
                     </div>
                   </div>
@@ -122,27 +119,25 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
         </div>
 
         {/* أزرار الإجراءات */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <Button 
             onClick={onSwapClick}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm"
             variant="default"
           >
             <ArrowUpRight className="w-4 h-4" />
-            <span>تبديل سريع | Quick Swap</span>
+            <span className="text-right">تبديل</span>
+            <span className="text-left text-xs">Swap</span>
           </Button>
           <Button 
             onClick={() => setShowWithdrawalDialog(true)}
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm"
           >
             <TrendingUp className="w-4 h-4" />
-            <span>سحب حقيقي | Withdraw</span>
+            <span className="text-right">سحب</span>
+            <span className="text-left text-xs">Withdraw</span>
           </Button>
-        </div>
-
-        <div className="text-xs text-center text-muted-foreground bg-blue-50 p-2 rounded">
-          💡 التبديل الداخلي فوري ومجاني، السحب الحقيقي يتطلب رسوم شبكة
         </div>
       </CardContent>
       

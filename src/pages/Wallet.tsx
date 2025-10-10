@@ -70,43 +70,6 @@ const WalletContent = () => {
         
         {/* تاريخ السحوبات */}
         <WithdrawalHistory />
-        
-        {/* معلومات النظام */}
-        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              <span>نظام XP و MS-RA | XP & MS-RA System</span>
-            </CardTitle>
-            <CardDescription>
-              نظام متكامل للنقاط والتعدين - Complete Points & Mining System
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
-              <div className="p-3 bg-background rounded-lg">
-                <div className="text-2xl mb-1">💳</div>
-                <div className="text-sm font-medium">شحن XP | Recharge</div>
-                <div className="text-xs text-muted-foreground">Early Pre-Sale</div>
-              </div>
-              <div className="p-3 bg-background rounded-lg">
-                <div className="text-2xl mb-1">🔄</div>
-                <div className="text-sm font-medium">XP → MSRA</div>
-                <div className="text-xs text-muted-foreground">1000 XP = 1 MSRA</div>
-              </div>
-              <div className="p-3 bg-background rounded-lg">
-                <div className="text-2xl mb-1">⛏️</div>
-                <div className="text-sm font-medium">تعدين | Mining</div>
-                <div className="text-xs text-muted-foreground">Every 24h</div>
-              </div>
-            </div>
-            <div className="text-center text-sm text-primary font-medium">
-              XP للشحن • MSRA للتعدين • تحويل سهل ومباشر!
-              <br />
-              <span className="text-xs">XP for Recharge • MSRA for Mining • Easy Conversion!</span>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* نافذة التبديل السريع */}
