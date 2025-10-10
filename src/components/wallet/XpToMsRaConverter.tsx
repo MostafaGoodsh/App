@@ -86,12 +86,14 @@ export const XpToMsRaConverter = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary" />
-          تحويل XP إلى Ms-Ra | XP to Ms-Ra Conversion
+          <div className="flex flex-col text-right">
+            <span>تحويل XP إلى Ms-Ra</span>
+            <span className="text-sm font-normal">XP to Ms-Ra Conversion</span>
+          </div>
         </CardTitle>
         <CardDescription>
-          حول نقاط XP الخاصة بك إلى عملة التعدين Ms-Ra
-          <br />
-          <span className="text-xs">Convert Your XP Points to Ms-Ra Mining Token</span>
+          <div className="text-right">حول نقاط XP الخاصة بك إلى عملة التعدين Ms-Ra</div>
+          <div className="text-left text-xs">Convert Your XP Points to Ms-Ra Mining Token</div>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -109,7 +111,7 @@ export const XpToMsRaConverter = () => {
         </Alert>
 
         {/* Current Balances */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+        <div className="grid grid-cols-2 gap-4 p-4 bg-black/50 rounded-lg border border-yellow-600/30">
           <div>
             <div className="text-xs text-muted-foreground mb-1">رصيد XP | XP Balance</div>
             <div className="text-lg font-bold text-primary">
@@ -154,7 +156,7 @@ export const XpToMsRaConverter = () => {
         </div>
 
         {/* Conversion Preview */}
-        <div className="flex items-center justify-center gap-3 p-4 bg-primary/5 rounded-lg">
+        <div className="flex items-center justify-center gap-3 p-4 bg-black/50 rounded-lg border border-yellow-600/20">
           <div className="text-center">
             <div className="text-sm text-muted-foreground">تحويل | Convert</div>
             <div className="text-xl font-bold">{xpAmount || "0"} XP</div>

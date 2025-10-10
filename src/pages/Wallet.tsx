@@ -123,33 +123,6 @@ const WalletContent = () => {
         </div>
       )}
 
-      {/* تاريخ المعاملات المبسط */}
-      {transactions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>تاريخ المعاملات</CardTitle>
-            <CardDescription>آخر المعاملات المنفذة</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {transactions.slice(0, 5).map((tx, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <div className="font-medium">{tx.transaction_type}</div>
-                    <div className="text-sm text-muted-foreground">{tx.description}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-green-600">+{tx.amount} SOL</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(tx.created_at).toLocaleDateString('ar-SA')}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
     </>
   );

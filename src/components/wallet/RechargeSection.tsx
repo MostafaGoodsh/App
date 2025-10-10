@@ -197,14 +197,14 @@ export const RechargeSection = () => {
           )}
 
           {/* Test Mode Warning */}
-          <Alert className="bg-amber-50 dark:bg-amber-950 border-amber-200">
-            <Info className="h-4 w-4" />
+          <Alert className="bg-black/70 border-yellow-600/40">
+            <Info className="h-4 w-4 text-yellow-500" />
             <AlertDescription className="text-xs">
-              <p className="font-bold text-amber-700 dark:text-amber-300 mb-1">
+              <p className="font-bold text-yellow-500 mb-1">
                 🧪 Test Mode | وضع الاختبار
               </p>
               <p>استخدم بطاقة الاختبار: <strong className="font-mono">4987 6543 2109 8769</strong></p>
-              <p className="text-red-600 dark:text-red-400 mt-1">⚠️ لا تستخدم بطاقة حقيقية!</p>
+              <p className="text-red-400 mt-1">⚠️ لا تستخدم بطاقة حقيقية!</p>
             </AlertDescription>
           </Alert>
 
