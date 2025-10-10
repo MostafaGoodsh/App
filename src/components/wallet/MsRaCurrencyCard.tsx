@@ -279,7 +279,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       {/* Mining Stats - Only visible if verified */}
       {isVerified && (
         <div className="relative z-10 px-4 pb-3">
-          <div className="bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm p-3 rounded-lg border border-primary/20">
+          <div className="bg-gradient-to-r from-amber-500/20 to-yellow-600/20 backdrop-blur-sm p-3 rounded-lg border border-yellow-600/30">
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
                 <div className="text-xs text-muted-foreground mb-1 text-right">التعدين</div>
@@ -290,7 +290,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 <div className="text-sm font-bold text-primary">{internalMsraBalance.toFixed(2)}</div>
               </div>
             </div>
-            <div className="pt-2 border-t border-primary/20 text-center">
+            <div className="pt-2 border-t border-yellow-600/30 text-center">
               <div className="text-xs text-muted-foreground mb-1">
                 <span className="text-right inline-block w-full">الرصيد الكلي</span>
                 <span className="text-left inline-block w-full text-[10px]">Total Balance</span>
@@ -328,7 +328,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         {/* Solana Address Registration - Always visible */}
         {!isRegistered ? (
           <div 
-            className="bg-card/80 p-4 rounded-lg space-y-4 border border-border"
+            className="bg-black/60 p-4 rounded-lg space-y-4 border border-yellow-600/30"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 text-primary">
@@ -360,7 +360,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <>
             {/* Balance Display - Only if verified */}
             {isVerified && (
-              <div className="bg-card/80 p-4 rounded-lg border border-border">
+              <div className="bg-black/60 p-4 rounded-lg border border-yellow-600/30">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Mining Balance | رصيد التعدين</span>
@@ -379,7 +379,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   
                   <Separator />
                   
-                  <div className="flex items-center justify-between pt-2 border-t-2 border-primary/20">
+                  <div className="flex items-center justify-between pt-2 border-t-2 border-yellow-600/30">
                     <span className="text-sm font-medium">Total | الإجمالي</span>
                     <span className="text-2xl font-bold text-primary">{totalMsRaBalance.toFixed(2)} MS-RA</span>
                   </div>
@@ -428,7 +428,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             )}
 
             {/* Registered Address Display */}
-            <div className="bg-card/80 p-3 rounded-lg border border-border">
+            <div className="bg-black/60 p-3 rounded-lg border border-yellow-600/30">
               <div className="flex items-center gap-2 text-primary mb-1">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-sm font-medium">عنوان Solana مسجل</span>

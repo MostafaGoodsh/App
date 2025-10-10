@@ -41,7 +41,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
   const totalValue = getTotalUSDValue();
 
   return (
-    <Card className="w-full bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+    <Card className="w-full bg-gradient-to-br from-amber-500/10 to-yellow-600/10 border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
       
       <CardContent className="space-y-6">
         {/* إجمالي القيمة */}
-        <div className="text-center p-3 bg-white/50 rounded-lg border">
+        <div className="text-center p-3 bg-black/60 rounded-lg border border-yellow-600/30">
           <div className="text-xs text-muted-foreground mb-1">
             <span className="text-right inline-block w-full">إجمالي القيمة</span>
             <span className="text-left inline-block w-full">Total Value</span>
@@ -88,7 +88,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
               {balances.map((balance) => (
                 <div
                   key={balance.id}
-                  className="flex items-center justify-between p-3 bg-white/30 rounded-lg border"
+                  className="flex items-center justify-between p-3 bg-black/50 rounded-lg border border-yellow-600/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-primary/60 flex items-center justify-center text-white text-sm font-bold">
