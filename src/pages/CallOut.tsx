@@ -239,7 +239,7 @@ const CallOut = () => {
             )}
           </div>
 
-          {/* Personalities Archive Table */}
+          {/* Personalities Timeline */}
           {personalities.length > 0 && (
             <Card>
               <CardHeader className="px-3 sm:px-6">
@@ -248,78 +248,96 @@ const CallOut = () => {
                   أرشيف الشخصيات المكرمة
                 </CardTitle>
                 <CardDescription className="arabic-text text-xs sm:text-sm">
-                  جدول أرشيفي للشخصيات التي تم تكريمها على المنصة
+                  تايم لاين الشخصيات التي تم تكريمها على المنصة
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-2 sm:px-6">
-                <div className="overflow-x-auto -mx-2 sm:mx-0">
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">الاسم</th>
-                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm hidden sm:table-cell">اللقب</th>
-                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">التصنيف</th>
-                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm hidden md:table-cell">الحالة</th>
-                        <th className="text-right p-2 sm:p-3 arabic-text text-xs sm:text-sm">التواصل</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {personalities.map((personality) => (
-                        <tr key={personality.id} className="border-b hover:bg-muted/50">
-                          <td className="p-2 sm:p-3">
-                            <div className="flex items-center gap-2">
-                              {personality.image_url ? (
-                                <img 
-                                  src={personality.image_url} 
-                                  alt={personality.name}
-                                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
-                                />
-                              ) : (
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                                  <Star className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
-                                </div>
-                              )}
-                              <span className="font-medium arabic-text text-xs sm:text-sm truncate">{personality.name}</span>
-                            </div>
-                          </td>
-                          <td className="p-2 sm:p-3 arabic-text text-muted-foreground text-xs sm:text-sm hidden sm:table-cell">{personality.title}</td>
-                          <td className="p-2 sm:p-3">
-                            <Badge variant="outline" className={`${getCategoryColor(personality.category)} text-xs`}>
-                              <span className="hidden sm:inline">{getCategoryIcon(personality.category)}</span>
-                              <span className="sm:mr-1">
-                                {personality.category === 'scientist' ? 'عالم' : 
-                                 personality.category === 'artist' ? 'فنان' : 
-                                 personality.category === 'intellectual' ? 'مفكر' : 'عامة'}
-                              </span>
-                            </Badge>
-                          </td>
-                          <td className="p-2 sm:p-3 hidden md:table-cell">
-                            {personality.is_featured && (
-                              <Badge className="bg-primary/90 text-xs">
-                                <Star className="w-2 h-2 sm:w-3 sm:h-3 ml-1" />
-                                مميز
-                              </Badge>
-                            )}
-                          </td>
-                          <td className="p-2 sm:p-3">
-                            {personality.contact_link && personality.contact_link !== '#' ? (
-                              <a 
-                                href={personality.contact_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-xs sm:text-sm arabic-text"
-                              >
-                                <MessageCircle className="w-3 h-3" />
-                                <span className="hidden sm:inline">{personality.contact_button_text || 'تواصل'}</span>
-                              </a>
+              <CardContent className="px-3 sm:px-6">
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute right-[19px] sm:right-[23px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/60 via-primary/30 to-transparent" />
+                  
+                  {/* Timeline Items */}
+                  <div className="space-y-6">
+                    {personalities.map((personality, index) => (
+                      <div key={personality.id} className="relative flex gap-4 sm:gap-6">
+                        {/* Timeline Node */}
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-primary bg-background overflow-hidden shadow-lg">
+                            {personality.image_url ? (
+                              <img 
+                                src={personality.image_url} 
+                                alt={personality.name}
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
-                              <span className="text-muted-foreground text-xs arabic-text">-</span>
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                              </div>
                             )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                          {personality.is_featured && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-primary rounded-full flex items-center justify-center">
+                              <Star className="w-2 h-2 sm:w-3 sm:h-3 text-primary-foreground fill-current" />
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Content Card */}
+                        <div className="flex-1 pb-4">
+                          <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-colors">
+                            <CardContent className="p-3 sm:p-4">
+                              <div className="space-y-2">
+                                {/* Name and Title */}
+                                <div>
+                                  <h3 className="font-bold text-sm sm:text-base arabic-text">
+                                    {personality.name}
+                                  </h3>
+                                  {personality.title && (
+                                    <p className="text-xs sm:text-sm text-muted-foreground arabic-text mt-0.5">
+                                      {personality.title}
+                                    </p>
+                                  )}
+                                </div>
+                                
+                                {/* Description if available */}
+                                {personality.description && (
+                                  <p className="text-xs sm:text-sm text-muted-foreground arabic-text leading-relaxed">
+                                    {personality.description}
+                                  </p>
+                                )}
+                                
+                                {/* Category and Contact */}
+                                <div className="flex items-center justify-between gap-2 pt-2">
+                                  <Badge variant="outline" className={`${getCategoryColor(personality.category)} text-xs`}>
+                                    <span className="flex items-center gap-1">
+                                      {getCategoryIcon(personality.category)}
+                                      <span>
+                                        {personality.category === 'scientist' ? 'عالم' : 
+                                         personality.category === 'artist' ? 'فنان' : 
+                                         personality.category === 'intellectual' ? 'مفكر' : 'عامة'}
+                                      </span>
+                                    </span>
+                                  </Badge>
+                                  
+                                  {personality.contact_link && personality.contact_link !== '#' && (
+                                    <a 
+                                      href={personality.contact_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-xs sm:text-sm arabic-text"
+                                    >
+                                      <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                      <span>{personality.contact_button_text || 'تواصل'}</span>
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
