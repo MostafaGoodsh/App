@@ -206,19 +206,12 @@ const CallOut = () => {
                 </CardHeader>
                 <CardContent className="px-3 sm:px-6">
                   {activeCallout.personality_description && (
-                    <div className="arabic-text text-center mb-4">
+                    <div className="arabic-text text-center">
                       <p className="text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                         {activeCallout.personality_description}
                       </p>
                     </div>
                   )}
-                  
-                  {/* منطقة للصور أو الفيديوهات الإضافية - قابلة للتطوير في المستقبل */}
-                  <div className="text-center text-xs sm:text-sm text-muted-foreground arabic-text">
-                    <p className="italic">
-                      * يمكن إضافة صور أو فيديوهات تعريفية عن الشخصية من خلال لوحة الإدارة *
-                    </p>
-                  </div>
                 </CardContent>
               </Card>
             )}
