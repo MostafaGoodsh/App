@@ -76,15 +76,15 @@ const App = () => {
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
-                  <Route path="learning" element={<Learning />} />
+                  <Route path="learning" element={<RequireAccess><Learning /></RequireAccess>} />
                   <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
-                  <Route path="updates" element={<Updates />} />
+                  <Route path="updates" element={<RequireAccess><Updates /></RequireAccess>} />
                   <Route path="support" element={<RequireAuth><Support /></RequireAuth>} />
-                  <Route path="stable-coin" element={<StableCoin />} />
-                  <Route path="rwa" element={<RWA />} />
-                  <Route path="call-out" element={<CallOut />} />
-                  <Route path="reels" element={<Reels />} />
-                  <Route path="reels-categories" element={<ReelsCategories />} />
+                  <Route path="stable-coin" element={<RequireAccess><StableCoin /></RequireAccess>} />
+                  <Route path="rwa" element={<RequireAccess><RWA /></RequireAccess>} />
+                  <Route path="call-out" element={<RequireAccess><CallOut /></RequireAccess>} />
+                  <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
+                  <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
