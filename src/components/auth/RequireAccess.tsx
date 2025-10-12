@@ -15,12 +15,16 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
   useEffect(() => {
     const checkAccess = async () => {
       if (!user) {
+        console.log('RequireAccess: No user');
         setChecking(false);
         return;
       }
 
+      console.log('RequireAccess check:', { isAdmin, adminLoading, userId: user.id });
+
       // المدراء لهم وصول دائماً
       if (isAdmin) {
+        console.log('RequireAccess: Admin access granted');
         setHasAccess(true);
         setChecking(false);
         return;
@@ -37,6 +41,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         console.error("Error checking access:", error);
         setHasAccess(false);
       } else {
+        console.log('RequireAccess: User access:', data?.has_access);
         setHasAccess(data?.has_access || false);
       }
       
@@ -44,7 +49,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     };
 
     checkAccess();
-  }, [user, isAdmin]);
+  }, [user, isAdmin, adminLoading]);
 
   // عرض شاشة التحميل
   if (loading || checking || adminLoading) {
