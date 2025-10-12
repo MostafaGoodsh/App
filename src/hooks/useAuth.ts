@@ -35,24 +35,31 @@ export const useAuth = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
+        console.log('useAuth: No user, setting admin to false');
         setIsAdmin(false);
         setAdminLoading(false);
         return;
       }
+
+      console.log('useAuth: Checking admin status for user:', user.id);
+      setAdminLoading(true);
 
       try {
         const { data, error } = await supabase.rpc("is_admin", {
           _user_id: user.id,
         });
 
+        console.log('useAuth: is_admin response:', { data, error });
+
         if (error) {
-          console.error('Error checking admin status:', error);
+          console.error('useAuth: Error checking admin status:', error);
           setIsAdmin(false);
         } else {
-          setIsAdmin(data || false);
+          console.log('useAuth: Setting isAdmin to:', data);
+          setIsAdmin(data === true);
         }
       } catch (error) {
-        console.error('Error checking admin status:', error);
+        console.error('useAuth: Exception checking admin status:', error);
         setIsAdmin(false);
       } finally {
         setAdminLoading(false);
