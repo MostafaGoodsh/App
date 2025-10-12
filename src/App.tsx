@@ -24,6 +24,7 @@ import Support from "./pages/Support";
 import SupportAdmin from "./pages/SupportAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
+import RequireAccess from "./components/auth/RequireAccess";
 import Updates from "./pages/Updates";
 import StableCoin from "./pages/StableCoin";
 import RWA from "./pages/RWA";

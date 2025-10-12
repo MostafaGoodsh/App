@@ -17,7 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Clock, User } from "lucide-react";
+import { CheckCircle, XCircle, Clock, User, Lock, Unlock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
@@ -34,6 +35,7 @@ interface UserData {
   verification_status: string | null;
   verification_type: string | null;
   verified_at: string | null;
+  has_access: boolean;
 }
 
 const UsersManagement = () => {
@@ -68,15 +70,26 @@ const UsersManagement = () => {
         console.error("Error fetching verifications:", verificationsError);
       }
 
+      // جلب بيانات has_access
+      const { data: accessData, error: accessError } = await supabase
+        .from('profiles')
+        .select('user_id, has_access');
+
+      if (accessError) {
+        console.error("Error fetching access data:", accessError);
+      }
+
       // دمج البيانات
       const usersWithVerification = profilesData?.map((profile: any) => {
         const verification = verificationsData?.find((v: any) => v.user_id === profile.user_id);
+        const accessInfo = accessData?.find((a: any) => a.user_id === profile.user_id);
         return {
           ...profile,
           solana_address: profile.solana_address || null,
           verification_status: verification?.status || null,
           verification_type: verification?.verification_type || null,
           verified_at: verification?.verified_at || null,
+          has_access: accessInfo?.has_access || false,
         };
       }) || [];
 
@@ -144,6 +157,29 @@ const UsersManagement = () => {
     return format(new Date(dateString), 'dd/MM/yyyy - HH:mm', { locale: ar });
   };
 
+  const handleToggleAccess = async (userId: string, currentAccess: boolean) => {
+    try {
+      const functionName = currentAccess ? 'revoke_user_access' : 'grant_user_access';
+      const { error } = await supabase.rpc(functionName, { p_user_id: userId });
+
+      if (error) throw error;
+
+      toast({
+        title: "تم بنجاح",
+        description: currentAccess ? "تم إلغاء الوصول للمستخدم" : "تم منح الوصول للمستخدم",
+      });
+
+      fetchUsers(); // إعادة تحميل البيانات
+    } catch (error: any) {
+      console.error("Error toggling access:", error);
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في تحديث صلاحية الوصول",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -185,8 +221,9 @@ const UsersManagement = () => {
                     <TableHead>عنوان Solana</TableHead>
                     <TableHead>اللغة المفضلة</TableHead>
                     <TableHead>حالة التحقق</TableHead>
+                    <TableHead>صلاحية الوصول</TableHead>
                     <TableHead>تاريخ التسجيل</TableHead>
-                    <TableHead>تاريخ التحقق</TableHead>
+                    <TableHead>الإجراءات</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -219,10 +256,29 @@ const UsersManagement = () => {
                         {getVerificationBadge(user.verification_status)}
                       </TableCell>
                       <TableCell>
+                        {user.has_access ? (
+                          <Badge variant="default" className="gap-1 bg-green-600">
+                            <Unlock className="h-3 w-3" />
+                            لديه وصول
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="gap-1">
+                            <Lock className="h-3 w-3" />
+                            ممنوع من الوصول
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {formatDate(user.created_at)}
                       </TableCell>
                       <TableCell>
-                        {user.verified_at ? formatDate(user.verified_at) : "لم يتم التحقق"}
+                        <Button
+                          size="sm"
+                          variant={user.has_access ? "destructive" : "default"}
+                          onClick={() => handleToggleAccess(user.user_id, user.has_access)}
+                        >
+                          {user.has_access ? "إلغاء الوصول" : "منح الوصول"}
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

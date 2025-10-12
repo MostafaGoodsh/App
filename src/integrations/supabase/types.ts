@@ -1190,6 +1190,7 @@ export type Database = {
           followers_count: number | null
           following_count: number | null
           full_name: string | null
+          has_access: boolean | null
           id: string
           instagram_url: string | null
           is_verified: boolean | null
@@ -1213,6 +1214,7 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          has_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
@@ -1236,6 +1238,7 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          has_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
@@ -2640,6 +2643,10 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
+      grant_user_access: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2696,6 +2703,10 @@ export type Database = {
       }
       reject_content: {
         Args: { p_admin_notes?: string; p_content_id: string }
+        Returns: boolean
+      }
+      revoke_user_access: {
+        Args: { p_user_id: string }
         Returns: boolean
       }
       secure_wallet_access: {
