@@ -68,7 +68,7 @@ const App = () => {
               <Sonner />
               <Routes>
                 <Route path="/" element={<MainLayout />}>
-                  <Route index element={<Index />} />
+                  <Route index element={<RequireAccess><Index /></RequireAccess>} />
                   <Route path="auth" element={<Auth />} />
                   <Route path="payment-demo" element={<PaymentDemo />} />
                   <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
