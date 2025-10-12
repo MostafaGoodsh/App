@@ -16,6 +16,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     const checkAccess = async () => {
       if (!user) {
         console.log('RequireAccess: No user');
+        setHasAccess(false);
         setChecking(false);
         return;
       }
