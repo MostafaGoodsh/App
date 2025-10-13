@@ -10,7 +10,6 @@ interface RequireAccessProps {
 const RequireAccess = ({ children }: RequireAccessProps) => {
   const { user, loading, isAdmin, adminLoading } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -18,7 +17,6 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
       if (!user) {
         console.log('RequireAccess: No user');
         setHasAccess(false);
-        setChecking(false);
         return;
       }
 
@@ -34,7 +32,6 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
       if (isAdmin === true) {
         console.log('RequireAccess: Admin access granted');
         setHasAccess(true);
-        setChecking(false);
         return;
       }
 
@@ -52,15 +49,13 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         console.log('RequireAccess: User access:', data?.has_access);
         setHasAccess(data?.has_access || false);
       }
-      
-      setChecking(false);
     };
 
     checkAccess();
   }, [user, isAdmin, adminLoading]);
 
   // عرض شاشة التحميل
-  if (loading || adminLoading || checking) {
+  if (loading || adminLoading || hasAccess === null) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="flex flex-col items-center gap-4">
