@@ -13,29 +13,27 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
 
   useEffect(() => {
     const checkAccess = async () => {
-      // انتظر حتى ينتهي تحميل المستخدم
       if (!user) {
         console.log('RequireAccess: No user');
         setHasAccess(false);
         return;
       }
 
-      // انتظر حتى ينتهي فحص الأدمن
       if (adminLoading) {
-        console.log('RequireAccess: Waiting for admin check to complete');
+        console.log('RequireAccess: Waiting for admin check');
         return;
       }
 
       console.log('RequireAccess check:', { isAdmin, adminLoading, userId: user.id });
 
-      // المدراء لهم وصول دائماً - فحص هذا أولاً قبل فحص has_access
-      if (isAdmin === true) {
+      // المدراء لهم وصول دائماً
+      if (isAdmin) {
         console.log('RequireAccess: Admin access granted');
         setHasAccess(true);
         return;
       }
 
-      // التحقق من has_access للمستخدمين العاديين فقط
+      // التحقق من has_access للمستخدمين العاديين
       const { data, error } = await supabase
         .from("profiles")
         .select("has_access")
