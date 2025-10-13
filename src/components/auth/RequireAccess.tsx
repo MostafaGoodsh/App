@@ -59,7 +59,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
   }, [user, isAdmin, adminLoading]);
 
   // عرض شاشة التحميل
-  if (loading || checking || adminLoading) {
+  if (loading || adminLoading || checking) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="flex flex-col items-center gap-4">
@@ -76,7 +76,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
   }
 
   // إعادة التوجيه لصفحة الوصول المبكر إذا لم يكن لديه صلاحية
-  if (!hasAccess) {
+  if (hasAccess === false) {
     return <Navigate to="/early-access" replace />;
   }
 

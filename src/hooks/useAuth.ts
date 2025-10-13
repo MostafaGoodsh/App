@@ -42,7 +42,6 @@ export const useAuth = () => {
       }
 
       console.log('useAuth: Checking admin status for user:', user.id);
-      setAdminLoading(true);
 
       try {
         const { data, error } = await supabase.rpc("is_admin", {
@@ -66,6 +65,11 @@ export const useAuth = () => {
       }
     };
 
+    // ضبط adminLoading على true عند بدء الفحص
+    if (user) {
+      setAdminLoading(true);
+    }
+    
     checkAdminStatus();
   }, [user]);
 
