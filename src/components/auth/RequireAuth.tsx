@@ -8,46 +8,10 @@ interface RequireAuthProps {
 }
 
 const RequireAuth = ({ children }: RequireAuthProps) => {
-  const { user, loading, isAdmin } = useAuth();
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (!user) {
-        setChecking(false);
-        return;
-      }
-
-      // المدراء لهم وصول دائماً
-      if (isAdmin) {
-        setHasAccess(true);
-        setChecking(false);
-        return;
-      }
-
-      // التحقق من has_access للمستخدمين العاديين
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("has_access")
-        .eq("user_id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error checking access:", error);
-        setHasAccess(false);
-      } else {
-        setHasAccess(data?.has_access || false);
-      }
-      
-      setChecking(false);
-    };
-
-    checkAccess();
-  }, [user, isAdmin]);
+  const { user, loading } = useAuth();
 
   // Show loading state while checking authentication
-  if (loading || checking) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="flex flex-col items-center gap-4">
@@ -63,11 +27,7 @@ const RequireAuth = ({ children }: RequireAuthProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Redirect to early access if no access granted
-  if (!hasAccess) {
-    return <Navigate to="/early-access" replace />;
-  }
-
+  // جميع المستخدمين المسجلين لهم وصول
   return <>{children}</>;
 };
 

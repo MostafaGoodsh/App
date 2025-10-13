@@ -7,10 +7,10 @@ interface RequireAccessProps {
 }
 
 const RequireAccess = ({ children }: RequireAccessProps) => {
-  const { user, loading, isAdmin, adminLoading } = useAuth();
+  const { user, loading } = useAuth();
 
   // انتظر حتى ينتهي التحميل
-  if (loading || adminLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="flex flex-col items-center gap-4">
@@ -26,13 +26,8 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  // الأدمن له وصول دائماً
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-
-  // المستخدمون العاديون - اذهب لصفحة الوصول المبكر
-  return <Navigate to="/early-access" replace />;
+  // جميع المستخدمين المسجلين لهم وصول
+  return <>{children}</>;
 };
 
 export default RequireAccess;
