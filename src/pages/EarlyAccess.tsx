@@ -3,8 +3,16 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 
 const EarlyAccess = () => {
+  const { isAdmin, adminLoading, loading } = useAuth();
+  
+  // الأدمن يروح مباشرة للصفحة الرئيسية
+  if (!loading && !adminLoading && isAdmin) {
+    return <Navigate to="/" replace />;
+  }
   return (
     <>
       <Helmet>
