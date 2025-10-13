@@ -21,6 +21,12 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         return;
       }
 
+      // انتظر حتى ينتهي فحص الأدمن
+      if (adminLoading) {
+        console.log('RequireAccess: Waiting for admin check to complete');
+        return;
+      }
+
       console.log('RequireAccess check:', { isAdmin, adminLoading, userId: user.id });
 
       // المدراء لهم وصول دائماً
