@@ -32,20 +32,12 @@ const MainLayoutContent = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-12 w-12"
               onClick={toggleSidebar}
             >
-              <span className="text-lg">𓋹</span>
+              <span className="text-4xl text-amber-500 drop-shadow-lg">𓋹</span>
               <span className="sr-only">Toggle Sidebar</span>
             </Button>
-            <svg className="h-14 w-14 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="6" r="3"/>
-              <path d="M12 9v6"/>
-              <path d="M9 12h6"/>
-              <path d="M8 21h8"/>
-              <path d="M10 18v3"/>
-              <path d="M14 18v3"/>
-            </svg>
             <div className="flex flex-col justify-center leading-none">
               <div className="font-playfair text-xs text-muted-foreground -mb-1">
                 Crypto-MSR
