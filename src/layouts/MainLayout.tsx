@@ -19,7 +19,7 @@ const MainLayoutContent = () => {
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <header 
-          className="h-16 flex items-center justify-between border-b px-2"
+          className="h-16 flex items-center justify-between border-b px-1"
           style={{
             backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
             backgroundSize: 'cover',
@@ -28,14 +28,14 @@ const MainLayoutContent = () => {
             backgroundColor: 'hsl(var(--background) / 0.85)'
           }}
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
               className="h-10 w-10"
               onClick={toggleSidebar}
             >
-              <span className="text-2xl text-amber-500">𓋹</span>
+              <span className="text-2xl text-primary font-bold">𓋹</span>
               <span className="sr-only">Toggle Sidebar</span>
             </Button>
             <div className="flex flex-col justify-center leading-none">
@@ -47,7 +47,7 @@ const MainLayoutContent = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <NotificationBell />
             {user && (
               <Link to="/profile">
