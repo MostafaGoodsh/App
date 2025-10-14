@@ -32,10 +32,10 @@ const MainLayoutContent = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-12 w-12"
+              className="h-10 w-10"
               onClick={toggleSidebar}
             >
-              <span className="text-4xl text-amber-500 drop-shadow-lg">𓋹</span>
+              <span className="text-2xl text-amber-500">𓋹</span>
               <span className="sr-only">Toggle Sidebar</span>
             </Button>
             <div className="flex flex-col justify-center leading-none">
