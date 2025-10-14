@@ -18,7 +18,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
         <div 
           className="w-40 h-40 md:w-48 md:h-48 rounded-full flex items-center justify-center text-center p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-cover bg-center relative overflow-hidden"
           style={{ 
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/lovable-uploads/egyptian-golden-snake-bg.jpg')`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/lovable-uploads/egyptian-hieroglyphs-blue-gold.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
