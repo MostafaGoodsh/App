@@ -19,7 +19,7 @@ const MainLayoutContent = () => {
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <header 
-          className="h-16 flex items-center justify-between border-b px-4"
+          className="h-16 flex items-center justify-between border-b px-6"
           style={{
             backgroundImage: `url('/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')`,
             backgroundSize: 'cover',
@@ -28,7 +28,7 @@ const MainLayoutContent = () => {
             backgroundColor: 'hsl(var(--background) / 0.85)'
           }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -47,7 +47,7 @@ const MainLayoutContent = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <NotificationBell />
             {user && (
               <Link to="/profile">
