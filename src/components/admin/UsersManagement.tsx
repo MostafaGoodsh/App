@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -36,9 +37,11 @@ interface UserData {
   verification_type: string | null;
   verified_at: string | null;
   has_access: boolean;
+  total_points: number;
 }
 
 const UsersManagement = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -79,10 +82,20 @@ const UsersManagement = () => {
         console.error("Error fetching access data:", accessError);
       }
 
+      // جلب نقاط المستخدمين
+      const { data: pointsData, error: pointsError } = await supabase
+        .from('user_points_balance')
+        .select('user_id, total_points');
+
+      if (pointsError) {
+        console.error("Error fetching points data:", pointsError);
+      }
+
       // دمج البيانات
       const usersWithVerification = profilesData?.map((profile: any) => {
         const verification = verificationsData?.find((v: any) => v.user_id === profile.user_id);
         const accessInfo = accessData?.find((a: any) => a.user_id === profile.user_id);
+        const pointsInfo = pointsData?.find((p: any) => p.user_id === profile.user_id);
         return {
           ...profile,
           solana_address: profile.solana_address || null,
@@ -90,6 +103,7 @@ const UsersManagement = () => {
           verification_type: verification?.verification_type || null,
           verified_at: verification?.verified_at || null,
           has_access: accessInfo?.has_access || false,
+          total_points: pointsInfo?.total_points || 0,
         };
       }) || [];
 
@@ -216,6 +230,7 @@ const UsersManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>الاسم الكامل</TableHead>
+                    <TableHead>النقاط</TableHead>
                     <TableHead>البريد الإلكتروني</TableHead>
                     <TableHead>رقم الهاتف</TableHead>
                     <TableHead>عنوان Solana</TableHead>
@@ -228,9 +243,19 @@ const UsersManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">
+                    <TableRow key={user.id} className="cursor-pointer hover:bg-muted/50">
+                      <TableCell 
+                        className="font-medium"
+                        onClick={() => navigate(`/profile?user=${user.user_id}`)}
+                      >
                         {user.full_name || "غير محدد"}
+                      </TableCell>
+                      <TableCell
+                        onClick={() => navigate(`/profile?user=${user.user_id}`)}
+                      >
+                        <Badge variant="secondary" className="gap-1">
+                          {user.total_points.toLocaleString('ar-EG')}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         {user.masked_email || "غير محدد"}
