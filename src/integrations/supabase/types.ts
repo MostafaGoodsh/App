@@ -1542,6 +1542,72 @@ export type Database = {
           },
         ]
       }
+      roadmap_cards: {
+        Row: {
+          background_color: string | null
+          background_gradient: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          page_content: string | null
+          page_content_en: string | null
+          page_title: string | null
+          page_title_en: string | null
+          sections: Json | null
+          slug: string
+          title: string
+          title_en: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          page_content?: string | null
+          page_content_en?: string | null
+          page_title?: string | null
+          page_title_en?: string | null
+          sections?: Json | null
+          slug: string
+          title: string
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          page_content?: string | null
+          page_content_en?: string | null
+          page_title?: string | null
+          page_title_en?: string | null
+          sections?: Json | null
+          slug?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           admin_response: string | null

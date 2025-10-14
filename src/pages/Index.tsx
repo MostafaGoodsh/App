@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
+import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
 import sphinxBg from "@/assets/sphinx-bg.jpg";
 import pharaohStatueBg from "@/assets/pharaoh-statue-bg.jpg";
 
@@ -208,6 +209,9 @@ const Index = () => {
               <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
             </Button>
           </div>
+
+          {/* Roadmap Cards Section */}
+          <RoadmapCardsGrid />
         </section>
         
         {/* Ms-Ra Currency Section */}

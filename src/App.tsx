@@ -55,6 +55,8 @@ import PaymentDemo from "./pages/PaymentDemo";
 import QuranPagesAdmin from "./pages/QuranPagesAdmin";
 import DailyTasksCardAdmin from "./pages/DailyTasksCardAdmin";
 import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
+import RoadmapCardsAdmin from "./pages/RoadmapCardsAdmin";
+import RoadmapDetail from "./pages/RoadmapDetail";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -85,6 +87,7 @@ const App = () => {
                   <Route path="call-out" element={<RequireAccess><CallOut /></RequireAccess>} />
                   <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
+                  <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
@@ -113,6 +116,7 @@ const App = () => {
                   <Route path="admin/reels-categories" element={<RequireAdmin><ReelsCategoriesAdmin /></RequireAdmin>} />
                   <Route path="admin/daily-tasks-card" element={<RequireAdmin><DailyTasksCardAdmin /></RequireAdmin>} />
                   <Route path="admin/todo-introduction" element={<RequireAdmin><TodoIntroductionAdmin /></RequireAdmin>} />
+                  <Route path="admin/roadmap-cards" element={<RequireAdmin><RoadmapCardsAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
