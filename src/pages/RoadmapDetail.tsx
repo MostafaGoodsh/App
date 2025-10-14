@@ -78,41 +78,56 @@ const RoadmapDetail = () => {
         <meta name="description" content={data.description || data.page_title} />
       </Helmet>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main 
+        className="container mx-auto px-4 py-8 max-w-4xl bg-cover bg-center bg-fixed min-h-screen"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('/lovable-uploads/egyptian-hieroglyphs-bg.jpg')`,
+        }}
+      >
         {/* Header */}
         <div className="mb-8">
           <Link to="/">
-            <Button variant="ghost" className="mb-4">
+            <Button variant="ghost" className="mb-4 text-white hover:bg-white/10">
               <ArrowLeft className="ml-2 h-4 w-4" />
               العودة للرئيسية
             </Button>
           </Link>
           
           <div 
-            className="rounded-lg p-8 text-center mb-6"
-            style={{ background: data.background_gradient }}
+            className="rounded-lg p-8 text-center mb-6 bg-cover bg-center relative overflow-hidden"
+            style={{ 
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/lovable-uploads/egyptian-golden-snake-bg.jpg')`,
+            }}
           >
-            <h1 className="text-4xl font-bold text-white mb-2">
-              {data.page_title || data.title}
-            </h1>
-            {data.description && (
-              <p className="text-white/90 text-lg">{data.description}</p>
-            )}
+            <div className="relative z-10">
+              <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                {data.page_title || data.title}
+              </h1>
+              {data.page_title_en && (
+                <p className="text-white/90 text-xl mb-2 drop-shadow-lg">{data.page_title_en}</p>
+              )}
+              {data.description && (
+                <p className="text-white/90 text-lg drop-shadow-lg">{data.description}</p>
+              )}
+              {data.description_en && (
+                <p className="text-white/80 text-base drop-shadow-lg">{data.description_en}</p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Content */}
         {data.page_content ? (
-          <Card>
-            <CardContent className="p-6 prose prose-lg max-w-none dark:prose-invert">
-              <div dangerouslySetInnerHTML={{ __html: data.page_content }} />
+          <Card className="bg-black/60 backdrop-blur-sm border-white/20">
+            <CardContent className="p-6 prose prose-lg max-w-none prose-invert">
+              <div className="text-white" dangerouslySetInnerHTML={{ __html: data.page_content }} />
             </CardContent>
           </Card>
         ) : (
-          <Card>
+          <Card className="bg-black/60 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle>قريباً</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white">قريباً</CardTitle>
+              <CardDescription className="text-white/70">
                 المحتوى قيد الإعداد وسيتم نشره قريباً
               </CardDescription>
             </CardHeader>
@@ -123,16 +138,16 @@ const RoadmapDetail = () => {
         {data.sections && Array.isArray(data.sections) && data.sections.length > 0 && (
           <div className="mt-8 space-y-6">
             {data.sections.map((section: any, index: number) => (
-              <Card key={index}>
+              <Card key={index} className="bg-black/60 backdrop-blur-sm border-white/20">
                 <CardHeader>
-                  <CardTitle>{section.title}</CardTitle>
+                  <CardTitle className="text-white">{section.title}</CardTitle>
                   {section.description && (
-                    <CardDescription>{section.description}</CardDescription>
+                    <CardDescription className="text-white/70">{section.description}</CardDescription>
                   )}
                 </CardHeader>
                 {section.content && (
                   <CardContent>
-                    <div dangerouslySetInnerHTML={{ __html: section.content }} />
+                    <div className="text-white prose prose-invert" dangerouslySetInnerHTML={{ __html: section.content }} />
                   </CardContent>
                 )}
               </Card>
