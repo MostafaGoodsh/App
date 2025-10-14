@@ -24,7 +24,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <svg className="h-10 w-10 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="h-14 w-14 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="6" r="3"/>
             <path d="M12 9v6"/>
             <path d="M9 12h6"/>
@@ -88,9 +88,9 @@ const Header = () => {
           {user ? (
             <>
               <Link to="/profile">
-                <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                <Avatar className="h-11 w-11 cursor-pointer ring-2 ring-amber-500/30 hover:ring-amber-500/60 transition-all">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "Profile"} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
+                  <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-600 text-white font-semibold">
                     {profile?.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
