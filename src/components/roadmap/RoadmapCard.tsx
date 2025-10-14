@@ -24,14 +24,14 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
           }}
         >
           <div className="relative z-10 flex flex-col gap-1">
-            <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg">
-              {title}
-            </h3>
             {titleEn && (
-              <p className="text-white/90 text-xs font-semibold drop-shadow-lg">
+              <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg">
                 {titleEn}
-              </p>
+              </h3>
             )}
+            <p className="text-white/90 text-xs font-semibold drop-shadow-lg">
+              {title}
+            </p>
           </div>
         </div>
         
@@ -45,11 +45,11 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
         {(description || descriptionEn) && (
           <div className="absolute inset-0 rounded-full bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6 text-center">
             <div className="flex flex-col gap-1">
-              {description && (
-                <p className="text-white text-xs md:text-sm font-semibold">{description}</p>
-              )}
               {descriptionEn && (
-                <p className="text-white/80 text-xs">{descriptionEn}</p>
+                <p className="text-white text-xs md:text-sm font-semibold">{descriptionEn}</p>
+              )}
+              {description && (
+                <p className="text-white/80 text-xs">{description}</p>
               )}
             </div>
           </div>
