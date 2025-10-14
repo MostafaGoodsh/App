@@ -51,7 +51,7 @@ const MainLayoutContent = () => {
             <NotificationBell />
             {user && (
               <Link to="/profile">
-                <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-amber-500/30 hover:ring-amber-500/60 transition-all">
+                <Avatar className="h-9 w-9 cursor-pointer transition-all">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "Profile"} />
                   <AvatarFallback className="bg-gradient-to-br from-amber-500 to-amber-600 text-white font-semibold">
                     {profile?.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase() || "U"}
