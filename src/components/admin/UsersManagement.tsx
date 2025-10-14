@@ -23,6 +23,11 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
+interface InternalBalance {
+  token_symbol: string;
+  balance: number;
+}
+
 interface UserData {
   id: string;
   user_id: string;
@@ -38,6 +43,7 @@ interface UserData {
   verified_at: string | null;
   has_access: boolean;
   total_points: number;
+  internal_balances: InternalBalance[];
 }
 
 const UsersManagement = () => {
@@ -91,11 +97,30 @@ const UsersManagement = () => {
         console.error("Error fetching points data:", pointsError);
       }
 
+      // جلب العملات الداخلية للمستخدمين
+      const { data: balancesData, error: balancesError } = await supabase
+        .from('internal_wallet_balances')
+        .select(`
+          user_id,
+          balance,
+          internal_tokens!inner(symbol)
+        `);
+
+      if (balancesError) {
+        console.error("Error fetching internal balances:", balancesError);
+      }
+
       // دمج البيانات
       const usersWithVerification = profilesData?.map((profile: any) => {
         const verification = verificationsData?.find((v: any) => v.user_id === profile.user_id);
         const accessInfo = accessData?.find((a: any) => a.user_id === profile.user_id);
         const pointsInfo = pointsData?.find((p: any) => p.user_id === profile.user_id);
+        const userBalances = balancesData?.filter((b: any) => b.user_id === profile.user_id) || [];
+        const internal_balances: InternalBalance[] = userBalances.map((b: any) => ({
+          token_symbol: b.internal_tokens?.symbol || '',
+          balance: b.balance || 0
+        }));
+        
         return {
           ...profile,
           solana_address: profile.solana_address || null,
@@ -104,6 +129,7 @@ const UsersManagement = () => {
           verified_at: verification?.verified_at || null,
           has_access: accessInfo?.has_access || false,
           total_points: pointsInfo?.total_points || 0,
+          internal_balances,
         };
       }) || [];
 
@@ -231,6 +257,7 @@ const UsersManagement = () => {
                   <TableRow>
                     <TableHead>الاسم الكامل</TableHead>
                     <TableHead>النقاط</TableHead>
+                    <TableHead>العملات الداخلية</TableHead>
                     <TableHead>البريد الإلكتروني</TableHead>
                     <TableHead>رقم الهاتف</TableHead>
                     <TableHead>عنوان Solana</TableHead>
@@ -254,8 +281,21 @@ const UsersManagement = () => {
                         onClick={() => navigate(`/profile?user=${user.user_id}`)}
                       >
                         <Badge variant="secondary" className="gap-1">
-                          {user.total_points.toLocaleString('ar-EG')}
+                          {user.total_points.toLocaleString('ar-EG')} نقطة
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {user.internal_balances.length > 0 ? (
+                            user.internal_balances.map((balance, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {balance.balance.toLocaleString('ar-EG')} {balance.token_symbol}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground text-sm">لا توجد عملات</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {user.masked_email || "غير محدد"}
