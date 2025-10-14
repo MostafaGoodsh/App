@@ -65,7 +65,9 @@ const RoadmapCardsGrid = () => {
           <RoadmapCard
             key={card.id}
             title={card.title}
+            titleEn={card.title_en}
             description={card.description}
+            descriptionEn={card.description_en}
             gradient={card.background_gradient}
             slug={card.slug}
           />
