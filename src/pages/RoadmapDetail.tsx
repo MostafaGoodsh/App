@@ -99,20 +99,22 @@ const RoadmapDetail = () => {
               backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/lovable-uploads/egyptian-golden-snake-bg.jpg')`,
             }}
           >
-            <div className="relative z-10">
-              <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                {data.page_title || data.title}
+          <div className="relative z-10">
+            {data.page_title_en && (
+              <h1 className="font-cairo text-3xl md:text-4xl font-bold text-primary mb-3 drop-shadow-lg">
+                {data.page_title_en}
               </h1>
-              {data.page_title_en && (
-                <p className="text-white/90 text-xl mb-2 drop-shadow-lg">{data.page_title_en}</p>
-              )}
-              {data.description && (
-                <p className="text-white/90 text-lg drop-shadow-lg">{data.description}</p>
-              )}
-              {data.description_en && (
-                <p className="text-white/80 text-base drop-shadow-lg">{data.description_en}</p>
-              )}
-            </div>
+            )}
+            <p className="font-cairo text-xl md:text-2xl text-white mb-2 drop-shadow-lg">
+              {data.page_title || data.title}
+            </p>
+            {data.description_en && (
+              <p className="text-white/90 text-base md:text-lg drop-shadow-lg mb-1">{data.description_en}</p>
+            )}
+            {data.description && (
+              <p className="text-white/80 text-sm md:text-base drop-shadow-lg">{data.description}</p>
+            )}
+          </div>
           </div>
         </div>
 
@@ -120,7 +122,10 @@ const RoadmapDetail = () => {
         {data.page_content ? (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
             <CardContent className="p-6 prose prose-lg max-w-none prose-invert">
-              <div className="text-white" dangerouslySetInnerHTML={{ __html: data.page_content }} />
+              <div 
+                className="text-white [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_iframe]:max-w-full [&_iframe]:aspect-video" 
+                dangerouslySetInnerHTML={{ __html: data.page_content }} 
+              />
             </CardContent>
           </Card>
         ) : (
@@ -140,14 +145,17 @@ const RoadmapDetail = () => {
             {data.sections.map((section: any, index: number) => (
               <Card key={index} className="bg-black/60 backdrop-blur-sm border-white/20">
                 <CardHeader>
-                  <CardTitle className="text-white">{section.title}</CardTitle>
+                  <CardTitle className="font-cairo text-white">{section.title}</CardTitle>
                   {section.description && (
                     <CardDescription className="text-white/70">{section.description}</CardDescription>
                   )}
                 </CardHeader>
                 {section.content && (
                   <CardContent>
-                    <div className="text-white prose prose-invert" dangerouslySetInnerHTML={{ __html: section.content }} />
+                    <div 
+                      className="text-white prose prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_iframe]:max-w-full [&_iframe]:aspect-video" 
+                      dangerouslySetInnerHTML={{ __html: section.content }} 
+                    />
                   </CardContent>
                 )}
               </Card>
