@@ -153,9 +153,6 @@ const Index = () => {
                 <p className="font-cairo text-xs md:text-sm text-white/60 mb-1">
                   نداء تقدير و الهام و زخم
                 </p>
-                <p className="font-cairo text-xs md:text-sm text-white/60 leading-relaxed">
-                  استدعاء شرفي للمشاركة في بناء مستقبل مصر الرقمي
-                </p>
                 <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
               </div>
             </article>
