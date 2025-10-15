@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, CreditCard } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, CreditCard, Map } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -53,6 +53,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة أقسام الريلز", url: "/admin/reels-categories", icon: Tags },
   { title: "إدارة كارت الاستدعاء", url: "/admin/callout-card", icon: Star },
   { title: "إدارة كارت المهام اليومية", url: "/admin/daily-tasks-card", icon: Calendar },
+  { title: "إدارة كروت الرودماب", url: "/admin/roadmap-cards", icon: Map },
   { title: "إعدادات التحويل", url: "/admin/conversion-settings", icon: Settings },
   { title: "إدارة مقدمة قائمة الأعمال", url: "/admin/todo-introduction", icon: Calendar },
 ];
