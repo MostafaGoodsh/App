@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Upload } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -47,6 +47,7 @@ interface RoadmapCard {
   is_active: boolean;
   page_title?: string;
   page_content?: string;
+  icon_url?: string;
 }
 
 const RoadmapCardsManagement = () => {
@@ -54,6 +55,7 @@ const RoadmapCardsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [editingCard, setEditingCard] = useState<Partial<RoadmapCard> | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -151,6 +153,70 @@ const RoadmapCardsManagement = () => {
     setIsDialogOpen(true);
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // التحقق من نوع الملف
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "خطأ",
+        description: "يرجى اختيار ملف صورة فقط",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // التحقق من حجم الملف (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "خطأ",
+        description: "حجم الصورة يجب أن يكون أقل من 5 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `roadmap-icons/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // حذف الصورة القديمة إذا وجدت
+      if (editingCard?.icon_url && editingCard.icon_url.includes('avatars/')) {
+        const oldPath = editingCard.icon_url.split('avatars/')[1];
+        await supabase.storage.from('avatars').remove([oldPath]);
+      }
+
+      setEditingCard({ ...editingCard, icon_url: publicUrl });
+
+      toast({
+        title: "تم رفع الصورة بنجاح",
+        description: "تم تحميل الأيقونة بنجاح",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في رفع الصورة",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -218,6 +284,34 @@ const RoadmapCardsManagement = () => {
                     placeholder="Description in English"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>أيقونة الكارت</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="flex-1"
+                  />
+                  {uploading && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Upload className="h-4 w-4 animate-pulse" />
+                      جاري الرفع...
+                    </div>
+                  )}
+                </div>
+                {editingCard?.icon_url && (
+                  <div className="mt-2">
+                    <img 
+                      src={editingCard.icon_url} 
+                      alt="Icon preview" 
+                      className="w-20 h-20 object-cover rounded-lg border"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
