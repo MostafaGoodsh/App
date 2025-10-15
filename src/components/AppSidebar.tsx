@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, CreditCard, Map } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +22,6 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
   { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
   { title: getContent("sidebar_home", "الرئيسية"), url: "/", icon: Home },
   { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
-  { title: getContent("sidebar_recharge", "شحن المحفظة"), url: "/recharge", icon: CreditCard, requireAuth: true },
   { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
   { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
   { title: getContent("sidebar_support", "رسالة جديدة"), url: "/support", icon: MessageSquare, requireAuth: true },

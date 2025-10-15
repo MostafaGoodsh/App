@@ -9,7 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Wallet as WalletIcon } from 'lucide-react';
+import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 // محتوى المحفظة البسيطة
 const WalletContent = () => {
@@ -17,6 +18,7 @@ const WalletContent = () => {
   const [showHybridSwap, setShowHybridSwap] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [internalTransactions, setInternalTransactions] = useState<any[]>([]);
   
   const { user } = useAuth();
   const { getTransactionHistory } = useSolanaWalletData();
@@ -43,6 +45,59 @@ const WalletContent = () => {
     const txHistory = await getTransactionHistory();
     setTransactions(txHistory);
   };
+
+  // Load internal transactions
+  useEffect(() => {
+    const loadInternalTransactions = async () => {
+      if (!user) return;
+      
+      const { data: swaps } = await supabase
+        .from('internal_swaps')
+        .select(`
+          *,
+          from_token:internal_tokens!internal_swaps_from_token_id_fkey(symbol, name),
+          to_token:internal_tokens!internal_swaps_to_token_id_fkey(symbol, name)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const { data: payments } = await supabase
+        .from('payment_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      const allTx = [
+        ...(swaps || []).map(s => ({
+          id: s.id,
+          type: 'swap',
+          from_amount: s.from_amount,
+          to_amount: s.to_amount,
+          from_token: s.from_token?.symbol,
+          to_token: s.to_token?.symbol,
+          date: new Date(s.created_at).toLocaleDateString('ar-EG'),
+          time: new Date(s.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+          status: s.status
+        })),
+        ...(payments || []).map(p => ({
+          id: p.id,
+          type: 'recharge',
+          amount: p.amount,
+          currency: p.currency,
+          payment_method: p.payment_method,
+          date: new Date(p.created_at).toLocaleDateString('ar-EG'),
+          time: new Date(p.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+          status: p.status
+        }))
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      setInternalTransactions(allTx.slice(0, 10));
+    };
+
+    loadInternalTransactions();
+  }, [user]);
 
   useEffect(() => {
     loadTransactions();
@@ -119,6 +174,79 @@ const WalletContent = () => {
         </div>
       )}
 
+
+      {/* تاريخ المعاملات */}
+      <Card className="bg-black/60 backdrop-blur-sm border-white/20">
+        <CardHeader>
+          <CardTitle className="font-cairo flex items-center gap-2 text-white">
+            <Activity className="w-5 h-5" />
+            Transaction History | تاريخ المعاملات
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            آخر المعاملات في محفظتك الداخلية
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {internalTransactions.length === 0 ? (
+            <div className="text-center py-8">
+              <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-white/70 mb-2">لا توجد معاملات بعد</p>
+              <p className="text-sm text-white/50">
+                ستظهر معاملاتك هنا عند بدء الاستخدام
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {internalTransactions.map((tx) => (
+                <div 
+                  key={tx.id} 
+                  className="flex items-center justify-between p-3 bg-background/20 rounded-lg border border-white/10 hover:border-primary/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    {tx.type === 'swap' ? (
+                      <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-blue-400" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <ArrowDownLeft className="w-5 h-5 text-green-400" />
+                      </div>
+                    )}
+                    
+                    <div>
+                      <p className="font-cairo font-medium text-white">
+                        {tx.type === 'swap' 
+                          ? `تبديل ${tx.from_token} إلى ${tx.to_token}`
+                          : `شحن ${tx.currency}`
+                        }
+                      </p>
+                      <p className="text-sm text-white/60">
+                        {tx.date} | {tx.time}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-left">
+                    <p className="font-cairo font-medium text-white">
+                      {tx.type === 'swap' 
+                        ? `${tx.to_amount} ${tx.to_token}`
+                        : `${tx.amount} ${tx.currency}`
+                      }
+                    </p>
+                    <Badge 
+                      variant={tx.status === 'completed' ? 'default' : 'secondary'}
+                      className="text-xs"
+                    >
+                      {tx.status === 'completed' ? 'مكتمل' : 
+                       tx.status === 'pending' ? 'قيد المعالجة' : 'فشل'}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
     </>
   );
