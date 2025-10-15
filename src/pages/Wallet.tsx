@@ -132,11 +132,14 @@ const WalletPage = () => {
         <header className="text-center space-y-2">
           <div className="flex items-center justify-center gap-3 mb-2">
             <WalletIcon className="w-10 h-10 text-primary" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              المحفظة | Wallet
+            <h1 className="font-cairo text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Wallet
             </h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="font-cairo text-xl md:text-2xl text-white/90 mb-2">
+            المحفظة
+          </p>
+          <p className="text-muted-foreground text-sm">
             أدر عملاتك الداخلية، اشحن، حول، واسحب بسهولة
             <br />
             <span className="text-xs">Manage, Recharge, Convert & Withdraw Easily</span>

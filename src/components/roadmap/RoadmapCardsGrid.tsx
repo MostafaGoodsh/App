@@ -52,10 +52,13 @@ const RoadmapCardsGrid = () => {
   return (
     <section className="my-16">
       <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          خارطة الطريق
+        <h2 className="font-cairo text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          Roadmap
         </h2>
-        <p className="text-muted-foreground">
+        <p className="font-cairo text-xl md:text-2xl text-white/90 mb-2">
+          خارطة الطريق
+        </p>
+        <p className="text-muted-foreground text-sm">
           تابع تطورات المشروع والخطوات القادمة
         </p>
       </div>
