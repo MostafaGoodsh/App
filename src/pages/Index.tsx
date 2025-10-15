@@ -147,9 +147,12 @@ const Index = () => {
                 loading="lazy" 
               />
               <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-                <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
+                <h2 className="font-cairo text-2xl md:text-3xl mb-1 text-primary transition-colors duration-300 font-bold">
                   {getContent('hero_cta_5', 'Call out | إستدعاء شرفي')}
                 </h2>
+                <p className="font-cairo text-xs md:text-sm text-white/60 mb-2">
+                  نداء تقدير و الهام و زخم
+                </p>
                 <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
                   استدعاء شرفي للمشاركة في بناء مستقبل مصر الرقمي
                 </p>
