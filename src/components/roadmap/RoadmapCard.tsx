@@ -16,7 +16,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
       <article className="relative group cursor-pointer">
         {/* الكارت الدائري */}
         <div 
-          className="w-40 h-40 md:w-48 md:h-48 rounded-full flex items-center justify-center text-center p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-cover bg-center relative overflow-hidden"
+          className="w-44 h-44 md:w-52 md:h-52 rounded-full flex items-center justify-center text-center p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 bg-cover bg-center relative overflow-hidden"
           style={{ 
             backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/lovable-uploads/egyptian-hieroglyphs-blue-gold.jpg')`,
             backgroundSize: 'cover',
@@ -25,11 +25,11 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
         >
           <div className="relative z-10 flex flex-col gap-1">
             {titleEn && (
-              <h3 className="text-white font-bold text-sm md:text-base leading-tight drop-shadow-lg">
+              <h3 className="font-cairo text-lg md:text-xl font-bold text-primary leading-tight drop-shadow-lg">
                 {titleEn}
               </h3>
             )}
-            <p className="text-white/90 text-xs font-semibold drop-shadow-lg">
+            <p className="text-sm md:text-base text-white/90 drop-shadow-lg">
               {title}
             </p>
           </div>
@@ -46,10 +46,10 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
           <div className="absolute inset-0 rounded-full bg-black/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6 text-center">
             <div className="flex flex-col gap-1">
               {descriptionEn && (
-                <p className="text-white text-xs md:text-sm font-semibold">{descriptionEn}</p>
+                <p className="font-cairo text-sm md:text-base text-primary font-bold">{descriptionEn}</p>
               )}
               {description && (
-                <p className="text-white/80 text-xs">{description}</p>
+                <p className="text-xs md:text-sm text-white/90">{description}</p>
               )}
             </div>
           </div>
