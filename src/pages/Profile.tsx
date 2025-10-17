@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,9 @@ import { FollowStats } from '@/components/profile/FollowStats';
 import { TodoList } from '@/components/profile/TodoList';
 
 export default function Profile() {
-  const { profile, loading } = useProfile();
+  const [searchParams] = useSearchParams();
+  const viewUserId = searchParams.get('user');
+  const { profile, loading } = useProfile(viewUserId || undefined);
   const { 
     stats, 
     dailyTasks, 

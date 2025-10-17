@@ -27,7 +27,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export const useProfile = () => {
+export const useProfile = (userId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -35,13 +35,14 @@ export const useProfile = () => {
   const [uploading, setUploading] = useState(false);
 
   const fetchProfile = async () => {
-    if (!user) return;
+    const targetUserId = userId || user?.id;
+    if (!targetUserId) return;
 
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', targetUserId)
         .single();
 
       if (error) throw error;
@@ -175,10 +176,10 @@ export const useProfile = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (userId || user) {
       fetchProfile();
     }
-  }, [user]);
+  }, [user, userId]);
 
   return {
     profile,
