@@ -279,9 +279,11 @@ export const ContentApprovalManagement = () => {
               </CardHeader>
               
               <CardContent className="space-y-4">
-                <div className="text-sm text-muted-foreground" dir={content.text_direction}>
-                  {content.content.substring(0, 200)}...
-                </div>
+                {content.content && (
+                  <div className="text-sm text-muted-foreground" dir={content.text_direction}>
+                    {content.content.substring(0, 200)}...
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
