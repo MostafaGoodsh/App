@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
+import { useAuth } from '@/hooks/useAuth';
 import StreakDisplay from "@/components/engagement/StreakDisplay";
 import DailyTasksList from "@/components/engagement/DailyTasksList";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -32,6 +33,9 @@ export default function Profile() {
   const [searchParams] = useSearchParams();
   const viewUserId = searchParams.get('user');
   const { profile, loading } = useProfile(viewUserId || undefined);
+  const { user } = useAuth();
+  const isOwnProfile = !viewUserId || viewUserId === user?.id;
+  
   const { 
     stats, 
     dailyTasks, 
@@ -192,11 +196,17 @@ export default function Profile() {
           </Card>
 
           {/* Account Stats and Engagement */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <AccountStatsCard />
-            <EngagementStatsCard />
-            {profile.user_id && <FollowStats userId={profile.user_id} />}
-          </div>
+          {isOwnProfile ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <AccountStatsCard />
+              <EngagementStatsCard />
+              {profile.user_id && <FollowStats userId={profile.user_id} />}
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              {profile.user_id && <FollowStats userId={profile.user_id} />}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="edit">
