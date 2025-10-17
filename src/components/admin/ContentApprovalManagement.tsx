@@ -37,10 +37,6 @@ interface PendingContent {
   created_at: string;
   created_by: string;
   media_urls: string[];
-  profiles?: {
-    full_name: string;
-    email: string;
-  } | null;
 }
 
 export const ContentApprovalManagement = () => {
@@ -74,11 +70,7 @@ export const ContentApprovalManagement = () => {
           submission_notes,
           created_at,
           created_by,
-          media_urls,
-          profiles:profiles!learning_content_created_by_fkey(
-            full_name,
-            email
-          )
+          media_urls
         `)
         .eq('approval_status', 'pending')
         .order('created_at', { ascending: false });
@@ -295,7 +287,7 @@ export const ContentApprovalManagement = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <User className="w-4 h-4" />
-                      {content.author_name || content.profiles?.full_name || 'غير محدد'}
+                      {content.author_name || 'غير محدد'}
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
