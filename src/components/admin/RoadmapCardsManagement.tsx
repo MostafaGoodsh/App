@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Save, X, Upload } from "lucide-react";
 import {
@@ -245,146 +246,202 @@ const RoadmapCardsManagement = () => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>العنوان (عربي)</Label>
-                  <Input
-                    value={editingCard?.title || ''}
-                    onChange={(e) => setEditingCard({ ...editingCard, title: e.target.value })}
-                    placeholder="العنوان بالعربية"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Title (English)</Label>
-                  <Input
-                    value={editingCard?.title_en || ''}
-                    onChange={(e) => setEditingCard({ ...editingCard, title_en: e.target.value })}
-                    placeholder="Title in English"
-                  />
-                </div>
-              </div>
+            <Tabs defaultValue="basic" className="py-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">المحتوى الأساسي</TabsTrigger>
+                <TabsTrigger value="advanced">محتوى متقدم (تقني)</TabsTrigger>
+              </TabsList>
 
-              <div className="space-y-2">
-                <Label>Slug (URL)</Label>
-                <Input
-                  value={editingCard?.slug || ''}
-                  onChange={(e) => setEditingCard({ ...editingCard, slug: e.target.value })}
-                  placeholder="white-paper"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>الوصف (عربي)</Label>
-                  <Textarea
-                    value={editingCard?.description || ''}
-                    onChange={(e) => setEditingCard({ ...editingCard, description: e.target.value })}
-                    placeholder="الوصف بالعربية"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Description (English)</Label>
-                  <Textarea
-                    value={editingCard?.description_en || ''}
-                    onChange={(e) => setEditingCard({ ...editingCard, description_en: e.target.value })}
-                    placeholder="Description in English"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>أيقونة الكارت</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, 'icon_url')}
-                    disabled={uploading}
-                    className="flex-1"
-                  />
-                  {uploading && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Upload className="h-4 w-4 animate-pulse" />
-                      جاري الرفع...
-                    </div>
-                  )}
-                </div>
-                {editingCard?.icon_url && (
-                  <div className="mt-2">
-                    <img 
-                      src={editingCard.icon_url} 
-                      alt="Icon preview" 
-                      className="w-20 h-20 object-cover rounded-lg border"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>خلفية الكارت (Gradient)</Label>
-                <Input
-                  value={editingCard?.background_gradient || ''}
-                  onChange={(e) => setEditingCard({ ...editingCard, background_gradient: e.target.value })}
-                  placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                />
-                <div 
-                  className="w-full h-20 rounded-lg border"
-                  style={{ background: editingCard?.background_gradient }}
-                />
-              </div>
-
-              <div className="border-t pt-4 mt-4">
-                <h3 className="text-lg font-semibold mb-4">إعدادات الصفحة الداخلية</h3>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
+              <TabsContent value="basic" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>عنوان الصفحة (عربي)</Label>
+                    <Label>العنوان (عربي)</Label>
                     <Input
-                      value={editingCard?.page_title || ''}
-                      onChange={(e) => setEditingCard({ ...editingCard, page_title: e.target.value })}
-                      placeholder="عنوان الصفحة الداخلية"
+                      value={editingCard?.title || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, title: e.target.value })}
+                      placeholder="العنوان بالعربية"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Page Title (English)</Label>
+                    <Label>Title (English)</Label>
                     <Input
-                      value={editingCard?.page_title_en || ''}
-                      onChange={(e) => setEditingCard({ ...editingCard, page_title_en: e.target.value })}
-                      placeholder="Internal page title"
+                      value={editingCard?.title_en || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, title_en: e.target.value })}
+                      placeholder="Title in English"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-4">
-                  <Label>صورة غلاف الصفحة</Label>
+                <div className="space-y-2">
+                  <Label>Slug (URL)</Label>
+                  <Input
+                    value={editingCard?.slug || ''}
+                    onChange={(e) => setEditingCard({ ...editingCard, slug: e.target.value })}
+                    placeholder="white-paper"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>الوصف (عربي)</Label>
+                    <Textarea
+                      value={editingCard?.description || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, description: e.target.value })}
+                      placeholder="الوصف بالعربية"
+                      rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Description (English)</Label>
+                    <Textarea
+                      value={editingCard?.description_en || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, description_en: e.target.value })}
+                      placeholder="Description in English"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>أيقونة الكارت</Label>
                   <div className="flex gap-2">
                     <Input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'page_cover_image')}
+                      onChange={(e) => handleImageUpload(e, 'icon_url')}
                       disabled={uploading}
                       className="flex-1"
                     />
+                    {uploading && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Upload className="h-4 w-4 animate-pulse" />
+                        جاري الرفع...
+                      </div>
+                    )}
                   </div>
-                  {editingCard?.page_cover_image && (
+                  {editingCard?.icon_url && (
                     <div className="mt-2">
                       <img 
-                        src={editingCard.page_cover_image} 
-                        alt="Cover preview" 
-                        className="w-full h-40 object-cover rounded-lg border"
+                        src={editingCard.icon_url} 
+                        alt="Icon preview" 
+                        className="w-20 h-20 object-cover rounded-lg border"
                       />
                     </div>
                   )}
                 </div>
 
+                <div className="space-y-2">
+                  <Label>خلفية الكارت (Gradient)</Label>
+                  <Input
+                    value={editingCard?.background_gradient || ''}
+                    onChange={(e) => setEditingCard({ ...editingCard, background_gradient: e.target.value })}
+                    placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  />
+                  <div 
+                    className="w-full h-20 rounded-lg border"
+                    style={{ background: editingCard?.background_gradient }}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-4">محتوى الصفحة الداخلية</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label>عنوان الصفحة (عربي)</Label>
+                      <Input
+                        value={editingCard?.page_title || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, page_title: e.target.value })}
+                        placeholder="عنوان الصفحة الداخلية"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Page Title (English)</Label>
+                      <Input
+                        value={editingCard?.page_title_en || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, page_title_en: e.target.value })}
+                        placeholder="Internal page title"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <Label>صورة غلاف الصفحة</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, 'page_cover_image')}
+                        disabled={uploading}
+                        className="flex-1"
+                      />
+                    </div>
+                    {editingCard?.page_cover_image && (
+                      <div className="mt-2">
+                        <img 
+                          src={editingCard.page_cover_image} 
+                          alt="Cover preview" 
+                          className="w-full h-40 object-cover rounded-lg border"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label>المحتوى (عربي)</Label>
+                      <Textarea
+                        value={editingCard?.page_content || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, page_content: e.target.value })}
+                        placeholder="اكتب المحتوى هنا..."
+                        rows={10}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Content (English)</Label>
+                      <Textarea
+                        value={editingCard?.page_content_en || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, page_content_en: e.target.value })}
+                        placeholder="Write content here..."
+                        rows={10}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>ترتيب العرض</Label>
+                    <Input
+                      type="number"
+                      value={editingCard?.display_order || 0}
+                      onChange={(e) => setEditingCard({ ...editingCard, display_order: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2 space-x-reverse pt-8">
+                    <Switch
+                      checked={editingCard?.is_active}
+                      onCheckedChange={(checked) => setEditingCard({ ...editingCard, is_active: checked })}
+                    />
+                    <Label>نشط</Label>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="advanced" className="space-y-4">
+                <div className="bg-muted/50 p-4 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    هذه الإعدادات للمطورين فقط. يمكنك استخدام HTML وJSON لإنشاء صفحات متقدمة بمكونات مخصصة.
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="space-y-2">
-                    <Label>خلفية الصفحة</Label>
+                    <Label>خلفية الصفحة (CSS)</Label>
                     <Input
                       value={editingCard?.page_background || ''}
                       onChange={(e) => setEditingCard({ ...editingCard, page_background: e.target.value })}
-                      placeholder="#ffffff أو gradient"
+                      placeholder="#ffffff أو linear-gradient(...)"
                     />
                     <div 
                       className="w-full h-16 rounded-lg border"
@@ -392,7 +449,7 @@ const RoadmapCardsManagement = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>لون النص</Label>
+                    <Label>لون النص (Hex)</Label>
                     <Input
                       value={editingCard?.page_text_color || ''}
                       onChange={(e) => setEditingCard({ ...editingCard, page_text_color: e.target.value })}
@@ -412,46 +469,28 @@ const RoadmapCardsManagement = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>محتوى الصفحة (عربي - HTML)</Label>
+                    <Label>محتوى HTML (عربي)</Label>
                     <Textarea
                       value={editingCard?.page_content || ''}
                       onChange={(e) => setEditingCard({ ...editingCard, page_content: e.target.value })}
-                      placeholder="<p>المحتوى هنا...</p>"
-                      rows={8}
+                      placeholder="<div>...</div>"
+                      rows={12}
                       className="font-mono text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Page Content (English - HTML)</Label>
+                    <Label>HTML Content (English)</Label>
                     <Textarea
                       value={editingCard?.page_content_en || ''}
                       onChange={(e) => setEditingCard({ ...editingCard, page_content_en: e.target.value })}
-                      placeholder="<p>Content here...</p>"
-                      rows={8}
+                      placeholder="<div>...</div>"
+                      rows={12}
                       className="font-mono text-sm"
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>ترتيب العرض</Label>
-                  <Input
-                    type="number"
-                    value={editingCard?.display_order || 0}
-                    onChange={(e) => setEditingCard({ ...editingCard, display_order: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse pt-8">
-                  <Switch
-                    checked={editingCard?.is_active}
-                    onCheckedChange={(checked) => setEditingCard({ ...editingCard, is_active: checked })}
-                  />
-                  <Label>نشط</Label>
-                </div>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
 
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
