@@ -57,6 +57,7 @@ import DailyTasksCardAdmin from "./pages/DailyTasksCardAdmin";
 import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
 import RoadmapCardsAdmin from "./pages/RoadmapCardsAdmin";
 import RoadmapDetail from "./pages/RoadmapDetail";
+import Anubis from "./pages/Anubis";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -88,6 +89,7 @@ const App = () => {
                   <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
+                  <Route path="anubis" element={<RequireAccess><Anubis /></RequireAccess>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />

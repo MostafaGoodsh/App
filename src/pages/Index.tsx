@@ -179,8 +179,9 @@ const Index = () => {
             </article>
           </Link>
           
-          {/* Wallet Card - No Link, just display */}
-          <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 bg-card/30 backdrop-blur-sm group">
+          {/* Wallet Card */}
+          <Link to="/wallet" className="group">
+            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm group">
             <img 
               src={getContent('wallet_card_image', '/lovable-uploads/placeholder.png')} 
               alt={getAltText('wallet_card_image', 'صورة الخزانة')}
@@ -197,6 +198,7 @@ const Index = () => {
               <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
             </div>
           </article>
+          </Link>
 
           {/* Anubis Card - Last Card */}
           <AnubisCard />
