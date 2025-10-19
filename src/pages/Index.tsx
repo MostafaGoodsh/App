@@ -158,41 +158,45 @@ const Index = () => {
             </article>
           </Link>
           
-          {/* Identity and Wallet Cards */}
-          {[
-            { 
-              imageKey: 'identity_card_image',
-              titleKey: 'identity_card_title', 
-              descriptionKey: 'identity_card_description',
-              href: "/identity"
-            },
-            { 
-              imageKey: 'wallet_card_image',
-              titleKey: 'wallet_card_title', 
-              descriptionKey: 'wallet_card_description',
-              href: "/wallet"
-            },
-          ].map((card) => (
-            <Link key={card.titleKey} to={card.href} className="group">
-              <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
-                <img 
-                  src={getContent(card.imageKey, '/lovable-uploads/placeholder.png')} 
-                  alt={getAltText(card.imageKey, 'صورة البطاقة')} 
-                  className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
-                  loading="lazy" 
-                />
-                <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-                  <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
-                    {getContent(card.titleKey, 'عنوان البطاقة')}
-                  </h2>
-                  <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
-                    {getContent(card.descriptionKey, 'وصف البطاقة')}
-                  </p>
-                  <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </article>
-            </Link>
-          ))}
+          {/* Identity Card */}
+          <Link to="/identity" className="group">
+            <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
+              <img 
+                src={getContent('identity_card_image', '/lovable-uploads/placeholder.png')} 
+                alt={getAltText('identity_card_image', 'صورة البطاقة')}
+                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+                loading="lazy" 
+              />
+              <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+                <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
+                  {getContent('identity_card_title', 'عنوان البطاقة')}
+                </h2>
+                <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
+                  {getContent('identity_card_description', 'وصف البطاقة')}
+                </p>
+                <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
+              </div>
+            </article>
+          </Link>
+          
+          {/* Wallet Card - No Link, just display */}
+          <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 bg-card/30 backdrop-blur-sm group">
+            <img 
+              src={getContent('wallet_card_image', '/lovable-uploads/placeholder.png')} 
+              alt={getAltText('wallet_card_image', 'صورة الخزانة')}
+              className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300" 
+              loading="lazy" 
+            />
+            <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+              <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
+                {getContent('wallet_card_title', 'الخزانة الرقمية')}
+              </h2>
+              <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
+                {getContent('wallet_card_description', 'وصف الخزانة')}
+              </p>
+              <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
+            </div>
+          </article>
 
           {/* Anubis Card - Last Card */}
           <AnubisCard />
