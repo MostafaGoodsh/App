@@ -46,8 +46,13 @@ interface RoadmapCard {
   display_order: number;
   is_active: boolean;
   page_title?: string;
+  page_title_en?: string;
   page_content?: string;
+  page_content_en?: string;
   icon_url?: string;
+  page_cover_image?: string;
+  page_background?: string;
+  page_text_color?: string;
 }
 
 const RoadmapCardsManagement = () => {
@@ -153,7 +158,7 @@ const RoadmapCardsManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, fieldName: 'icon_url' | 'page_cover_image') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -180,8 +185,9 @@ const RoadmapCardsManagement = () => {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
+      const folderName = fieldName === 'icon_url' ? 'roadmap-icons' : 'roadmap-covers';
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `roadmap-icons/${fileName}`;
+      const filePath = `${folderName}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -194,16 +200,17 @@ const RoadmapCardsManagement = () => {
         .getPublicUrl(filePath);
 
       // حذف الصورة القديمة إذا وجدت
-      if (editingCard?.icon_url && editingCard.icon_url.includes('avatars/')) {
-        const oldPath = editingCard.icon_url.split('avatars/')[1];
+      const oldImageUrl = editingCard?.[fieldName];
+      if (oldImageUrl && oldImageUrl.includes('avatars/')) {
+        const oldPath = oldImageUrl.split('avatars/')[1];
         await supabase.storage.from('avatars').remove([oldPath]);
       }
 
-      setEditingCard({ ...editingCard, icon_url: publicUrl });
+      setEditingCard({ ...editingCard, [fieldName]: publicUrl });
 
       toast({
         title: "تم رفع الصورة بنجاح",
-        description: "تم تحميل الأيقونة بنجاح",
+        description: fieldName === 'icon_url' ? "تم تحميل الأيقونة بنجاح" : "تم تحميل صورة الغلاف بنجاح",
       });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -292,7 +299,7 @@ const RoadmapCardsManagement = () => {
                   <Input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={(e) => handleImageUpload(e, 'icon_url')}
                     disabled={uploading}
                     className="flex-1"
                   />
@@ -315,35 +322,116 @@ const RoadmapCardsManagement = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Background Gradient (CSS)</Label>
+                <Label>خلفية الكارت (Gradient)</Label>
                 <Input
                   value={editingCard?.background_gradient || ''}
                   onChange={(e) => setEditingCard({ ...editingCard, background_gradient: e.target.value })}
                   placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 />
                 <div 
-                  className="w-full h-20 rounded-lg"
+                  className="w-full h-20 rounded-lg border"
                   style={{ background: editingCard?.background_gradient }}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>عنوان الصفحة</Label>
-                <Input
-                  value={editingCard?.page_title || ''}
-                  onChange={(e) => setEditingCard({ ...editingCard, page_title: e.target.value })}
-                  placeholder="عنوان الصفحة الداخلية"
-                />
-              </div>
+              <div className="border-t pt-4 mt-4">
+                <h3 className="text-lg font-semibold mb-4">إعدادات الصفحة الداخلية</h3>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-2">
+                    <Label>عنوان الصفحة (عربي)</Label>
+                    <Input
+                      value={editingCard?.page_title || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_title: e.target.value })}
+                      placeholder="عنوان الصفحة الداخلية"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Page Title (English)</Label>
+                    <Input
+                      value={editingCard?.page_title_en || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_title_en: e.target.value })}
+                      placeholder="Internal page title"
+                    />
+                  </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label>محتوى الصفحة (HTML)</Label>
-                <Textarea
-                  value={editingCard?.page_content || ''}
-                  onChange={(e) => setEditingCard({ ...editingCard, page_content: e.target.value })}
-                  placeholder="<p>المحتوى هنا...</p>"
-                  rows={6}
-                />
+                <div className="space-y-2 mb-4">
+                  <Label>صورة غلاف الصفحة</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'page_cover_image')}
+                      disabled={uploading}
+                      className="flex-1"
+                    />
+                  </div>
+                  {editingCard?.page_cover_image && (
+                    <div className="mt-2">
+                      <img 
+                        src={editingCard.page_cover_image} 
+                        alt="Cover preview" 
+                        className="w-full h-40 object-cover rounded-lg border"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="space-y-2">
+                    <Label>خلفية الصفحة</Label>
+                    <Input
+                      value={editingCard?.page_background || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_background: e.target.value })}
+                      placeholder="#ffffff أو gradient"
+                    />
+                    <div 
+                      className="w-full h-16 rounded-lg border"
+                      style={{ background: editingCard?.page_background || '#ffffff' }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>لون النص</Label>
+                    <Input
+                      value={editingCard?.page_text_color || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_text_color: e.target.value })}
+                      placeholder="#000000"
+                    />
+                    <div 
+                      className="w-full h-16 rounded-lg border flex items-center justify-center"
+                      style={{ 
+                        background: editingCard?.page_background || '#ffffff',
+                        color: editingCard?.page_text_color || '#000000'
+                      }}
+                    >
+                      نص تجريبي
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>محتوى الصفحة (عربي - HTML)</Label>
+                    <Textarea
+                      value={editingCard?.page_content || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_content: e.target.value })}
+                      placeholder="<p>المحتوى هنا...</p>"
+                      rows={8}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Page Content (English - HTML)</Label>
+                    <Textarea
+                      value={editingCard?.page_content_en || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, page_content_en: e.target.value })}
+                      placeholder="<p>Content here...</p>"
+                      rows={8}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

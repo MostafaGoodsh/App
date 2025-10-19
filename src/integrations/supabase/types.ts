@@ -1554,8 +1554,11 @@ export type Database = {
           icon_url: string | null
           id: string
           is_active: boolean | null
+          page_background: string | null
           page_content: string | null
           page_content_en: string | null
+          page_cover_image: string | null
+          page_text_color: string | null
           page_title: string | null
           page_title_en: string | null
           sections: Json | null
@@ -1575,8 +1578,11 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          page_background?: string | null
           page_content?: string | null
           page_content_en?: string | null
+          page_cover_image?: string | null
+          page_text_color?: string | null
           page_title?: string | null
           page_title_en?: string | null
           sections?: Json | null
@@ -1596,8 +1602,11 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          page_background?: string | null
           page_content?: string | null
           page_content_en?: string | null
+          page_cover_image?: string | null
+          page_text_color?: string | null
           page_title?: string | null
           page_title_en?: string | null
           sections?: Json | null
