@@ -65,20 +65,27 @@ serve(async (req) => {
       )
     }
 
+    // Get user's internal token by symbol first
+    const { data: token, error: tokenError } = await supabase
+      .from('internal_tokens')
+      .select('id, symbol, exchange_rate_usd, decimals')
+      .eq('symbol', internal_token_symbol)
+      .eq('is_active', true)
+      .single()
+
+    if (tokenError || !token) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Token not found' }),
+        { status: 404, headers: corsHeaders }
+      )
+    }
+
     // Get user's internal token balance
     const { data: tokenBalance, error: balanceError } = await supabase
       .from('internal_wallet_balances')
-      .select(`
-        balance,
-        token_id,
-        internal_tokens (
-          symbol,
-          exchange_rate_usd,
-          decimals
-        )
-      `)
+      .select('balance, token_id')
       .eq('user_id', user.id)
-      .eq('internal_tokens.symbol', internal_token_symbol)
+      .eq('token_id', token.id)
       .single()
 
     if (balanceError || !tokenBalance) {
@@ -102,7 +109,7 @@ serve(async (req) => {
     if (target_token === 'SOL') {
       // Convert to SOL using USD rates
       const solPrice = 100 // Approximate SOL price in USD - should be fetched from API
-      const internalTokenUsdValue = internal_amount * (tokenBalance.internal_tokens as any).exchange_rate_usd
+      const internalTokenUsdValue = internal_amount * token.exchange_rate_usd
       targetAmount = internalTokenUsdValue / solPrice
       conversionRate = targetAmount / internal_amount
     } else {
@@ -117,7 +124,7 @@ serve(async (req) => {
       .from('withdrawal_requests')
       .insert({
         user_id: user.id,
-        internal_token_id: tokenBalance.token_id,
+        internal_token_id: token.id,
         internal_amount: internal_amount,
         target_token: target_token,
         target_address: target_address,
@@ -203,7 +210,7 @@ serve(async (req) => {
             balance: tokenBalance.balance - internal_amount
           })
           .eq('user_id', user.id)
-          .eq('token_id', tokenBalance.token_id)
+          .eq('token_id', token.id)
 
         console.log(`Withdrawal processed: ${signature}`)
 
