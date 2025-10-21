@@ -208,12 +208,6 @@ const Index = () => {
             <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
               <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
-              <Link to="/rwa">{getContent('hero_cta_4', 'MSR-RWA (قريبا)')}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
-              <Link to="/stable-coin">{getContent('hero_cta_3', 'MSR-Stable coin (قريبا)')}</Link>
-            </Button>
           </div>
 
           {/* Roadmap Cards Section */}
