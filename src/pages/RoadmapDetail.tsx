@@ -120,14 +120,18 @@ const RoadmapDetail = () => {
 
         {/* Content */}
         {data.page_content ? (
-          <Card className="bg-black/60 backdrop-blur-sm border-white/20">
-            <CardContent className="p-6 prose prose-lg max-w-none prose-invert">
-              <div 
-                className="text-white [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_iframe]:max-w-full [&_iframe]:aspect-video" 
-                dangerouslySetInnerHTML={{ __html: data.page_content }} 
-              />
-            </CardContent>
-          </Card>
+          <div 
+            className="text-white prose prose-lg max-w-none prose-invert 
+              [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg 
+              [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg 
+              [&_iframe]:max-w-full [&_iframe]:aspect-video
+              [&_.bg-card]:bg-black/60 [&_.bg-card]:backdrop-blur-sm [&_.bg-card]:border-white/20
+              [&_.text-muted-foreground]:text-white/70
+              [&_.border]:border-white/20
+              [&_.border-primary\\/30]:border-primary/30
+              [&_.arabic-text]:text-right [&_.arabic-text]:font-cairo" 
+            dangerouslySetInnerHTML={{ __html: data.page_content }} 
+          />
         ) : (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
             <CardHeader>
