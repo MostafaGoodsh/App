@@ -54,6 +54,8 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة كارت المهام اليومية", url: "/admin/daily-tasks-card", icon: Calendar },
   { title: "إعدادات التحويل", url: "/admin/conversion-settings", icon: Settings },
   { title: "إدارة كروت الرودماب", url: "/admin/roadmap-cards", icon: Map },
+  { title: "إدارة بطاقات الصفحة الرئيسية", url: "/admin/home-cards", icon: Home },
+  { title: "إعدادات البروفايل", url: "/admin/profile-settings", icon: User },
   { title: "إدارة مقدمة قائمة الأعمال", url: "/admin/todo-introduction", icon: Calendar },
 ];
 

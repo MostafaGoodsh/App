@@ -469,6 +469,99 @@ export type Database = {
         }
         Relationships: []
       }
+      home_page_cards: {
+        Row: {
+          background_color: string | null
+          background_gradient: string | null
+          background_image: string | null
+          card_type: string
+          content_font_size: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          external_widget_url: string | null
+          font_family: string | null
+          font_size: string | null
+          font_weight: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          page_content: string | null
+          page_content_en: string | null
+          route_path: string | null
+          slug: string
+          text_color: string | null
+          title: string
+          title_en: string | null
+          title_font_size: string | null
+          updated_at: string
+          widget_config: Json | null
+          widget_type: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          card_type?: string
+          content_font_size?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          external_widget_url?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          page_content?: string | null
+          page_content_en?: string | null
+          route_path?: string | null
+          slug: string
+          text_color?: string | null
+          title: string
+          title_en?: string | null
+          title_font_size?: string | null
+          updated_at?: string
+          widget_config?: Json | null
+          widget_type?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          card_type?: string
+          content_font_size?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          external_widget_url?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          page_content?: string | null
+          page_content_en?: string | null
+          route_path?: string | null
+          slug?: string
+          text_color?: string | null
+          title?: string
+          title_en?: string | null
+          title_font_size?: string | null
+          updated_at?: string
+          widget_config?: Json | null
+          widget_type?: string | null
+        }
+        Relationships: []
+      }
       identity_verification: {
         Row: {
           address: string | null
@@ -971,7 +1064,7 @@ export type Database = {
           failed_at: string | null
           id: string
           internal_token_id: string | null
-          ip_address: unknown | null
+          ip_address: unknown
           notes: string | null
           payment_details: Json | null
           payment_method: string
@@ -994,7 +1087,7 @@ export type Database = {
           failed_at?: string | null
           id?: string
           internal_token_id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           notes?: string | null
           payment_details?: Json | null
           payment_method: string
@@ -1017,7 +1110,7 @@ export type Database = {
           failed_at?: string | null
           id?: string
           internal_token_id?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           notes?: string | null
           payment_details?: Json | null
           payment_method?: string
@@ -1180,6 +1273,81 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_customization: {
+        Row: {
+          background_color: string | null
+          background_gradient: string | null
+          background_image: string | null
+          card_arrangement: Json | null
+          content_font_size: string | null
+          created_at: string
+          external_widgets: Json | null
+          font_family: string | null
+          font_weight: string | null
+          header_font_size: string | null
+          id: string
+          layout_type: string | null
+          profile_visibility: string | null
+          show_activity: boolean | null
+          show_follow_stats: boolean | null
+          show_join_date: boolean | null
+          show_social_links: boolean | null
+          show_stats: boolean | null
+          show_todo_list: boolean | null
+          theme_mode: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          card_arrangement?: Json | null
+          content_font_size?: string | null
+          created_at?: string
+          external_widgets?: Json | null
+          font_family?: string | null
+          font_weight?: string | null
+          header_font_size?: string | null
+          id?: string
+          layout_type?: string | null
+          profile_visibility?: string | null
+          show_activity?: boolean | null
+          show_follow_stats?: boolean | null
+          show_join_date?: boolean | null
+          show_social_links?: boolean | null
+          show_stats?: boolean | null
+          show_todo_list?: boolean | null
+          theme_mode?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          card_arrangement?: Json | null
+          content_font_size?: string | null
+          created_at?: string
+          external_widgets?: Json | null
+          font_family?: string | null
+          font_weight?: string | null
+          header_font_size?: string | null
+          id?: string
+          layout_type?: string | null
+          profile_visibility?: string | null
+          show_activity?: boolean | null
+          show_follow_stats?: boolean | null
+          show_join_date?: boolean | null
+          show_social_links?: boolean | null
+          show_stats?: boolean | null
+          show_todo_list?: boolean | null
+          theme_mode?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1262,7 +1430,7 @@ export type Database = {
           accessed_by: string
           fields_accessed: string[] | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           profile_id: string
           user_agent: string | null
         }
@@ -1272,7 +1440,7 @@ export type Database = {
           accessed_by: string
           fields_accessed?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           profile_id: string
           user_agent?: string | null
         }
@@ -1282,7 +1450,7 @@ export type Database = {
           accessed_by?: string
           fields_accessed?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           profile_id?: string
           user_agent?: string | null
         }
@@ -1886,7 +2054,7 @@ export type Database = {
           accessed_at: string
           accessed_by: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           masked_data: boolean | null
           transaction_id: string
           user_agent: string | null
@@ -1897,7 +2065,7 @@ export type Database = {
           accessed_at?: string
           accessed_by: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           masked_data?: boolean | null
           transaction_id: string
           user_agent?: string | null
@@ -1908,7 +2076,7 @@ export type Database = {
           accessed_at?: string
           accessed_by?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           masked_data?: boolean | null
           transaction_id?: string
           user_agent?: string | null
@@ -2350,7 +2518,7 @@ export type Database = {
           blocked: boolean | null
           device_fingerprint: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           mfa_verified: boolean | null
           risk_score: number | null
           user_agent: string | null
@@ -2364,7 +2532,7 @@ export type Database = {
           blocked?: boolean | null
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           mfa_verified?: boolean | null
           risk_score?: number | null
           user_agent?: string | null
@@ -2378,7 +2546,7 @@ export type Database = {
           blocked?: boolean | null
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           mfa_verified?: boolean | null
           risk_score?: number | null
           user_agent?: string | null
@@ -2635,22 +2803,15 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
-      calculate_user_points: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
-      complete_daily_task: {
-        Args: { p_task_id: string }
-        Returns: Json
-      }
+      calculate_user_points: { Args: { p_user_id: string }; Returns: number }
+      complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
         Args: { p_user_id: string }
         Returns: number
       }
-      count_unread_notifications: {
-        Args: Record<PropertyKey, never> | { p_user_id: string }
-        Returns: number
-      }
+      count_unread_notifications:
+        | { Args: { p_user_id: string }; Returns: number }
+        | { Args: never; Returns: number }
       create_initial_internal_balances: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -2685,7 +2846,7 @@ export type Database = {
         Returns: Json
       }
       get_identity_verification_admin_view: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           document_info_masked: string
@@ -2700,7 +2861,7 @@ export type Database = {
         }[]
       }
       get_profiles_admin_view: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           access_count: number
           avatar_url: string
@@ -2717,7 +2878,7 @@ export type Database = {
         }[]
       }
       get_secure_profile_export: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           avg_profile_age_days: number
           profiles_with_email: number
@@ -2738,14 +2899,8 @@ export type Database = {
           transaction_count: number
         }[]
       }
-      grant_admin_role: {
-        Args: { user_email: string }
-        Returns: boolean
-      }
-      grant_user_access: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
+      grant_admin_role: { Args: { user_email: string }; Returns: boolean }
+      grant_user_access: { Args: { p_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2761,10 +2916,7 @@ export type Database = {
         }
         Returns: Json
       }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       mark_all_notifications_read: {
         Args: { p_is_admin?: boolean; p_user_id: string }
         Returns: number
@@ -2804,10 +2956,7 @@ export type Database = {
         Args: { p_admin_notes?: string; p_content_id: string }
         Returns: boolean
       }
-      revoke_user_access: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
+      revoke_user_access: { Args: { p_user_id: string }; Returns: boolean }
       secure_wallet_access: {
         Args: {
           p_access_type: string
@@ -2817,10 +2966,7 @@ export type Database = {
         }
         Returns: Json
       }
-      unverify_user_profile: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
+      unverify_user_profile: { Args: { p_user_id: string }; Returns: boolean }
       update_kyc_status: {
         Args: {
           admin_notes?: string
@@ -2829,18 +2975,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      update_mining_progress: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      update_mining_progress: { Args: { p_user_id: string }; Returns: Json }
       update_user_engagement_stats: {
         Args: { p_user_id: string }
         Returns: Json
       }
-      update_user_points_balance: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      update_user_points_balance: { Args: { p_user_id: string }; Returns: Json }
       upload_avatar: {
         Args: { content_type?: string; file_data: string; file_name: string }
         Returns: Json
@@ -2854,10 +2994,7 @@ export type Database = {
         }
         Returns: Json
       }
-      verify_user_profile: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
+      verify_user_profile: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
