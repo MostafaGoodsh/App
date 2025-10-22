@@ -39,8 +39,9 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
       }
     };
 
+    setCheckingAccess(true);
     checkEarlyAccess();
-  }, [user]);
+  }, [user?.id]);
 
   // انتظر حتى ينتهي التحميل
   if (loading || checkingAccess) {

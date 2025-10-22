@@ -39,8 +39,9 @@ const RequireAdmin = ({ children }: RequireAdminProps) => {
       }
     };
 
+    setCheckingAdmin(true);
     checkAdminStatus();
-  }, [user]);
+  }, [user?.id]);
 
   if (loading || checkingAdmin) {
     return (

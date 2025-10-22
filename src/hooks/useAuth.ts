@@ -35,26 +35,20 @@ export const useAuth = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
-        console.log('useAuth: No user, setting admin to false');
         setIsAdmin(false);
         setAdminLoading(false);
         return;
       }
-
-      console.log('useAuth: Checking admin status for user:', user.id);
 
       try {
         const { data, error } = await supabase.rpc("is_admin", {
           _user_id: user.id,
         });
 
-        console.log('useAuth: is_admin response:', { data, error });
-
         if (error) {
           console.error('useAuth: Error checking admin status:', error);
           setIsAdmin(false);
         } else {
-          console.log('useAuth: Setting isAdmin to:', data);
           setIsAdmin(data === true);
         }
       } catch (error) {
@@ -65,13 +59,12 @@ export const useAuth = () => {
       }
     };
 
-    // ضبط adminLoading على true عند بدء الفحص
     if (user) {
       setAdminLoading(true);
     }
     
     checkAdminStatus();
-  }, [user]);
+  }, [user?.id]);
 
   return { 
     session, 
