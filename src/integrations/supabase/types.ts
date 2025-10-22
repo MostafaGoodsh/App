@@ -1359,6 +1359,7 @@ export type Database = {
           following_count: number | null
           full_name: string | null
           has_access: boolean | null
+          has_early_access: boolean | null
           id: string
           instagram_url: string | null
           is_verified: boolean | null
@@ -1383,6 +1384,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           has_access?: boolean | null
+          has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
@@ -1407,6 +1409,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           has_access?: boolean | null
+          has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
@@ -2804,6 +2807,7 @@ export type Database = {
         Returns: number
       }
       calculate_user_points: { Args: { p_user_id: string }; Returns: number }
+      check_early_access: { Args: { _user_id: string }; Returns: boolean }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
         Args: { p_user_id: string }

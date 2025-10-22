@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +29,7 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
 
 const useAdminMenuItems = (getContent: (key: string, fallback?: string) => string) => [
   { title: getContent("admin_users_management", "إدارة المستخدمين"), url: "/admin/users", icon: Users },
+  { title: "إدارة الوصول المبكر", url: "/admin/early-access", icon: UserCheck },
   { title: "رسائل الدعم", url: "/admin/support", icon: MessageSquare },
   { title: "إدارة الحسابات المعتمدة", url: "/admin/verified-accounts", icon: Shield },
   { title: getContent("admin_kyc_management", "إدارة الهوية"), url: "/admin/kyc", icon: Shield },

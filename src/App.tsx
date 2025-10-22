@@ -60,6 +60,7 @@ import RoadmapDetail from "./pages/RoadmapDetail";
 import Anubis from "./pages/Anubis";
 import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
+import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -123,6 +124,7 @@ const App = () => {
                   <Route path="admin/roadmap-cards" element={<RequireAdmin><RoadmapCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/home-cards" element={<RequireAdmin><HomePageCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
+                  <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
