@@ -14,6 +14,7 @@ export const useAuth = () => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[useAuth] Initial session loaded:', session?.user?.id);
       if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
@@ -23,6 +24,7 @@ export const useAuth = () => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log('[useAuth] Auth state changed:', event, newSession?.user?.id);
       if (mounted) {
         setSession(newSession);
         setUser(newSession?.user ?? null);
@@ -40,6 +42,7 @@ export const useAuth = () => {
     let mounted = true;
 
     const checkAdminStatus = async () => {
+      console.log('[useAuth] Checking admin status for user:', user?.id);
       if (!user?.id) {
         if (mounted) {
           setIsAdmin(false);
@@ -57,6 +60,7 @@ export const useAuth = () => {
           _user_id: user.id,
         });
 
+        console.log('[useAuth] Admin check result:', data, error);
         if (mounted) {
           if (error) {
             setIsAdmin(false);
@@ -66,6 +70,7 @@ export const useAuth = () => {
           setAdminLoading(false);
         }
       } catch (error) {
+        console.error('[useAuth] Admin check error:', error);
         if (mounted) {
           setIsAdmin(false);
           setAdminLoading(false);

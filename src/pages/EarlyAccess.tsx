@@ -7,12 +7,31 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 
 const EarlyAccess = () => {
-  const { isAdmin, adminLoading, loading } = useAuth();
+  const { isAdmin, loading } = useAuth();
+  
+  console.log('[EarlyAccess] Render - isAdmin:', isAdmin, 'loading:', loading);
   
   // الأدمن يروح مباشرة للصفحة الرئيسية
-  if (!loading && !adminLoading && isAdmin) {
+  if (!loading && isAdmin) {
+    console.log('[EarlyAccess] Redirecting admin to home');
     return <Navigate to="/" replace />;
   }
+  
+  // عرض loading أثناء التحقق
+  if (loading) {
+    console.log('[EarlyAccess] Showing loading state');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="arabic-text">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  console.log('[EarlyAccess] Showing early access page');
+  
   return (
     <>
       <Helmet>
