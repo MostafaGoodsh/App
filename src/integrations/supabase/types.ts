@@ -1546,11 +1546,16 @@ export type Database = {
         Row: {
           background_color: string | null
           background_gradient: string | null
+          content_font_size: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
           description_en: string | null
           display_order: number | null
+          external_widget_url: string | null
+          font_family: string | null
+          font_size: string | null
+          font_weight: string | null
           icon_url: string | null
           id: string
           is_active: boolean | null
@@ -1565,16 +1570,24 @@ export type Database = {
           slug: string
           title: string
           title_en: string | null
+          title_font_size: string | null
           updated_at: string | null
+          widget_config: Json | null
+          widget_type: string | null
         }
         Insert: {
           background_color?: string | null
           background_gradient?: string | null
+          content_font_size?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           description_en?: string | null
           display_order?: number | null
+          external_widget_url?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
@@ -1589,16 +1602,24 @@ export type Database = {
           slug: string
           title: string
           title_en?: string | null
+          title_font_size?: string | null
           updated_at?: string | null
+          widget_config?: Json | null
+          widget_type?: string | null
         }
         Update: {
           background_color?: string | null
           background_gradient?: string | null
+          content_font_size?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           description_en?: string | null
           display_order?: number | null
+          external_widget_url?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
@@ -1613,7 +1634,10 @@ export type Database = {
           slug?: string
           title?: string
           title_en?: string | null
+          title_font_size?: string | null
           updated_at?: string | null
+          widget_config?: Json | null
+          widget_type?: string | null
         }
         Relationships: []
       }

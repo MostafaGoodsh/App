@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Upload, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -54,6 +54,14 @@ interface RoadmapCard {
   page_cover_image?: string;
   page_background?: string;
   page_text_color?: string;
+  font_size?: string;
+  font_family?: string;
+  font_weight?: string;
+  title_font_size?: string;
+  content_font_size?: string;
+  external_widget_url?: string;
+  widget_type?: string;
+  widget_config?: any;
 }
 
 const RoadmapCardsManagement = () => {
@@ -143,6 +151,42 @@ const RoadmapCardsManagement = () => {
     }
   };
 
+  const handleMoveUp = async (card: RoadmapCard) => {
+    const currentIndex = cards.findIndex(c => c.id === card.id);
+    if (currentIndex === 0) return;
+    
+    const prevCard = cards[currentIndex - 1];
+    
+    try {
+      await supabase.from('roadmap_cards').update({ display_order: card.display_order }).eq('id', prevCard.id);
+      await supabase.from('roadmap_cards').update({ display_order: prevCard.display_order }).eq('id', card.id);
+      
+      toast({ title: "تم تغيير الترتيب" });
+      fetchCards();
+    } catch (error) {
+      console.error('Error:', error);
+      toast({ title: "خطأ", description: "فشل في تغيير الترتيب", variant: "destructive" });
+    }
+  };
+
+  const handleMoveDown = async (card: RoadmapCard) => {
+    const currentIndex = cards.findIndex(c => c.id === card.id);
+    if (currentIndex === cards.length - 1) return;
+    
+    const nextCard = cards[currentIndex + 1];
+    
+    try {
+      await supabase.from('roadmap_cards').update({ display_order: card.display_order }).eq('id', nextCard.id);
+      await supabase.from('roadmap_cards').update({ display_order: nextCard.display_order }).eq('id', card.id);
+      
+      toast({ title: "تم تغيير الترتيب" });
+      fetchCards();
+    } catch (error) {
+      console.error('Error:', error);
+      toast({ title: "خطأ", description: "فشل في تغيير الترتيب", variant: "destructive" });
+    }
+  };
+
   const openCreateDialog = () => {
     setEditingCard({
       title: '',
@@ -150,6 +194,12 @@ const RoadmapCardsManagement = () => {
       background_gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       display_order: cards.length + 1,
       is_active: true,
+      font_family: 'Cairo',
+      font_size: 'medium',
+      font_weight: 'normal',
+      title_font_size: 'large',
+      content_font_size: 'medium',
+      widget_type: 'none',
     });
     setIsDialogOpen(true);
   };
@@ -247,9 +297,11 @@ const RoadmapCardsManagement = () => {
             </DialogHeader>
 
             <Tabs defaultValue="basic" className="py-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="basic">المحتوى الأساسي</TabsTrigger>
-                <TabsTrigger value="advanced">محتوى متقدم (تقني)</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="basic">الأساسي</TabsTrigger>
+                <TabsTrigger value="fonts">الفونتات</TabsTrigger>
+                <TabsTrigger value="widgets">Widgets</TabsTrigger>
+                <TabsTrigger value="advanced">متقدم</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4">
@@ -428,6 +480,149 @@ const RoadmapCardsManagement = () => {
                 </div>
               </TabsContent>
 
+              <TabsContent value="fonts" className="space-y-4">
+                <div className="bg-muted/50 p-4 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    تحكم في خطوط وأحجام النصوص في الصفحة الداخلية
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>نوع الخط</Label>
+                    <select
+                      className="w-full p-2 rounded-md border bg-background"
+                      value={editingCard?.font_family || 'Cairo'}
+                      onChange={(e) => setEditingCard({ ...editingCard, font_family: e.target.value })}
+                    >
+                      <option value="Cairo">Cairo</option>
+                      <option value="Tajawal">Tajawal</option>
+                      <option value="Amiri">Amiri</option>
+                      <option value="Roboto">Roboto</option>
+                      <option value="Inter">Inter</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>سُمك الخط</Label>
+                    <select
+                      className="w-full p-2 rounded-md border bg-background"
+                      value={editingCard?.font_weight || 'normal'}
+                      onChange={(e) => setEditingCard({ ...editingCard, font_weight: e.target.value })}
+                    >
+                      <option value="normal">عادي</option>
+                      <option value="medium">متوسط</option>
+                      <option value="semibold">نصف سميك</option>
+                      <option value="bold">سميك</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>حجم العنوان</Label>
+                    <select
+                      className="w-full p-2 rounded-md border bg-background"
+                      value={editingCard?.title_font_size || 'large'}
+                      onChange={(e) => setEditingCard({ ...editingCard, title_font_size: e.target.value })}
+                    >
+                      <option value="small">صغير</option>
+                      <option value="medium">متوسط</option>
+                      <option value="large">كبير</option>
+                      <option value="xlarge">كبير جداً</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>حجم المحتوى</Label>
+                    <select
+                      className="w-full p-2 rounded-md border bg-background"
+                      value={editingCard?.content_font_size || 'medium'}
+                      onChange={(e) => setEditingCard({ ...editingCard, content_font_size: e.target.value })}
+                    >
+                      <option value="small">صغير</option>
+                      <option value="medium">متوسط</option>
+                      <option value="large">كبير</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>الحجم العام</Label>
+                    <select
+                      className="w-full p-2 rounded-md border bg-background"
+                      value={editingCard?.font_size || 'medium'}
+                      onChange={(e) => setEditingCard({ ...editingCard, font_size: e.target.value })}
+                    >
+                      <option value="small">صغير</option>
+                      <option value="medium">متوسط</option>
+                      <option value="large">كبير</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4" style={{ 
+                  fontFamily: editingCard?.font_family || 'Cairo',
+                  fontWeight: editingCard?.font_weight || 'normal'
+                }}>
+                  <h3 className="mb-2" style={{ fontSize: editingCard?.title_font_size === 'xlarge' ? '2rem' : editingCard?.title_font_size === 'large' ? '1.5rem' : editingCard?.title_font_size === 'medium' ? '1.25rem' : '1rem' }}>
+                    معاينة العنوان
+                  </h3>
+                  <p style={{ fontSize: editingCard?.content_font_size === 'large' ? '1.125rem' : editingCard?.content_font_size === 'medium' ? '1rem' : '0.875rem' }}>
+                    هذا نص تجريبي لمعاينة الخط والحجم المختار. يمكنك رؤية كيف سيظهر المحتوى في الصفحة.
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="widgets" className="space-y-4">
+                <div className="bg-muted/50 p-4 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    أضف widgets خارجية مثل عرض العملات من DexScreener أو Pump.fun أو رصيد محفظة
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>نوع الـ Widget</Label>
+                  <select
+                    className="w-full p-2 rounded-md border bg-background"
+                    value={editingCard?.widget_type || 'none'}
+                    onChange={(e) => setEditingCard({ ...editingCard, widget_type: e.target.value })}
+                  >
+                    <option value="none">بدون Widget</option>
+                    <option value="iframe">Iframe مخصص</option>
+                    <option value="dexscreener">DexScreener Chart</option>
+                    <option value="pumpfun">Pump.fun Token</option>
+                    <option value="wallet_balance">رصيد محفظة</option>
+                    <option value="custom_embed">Embed Code مخصص</option>
+                  </select>
+                </div>
+
+                {editingCard?.widget_type && editingCard.widget_type !== 'none' && (
+                  <div className="space-y-2">
+                    <Label>رابط أو كود الـ Widget</Label>
+                    <Textarea
+                      value={editingCard?.external_widget_url || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, external_widget_url: e.target.value })}
+                      placeholder={
+                        editingCard.widget_type === 'dexscreener' ? 'https://dexscreener.com/solana/...' :
+                        editingCard.widget_type === 'pumpfun' ? 'https://pump.fun/coin/...' :
+                        editingCard.widget_type === 'wallet_balance' ? 'عنوان المحفظة' :
+                        editingCard.widget_type === 'custom_embed' ? 'ضع كود الـ embed هنا' :
+                        'ضع الرابط أو الكود هنا'
+                      }
+                      rows={3}
+                    />
+                  </div>
+                )}
+
+                {editingCard?.widget_type === 'dexscreener' && editingCard?.external_widget_url && (
+                  <div className="border rounded-lg p-2">
+                    <p className="text-sm text-muted-foreground mb-2">معاينة Widget</p>
+                    <iframe
+                      src={editingCard.external_widget_url}
+                      className="w-full h-64 rounded"
+                      title="Widget Preview"
+                    />
+                  </div>
+                )}
+              </TabsContent>
+
               <TabsContent value="advanced" className="space-y-4">
                 <div className="bg-muted/50 p-4 rounded-lg mb-4">
                   <p className="text-sm text-muted-foreground">
@@ -539,6 +734,24 @@ const RoadmapCardsManagement = () => {
               </TableCell>
               <TableCell className="text-left">
                 <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleMoveUp(card)}
+                    disabled={cards.findIndex(c => c.id === card.id) === 0}
+                    title="تحريك للأعلى"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleMoveDown(card)}
+                    disabled={cards.findIndex(c => c.id === card.id) === cards.length - 1}
+                    title="تحريك للأسفل"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
