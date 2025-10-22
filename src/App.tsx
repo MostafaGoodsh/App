@@ -61,6 +61,7 @@ import Anubis from "./pages/Anubis";
 import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
+import Documents from "./pages/Documents";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -82,6 +83,7 @@ const App = () => {
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
                   <Route path="identity" element={<RequireAuth><Identity /></RequireAuth>} />
+                  <Route path="documents" element={<RequireAuth><Documents /></RequireAuth>} />
                   <Route path="learning" element={<RequireAccess><Learning /></RequireAccess>} />
                   <Route path="surveys" element={<RequireAuth><Surveys /></RequireAuth>} />
                   <Route path="updates" element={<RequireAccess><Updates /></RequireAccess>} />
