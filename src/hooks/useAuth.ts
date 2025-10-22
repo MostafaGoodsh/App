@@ -10,34 +10,46 @@ export const useAuth = () => {
   const [adminLoading, setAdminLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log('Auth state changed:', event, newSession?.user?.email);
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      setLoading(false);
-    });
+    let mounted = true;
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session loaded:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    });
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (mounted) {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+      }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   // فحص حالة الإدارة
   useEffect(() => {
+    let mounted = true;
+
     const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setAdminLoading(false);
+      if (!user?.id) {
+        if (mounted) {
+          setIsAdmin(false);
+          setAdminLoading(false);
+        }
         return;
+      }
+
+      if (mounted) {
+        setAdminLoading(true);
       }
 
       try {
@@ -45,25 +57,27 @@ export const useAuth = () => {
           _user_id: user.id,
         });
 
-        if (error) {
-          console.error('useAuth: Error checking admin status:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(data === true);
+        if (mounted) {
+          if (error) {
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(data === true);
+          }
+          setAdminLoading(false);
         }
       } catch (error) {
-        console.error('useAuth: Exception checking admin status:', error);
-        setIsAdmin(false);
-      } finally {
-        setAdminLoading(false);
+        if (mounted) {
+          setIsAdmin(false);
+          setAdminLoading(false);
+        }
       }
     };
 
-    if (user) {
-      setAdminLoading(true);
-    }
-    
     checkAdminStatus();
+
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
 
   return { 

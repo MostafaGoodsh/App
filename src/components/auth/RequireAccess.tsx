@@ -10,14 +10,22 @@ interface RequireAccessProps {
 const RequireAccess = ({ children }: RequireAccessProps) => {
   const { user, loading, isAdmin } = useAuth();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [checkingAccess, setCheckingAccess] = useState(true);
+  const [checkingAccess, setCheckingAccess] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const checkEarlyAccess = async () => {
-      if (!user) {
-        setHasAccess(false);
-        setCheckingAccess(false);
+      if (!user?.id) {
+        if (mounted) {
+          setHasAccess(false);
+          setCheckingAccess(false);
+        }
         return;
+      }
+
+      if (mounted) {
+        setCheckingAccess(true);
       }
 
       try {
@@ -25,22 +33,27 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
           _user_id: user.id,
         });
 
-        if (error) {
-          console.error("Error checking early access:", error);
-          setHasAccess(false);
-        } else {
-          setHasAccess(data === true);
+        if (mounted) {
+          if (error) {
+            setHasAccess(false);
+          } else {
+            setHasAccess(data === true);
+          }
+          setCheckingAccess(false);
         }
       } catch (error) {
-        console.error("Error checking early access:", error);
-        setHasAccess(false);
-      } finally {
-        setCheckingAccess(false);
+        if (mounted) {
+          setHasAccess(false);
+          setCheckingAccess(false);
+        }
       }
     };
 
-    setCheckingAccess(true);
     checkEarlyAccess();
+
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
 
   // انتظر حتى ينتهي التحميل

@@ -13,11 +13,19 @@ const RequireAdmin = ({ children }: RequireAdminProps) => {
   const [checkingAdmin, setCheckingAdmin] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setCheckingAdmin(false);
+      if (!user?.id) {
+        if (mounted) {
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+        }
         return;
+      }
+
+      if (mounted) {
+        setCheckingAdmin(true);
       }
 
       try {
@@ -25,22 +33,27 @@ const RequireAdmin = ({ children }: RequireAdminProps) => {
           _user_id: user.id,
         });
 
-        if (error) {
-          console.error("Error checking admin status:", error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(data);
+        if (mounted) {
+          if (error) {
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(data);
+          }
+          setCheckingAdmin(false);
         }
       } catch (error) {
-        console.error("Error checking admin status:", error);
-        setIsAdmin(false);
-      } finally {
-        setCheckingAdmin(false);
+        if (mounted) {
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+        }
       }
     };
 
-    setCheckingAdmin(true);
     checkAdminStatus();
+
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
 
   if (loading || checkingAdmin) {
