@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ProfileSettingsManagement from "@/components/admin/ProfileSettingsManagement";
+import ProfileCustomizationManagement from "@/components/admin/ProfileCustomizationManagement";
 import RequireAuth from "@/components/auth/RequireAuth";
 
 export default function ProfileSettingsAdmin() {
@@ -10,7 +10,7 @@ export default function ProfileSettingsAdmin() {
         <meta name="description" content="تخصيص وإدارة إعدادات البروفايل" />
       </Helmet>
       <div className="container mx-auto p-6">
-        <ProfileSettingsManagement />
+        <ProfileCustomizationManagement />
       </div>
     </RequireAuth>
   );
