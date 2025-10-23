@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HybridWalletCard } from '@/components/wallet/HybridWalletCard';
 import { HybridTokenSwap } from '@/components/wallet/HybridTokenSwap';
+import { WithdrawalDialog } from '@/components/wallet/WithdrawalDialog';
 import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { RechargeSection } from '@/components/wallet/RechargeSection';
@@ -163,34 +164,10 @@ const WalletContent = () => {
       )}
 
       {/* نافذة السحب الحقيقي */}
-      {showWithdraw && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-background rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="text-lg font-semibold">سحب حقيقي</h3>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowWithdraw(false)}
-              >
-                ✕
-              </Button>
-            </div>
-            <div className="p-4">
-              <div className="text-center py-8">
-                <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">قريباً جداً!</h3>
-                <p className="text-muted-foreground mb-4">
-                  ميزة السحب الحقيقي للعملات قيد التطوير
-                </p>
-                <p className="text-sm text-blue-600">
-                  ستتمكن قريباً من سحب عملاتك الداخلية كعملات حقيقية
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <WithdrawalDialog 
+        open={showWithdraw}
+        onOpenChange={setShowWithdraw}
+      />
 
 
       {/* تاريخ المعاملات */}

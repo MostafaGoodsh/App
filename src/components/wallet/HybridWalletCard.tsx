@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
-import { WithdrawalDialog } from './WithdrawalDialog';
 import { Coins, ArrowUpRight, Wallet, TrendingUp } from 'lucide-react';
 
 interface HybridWalletCardProps {
@@ -14,7 +13,6 @@ interface HybridWalletCardProps {
 
 export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletCardProps) => {
   const { balances, getTotalUSDValue, isLoading } = useInternalWallet();
-  const [showWithdrawalDialog, setShowWithdrawalDialog] = React.useState(false);
 
   if (isLoading) {
     return (
@@ -142,7 +140,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
             <span className="text-xs font-playfair" dir="ltr">Swap</span>
           </Button>
           <Button 
-            onClick={() => setShowWithdrawalDialog(true)}
+            onClick={onWithdrawClick}
             variant="outline"
             className="flex flex-col items-center gap-1 text-sm h-auto py-3"
           >
@@ -152,11 +150,6 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
           </Button>
         </div>
       </CardContent>
-      
-      <WithdrawalDialog 
-        open={showWithdrawalDialog}
-        onOpenChange={setShowWithdrawalDialog}
-      />
     </Card>
   );
 };
