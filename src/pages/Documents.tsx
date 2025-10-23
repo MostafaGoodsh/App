@@ -107,13 +107,20 @@ const Documents = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8 text-center">
-        <h1 className="font-cairo text-4xl font-bold text-primary mb-4">
-          رفع الوثائق والصور
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          قم برفع وثائقك وصورك الشخصية بشكل آمن مع مصادقة ثنائية
-        </p>
+      <div className="mb-8">
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+              <Shield className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="font-cairo text-4xl font-bold text-primary mb-2">
+              الخزانة الرقمية
+            </CardTitle>
+            <CardDescription className="text-lg">
+              قم برفع وثائقك وصورك الشخصية بشكل آمن مع مصادقة ثنائية
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
 
       <div className="grid gap-6">
