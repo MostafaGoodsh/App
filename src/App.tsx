@@ -25,6 +25,7 @@ import SupportAdmin from "./pages/SupportAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
 import RequireAccess from "./components/auth/RequireAccess";
+import RequireAnubisAccess from "./components/auth/RequireAnubisAccess";
 import Updates from "./pages/Updates";
 import StableCoin from "./pages/StableCoin";
 import RWA from "./pages/RWA";
@@ -94,7 +95,7 @@ const App = () => {
                   <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
-                  <Route path="anubis" element={<RequireAccess><Anubis /></RequireAccess>} />
+                  <Route path="anubis" element={<RequireAnubisAccess><Anubis /></RequireAnubisAccess>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />

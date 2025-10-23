@@ -1350,6 +1350,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          anubis_expires_at: string | null
+          anubis_subscription_type: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -1359,6 +1361,7 @@ export type Database = {
           following_count: number | null
           full_name: string | null
           has_access: boolean | null
+          has_anubis_access: boolean | null
           has_early_access: boolean | null
           id: string
           instagram_url: string | null
@@ -1375,6 +1378,8 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          anubis_expires_at?: string | null
+          anubis_subscription_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -1384,6 +1389,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           has_access?: boolean | null
+          has_anubis_access?: boolean | null
           has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
@@ -1400,6 +1406,8 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          anubis_expires_at?: string | null
+          anubis_subscription_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -1409,6 +1417,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           has_access?: boolean | null
+          has_anubis_access?: boolean | null
           has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
@@ -2807,6 +2816,7 @@ export type Database = {
         Returns: number
       }
       calculate_user_points: { Args: { p_user_id: string }; Returns: number }
+      check_anubis_access: { Args: { _user_id: string }; Returns: boolean }
       check_early_access: { Args: { _user_id: string }; Returns: boolean }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
@@ -2904,6 +2914,14 @@ export type Database = {
         }[]
       }
       grant_admin_role: { Args: { user_email: string }; Returns: boolean }
+      grant_anubis_access: {
+        Args: {
+          p_duration_days?: number
+          p_subscription_type?: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       grant_user_access: { Args: { p_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -2960,6 +2978,7 @@ export type Database = {
         Args: { p_admin_notes?: string; p_content_id: string }
         Returns: boolean
       }
+      revoke_anubis_access: { Args: { p_user_id: string }; Returns: boolean }
       revoke_user_access: { Args: { p_user_id: string }; Returns: boolean }
       secure_wallet_access: {
         Args: {
