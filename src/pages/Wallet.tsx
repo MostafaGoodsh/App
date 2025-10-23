@@ -5,7 +5,6 @@ import { WithdrawalDialog } from '@/components/wallet/WithdrawalDialog';
 import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { RechargeSection } from '@/components/wallet/RechargeSection';
-import { useSolanaWalletData } from '@/hooks/useSolanaWalletData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,14 +15,12 @@ import { Link } from 'react-router-dom';
 
 // محتوى المحفظة البسيطة
 const WalletContent = () => {
-  const [transactions, setTransactions] = useState<any[]>([]);
   const [showHybridSwap, setShowHybridSwap] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [internalTransactions, setInternalTransactions] = useState<any[]>([]);
   
   const { user } = useAuth();
-  const { getTransactionHistory } = useSolanaWalletData();
 
   // Check verification status
   useEffect(() => {
@@ -42,11 +39,6 @@ const WalletContent = () => {
     
     checkVerification();
   }, [user]);
-
-  const loadTransactions = async () => {
-    const txHistory = await getTransactionHistory();
-    setTransactions(txHistory);
-  };
 
   // Load internal transactions
   useEffect(() => {
@@ -100,10 +92,6 @@ const WalletContent = () => {
 
     loadInternalTransactions();
   }, [user]);
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
 
   return (
     <>
