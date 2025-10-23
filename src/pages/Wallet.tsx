@@ -9,8 +9,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 // محتوى المحفظة البسيطة
 const WalletContent = () => {
@@ -107,6 +108,23 @@ const WalletContent = () => {
     <>
       {/* المحفظة الداخلية فقط */}
       <div className="space-y-6">
+        {/* Quick Actions */}
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <Link to="/documents">
+              <Button className="w-full h-auto py-6 bg-primary/20 hover:bg-primary/30 border border-primary/30">
+                <div className="flex items-center justify-center gap-3">
+                  <FileText className="w-6 h-6" />
+                  <div className="text-right">
+                    <p className="font-cairo font-bold text-lg">رفع الوثائق والصور</p>
+                    <p className="text-xs opacity-80">Upload Documents & Images</p>
+                  </div>
+                </div>
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* محفظة XP و MS-RA */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <HybridWalletCard 
