@@ -238,11 +238,12 @@ export default function Anubis() {
 
     try {
       const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('anubis-vault')
-        .upload(fileName, selectedFile);
+        .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
