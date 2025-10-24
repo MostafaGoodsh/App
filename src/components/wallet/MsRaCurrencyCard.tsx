@@ -11,7 +11,7 @@ import { useAppContent } from "@/hooks/useAppContent";
 import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { 
   Zap, 
   Clock, 
@@ -30,7 +30,6 @@ interface MsRaCurrencyCardProps {
 export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { getContentItem } = useAppContent();
   const { getTokenBalance } = useInternalWallet();
   const [solanaAddress, setSolanaAddress] = useState("");
@@ -257,11 +256,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   };
 
   return (
-    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg bg-card" onClick={() => navigate('/mining')}>
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-10"
-        style={{ backgroundImage: `url(${cardBackground})` }}
-      />
+    <Link to="/mining" className="block">
+      <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg bg-card">
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-10"
+          style={{ backgroundImage: `url(${cardBackground})` }}
+        />
       <CardHeader className="relative z-10 pb-3">
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
@@ -317,8 +317,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             <p className="text-sm text-amber-600 dark:text-amber-300 mb-3">
               يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين
             </p>
-            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate('/identity'); }}>
-              انتقل لتحقيق الهوية
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/identity" onClick={(e) => e.stopPropagation()}>انتقل لتحقيق الهوية</Link>
             </Button>
           </div>
         )}
@@ -442,5 +442,6 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         )}
       </CardContent>
     </Card>
+    </Link>
   );
 };
