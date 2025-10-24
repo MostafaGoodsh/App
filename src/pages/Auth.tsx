@@ -97,9 +97,21 @@ const Auth = () => {
           {mode === 'signin' ? 'تسجيل الدخول' : 'إنشاء حساب'}
         </h1>
 
-        <div className="mb-6 flex gap-2">
-          <Button variant={mode === 'signin' ? 'default' : 'outline'} onClick={() => setMode('signin')}>دخول</Button>
-          <Button variant={mode === 'signup' ? 'default' : 'outline'} onClick={() => setMode('signup')}>تسجيل</Button>
+        <div className="mb-6 flex gap-3 bg-muted/50 p-1 rounded-lg">
+          <Button 
+            variant={mode === 'signin' ? 'default' : 'ghost'} 
+            onClick={() => setMode('signin')}
+            className="flex-1"
+          >
+            تسجيل الدخول
+          </Button>
+          <Button 
+            variant={mode === 'signup' ? 'default' : 'ghost'} 
+            onClick={() => setMode('signup')}
+            className="flex-1"
+          >
+            حساب جديد
+          </Button>
         </div>
 
         {mode === 'signin' ? (
