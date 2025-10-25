@@ -44,23 +44,28 @@ export default function Anubis() {
     
     setLoadingFiles(true);
     try {
-      const { data, error } = await supabase.storage
-        .from('anubis-vault')
-        .list(user.id, {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/list-vault-files`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (error) {
-        console.error('Storage list error:', error);
-        throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch files');
       }
 
-      console.log('Fetched files from storage:', data);
+      const result = await response.json();
+      console.log('Fetched files from storage:', result.data);
 
-      if (data) {
-        const files = data.map(file => ({
+      if (result.data) {
+        const files = result.data.map((file: any) => ({
           name: file.name,
           created_at: file.created_at,
           size: file.metadata?.size || 0,
@@ -92,13 +97,24 @@ export default function Anubis() {
     }
 
     try {
-      const { data, error } = await supabase.storage
-        .from('anubis-vault')
-        .download(`${user.id}/${fileName}`);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/download-vault-file?fileName=${encodeURIComponent(fileName)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+        }
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to download file');
+      }
 
-      const url = URL.createObjectURL(data);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -149,11 +165,24 @@ export default function Anubis() {
     if (!user || !fileToDelete || !mfaVerified) return;
 
     try {
-      const { error } = await supabase.storage
-        .from('anubis-vault')
-        .remove([`${user.id}/${fileToDelete}`]);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await fetch(
+        `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/delete-vault-file`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ fileName: fileToDelete }),
+        }
+      );
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete file');
+      }
 
       toast({
         title: "تم الحذف بنجاح",
@@ -249,15 +278,30 @@ export default function Anubis() {
     setUploading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('anubis-vault')
-        .upload(filePath, selectedFile);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('fileName', fileName);
 
-      if (uploadError) throw uploadError;
+      const response = await fetch(
+        `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/upload-vault-file`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload file');
+      }
 
       toast({
         title: "تم رفع الملف بنجاح ✓",
