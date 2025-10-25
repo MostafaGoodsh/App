@@ -52,18 +52,30 @@ export default function Anubis() {
           sortBy: { column: 'created_at', order: 'desc' }
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Storage list error:', error);
+        throw error;
+      }
+
+      console.log('Fetched files from storage:', data);
 
       if (data) {
-        setStoredFiles(data.map(file => ({
+        const files = data.map(file => ({
           name: file.name,
           created_at: file.created_at,
           size: file.metadata?.size || 0,
           id: file.id
-        })));
+        }));
+        console.log('Processed files:', files);
+        setStoredFiles(files);
       }
     } catch (error: any) {
       console.error('Error fetching files:', error);
+      toast({
+        title: "خطأ في جلب الملفات",
+        description: error.message,
+        variant: "destructive",
+      });
     } finally {
       setLoadingFiles(false);
     }
@@ -253,7 +265,11 @@ export default function Anubis() {
       });
 
       setSelectedFile(null);
-      fetchStoredFiles();
+      
+      // تأخير بسيط للتأكد من اكتمال الحفظ
+      setTimeout(() => {
+        fetchStoredFiles();
+      }, 500);
     } catch (error: any) {
       toast({
         title: "فشل رفع الملف",
