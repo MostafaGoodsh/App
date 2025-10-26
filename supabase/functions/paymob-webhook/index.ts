@@ -114,6 +114,24 @@ serve(async (req) => {
       // Calculate tokens to credit
       const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
 
+      // Check if this is an Anubis subscription payment
+      const isAnubisSubscription = transaction.internal_tokens.symbol.startsWith('ANUBIS_');
+      let anubisSubscriptionType = null;
+      let anubisDurationDays = null;
+      
+      if (isAnubisSubscription) {
+        // Parse subscription details from token symbol: ANUBIS_BASIC_30D, ANUBIS_PREMIUM_90D, etc.
+        const parts = transaction.internal_tokens.symbol.split('_');
+        anubisSubscriptionType = parts[1]?.toLowerCase(); // 'basic', 'premium', 'lifetime'
+        const durationStr = parts[2]; // '30D', '90D', etc.
+        anubisDurationDays = parseInt(durationStr?.replace('D', '')) || 30;
+        
+        console.log('Anubis subscription detected:', {
+          type: anubisSubscriptionType,
+          duration: anubisDurationDays
+        });
+      }
+
       // Update transaction as completed
       const { error: updateError } = await supabaseClient
         .from('payment_transactions')
@@ -130,48 +148,86 @@ serve(async (req) => {
         throw updateError;
       }
 
-      // Credit user's internal wallet
-      // First, check if balance exists
-      const { data: existingBalance } = await supabaseClient
-        .from('internal_wallet_balances')
-        .select('balance')
-        .eq('user_id', transaction.user_id)
-        .eq('token_id', transaction.internal_token_id)
-        .maybeSingle();
-
-      if (existingBalance) {
-        // Update existing balance
-        const { error: balanceError } = await supabaseClient
-          .from('internal_wallet_balances')
+      // Activate Anubis subscription if applicable
+      if (isAnubisSubscription && anubisSubscriptionType && anubisDurationDays) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + anubisDurationDays);
+        
+        const { error: activationError } = await supabaseClient
+          .from('profiles')
           .update({
-            balance: existingBalance.balance + tokens_to_credit,
-            updated_at: new Date().toISOString()
+            has_anubis_access: true,
+            anubis_subscription_type: anubisSubscriptionType,
+            anubis_expires_at: expiresAt.toISOString()
           })
-          .eq('user_id', transaction.user_id)
-          .eq('token_id', transaction.internal_token_id);
+          .eq('user_id', transaction.user_id);
 
-        if (balanceError) {
-          console.error('Failed to update balance:', balanceError);
+        if (activationError) {
+          console.error('Failed to activate Anubis subscription:', activationError);
+        } else {
+          console.log('✅ Anubis subscription activated:', {
+            user_id: transaction.user_id,
+            type: anubisSubscriptionType,
+            expires_at: expiresAt.toISOString()
+          });
+          
+          // Send notification
+          await supabaseClient
+            .from('notifications')
+            .insert({
+              user_id: transaction.user_id,
+              title: '✅ تم تفعيل اشتراك الخزانة الرقمية',
+              message: `تم تفعيل اشتراكك ${anubisSubscriptionType === 'premium' ? 'البريميوم 👑' : anubisSubscriptionType === 'lifetime' ? 'مدى الحياة ♾️' : 'الأساسي'} بنجاح`,
+              type: 'subscription_activated',
+              is_read: false,
+              action_url: '/anubis'
+            });
         }
       } else {
-        // Create new balance
-        const { error: balanceError } = await supabaseClient
+        // Credit user's internal wallet for regular tokens
+        // First, check if balance exists
+        const { data: existingBalance } = await supabaseClient
           .from('internal_wallet_balances')
-          .insert({
-            user_id: transaction.user_id,
-            token_id: transaction.internal_token_id,
-            balance: tokens_to_credit
-          });
+          .select('balance')
+          .eq('user_id', transaction.user_id)
+          .eq('token_id', transaction.internal_token_id)
+          .maybeSingle();
 
-        if (balanceError) {
-          console.error('Failed to create balance:', balanceError);
+        if (existingBalance) {
+          // Update existing balance
+          const { error: balanceError } = await supabaseClient
+            .from('internal_wallet_balances')
+            .update({
+              balance: existingBalance.balance + tokens_to_credit,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', transaction.user_id)
+            .eq('token_id', transaction.internal_token_id);
+
+          if (balanceError) {
+            console.error('Failed to update balance:', balanceError);
+          }
+        } else {
+          // Create new balance
+          const { error: balanceError } = await supabaseClient
+            .from('internal_wallet_balances')
+            .insert({
+              user_id: transaction.user_id,
+              token_id: transaction.internal_token_id,
+              balance: tokens_to_credit
+            });
+
+          if (balanceError) {
+            console.error('Failed to create balance:', balanceError);
+          }
         }
       }
 
       console.log('✅ Payment completed successfully via webhook:', {
         transaction_id: transaction.id,
         intention_id: intentionId,
-        tokens_credited: tokens_to_credit,
+        tokens_credited: isAnubisSubscription ? 0 : tokens_to_credit,
+        is_anubis_subscription: isAnubisSubscription,
         user_id: transaction.user_id
       });
     } else {

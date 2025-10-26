@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useAppContent } from "@/hooks/useAppContent";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import RequireAnubisAccess from "@/components/auth/RequireAnubisAccess";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -329,7 +330,7 @@ export default function Anubis() {
   const backgroundImage = getContent('anubis_card_background', '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
 
   return (
-    <>
+    <RequireAnubisAccess>
       <Helmet>
         <title>{title} | Crypto-MSR</title>
         <meta name="description" content="الخزانة الرقمية - قم برفع وثائقك وصورك الشخصية بشكل آمن" />
@@ -600,6 +601,6 @@ export default function Anubis() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </>
+    </RequireAnubisAccess>
   );
 }

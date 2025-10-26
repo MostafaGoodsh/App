@@ -127,10 +127,14 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 text-center">
                 <h3 className="font-bold text-xl mb-3">للحصول على الوصول</h3>
                 <p className="text-muted-foreground mb-4">
-                  يرجى التواصل مع الإدارة لتفعيل اشتراكك في الخزانة الرقمية
+                  اشترك الآن للحصول على وصول فوري للخزانة الرقمية
                 </p>
-                <Button size="lg" className="w-full sm:w-auto">
-                  تواصل مع الإدارة
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto"
+                  onClick={() => window.location.href = '/anubis-subscription'}
+                >
+                  عرض خطط الاشتراك
                 </Button>
               </div>
 

@@ -59,6 +59,7 @@ import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
 import RoadmapCardsAdmin from "./pages/RoadmapCardsAdmin";
 import RoadmapDetail from "./pages/RoadmapDetail";
 import Anubis from "./pages/Anubis";
+import AnubisSubscription from "./pages/AnubisSubscription";
 import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
@@ -95,7 +96,8 @@ const App = () => {
                   <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
-                  <Route path="anubis" element={<RequireAnubisAccess><Anubis /></RequireAnubisAccess>} />
+                  <Route path="anubis" element={<Anubis />} />
+                  <Route path="anubis-subscription" element={<RequireAuth><AnubisSubscription /></RequireAuth>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
