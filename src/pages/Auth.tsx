@@ -77,34 +77,16 @@ const Auth = () => {
 
   const onGoogleSignIn = async () => {
     setIsSubmitting(true);
-    
-    // Show loading message
-    toast({ 
-      title: "جاري إعادة التوجيه لـ Google...", 
-      description: "سيتم فتح نافذة تسجيل الدخول", 
-    });
-
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
-          skipBrowserRedirect: false,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
+          redirectTo: `${window.location.origin}/`
         }
       });
       
-      if (error) {
-        console.error('Google Sign-In Error:', error);
-        throw error;
-      }
-      
-      // Don't reset submitting - user is being redirected
+      if (error) throw error;
     } catch (error: any) {
-      console.error('Google OAuth Error:', error);
       toast({ 
         title: "فشل تسجيل الدخول بـ Google", 
         description: error?.message || "حدث خطأ، حاول مرة أخرى", 
