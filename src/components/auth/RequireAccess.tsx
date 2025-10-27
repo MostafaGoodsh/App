@@ -24,6 +24,21 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         return;
       }
 
+      // التحقق من الـ cache أولاً
+      try {
+        const cached = sessionStorage.getItem(`hasAccess_${user.id}`);
+        if (cached !== null) {
+          // استخدام الـ cached value دون الحاجة لفحص الـ server
+          if (mounted) {
+            setHasAccess(JSON.parse(cached));
+            setCheckingAccess(false);
+          }
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to read cached access:', e);
+      }
+
       if (mounted) {
         setCheckingAccess(true);
       }
@@ -34,10 +49,13 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         });
 
         if (mounted) {
-          if (error) {
-            setHasAccess(false);
-          } else {
-            setHasAccess(data === true);
+          const accessStatus = error ? false : (data === true);
+          setHasAccess(accessStatus);
+          // حفظ في sessionStorage
+          try {
+            sessionStorage.setItem(`hasAccess_${user.id}`, JSON.stringify(accessStatus));
+          } catch (e) {
+            console.error('Failed to cache access status:', e);
           }
           setCheckingAccess(false);
         }
