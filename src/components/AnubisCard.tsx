@@ -12,8 +12,8 @@ const AnubisCard = () => {
   const description = getContent('anubis_card_description', '');
   const backgroundImage = getContent('anubis_card_background', '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
 
-  const displayTitle = title || 'أنوبيس - حامي الأسرار';
-  const displayDescription = description || 'اضغط لاكتشاف أسرار أنوبيس القديمة';
+  const displayTitle = title || 'الخزانة الرقمية';
+  const displayDescription = description || 'خزنة رقمية آمنة لملفاتك الخاصة';
 
   return (
     <Link to="/anubis" className="group">
