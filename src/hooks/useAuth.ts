@@ -6,19 +6,8 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  // استخدام sessionStorage للـ caching
-  const getCachedAdminStatus = () => {
-    try {
-      const cached = sessionStorage.getItem('isAdmin');
-      return cached ? JSON.parse(cached) : false;
-    } catch {
-      return false;
-    }
-  };
-  
-  const [isAdmin, setIsAdmin] = useState(getCachedAdminStatus());
-  const [adminLoading, setAdminLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -58,27 +47,8 @@ export const useAuth = () => {
         if (mounted) {
           setIsAdmin(false);
           setAdminLoading(false);
-          try {
-            sessionStorage.removeItem('isAdmin');
-          } catch (e) {
-            console.error('[useAuth] Failed to clear admin cache:', e);
-          }
         }
         return;
-      }
-
-      // التحقق من الـ cache أولاً
-      try {
-        const cached = sessionStorage.getItem('isAdmin');
-        if (cached !== null) {
-          // استخدام الـ cached value دون الحاجة لفحص الـ server
-          setIsAdmin(JSON.parse(cached));
-          setAdminLoading(false);
-          console.log('[useAuth] Using cached admin status:', cached);
-          return;
-        }
-      } catch (e) {
-        console.error('[useAuth] Failed to read admin cache:', e);
       }
 
       if (mounted) {
@@ -92,13 +62,10 @@ export const useAuth = () => {
 
         console.log('[useAuth] Admin check result:', data, error);
         if (mounted) {
-          const adminStatus = data === true;
-          setIsAdmin(adminStatus);
-          // حفظ في sessionStorage
-          try {
-            sessionStorage.setItem('isAdmin', JSON.stringify(adminStatus));
-          } catch (e) {
-            console.error('[useAuth] Failed to cache admin status:', e);
+          if (error) {
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(data === true);
           }
           setAdminLoading(false);
         }
