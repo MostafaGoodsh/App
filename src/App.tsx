@@ -42,7 +42,7 @@ import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
 import MediaContentAdmin from "./pages/MediaContentAdmin";
 import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
 import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
-import AnubisCardAdmin from "./pages/AnubisCardAdmin";
+
 import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
 import Reels from "./pages/Reels";
 import ReelsCardAdmin from "./pages/ReelsCardAdmin";
@@ -110,7 +110,7 @@ const App = () => {
                   <Route path="admin/content-approval" element={<RequireAdmin><ContentApprovalAdmin /></RequireAdmin>} />
                   <Route path="admin/content" element={<RequireAdmin><ContentAdmin /></RequireAdmin>} />
                   <Route path="admin/updates" element={<RequireAdmin><UpdatesAdmin /></RequireAdmin>} />
-                  <Route path="admin/anubis-card" element={<RequireAdmin><AnubisCardAdmin /></RequireAdmin>} />
+                  
                   <Route path="admin/mining-levels" element={<RequireAdmin><MiningLevelsAdmin /></RequireAdmin>} />
                   <Route path="admin/callout-personalities" element={<RequireAdmin><CalloutPersonalitiesAdmin /></RequireAdmin>} />
                   <Route path="admin/active-callout" element={<RequireAdmin><ActiveCalloutAdmin /></RequireAdmin>} />

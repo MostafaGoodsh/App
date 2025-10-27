@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
-import AnubisCard from "@/components/AnubisCard";
+
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
 import sphinxBg from "@/assets/sphinx-bg.jpg";
@@ -200,8 +200,6 @@ const Index = () => {
           </article>
           </Link>
 
-          {/* Anubis Card - Last Card */}
-          <AnubisCard />
 
           {/* Action Buttons Section */}
           <div className="flex flex-col items-center justify-center gap-4 mt-8">
