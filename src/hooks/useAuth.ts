@@ -42,7 +42,7 @@ export const useAuth = () => {
     let mounted = true;
 
     const checkAdminStatus = async () => {
-      console.log('[useAuth] Checking admin status for user:', user?.id);
+      // Only check if we have a valid user ID
       if (!user?.id) {
         if (mounted) {
           setIsAdmin(false);
@@ -56,6 +56,7 @@ export const useAuth = () => {
       }
 
       try {
+        console.log('[useAuth] Checking admin status for user:', user.id);
         const { data, error } = await supabase.rpc("is_admin", {
           _user_id: user.id,
         });
@@ -78,12 +79,19 @@ export const useAuth = () => {
       }
     };
 
-    checkAdminStatus();
+    // Only check admin if not loading session and user exists
+    if (!loading && user?.id) {
+      checkAdminStatus();
+    } else if (!loading && !user) {
+      // If not loading and no user, set admin to false
+      setIsAdmin(false);
+      setAdminLoading(false);
+    }
 
     return () => {
       mounted = false;
     };
-  }, [user?.id]);
+  }, [user?.id, loading]);
 
   return { 
     session, 

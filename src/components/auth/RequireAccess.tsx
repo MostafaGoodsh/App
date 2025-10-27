@@ -16,6 +16,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     let mounted = true;
 
     const checkEarlyAccess = async () => {
+      // Wait for user to be loaded
       if (!user?.id) {
         if (mounted) {
           setHasAccess(false);
@@ -49,12 +50,15 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
       }
     };
 
-    checkEarlyAccess();
+    // Only check if not loading and user exists
+    if (!loading && user?.id) {
+      checkEarlyAccess();
+    }
 
     return () => {
       mounted = false;
     };
-  }, [user?.id]);
+  }, [user?.id, loading]);
 
   // انتظر حتى ينتهي التحميل (بما في ذلك فحص الأدمن)
   if (loading || checkingAccess || adminLoading) {
@@ -78,9 +82,21 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     return <>{children}</>;
   }
 
-  // التحقق من حالة الوصول المبكر
-  if (!hasAccess) {
+  // التحقق من حالة الوصول المبكر - فقط إذا تم الانتهاء من الفحص
+  if (hasAccess === false) {
     return <Navigate to="/early-access" replace />;
+  }
+
+  // If still checking access, show loading
+  if (hasAccess === null) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="arabic-text">جاري التحميل...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
