@@ -26,7 +26,6 @@ import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
 import RequireAccess from "./components/auth/RequireAccess";
 import RequireAnubisAccess from "./components/auth/RequireAnubisAccess";
-import RequireVaultAccess from "./components/auth/RequireVaultAccess";
 import Updates from "./pages/Updates";
 import StableCoin from "./pages/StableCoin";
 import RWA from "./pages/RWA";
@@ -65,8 +64,6 @@ import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
 import Documents from "./pages/Documents";
-import VaultSubscription from "./pages/VaultSubscription";
-import VaultSubscriptionsAdmin from "./pages/VaultSubscriptionsAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -83,8 +80,7 @@ const App = () => {
                   <Route index element={<RequireAccess><Index /></RequireAccess>} />
                   <Route path="auth" element={<Auth />} />
                   <Route path="payment-demo" element={<PaymentDemo />} />
-                  <Route path="vault-subscription" element={<RequireAuth><VaultSubscription /></RequireAuth>} />
-                  <Route path="wallet" element={<RequireVaultAccess><Wallet /></RequireVaultAccess>} />
+                  <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
                   <Route path="recharge" element={<RequireAuth><Recharge /></RequireAuth>} />
                   <Route path="mining" element={<RequireAuth><Mining /></RequireAuth>} />
                   <Route path="early-access" element={<EarlyAccess />} />
@@ -134,7 +130,6 @@ const App = () => {
                   <Route path="admin/home-cards" element={<RequireAdmin><HomePageCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                   <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
-                  <Route path="admin/vault-subscriptions" element={<RequireAdmin><VaultSubscriptionsAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
