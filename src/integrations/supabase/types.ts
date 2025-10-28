@@ -2522,6 +2522,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vault_subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          payment_amount: number | null
+          payment_currency: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          start_date: string | null
+          status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_access_audit: {
         Row: {
           access_type: string
@@ -2930,6 +2975,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_vault_access: { Args: { _user_id: string }; Returns: boolean }
       internal_token_swap: {
         Args: {
           p_from_amount: number
