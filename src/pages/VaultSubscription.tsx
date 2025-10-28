@@ -1,191 +1,204 @@
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Check, CreditCard } from "lucide-react";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, Lock, FileText, AlertCircle, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useVaultSubscription } from "@/hooks/useVaultSubscription";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const VaultSubscription = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscription, hasAccess, createSubscription } = useVaultSubscription();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const { hasAccess, createSubscription } = useVaultSubscription();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: user?.email || "",
+    phone: "",
+    agreeToTerms: false
+  });
 
-  const plans = [
-    {
-      id: "monthly",
-      name: "اشتراك شهري",
-      price: 99,
-      duration: "شهر",
-      features: [
-        "وصول كامل للخزانة الرقمية",
-        "تخزين آمن للملفات",
-        "تشفير متقدم",
-        "دعم فني 24/7",
-      ],
-    },
-    {
-      id: "yearly",
-      name: "اشتراك سنوي",
-      price: 999,
-      duration: "سنة",
-      savings: "وفر 180 جنيه",
-      features: [
-        "جميع مزايا الاشتراك الشهري",
-        "خصم 15%",
-        "مساحة تخزين إضافية",
-        "أولوية في الدعم الفني",
-      ],
-    },
-    {
-      id: "lifetime",
-      name: "اشتراك مدى الحياة",
-      price: 2999,
-      duration: "مدى الحياة",
-      savings: "أفضل قيمة",
-      features: [
-        "وصول غير محدود للخزانة",
-        "مساحة تخزين غير محدودة",
-        "جميع التحديثات المستقبلية",
-        "دعم VIP",
-      ],
-    },
-  ];
+  useEffect(() => {
+    if (hasAccess) {
+      navigate('/wallet');
+    }
+  }, [hasAccess, navigate]);
 
-  const handleSubscribe = async (planId: string, price: number) => {
-    setSelectedPlan(planId);
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // Here you would integrate with your payment provider
-    // For now, we'll create a pending subscription
-    await createSubscription.mutateAsync({
-      subscription_type: planId,
-      payment_amount: price,
-      payment_method: "pending",
-    });
-    
-    // Redirect to payment page or show payment modal
-    // navigate("/payment");
+    if (!formData.agreeToTerms) {
+      toast.error("يجب الموافقة على الشروط والأحكام");
+      return;
+    }
+
+    if (!formData.fullName || !formData.email || !formData.phone) {
+      toast.error("يرجى ملء جميع الحقول");
+      return;
+    }
+
+    try {
+      await createSubscription.mutateAsync({
+        subscription_type: 'free_trial',
+        payment_amount: 0,
+        payment_method: 'free',
+        status: 'active'
+      });
+      
+      toast.success("تم تسجيلك بنجاح! مرحباً بك في الخزانة الرقمية");
+      setTimeout(() => navigate('/wallet'), 1500);
+    } catch (error: any) {
+      toast.error(error.message || "حدث خطأ أثناء التسجيل");
+    }
   };
 
-  // If user already has access, redirect to wallet
-  if (hasAccess && subscription?.status === "active") {
-    navigate("/wallet");
-    return null;
-  }
-
-  // If not logged in, redirect to auth
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <>
       <Helmet>
-        <title>اشتراك الخزانة الرقمية - منصة مصر</title>
-        <meta name="description" content="اشترك في الخزانة الرقمية للحصول على تخزين آمن ومشفر لملفاتك" />
+        <title>التسجيل في الخزانة الرقمية - منصة مصر</title>
+        <meta name="description" content="سجل الآن في الخزانة الرقمية واحصل على تخزين آمن ومشفر لملفاتك - مجاني لفترة محدودة" />
       </Helmet>
-      <div 
-        className="min-h-screen py-12"
-        style={{
-          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="min-h-screen bg-background/90">
-          <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center mb-12">
-              <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <Lock className="w-10 h-10 text-primary" />
+      <div className="min-h-screen py-16 px-4" style={{
+        backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
+        <div className="min-h-screen bg-background/95 py-8">
+          <div className="container mx-auto max-w-2xl">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                <Shield className="w-8 h-8 text-primary" />
               </div>
-              <h1 className="text-4xl font-bold text-primary mb-4 arabic-text">الخزانة الرقمية</h1>
-              <p className="text-xl text-muted-foreground arabic-text">
-                احم بياناتك وملفاتك بأعلى مستويات الأمان
+              <h1 className="font-cairo text-4xl font-bold text-primary mb-2">
+                الخزانة الرقمية
+              </h1>
+              <p className="font-cairo text-lg text-muted-foreground">
+                Digital Vault | احم بياناتك بأعلى مستويات الأمان
               </p>
             </div>
 
-            {subscription?.status === "pending" && (
-              <Card className="mb-8 border-yellow-500/50 bg-yellow-50/10">
-                <CardContent className="pt-6">
-                  <p className="text-center arabic-text">
-                    لديك اشتراك قيد المراجعة. سيتم تفعيله بعد تأكيد الدفع.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <Alert className="mb-6 border-primary/50 bg-primary/5">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              <AlertDescription className="font-cairo text-base">
+                <strong>عرض خاص:</strong> الخدمة مجانية لفترة محدودة! سجل الآن واستفد من جميع المميزات
+              </AlertDescription>
+            </Alert>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {plans.map((plan) => (
-                <Card 
-                  key={plan.id}
-                  className={`relative overflow-hidden transition-all duration-300 hover:scale-105 ${
-                    plan.id === "yearly" ? "border-primary shadow-lg" : ""
-                  }`}
-                >
-                  {plan.savings && (
-                    <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold arabic-text">
-                      {plan.savings}
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-2xl arabic-text">{plan.name}</CardTitle>
-                    <CardDescription className="arabic-text">
-                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                      <span className="text-lg"> جنيه</span>
-                      <span className="text-sm text-muted-foreground"> / {plan.duration}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2 arabic-text">
-                          <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      className="w-full arabic-text"
-                      size="lg"
-                      variant={plan.id === "yearly" ? "default" : "outline"}
-                      onClick={() => handleSubscribe(plan.id, plan.price)}
-                      disabled={createSubscription.isPending && selectedPlan === plan.id}
-                    >
-                      <CreditCard className="w-4 h-4 ml-2" />
-                      {createSubscription.isPending && selectedPlan === plan.id
-                        ? "جاري المعالجة..."
-                        : "اشترك الآن"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="mt-12 bg-primary/5 border-primary/20">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <h3 className="text-xl font-bold arabic-text">لماذا الخزانة الرقمية؟</h3>
-                  <div className="grid md:grid-cols-3 gap-6 text-sm arabic-text">
-                    <div>
-                      <h4 className="font-bold mb-2">🔒 أمان متقدم</h4>
-                      <p className="text-muted-foreground">تشفير من الطراز العسكري لحماية ملفاتك</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold mb-2">☁️ نسخ احتياطي تلقائي</h4>
-                      <p className="text-muted-foreground">لن تفقد بياناتك أبداً</p>
-                    </div>
-                    <div>
-                      <h4 className="font-bold mb-2">📱 وصول من أي مكان</h4>
-                      <p className="text-muted-foreground">ملفاتك متاحة على جميع أجهزتك</p>
-                    </div>
+            <Card className="shadow-xl">
+              <CardHeader>
+                <CardTitle className="font-cairo text-2xl">التسجيل في الخزانة الرقمية</CardTitle>
+                <CardDescription className="font-cairo text-base">
+                  املأ البيانات التالية للحصول على وصول فوري وآمن
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName" className="font-cairo text-base">الاسم الكامل *</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="أدخل اسمك الكامل"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                      required
+                      className="font-cairo h-12"
+                    />
                   </div>
-                </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="font-cairo text-base">البريد الإلكتروني *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="example@domain.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      required
+                      className="font-cairo h-12"
+                      disabled={!!user?.email}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="font-cairo text-base">رقم الهاتف *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+20 1XX XXX XXXX"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      required
+                      className="font-cairo h-12"
+                      dir="ltr"
+                    />
+                  </div>
+
+                  <div className="bg-muted/40 rounded-lg p-5 space-y-3 border border-border/50">
+                    <h3 className="font-cairo font-bold text-lg flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                      المميزات المتاحة مجاناً:
+                    </h3>
+                    <ul className="space-y-3 font-cairo">
+                      <li className="flex items-start gap-3">
+                        <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>رفع وتخزين الوثائق بشكل آمن ومشفر</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>حماية بالمصادقة الثنائية (2FA) لأمان إضافي</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <Lock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span>تشفير من الطرف إلى الطرف لجميع البيانات</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-4 bg-muted/20 rounded-lg">
+                    <Checkbox
+                      id="terms"
+                      checked={formData.agreeToTerms}
+                      onCheckedChange={(checked) => 
+                        setFormData({...formData, agreeToTerms: checked as boolean})
+                      }
+                      className="mt-1"
+                    />
+                    <Label htmlFor="terms" className="font-cairo leading-relaxed cursor-pointer text-sm">
+                      أوافق على الشروط والأحكام وسياسة الخصوصية الخاصة بالخزانة الرقمية وأدرك أن الخدمة مجانية حالياً وقد تصبح مدفوعة في المستقبل
+                    </Label>
+                  </div>
+
+                  <Button 
+                    type="submit"
+                    className="w-full font-cairo text-lg py-6 h-14"
+                    disabled={createSubscription.isPending || !formData.agreeToTerms}
+                  >
+                    {createSubscription.isPending ? 'جاري التسجيل...' : 'تسجيل والبدء الآن 🚀'}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
+
+            <Alert className="mt-6 border-muted bg-muted/30">
+              <AlertDescription className="text-center font-cairo text-sm">
+                ✨ الخدمة <strong>مجانية تماماً</strong> حالياً | قد تصبح مدفوعة لاحقاً
+              </AlertDescription>
+            </Alert>
           </div>
         </div>
       </div>

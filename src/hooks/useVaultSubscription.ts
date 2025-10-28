@@ -53,6 +53,7 @@ export const useVaultSubscription = () => {
       payment_amount: number;
       payment_method: string;
       payment_reference?: string;
+      status?: string;
     }) => {
       if (!user?.id) throw new Error("User not authenticated");
 
@@ -61,6 +62,7 @@ export const useVaultSubscription = () => {
         .insert({
           user_id: user.id,
           ...subscriptionData,
+          status: subscriptionData.status || 'pending'
         })
         .select()
         .single();
