@@ -1,8 +1,11 @@
 import { useAppContent } from "@/hooks/useAppContent";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const AnubisCard = () => {
   const { getContent, getAltText, loading } = useAppContent();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80"></div>;
@@ -15,8 +18,21 @@ const AnubisCard = () => {
   const displayTitle = title || 'أنوبيس - حامي الأسرار';
   const displayDescription = description || 'اضغط لاكتشاف أسرار أنوبيس القديمة';
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user) {
+      navigate("/anubis-subscription");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
-    <Link to="/anubis" className="group">
+    <Link 
+      to={user ? "/anubis-subscription" : "/auth"}
+      onClick={handleClick}
+      className="group"
+    >
       <article 
         className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
       >

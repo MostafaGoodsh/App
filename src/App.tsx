@@ -61,6 +61,7 @@ import RoadmapDetail from "./pages/RoadmapDetail";
 import Anubis from "./pages/Anubis";
 import AnubisSubscription from "./pages/AnubisSubscription";
 import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
+import AnubisSubscriptionsAdmin from "./pages/AnubisSubscriptionsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
 import Documents from "./pages/Documents";
@@ -128,6 +129,7 @@ const App = () => {
                   <Route path="admin/todo-introduction" element={<RequireAdmin><TodoIntroductionAdmin /></RequireAdmin>} />
                   <Route path="admin/roadmap-cards" element={<RequireAdmin><RoadmapCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/home-cards" element={<RequireAdmin><HomePageCardsAdmin /></RequireAdmin>} />
+                  <Route path="admin/anubis-subscriptions" element={<RequireAdmin><AnubisSubscriptionsAdmin /></RequireAdmin>} />
                   <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                   <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />

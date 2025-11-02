@@ -56,6 +56,51 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          payment_amount: number | null
+          payment_currency: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          start_date: string | null
+          status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_content: {
         Row: {
           alt_text: string | null
@@ -1902,6 +1947,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          language: string | null
           questions: Json
           title: string
           updated_at: string
@@ -1912,6 +1958,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          language?: string | null
           questions: Json
           title: string
           updated_at?: string
@@ -1922,6 +1969,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          language?: string | null
           questions?: Json
           title?: string
           updated_at?: string
@@ -2522,6 +2570,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vault_subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          payment_amount: number | null
+          payment_currency: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          start_date: string | null
+          status: string
+          subscription_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          payment_amount?: number | null
+          payment_currency?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          start_date?: string | null
+          status?: string
+          subscription_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_access_audit: {
         Row: {
           access_type: string
@@ -2816,7 +2909,10 @@ export type Database = {
         Returns: number
       }
       calculate_user_points: { Args: { p_user_id: string }; Returns: number }
-      check_anubis_access: { Args: { _user_id: string }; Returns: boolean }
+      check_anubis_subscription_access: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       check_early_access: { Args: { _user_id: string }; Returns: boolean }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
@@ -2930,6 +3026,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_vault_access: { Args: { _user_id: string }; Returns: boolean }
       internal_token_swap: {
         Args: {
           p_from_amount: number
