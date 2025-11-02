@@ -27,13 +27,10 @@ const AnubisCard = () => {
   };
 
   return (
-    <div 
+    <article 
       onClick={handleClick}
-      className="group cursor-pointer"
+      className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
     >
-      <article 
-        className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
-      >
         <img 
           src={backgroundImage}
           alt={getAltText('anubis_card_image', 'تمثال أنوبيس المصري الذهبي')}
@@ -49,8 +46,7 @@ const AnubisCard = () => {
           </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>
-      </article>
-    </div>
+    </article>
   );
 };
 
