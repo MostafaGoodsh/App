@@ -65,6 +65,7 @@ import AnubisSubscriptionsAdmin from "./pages/AnubisSubscriptionsAdmin";
 import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
 import Documents from "./pages/Documents";
+import AnubisSettingsAdmin from "./pages/AnubisSettingsAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -97,7 +98,7 @@ const App = () => {
                   <Route path="reels" element={<RequireAccess><Reels /></RequireAccess>} />
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
-                  <Route path="anubis" element={<Anubis />} />
+                  <Route path="anubis" element={<RequireAnubisAccess><Anubis /></RequireAnubisAccess>} />
                   <Route path="anubis-subscription" element={<RequireAuth><AnubisSubscription /></RequireAuth>} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
@@ -130,6 +131,7 @@ const App = () => {
                   <Route path="admin/roadmap-cards" element={<RequireAdmin><RoadmapCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/home-cards" element={<RequireAdmin><HomePageCardsAdmin /></RequireAdmin>} />
                   <Route path="admin/anubis-subscriptions" element={<RequireAdmin><AnubisSubscriptionsAdmin /></RequireAdmin>} />
+                  <Route path="admin/anubis-settings" element={<RequireAdmin><AnubisSettingsAdmin /></RequireAdmin>} />
                   <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                   <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />

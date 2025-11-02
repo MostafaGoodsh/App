@@ -26,6 +26,13 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
       }
 
       try {
+        // Get settings to check if free tier is enabled
+        const { data: settingsData } = await supabase
+          .from("anubis_settings")
+          .select("*")
+          .limit(1)
+          .single();
+
         // Check using RPC function
         const { data: accessData, error: accessError } = await supabase.rpc(
           'check_anubis_subscription_access',
@@ -46,7 +53,6 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
           .from("anubis_subscriptions")
           .select("subscription_type, end_date")
           .eq("user_id", user.id)
-          .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(1)
           .single();

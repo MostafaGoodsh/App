@@ -1,176 +1,73 @@
-import { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { usePayment } from '@/hooks/usePayment';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Shield, Check, Crown, Lock } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Shield, Lock, CheckCircle2, Loader2 } from "lucide-react";
+import { useAnubisSubscription } from "@/hooks/useAnubisSubscription";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  name_ar: string;
-  price: number;
-  duration_days: number;
-  features: string[];
-  icon: string;
-  color: string;
-}
-
-const AnubisSubscription = () => {
+export default function AnubisSubscription() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  const { processPayment, loading, getSupportedMethods } = usePayment();
-  
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState('');
-
-  const paymentMethods = getSupportedMethods();
-
-  const subscriptionPlans: SubscriptionPlan[] = [
-    {
-      id: 'basic',
-      name: 'Basic',
-      name_ar: 'اشتراك أساسي',
-      price: 100,
-      duration_days: 30,
-      features: [
-        'صلاحية 30 يوم',
-        'تخزين حتى 100 ميجا',
-        'رفع ملفات حتى 10 ميجا',
-        'مصادقة ثنائية',
-        'تشفير AES-256'
-      ],
-      icon: '🔐',
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      name_ar: 'اشتراك بريميوم',
-      price: 250,
-      duration_days: 90,
-      features: [
-        'صلاحية 90 يوم',
-        'تخزين غير محدود',
-        'رفع ملفات حتى 50 ميجا',
-        'مصادقة ثنائية متقدمة',
-        'تشفير عسكري',
-        'نسخ احتياطي تلقائي',
-        'دعم أولوية'
-      ],
-      icon: '👑',
-      color: 'from-amber-500 to-amber-600'
-    },
-    {
-      id: 'lifetime',
-      name: 'Lifetime',
-      name_ar: 'اشتراك مدى الحياة',
-      price: 500,
-      duration_days: 36500, // 100 years
-      features: [
-        'صلاحية مدى الحياة',
-        'كل مميزات البريميوم',
-        'أولوية الدعم الفني',
-        'ميزات حصرية قادمة'
-      ],
-      icon: '♾️',
-      color: 'from-purple-500 to-purple-600'
-    }
-  ];
+  const { user } = useAuth();
+  const { hasAccess, subscription, createSubscription } = useAnubisSubscription();
+  const [registering, setRegistering] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth');
-    }
-  }, [user, authLoading, navigate]);
-
-  // Check if payment was successful
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment');
-    const transactionId = searchParams.get('transaction_id');
-    
-    if (paymentStatus === 'success' && transactionId) {
-      toast({
-        title: "✅ تم تفعيل الاشتراك",
-        description: "يمكنك الآن الوصول إلى الخزانة الرقمية",
-      });
-      setTimeout(() => navigate('/anubis'), 2000);
-    } else if (paymentStatus === 'failed') {
-      toast({
-        title: "❌ فشل الدفع",
-        description: "حاول مرة أخرى",
-        variant: "destructive"
-      });
-    }
-  }, [searchParams, toast, navigate]);
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!selectedPlan) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء اختيار خطة اشتراك",
-        variant: "destructive"
-      });
+    if (!user) {
+      navigate("/auth");
       return;
     }
 
-    if (!selectedMethod) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء اختيار طريقة دفع",
-        variant: "destructive"
-      });
+    // Fetch settings
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from("anubis_settings")
+        .select("*")
+        .limit(1)
+        .single();
+      
+      if (data) setSettings(data);
+    };
+
+    fetchSettings();
+
+    // If already has access, redirect
+    if (hasAccess) {
+      navigate("/anubis");
+    }
+  }, [user, hasAccess, navigate]);
+
+  const handleRegister = async () => {
+    if (!user) {
+      toast.error("يرجى تسجيل الدخول أولاً");
+      navigate("/auth");
       return;
     }
 
-    const plan = subscriptionPlans.find(p => p.id === selectedPlan);
-    if (!plan) return;
-
-    if ((selectedMethod === 'vodafone_cash' || selectedMethod === 'orange_cash' || selectedMethod === 'etisalat_cash') && !phoneNumber) {
-      toast({
-        title: "خطأ",
-        description: "الرجاء إدخال رقم المحفظة",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    setRegistering(true);
     try {
-      let formattedPhone = phoneNumber;
-      if (phoneNumber && !phoneNumber.startsWith('+')) {
-        formattedPhone = '+20' + phoneNumber.replace(/^0+/, '');
-      }
-
-      const result = await processPayment({
-        amount: plan.price,
-        payment_method: selectedMethod as any,
-        phone_number: formattedPhone || undefined,
-        internal_token_symbol: `ANUBIS_${plan.id.toUpperCase()}_${plan.duration_days}D`
+      await createSubscription.mutateAsync({
+        subscription_type: settings?.free_tier_enabled ? "free_trial" : "basic",
+        status: "active"
       });
-
-      if (result.payment_url) {
-        window.open(result.payment_url, '_blank');
-      }
-    } catch (error) {
-      console.error('Subscription payment error:', error);
+      
+      toast.success("تم التسجيل بنجاح!");
+      navigate("/anubis");
+    } catch (error: any) {
+      toast.error(error.message || "فشل التسجيل");
+    } finally {
+      setRegistering(false);
     }
   };
 
-  if (authLoading) {
+  if (!settings) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p>جاري التحميل...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -178,155 +75,138 @@ const AnubisSubscription = () => {
   return (
     <>
       <Helmet>
-        <title>اشتراك الخزانة الرقمية | Crypto-MSR</title>
-        <meta name="description" content="اشترك في خدمة الخزانة الرقمية الآمنة مع تشفير عسكري" />
+        <title>تسجيل في خزانة أنوبيس الرقمية | Anubis Vault Registration</title>
       </Helmet>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl" dir="rtl">
-        <div className="mb-8 text-center">
-          <Shield className="h-16 w-16 text-primary mx-auto mb-4" />
-          <h1 className="text-4xl font-bold mb-3">
-            اشتراك الخزانة الرقمية - أنوبيس
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            احمِ ملفاتك بأعلى معايير الأمان مع تشفير عسكري
-          </p>
-        </div>
-
-        {/* Subscription Plans */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {subscriptionPlans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`cursor-pointer transition-all ${
-                selectedPlan === plan.id
-                  ? 'border-primary shadow-lg scale-105'
-                  : 'hover:border-primary/50 hover:shadow'
-              }`}
-              onClick={() => setSelectedPlan(plan.id)}
-            >
-              <CardHeader>
-                <div className="text-center">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${plan.color} flex items-center justify-center text-3xl`}>
-                    {plan.icon}
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/50 to-background">
+        <Card className="max-w-3xl w-full shadow-2xl border-2 border-primary/20">
+          <CardHeader className="text-center space-y-4 pb-6">
+            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+              <Shield className="h-10 w-10 text-primary" />
+            </div>
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              خزانة أنوبيس الرقمية
+              <br />
+              <span className="text-2xl">Anubis Digital Vault</span>
+            </CardTitle>
+            <CardDescription className="text-lg">
+              {settings.free_tier_enabled ? (
+                <>
+                  مجاني في الفترة الحالية - سجل الآن واحصل على وصول فوري
+                  <br />
+                  Free for limited time - Register now for instant access
+                </>
+              ) : (
+                <>
+                  خدمة تخزين آمنة ومشفرة لملفاتك الشخصية
+                  <br />
+                  Secure and encrypted storage for your personal files
+                </>
+              )}
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            {/* Features */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-xl text-center">
+                المزايا المتوفرة | Available Features
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { ar: "تشفير قوي لجميع ملفاتك", en: "Strong encryption for all files" },
+                  { ar: "مساحة تخزين آمنة", en: "Secure storage space" },
+                  { ar: "وصول سريع من أي مكان", en: "Fast access from anywhere" },
+                  { ar: "حماية ضد الفقدان والاختراق", en: "Protection against loss and hacking" }
+                ].map((feature, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
+                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium">{feature.ar}</p>
+                      <p className="text-muted-foreground">{feature.en}</p>
+                    </div>
                   </div>
-                  <CardTitle className="text-2xl mb-2">{plan.name_ar}</CardTitle>
-                  <div className="text-3xl font-bold text-primary">
-                    {plan.price} ج.م
-                  </div>
-                  <CardDescription className="mt-2">
-                    لمدة {plan.duration_days === 36500 ? 'مدى الحياة' : `${plan.duration_days} يوم`}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Payment Form */}
-        {selectedPlan && (
-          <Card>
-            <CardHeader>
-              <CardTitle>إتمام الاشتراك</CardTitle>
-              <CardDescription>اختر طريقة الدفع لتفعيل اشتراكك</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubscribe} className="space-y-6">
-                {/* Payment Methods */}
-                <div className="space-y-3">
-                  <Label>طريقة الدفع</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {paymentMethods.map((method) => (
-                      <button
-                        key={method.id}
-                        type="button"
-                        onClick={() => setSelectedMethod(method.id)}
-                        className={`relative h-20 rounded-lg border-2 transition-all overflow-hidden ${
-                          selectedMethod === method.id
-                            ? 'border-primary shadow-lg'
-                            : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <img 
-                          src={method.bgImage} 
-                          alt={method.name}
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                        {selectedMethod === method.id && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-                            ✓
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Phone Number */}
-                {(selectedMethod === 'vodafone_cash' || 
-                  selectedMethod === 'orange_cash' || 
-                  selectedMethod === 'etisalat_cash') && (
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">رقم المحفظة</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="01xxxxxxxxx"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      dir="ltr"
-                    />
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري المعالجة...
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="ml-2 h-4 w-4" />
-                      دفع آمن {subscriptionPlans.find(p => p.id === selectedPlan)?.price} ج.م
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Security Notice */}
-        <Card className="mt-6 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-1" />
-              <div className="text-sm">
-                <p className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                  🔒 دفع آمن ومشفر
-                </p>
-                <p className="text-blue-700 dark:text-blue-300">
-                  جميع المعاملات مشفرة بمعايير PCI-DSS. لا نحتفظ ببيانات بطاقتك الائتمانية.
-                </p>
+                ))}
               </div>
+            </div>
+
+            {/* Free Notice */}
+            {settings.free_tier_enabled && (
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Lock className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                  <div className="space-y-1">
+                    <p className="font-semibold text-green-900 dark:text-green-100">
+                      مجاني الآن | Free Now
+                    </p>
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      سجل الآن واستمتع بالخدمة مجاناً. ستصبح الخدمة مدفوعة لاحقاً.
+                      <br />
+                      Register now and enjoy the service for free. It will become paid later.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Pricing Info (if payment enabled) */}
+            {settings.payment_enabled && (
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">
+                  خطط الاشتراك | Subscription Plans
+                </h4>
+                <div className="grid grid-cols-3 gap-3 text-sm">
+                  {settings.monthly_price > 0 && (
+                    <div className="text-center p-3 bg-background rounded-lg">
+                      <p className="font-bold text-lg">{settings.monthly_price} {settings.currency}</p>
+                      <p className="text-muted-foreground">شهرياً | Monthly</p>
+                    </div>
+                  )}
+                  {settings.quarterly_price > 0 && (
+                    <div className="text-center p-3 bg-background rounded-lg">
+                      <p className="font-bold text-lg">{settings.quarterly_price} {settings.currency}</p>
+                      <p className="text-muted-foreground">ربع سنوي | Quarterly</p>
+                    </div>
+                  )}
+                  {settings.yearly_price > 0 && (
+                    <div className="text-center p-3 bg-background rounded-lg">
+                      <p className="font-bold text-lg">{settings.yearly_price} {settings.currency}</p>
+                      <p className="text-muted-foreground">سنوي | Yearly</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Register Button */}
+            <Button
+              size="lg"
+              className="w-full text-lg h-14"
+              onClick={handleRegister}
+              disabled={registering || hasAccess}
+            >
+              {registering ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  جاري التسجيل... | Registering...
+                </>
+              ) : hasAccess ? (
+                <>لديك وصول بالفعل | Already Registered</>
+              ) : (
+                <>سجل الآن للوصول الفوري | Register Now for Instant Access</>
+              )}
+            </Button>
+
+            {/* Security Note */}
+            <div className="text-center text-sm text-muted-foreground pt-4">
+              <Lock className="h-4 w-4 inline-block mr-1" />
+              جميع بياناتك محمية بتشفير من الدرجة العسكرية
+              <br />
+              All your data is protected with military-grade encryption
             </div>
           </CardContent>
         </Card>
       </div>
     </>
   );
-};
-
-export default AnubisSubscription;
+}

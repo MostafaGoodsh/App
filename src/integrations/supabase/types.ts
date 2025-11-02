@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_settings: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          free_tier_enabled: boolean | null
+          id: string
+          monthly_price: number | null
+          payment_enabled: boolean | null
+          quarterly_price: number | null
+          updated_at: string | null
+          yearly_price: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          free_tier_enabled?: boolean | null
+          id?: string
+          monthly_price?: number | null
+          payment_enabled?: boolean | null
+          quarterly_price?: number | null
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          free_tier_enabled?: boolean | null
+          id?: string
+          monthly_price?: number | null
+          payment_enabled?: boolean | null
+          quarterly_price?: number | null
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Relationships: []
+      }
       anubis_subscriptions: {
         Row: {
           created_at: string
@@ -68,6 +104,9 @@ export type Database = {
           start_date: string | null
           status: string
           subscription_type: string
+          two_factor_enabled: boolean | null
+          two_factor_secret: string | null
+          two_factor_verified_at: string | null
           updated_at: string
           user_id: string
         }
@@ -82,6 +121,9 @@ export type Database = {
           start_date?: string | null
           status?: string
           subscription_type?: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
+          two_factor_verified_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -96,6 +138,9 @@ export type Database = {
           start_date?: string | null
           status?: string
           subscription_type?: string
+          two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
+          two_factor_verified_at?: string | null
           updated_at?: string
           user_id?: string
         }
