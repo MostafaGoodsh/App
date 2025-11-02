@@ -18,8 +18,7 @@ const AnubisCard = () => {
   const displayTitle = title || 'أنوبيس - حامي الأسرار';
   const displayDescription = description || 'اضغط لاكتشاف أسرار أنوبيس القديمة';
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleClick = () => {
     if (user) {
       navigate("/anubis-subscription");
     } else {
@@ -28,10 +27,9 @@ const AnubisCard = () => {
   };
 
   return (
-    <Link 
-      to={user ? "/anubis-subscription" : "/auth"}
+    <div 
       onClick={handleClick}
-      className="group"
+      className="group cursor-pointer"
     >
       <article 
         className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
@@ -52,7 +50,7 @@ const AnubisCard = () => {
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>
       </article>
-    </Link>
+    </div>
   );
 };
 
