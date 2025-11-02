@@ -1,11 +1,17 @@
 import { useAppContent } from "@/hooks/useAppContent";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAnubisSubscription } from "@/hooks/useAnubisSubscription";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const AnubisCard = () => {
   const { getContent, getAltText, loading } = useAppContent();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { createSubscription, hasAccess } = useAnubisSubscription();
+  const { toast } = useToast();
+  const [registering, setRegistering] = useState(false);
 
   if (loading) {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80"></div>;
@@ -18,18 +24,35 @@ const AnubisCard = () => {
   const displayTitle = title || 'أنوبيس - حامي الأسرار';
   const displayDescription = description || 'اضغط لاكتشاف أسرار أنوبيس القديمة';
 
-  const handleClick = () => {
-    if (user) {
-      navigate("/anubis-subscription");
-    } else {
+  const handleClick = async () => {
+    if (!user) {
       navigate("/auth");
+      return;
+    }
+
+    if (hasAccess) {
+      navigate("/anubis");
+      return;
+    }
+
+    try {
+      setRegistering(true);
+      await createSubscription.mutateAsync({
+        subscription_type: "free_trial"
+      });
+      navigate("/anubis");
+    } catch (error) {
+      console.error("Error registering:", error);
+    } finally {
+      setRegistering(false);
     }
   };
 
   return (
     <article 
       onClick={handleClick}
-      className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300"
+      className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{ pointerEvents: registering ? 'none' : 'auto' }}
     >
         <img 
           src={backgroundImage}
