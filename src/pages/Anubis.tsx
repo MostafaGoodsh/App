@@ -20,7 +20,7 @@ interface StoredFile {
 }
 
 export default function Anubis() {
-  const { getContent, getAltText, loading } = useAppContent();
+  const { getContent, getAltText } = useAppContent();
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -202,10 +202,6 @@ export default function Anubis() {
       setFileToDelete(null);
     }
   };
-
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
-  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -494,7 +490,7 @@ export default function Anubis() {
                               variant="ghost"
                               size="sm"
                               onClick={() => confirmDelete(file.name)}
-                              className="text-destructive hover:text-destructive"
+                              className="hover:bg-destructive/10 hover:text-destructive"
                               title="حذف"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -508,99 +504,73 @@ export default function Anubis() {
               </Card>
             )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-cairo flex items-center gap-2">
-                  <Upload className="w-5 h-5" />
-                  رفع الملفات
-                </CardTitle>
-                <CardDescription>
-                  اختر صورة (JPG, PNG) أو ملف PDF لرفعه (الحد الأقصى: 5 ميجابايت)
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="file-upload">اختر الملف</Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    accept="image/jpeg,image/png,image/jpg,application/pdf"
-                    onChange={handleFileSelect}
-                    disabled={!mfaVerified || uploading}
-                  />
-                </div>
-
-                {selectedFile && (
-                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                    {selectedFile.type.startsWith('image/') ? (
-                      <ImageIcon className="w-5 h-5 text-primary" />
-                    ) : (
-                      <FileText className="w-5 h-5 text-primary" />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{selectedFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+            {mfaVerified && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-cairo flex items-center gap-2">
+                    <Upload className="w-5 h-5" />
+                    رفع ملف جديد
+                  </CardTitle>
+                  <CardDescription>
+                    قم برفع صورة أو مستند PDF (الحد الأقصى: 5 ميجابايت)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="file-upload">اختر الملف</Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      accept="image/jpeg,image/png,image/jpg,application/pdf"
+                      onChange={handleFileSelect}
+                      disabled={uploading}
+                    />
+                    {selectedFile && (
+                      <p className="text-sm text-muted-foreground">
+                        الملف المحدد: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
-                    </div>
+                    )}
                   </div>
-                )}
-
-                <Button 
-                  onClick={handleUpload} 
-                  disabled={!selectedFile || !mfaVerified || uploading}
-                  className="w-full"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                      جاري الرفع...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 ml-2" />
-                      رفع الملف
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary/20 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="font-cairo text-lg">معلومات مهمة</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p>• يتم تشفير جميع الملفات المرفوعة بتشفير من الدرجة العسكرية</p>
-                <p>• المصادقة الثنائية (MFA) مطلوبة للوصول إلى الخزانة</p>
-                <p>• يمكنك عرض وتحميل ملفاتك بعد المصادقة</p>
-                <p>• الملفات المدعومة: JPG, PNG, PDF</p>
-                <p>• الحد الأقصى لحجم الملف: 5 ميجابايت</p>
-                <p>• جلسة المصادقة نشطة حتى تقوم بإنهائها</p>
-              </CardContent>
-            </Card>
+                  <Button
+                    onClick={handleUpload}
+                    disabled={!selectedFile || uploading}
+                    className="w-full"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        جاري الرفع...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 ml-2" />
+                        رفع الملف
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
-
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="font-cairo">تأكيد الحذف</AlertDialogTitle>
-              <AlertDialogDescription>
-                هل أنت متأكد من حذف هذا الملف؟ لا يمكن التراجع عن هذه العملية.
-                <br />
-                <strong className="text-foreground">{fileToDelete}</strong>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={deleteFile} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                حذف الملف
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف الملف "{fileToDelete}"؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteFile} className="bg-destructive hover:bg-destructive/90">
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </RequireAnubisAccess>
   );
 }
