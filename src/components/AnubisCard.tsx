@@ -7,7 +7,7 @@ import { useState } from "react";
 
 const AnubisCard = () => {
   const { getContent, getAltText, loading } = useAppContent();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { createSubscription, hasAccess } = useAnubisSubscription();
   const { toast } = useToast();
@@ -30,11 +30,19 @@ const AnubisCard = () => {
       return;
     }
 
+    // Admin has direct access without subscription
+    if (isAdmin) {
+      navigate("/anubis");
+      return;
+    }
+
+    // If user already has access, go directly
     if (hasAccess) {
       navigate("/anubis");
       return;
     }
 
+    // Otherwise, create subscription first
     try {
       setRegistering(true);
       await createSubscription.mutateAsync({
