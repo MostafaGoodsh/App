@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAppContent } from "@/hooks/useAppContent";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAnubisAuth } from "@/hooks/useAnubisAuth";
 import RequireAnubisAccess from "@/components/auth/RequireAnubisAccess";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,7 @@ interface StoredFile {
 
 export default function Anubis() {
   const { getContent, getAltText } = useAppContent();
-  const { user } = useAuth();
+  const { user, sessionToken } = useAnubisAuth();
   const { toast } = useToast();
   
   const [uploading, setUploading] = useState(false);
@@ -38,17 +37,15 @@ export default function Anubis() {
   }, [user]);
 
   const fetchStoredFiles = async () => {
-    if (!user) return;
+    if (!user || !sessionToken) return;
     
     setLoadingFiles(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await fetch(
         `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/list-vault-files`,
         {
           headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${sessionToken}`,
             'Content-Type': 'application/json',
           },
         }
@@ -85,7 +82,7 @@ export default function Anubis() {
   };
 
   const downloadFile = async (fileName: string) => {
-    if (!user) {
+    if (!user || !sessionToken) {
       toast({
         title: "خطأ",
         description: "يجب تسجيل الدخول أولاً",
@@ -95,13 +92,11 @@ export default function Anubis() {
     }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await fetch(
         `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/download-vault-file?fileName=${encodeURIComponent(fileName)}`,
         {
           headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${sessionToken}`,
           },
         }
       );
@@ -135,16 +130,11 @@ export default function Anubis() {
   };
 
   const viewFile = async (fileName: string) => {
-    if (!user) return;
+    if (!user || !sessionToken) return;
 
     try {
-      const { data } = await supabase.storage
-        .from('anubis-vault')
-        .getPublicUrl(`${user.id}/${fileName}`);
-
-      if (data?.publicUrl) {
-        window.open(data.publicUrl, '_blank');
-      }
+      // For now, download instead of view since we need proper authentication
+      await downloadFile(fileName);
     } catch (error: any) {
       toast({
         title: "فشل العرض",
@@ -160,17 +150,15 @@ export default function Anubis() {
   };
 
   const deleteFile = async () => {
-    if (!user || !fileToDelete) return;
+    if (!user || !fileToDelete || !sessionToken) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const response = await fetch(
         `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/delete-vault-file`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${sessionToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ fileName: fileToDelete }),
@@ -229,13 +217,11 @@ export default function Anubis() {
 
 
   const handleUpload = async () => {
-    if (!selectedFile || !user) return;
+    if (!selectedFile || !user || !sessionToken) return;
 
     setUploading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
 
@@ -248,7 +234,7 @@ export default function Anubis() {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
+            'Authorization': `Bearer ${sessionToken}`,
           },
           body: formData,
         }
