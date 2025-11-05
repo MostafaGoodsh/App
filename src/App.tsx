@@ -43,6 +43,7 @@ import MediaContentAdmin from "./pages/MediaContentAdmin";
 import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
 import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
 import AnubisCardAdmin from "./pages/AnubisCardAdmin";
+import AnubisAuth from "./pages/AnubisAuth";
 import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
 import Reels from "./pages/Reels";
 import ReelsCardAdmin from "./pages/ReelsCardAdmin";
@@ -99,7 +100,7 @@ const App = () => {
                   <Route path="reels-categories" element={<RequireAccess><ReelsCategories /></RequireAccess>} />
                   <Route path="roadmap/:slug" element={<RequireAccess><RoadmapDetail /></RequireAccess>} />
                   <Route path="anubis" element={<RequireAnubisAccess><Anubis /></RequireAnubisAccess>} />
-                  <Route path="anubis-subscription" element={<RequireAuth><AnubisSubscription /></RequireAuth>} />
+                  <Route path="anubis-auth" element={<AnubisAuth />} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />

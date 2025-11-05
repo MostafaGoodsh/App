@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, FileText, Image as ImageIcon, Shield, Download, Trash2, RefreshCw, Eye } from "lucide-react";
+import { Loader2, Upload, FileText, Image as ImageIcon, Shield, Download, Trash2, RefreshCw, Eye, Lock } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -25,9 +25,6 @@ export default function Anubis() {
   const { toast } = useToast();
   
   const [uploading, setUploading] = useState(false);
-  const [mfaCode, setMfaCode] = useState("");
-  const [mfaVerified, setMfaVerified] = useState(false);
-  const [mfaSessionId, setMfaSessionId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [storedFiles, setStoredFiles] = useState<StoredFile[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
@@ -35,10 +32,10 @@ export default function Anubis() {
   const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && mfaVerified) {
+    if (user) {
       fetchStoredFiles();
     }
-  }, [user, mfaVerified]);
+  }, [user]);
 
   const fetchStoredFiles = async () => {
     if (!user) return;
@@ -88,10 +85,10 @@ export default function Anubis() {
   };
 
   const downloadFile = async (fileName: string) => {
-    if (!user || !mfaVerified) {
+    if (!user) {
       toast({
-        title: "يجب المصادقة أولاً",
-        description: "يرجى التحقق من رمز المصادقة الثنائية",
+        title: "خطأ",
+        description: "يجب تسجيل الدخول أولاً",
         variant: "destructive",
       });
       return;
@@ -138,7 +135,7 @@ export default function Anubis() {
   };
 
   const viewFile = async (fileName: string) => {
-    if (!user || !mfaVerified) return;
+    if (!user) return;
 
     try {
       const { data } = await supabase.storage
@@ -163,7 +160,7 @@ export default function Anubis() {
   };
 
   const deleteFile = async () => {
-    if (!user || !fileToDelete || !mfaVerified) return;
+    if (!user || !fileToDelete) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -230,47 +227,9 @@ export default function Anubis() {
     }
   };
 
-  const verifyMFA = () => {
-    if (mfaCode === "123456") {
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setMfaSessionId(sessionId);
-      setMfaVerified(true);
-      
-      toast({
-        title: "تم التحقق بنجاح ✓",
-        description: "يمكنك الآن الوصول إلى الخزانة الرقمية",
-      });
-    } else {
-      toast({
-        title: "رمز غير صحيح",
-        description: "يرجى إدخال الرمز الصحيح للمصادقة",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetMFA = () => {
-    setMfaVerified(false);
-    setMfaCode("");
-    setMfaSessionId(null);
-    setStoredFiles([]);
-    toast({
-      title: "تم إنهاء الجلسة",
-      description: "يجب المصادقة مرة أخرى للوصول",
-    });
-  };
 
   const handleUpload = async () => {
     if (!selectedFile || !user) return;
-
-    if (!mfaVerified) {
-      toast({
-        title: "يجب التحقق أولاً",
-        description: "يرجى إدخال رمز المصادقة الثنائية",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setUploading(true);
 
@@ -358,68 +317,14 @@ export default function Anubis() {
                   {title}
                 </CardTitle>
                 <CardDescription className="text-lg">
-                  قم برفع وثائقك وصورك الشخصية بشكل آمن مع مصادقة ثنائية
+                  قم برفع وثائقك وصورك الشخصية بشكل آمن
                 </CardDescription>
               </CardHeader>
             </Card>
           </div>
 
           <div className="grid gap-6">
-            <Card className={mfaVerified ? "border-green-500/50 bg-green-500/5" : ""}>
-              <CardHeader>
-                <CardTitle className="font-cairo flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    المصادقة الثنائية
-                  </span>
-                  {mfaVerified && (
-                    <Button variant="outline" size="sm" onClick={resetMFA}>
-                      إنهاء الجلسة
-                    </Button>
-                  )}
-                </CardTitle>
-                <CardDescription>
-                  {mfaVerified 
-                    ? "✓ تم التحقق بنجاح - جلستك نشطة الآن" 
-                    : "يرجى إدخال رمز المصادقة الثنائية للمتابعة (رمز تجريبي: 123456)"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {!mfaVerified && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="mfa-code">رمز التحقق</Label>
-                      <Input
-                        id="mfa-code"
-                        type="text"
-                        placeholder="أدخل الرمز (123456)"
-                        value={mfaCode}
-                        onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                        maxLength={6}
-                        className="text-center text-xl tracking-widest"
-                      />
-                    </div>
-                    <Button 
-                      onClick={verifyMFA} 
-                      disabled={mfaCode.length !== 6}
-                      className="w-full"
-                    >
-                      تحقق من الرمز
-                    </Button>
-                  </>
-                )}
-                {mfaVerified && mfaSessionId && (
-                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                      <strong>معرف الجلسة:</strong> {mfaSessionId.substring(0, 20)}...
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {mfaVerified && (
-              <Card>
+            <Card>
                 <CardHeader>
                   <CardTitle className="font-cairo flex items-center justify-between">
                     <span className="flex items-center gap-2">
@@ -502,10 +407,8 @@ export default function Anubis() {
                   )}
                 </CardContent>
               </Card>
-            )}
 
-            {mfaVerified && (
-              <Card>
+            <Card>
                 <CardHeader>
                   <CardTitle className="font-cairo flex items-center gap-2">
                     <Upload className="w-5 h-5" />
@@ -550,7 +453,6 @@ export default function Anubis() {
                   </Button>
                 </CardContent>
               </Card>
-            )}
           </div>
         </div>
       </div>

@@ -1,78 +1,19 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAnubisAuth } from "@/hooks/useAnubisAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, Shield, Clock } from "lucide-react";
+import { Shield, Lock, Clock } from "lucide-react";
 
 interface RequireAnubisAccessProps {
   children: ReactNode;
 }
 
 const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
-  const { user, loading, isAdmin } = useAuth();
-  const [hasAccess, setHasAccess] = useState<boolean>(false);
-  const [checkingAccess, setCheckingAccess] = useState(true);
-  const [subscriptionType, setSubscriptionType] = useState<string>("");
-  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const { user, loading, isAuthenticated } = useAnubisAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAnubisAccess = async () => {
-      if (!user) {
-        setCheckingAccess(false);
-        return;
-      }
-
-      try {
-        // Get settings to check if free tier is enabled
-        const { data: settingsData } = await supabase
-          .from("anubis_settings")
-          .select("*")
-          .limit(1)
-          .single();
-
-        // Check using RPC function
-        const { data: accessData, error: accessError } = await supabase.rpc(
-          'check_anubis_subscription_access',
-          { user_uuid: user.id }
-        );
-
-        if (accessError) {
-          console.error("Error checking anubis access:", accessError);
-          setHasAccess(false);
-          setCheckingAccess(false);
-          return;
-        }
-
-        setHasAccess(Boolean(accessData));
-
-        // Get subscription details
-        const { data: subData } = await supabase
-          .from("anubis_subscriptions")
-          .select("subscription_type, end_date")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (subData) {
-          setSubscriptionType(subData.subscription_type);
-          setExpiresAt(subData.end_date);
-        }
-      } catch (error) {
-        console.error("Error in checkAnubisAccess:", error);
-        setHasAccess(false);
-      } finally {
-        setCheckingAccess(false);
-      }
-    };
-
-    checkAnubisAccess();
-  }, [user]);
-
-  if (loading || checkingAccess) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted">
         <div className="text-center space-y-4">
@@ -83,16 +24,7 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Admins always have access
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-
-  if (!hasAccess) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/50 to-background">
         <Card className="max-w-2xl w-full shadow-2xl border-2 border-primary/20">
@@ -158,7 +90,7 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
             <Button
               size="lg"
               className="w-full text-lg h-12"
-              onClick={() => navigate("/anubis-subscription")}
+              onClick={() => navigate("/anubis-auth")}
             >
               سجل الآن للوصول الفوري
             </Button>
@@ -170,19 +102,17 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
 
   return (
     <div className="space-y-4">
-      {subscriptionType && (
+      {user && (
         <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
             <div>
               <p className="font-semibold text-green-900 dark:text-green-100">
-                لديك وصول نشط إلى خزانة أنوبيس
+                مرحباً {user.full_name || user.email}
               </p>
-              {expiresAt && (
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  ينتهي في: {new Date(expiresAt).toLocaleDateString('ar-EG')}
-                </p>
-              )}
+              <p className="text-sm text-green-800 dark:text-green-200">
+                نوع الاشتراك: {user.subscription_type}
+              </p>
             </div>
           </div>
         </div>

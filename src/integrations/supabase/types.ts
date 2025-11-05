@@ -56,6 +56,44 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_sessions: {
+        Row: {
+          anubis_user_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          session_token: string
+          user_agent: string | null
+        }
+        Insert: {
+          anubis_user_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          session_token: string
+          user_agent?: string | null
+        }
+        Update: {
+          anubis_user_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          session_token?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anubis_sessions_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: false
+            referencedRelation: "anubis_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anubis_settings: {
         Row: {
           created_at: string | null
@@ -143,6 +181,48 @@ export type Database = {
           two_factor_verified_at?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      anubis_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          end_date: string | null
+          full_name: string | null
+          id: string
+          last_login: string | null
+          password_hash: string
+          phone: string | null
+          status: string | null
+          subscription_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          end_date?: string | null
+          full_name?: string | null
+          id?: string
+          last_login?: string | null
+          password_hash: string
+          phone?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          end_date?: string | null
+          full_name?: string | null
+          id?: string
+          last_login?: string | null
+          password_hash?: string
+          phone?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2959,6 +3039,7 @@ export type Database = {
         Returns: boolean
       }
       check_early_access: { Args: { _user_id: string }; Returns: boolean }
+      cleanup_expired_anubis_sessions: { Args: never; Returns: undefined }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
         Args: { p_user_id: string }
@@ -3157,6 +3238,10 @@ export type Database = {
           p_ip_address?: unknown
           p_wallet_id: string
         }
+        Returns: Json
+      }
+      verify_anubis_session: {
+        Args: { p_session_token: string }
         Returns: Json
       }
       verify_user_profile: { Args: { p_user_id: string }; Returns: boolean }
