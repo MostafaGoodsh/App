@@ -19,6 +19,7 @@ export default function AnubisCardManagement() {
   const { toast } = useToast();
 
   const fetchContent = async () => {
+    setLoading(true);
     try {
       const { data: titleData } = await supabase
         .from('app_content')
@@ -52,6 +53,11 @@ export default function AnubisCardManagement() {
       setDescription(descData?.text_content || 'اضغط لاكتشاف أسرار أنوبيس القديمة');
       setIntroduction(introData?.text_content || '');
       setBackgroundImage(bgData?.image_url || '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
+      
+      toast({
+        title: "تم التحديث",
+        description: "تم إعادة تحميل المحتوى بنجاح",
+      });
     } catch (error) {
       console.error('Error fetching content:', error);
       toast({
@@ -285,9 +291,10 @@ export default function AnubisCardManagement() {
             <Button 
               variant="outline" 
               onClick={fetchContent}
+              disabled={loading}
               className="arabic-text"
             >
-              <RefreshCw className="w-4 h-4 ml-2" />
+              <RefreshCw className={`w-4 h-4 ml-2 ${loading ? 'animate-spin' : ''}`} />
               إعادة تحميل
             </Button>
           </div>
