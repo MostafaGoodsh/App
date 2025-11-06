@@ -356,7 +356,12 @@ const Identity = () => {
                 <Shield className="h-8 w-8 text-primary" />
               </div>
             </div>
-            <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4">تحقيق الهوية</h1>
+            <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4">
+              Vault | الخزانة الرقمية
+            </h1>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+              الخزانة الرقمية الأكثر أمانًا في العالم الرقمي. نستخدم أحدث تقنيات التشفير والحماية لضمان خصوصيتك وأمان بياناتك. مع Vault، بياناتك في أيدٍ أمينة.
+            </p>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               التحقق من الهوية (KYC) مطلوب للامتثال للوائح المالية وضمان أمان معاملاتك
             </p>
