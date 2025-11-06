@@ -362,9 +362,6 @@ const Identity = () => {
             <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
               الخزانة الرقمية الأكثر أمانًا في العالم الرقمي. نستخدم أحدث تقنيات التشفير والحماية لضمان خصوصيتك وأمان بياناتك. مع Vault، بياناتك في أيدٍ أمينة.
             </p>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              التحقق من الهوية (KYC) مطلوب للامتثال للوائح المالية وضمان أمان معاملاتك
-            </p>
           </div>
 
           {/* Current Status */}
