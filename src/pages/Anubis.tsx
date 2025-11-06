@@ -268,6 +268,7 @@ export default function Anubis() {
   };
 
   const title = getContent('anubis_card_title', 'أنوبيس - حامي الأسرار');
+  const introduction = getContent('anubis_card_introduction', 'قم برفع وثائقك وصورك الشخصية بشكل آمن');
   const backgroundImage = getContent('anubis_card_background', '/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png');
 
   return (
@@ -302,8 +303,8 @@ export default function Anubis() {
                 <CardTitle className="font-cairo text-3xl font-bold text-primary mb-2">
                   {title}
                 </CardTitle>
-                <CardDescription className="text-lg">
-                  قم برفع وثائقك وصورك الشخصية بشكل آمن
+                <CardDescription className="text-lg whitespace-pre-line">
+                  {introduction}
                 </CardDescription>
               </CardHeader>
             </Card>
