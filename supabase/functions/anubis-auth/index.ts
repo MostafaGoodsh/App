@@ -13,9 +13,10 @@ serve(async (req) => {
   }
 
   try {
+    // استخدام Service Role Key للعمليات الإدارية (تجاوز RLS)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     const { action, email, password, full_name, phone } = await req.json();
