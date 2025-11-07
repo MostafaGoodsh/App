@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     // Validate Anubis session
     const { data: session, error: sessionError } = await supabaseClient
       .from('anubis_sessions')
-      .select('user_id, expires_at')
+      .select('anubis_user_id, expires_at')
       .eq('session_token', sessionToken)
       .single()
 
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const userId = session.user_id
+    const userId = session.anubis_user_id
 
     const url = new URL(req.url)
     const fileName = url.searchParams.get('fileName')
