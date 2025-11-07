@@ -16,16 +16,39 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token)
-
-    if (authError || !user) {
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    const sessionToken = authHeader.replace('Bearer ', '')
+    
+    // Validate Anubis session
+    const { data: session, error: sessionError } = await supabaseClient
+      .from('anubis_sessions')
+      .select('user_id, expires_at')
+      .eq('session_token', sessionToken)
+      .single()
+
+    if (sessionError || !session) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid session' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check if session is expired
+    if (new Date(session.expires_at) < new Date()) {
+      return new Response(
+        JSON.stringify({ error: 'Session expired' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const userId = session.user_id
 
     const url = new URL(req.url)
     const fileName = url.searchParams.get('fileName')
@@ -37,7 +60,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const filePath = `${user.id}/${fileName}`
+    const filePath = `${userId}/${fileName}`
 
     const { data, error } = await supabaseClient.storage
       .from('anubis-vault')
