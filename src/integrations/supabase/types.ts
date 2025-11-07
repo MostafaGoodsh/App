@@ -56,6 +56,82 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_2fa_codes: {
+        Row: {
+          anubis_user_id: string
+          attempts: number | null
+          code: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          used_at: string | null
+        }
+        Insert: {
+          anubis_user_id: string
+          attempts?: number | null
+          code: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Update: {
+          anubis_user_id?: string
+          attempts?: number | null
+          code?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anubis_2fa_codes_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: false
+            referencedRelation: "anubis_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anubis_2fa_settings: {
+        Row: {
+          anubis_user_id: string
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          method: string | null
+          updated_at: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          anubis_user_id: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          method?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          anubis_user_id?: string
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          method?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anubis_2fa_settings_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: true
+            referencedRelation: "anubis_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anubis_sessions: {
         Row: {
           anubis_user_id: string
@@ -3039,6 +3115,7 @@ export type Database = {
         Returns: boolean
       }
       check_early_access: { Args: { _user_id: string }; Returns: boolean }
+      cleanup_expired_2fa_codes: { Args: never; Returns: undefined }
       cleanup_expired_anubis_sessions: { Args: never; Returns: undefined }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
