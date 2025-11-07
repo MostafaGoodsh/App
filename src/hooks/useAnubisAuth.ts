@@ -68,6 +68,10 @@ export const useAnubisAuth = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
+      if (data.requires_2fa) {
+        return { success: true, requires_2fa: true, message: data.message };
+      }
+
       localStorage.setItem('anubis_session_token', data.session_token);
       setState({
         user: data.user,
@@ -79,6 +83,29 @@ export const useAnubisAuth = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       return { success: false, error: error.message || 'فشل تسجيل الدخول' };
+    }
+  };
+
+  const verify2FA = async (email: string, twofa_code: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('anubis-auth', {
+        body: { action: 'verify_2fa', email, twofa_code }
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      localStorage.setItem('anubis_session_token', data.session_token);
+      setState({
+        user: data.user,
+        loading: false,
+        sessionToken: data.session_token
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('2FA verification error:', error);
+      return { success: false, error: error.message || 'فشل التحقق' };
     }
   };
 
@@ -131,6 +158,7 @@ export const useAnubisAuth = () => {
     sessionToken: state.sessionToken,
     isAuthenticated: !!state.user,
     login,
+    verify2FA,
     register,
     logout
   };

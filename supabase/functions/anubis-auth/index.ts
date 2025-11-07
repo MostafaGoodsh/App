@@ -19,7 +19,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { action, email, password, full_name, phone } = await req.json();
+    const { action, email, password, full_name, phone, twofa_code } = await req.json();
 
     console.log('Anubis Auth Request:', { action, email });
 
@@ -150,7 +150,51 @@ serve(async (req) => {
         );
       }
 
-      // إنشاء جلسة جديدة
+      // التحقق من تفعيل المصادقة الثنائية
+      const { data: twoFASettings } = await supabaseClient
+        .from('anubis_2fa_settings')
+        .select('is_enabled')
+        .eq('anubis_user_id', user.id)
+        .single();
+
+      if (twoFASettings?.is_enabled) {
+        // إنشاء رمز التحقق
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const codeExpiresAt = new Date();
+        codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + 10);
+
+        await supabaseClient
+          .from('anubis_2fa_codes')
+          .insert({
+            anubis_user_id: user.id,
+            code,
+            expires_at: codeExpiresAt.toISOString()
+          });
+
+        // إرسال الرمز عبر البريد الإلكتروني
+        try {
+          await supabaseClient.functions.invoke('send-2fa-code', {
+            body: {
+              email: user.email,
+              code,
+              userName: user.full_name
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send 2FA email:', emailError);
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            requires_2fa: true,
+            message: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني'
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // تسجيل دخول عادي بدون مصادقة ثنائية
       const session_token = crypto.randomUUID() + '-' + Date.now();
       const expires_at = new Date();
       expires_at.setDate(expires_at.getDate() + 30);
@@ -174,6 +218,88 @@ serve(async (req) => {
       }
 
       // تحديث آخر تسجيل دخول
+      await supabaseClient
+        .from('anubis_users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', user.id);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            subscription_type: user.subscription_type
+          },
+          session_token,
+          expires_at
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
+    } else if (action === 'verify_2fa') {
+      if (!email || !twofa_code) {
+        return new Response(
+          JSON.stringify({ error: 'رمز التحقق والبريد الإلكتروني مطلوبان' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+
+      // البحث عن المستخدم
+      const { data: user } = await supabaseClient
+        .from('anubis_users')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (!user) {
+        return new Response(
+          JSON.stringify({ error: 'المستخدم غير موجود' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+        );
+      }
+
+      // التحقق من الرمز
+      const { data: codeRecord } = await supabaseClient
+        .from('anubis_2fa_codes')
+        .select('*')
+        .eq('anubis_user_id', user.id)
+        .eq('code', twofa_code)
+        .is('used_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!codeRecord) {
+        return new Response(
+          JSON.stringify({ error: 'رمز التحقق غير صحيح أو منتهي الصلاحية' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+        );
+      }
+
+      // تحديد الرمز كمستخدم
+      await supabaseClient
+        .from('anubis_2fa_codes')
+        .update({ used_at: new Date().toISOString() })
+        .eq('id', codeRecord.id);
+
+      // إنشاء جلسة
+      const session_token = crypto.randomUUID() + '-' + Date.now();
+      const expires_at = new Date();
+      expires_at.setDate(expires_at.getDate() + 30);
+
+      await supabaseClient
+        .from('anubis_sessions')
+        .insert({
+          anubis_user_id: user.id,
+          session_token,
+          expires_at: expires_at.toISOString(),
+          ip_address: req.headers.get('x-forwarded-for') || 'unknown',
+          user_agent: req.headers.get('user-agent') || 'unknown'
+        });
+
       await supabaseClient
         .from('anubis_users')
         .update({ last_login: new Date().toISOString() })

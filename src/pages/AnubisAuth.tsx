@@ -11,8 +11,10 @@ import { toast } from "sonner";
 
 const AnubisAuth = () => {
   const navigate = useNavigate();
-  const { login, register, isAuthenticated } = useAnubisAuth();
+  const { login, verify2FA, register, isAuthenticated } = useAnubisAuth();
   const [loading, setLoading] = useState(false);
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFACode, setTwoFACode] = useState('');
   
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
@@ -37,10 +39,37 @@ const AnubisAuth = () => {
       const result = await login(loginData.email, loginData.password);
       
       if (result.success) {
-        toast.success("تم تسجيل الدخول بنجاح");
-        navigate("/anubis");
+        if (result.requires_2fa) {
+          setRequires2FA(true);
+          toast.success(result.message || "تم إرسال رمز التحقق");
+        } else {
+          toast.success("تم تسجيل الدخول بنجاح");
+          navigate("/anubis");
+        }
       } else {
         toast.error(result.error || "فشل تسجيل الدخول");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twoFACode || twoFACode.length !== 6) {
+      toast.error('الرجاء إدخال رمز التحقق المكون من 6 أرقام');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await verify2FA(loginData.email, twoFACode);
+      
+      if (result.success) {
+        toast.success("تم التحقق بنجاح!");
+        navigate("/anubis");
+      } else {
+        toast.error(result.error || "رمز التحقق غير صحيح");
       }
     } finally {
       setLoading(false);
@@ -97,7 +126,61 @@ const AnubisAuth = () => {
         </CardHeader>
 
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          {requires2FA ? (
+            <div className="space-y-6">
+              <div className="text-center space-y-3">
+                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Lock className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold">التحقق الثنائي</h3>
+                <p className="text-sm text-muted-foreground">
+                  تم إرسال رمز التحقق إلى بريدك الإلكتروني<br />
+                  يرجى إدخال الرمز المكون من 6 أرقام
+                </p>
+              </div>
+
+              <form onSubmit={handleVerify2FA} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="2fa-code">رمز التحقق</Label>
+                  <Input
+                    id="2fa-code"
+                    type="text"
+                    placeholder="000000"
+                    value={twoFACode}
+                    onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    className="text-center text-2xl tracking-widest font-mono"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground text-center">
+                    الرمز صالح لمدة 10 دقائق
+                  </p>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading || twoFACode.length !== 6}
+                >
+                  {loading ? "جاري التحقق..." : "تأكيد"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setRequires2FA(false);
+                    setTwoFACode('');
+                  }}
+                  disabled={loading}
+                >
+                  رجوع
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">تسجيل الدخول</TabsTrigger>
               <TabsTrigger value="register">حساب جديد</TabsTrigger>
@@ -229,14 +312,17 @@ const AnubisAuth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
-          <div className="mt-6 space-y-3">
+          {!requires2FA && (
+            <div className="mt-6 space-y-3">
             <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
               <p className="text-sm text-amber-800 dark:text-amber-200 font-semibold">
                 🔒 تشفير عسكري من الدرجة الأولى لحماية ملفاتك
               </p>
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
     </div>

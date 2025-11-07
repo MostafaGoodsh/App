@@ -1,5 +1,11 @@
 project_id = "wnwfnziozwarlihrnjex"
 
+[functions.anubis-auth]
+verify_jwt = false
+
+[functions.send-2fa-code]
+verify_jwt = false
+
 [functions.upload-vault-file]
 verify_jwt = false
 
