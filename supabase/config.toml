@@ -1,1 +1,13 @@
 project_id = "wnwfnziozwarlihrnjex"
+
+[functions.upload-vault-file]
+verify_jwt = false
+
+[functions.list-vault-files]
+verify_jwt = false
+
+[functions.download-vault-file]
+verify_jwt = false
+
+[functions.delete-vault-file]
+verify_jwt = false
