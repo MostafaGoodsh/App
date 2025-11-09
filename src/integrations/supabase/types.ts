@@ -272,6 +272,7 @@ export type Database = {
           phone: string | null
           status: string | null
           subscription_type: string | null
+          two_factor_enabled: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -285,6 +286,7 @@ export type Database = {
           phone?: string | null
           status?: string | null
           subscription_type?: string | null
+          two_factor_enabled?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -298,6 +300,7 @@ export type Database = {
           phone?: string | null
           status?: string | null
           subscription_type?: string | null
+          two_factor_enabled?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
