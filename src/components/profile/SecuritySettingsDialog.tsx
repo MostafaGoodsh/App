@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,9 +18,14 @@ import {
   Smartphone, 
   Key, 
   AlertTriangle,
-  CheckCircle2 
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface SecuritySettingsDialogProps {
   open: boolean;
@@ -28,12 +33,17 @@ interface SecuritySettingsDialogProps {
 }
 
 export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsDialogProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState({
     twoFactorEnabled: false,
     loginAlerts: true,
     sessionTimeout: 30,
     passwordChangeRequired: false,
   });
+  const [anubisUser, setAnubisUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -41,19 +51,124 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
     confirmPassword: '',
   });
 
-  const handleSave = () => {
-    // TODO: Save security settings
-    console.log('Saving security settings:', settings);
-    onOpenChange(false);
-  };
+  // جلب بيانات المستخدم من Anubis
+  useEffect(() => {
+    const fetchAnubisUser = async () => {
+      if (!user?.email || !open) return;
+      
+      setLoadingSettings(true);
+      try {
+        const { data, error } = await supabase
+          .from('anubis_users')
+          .select('*')
+          .eq('email', user.email)
+          .single();
 
-  const handlePasswordChange = () => {
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('كلمات المرور غير متطابقة | Passwords do not match');
+        if (data) {
+          setAnubisUser(data);
+          setSettings(prev => ({
+            ...prev,
+            twoFactorEnabled: data.two_factor_enabled || false
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching Anubis user:', error);
+      } finally {
+        setLoadingSettings(false);
+      }
+    };
+
+    fetchAnubisUser();
+  }, [user?.email, open]);
+
+  const handleSave = async () => {
+    if (!user?.email) {
+      toast.error('خطأ | Error', {
+        description: 'لم يتم العثور على بيانات المستخدم | User data not found'
+      });
       return;
     }
-    // TODO: Change password
-    console.log('Changing password');
+
+    // إذا لم يكن لديه حساب Anubis وحاول تفعيل 2FA
+    if (!anubisUser && settings.twoFactorEnabled) {
+      toast.error('حساب Anubis مطلوب | Anubis Account Required', {
+        description: 'يجب إنشاء حساب Anubis أولاً لتفعيل المصادقة الثنائية | Create an Anubis account first to enable 2FA',
+        action: {
+          label: 'إنشاء حساب | Create Account',
+          onClick: () => {
+            onOpenChange(false);
+            navigate('/anubis-auth');
+          }
+        }
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // تحديث إعدادات 2FA في Anubis
+      const { error } = await supabase
+        .from('anubis_users')
+        .update({ two_factor_enabled: settings.twoFactorEnabled })
+        .eq('email', user.email);
+
+      if (error) throw error;
+
+      toast.success('تم الحفظ | Saved', {
+        description: 'تم حفظ إعدادات الأمان بنجاح | Security settings saved successfully'
+      });
+      
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Error saving settings:', error);
+      toast.error('خطأ | Error', {
+        description: error.message || 'فشل حفظ الإعدادات | Failed to save settings'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('خطأ | Error', {
+        description: 'كلمات المرور غير متطابقة | Passwords do not match'
+      });
+      return;
+    }
+
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      toast.error('خطأ | Error', {
+        description: 'يرجى ملء جميع الحقول | Please fill all fields'
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      });
+
+      if (error) throw error;
+
+      toast.success('تم التحديث | Updated', {
+        description: 'تم تغيير كلمة المرور بنجاح | Password changed successfully'
+      });
+      
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      toast.error('خطأ | Error', {
+        description: error.message || 'فشل تغيير كلمة المرور | Failed to change password'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -129,8 +244,12 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
                 />
               </div>
 
-              <Button onClick={handlePasswordChange} className="w-full arabic-text">
-                تغيير كلمة المرور | Change Password
+              <Button 
+                onClick={handlePasswordChange} 
+                className="w-full arabic-text"
+                disabled={loading}
+              >
+                {loading ? 'جاري التحديث...' : 'تغيير كلمة المرور | Change Password'}
               </Button>
             </CardContent>
           </Card>
@@ -143,34 +262,74 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
                 المصادقة الثنائية | Two-Factor Authentication
               </CardTitle>
               <CardDescription className="arabic-text">
-                طبقة حماية إضافية لحسابك | Additional security layer for your account
+                طبقة حماية إضافية لحسابك عبر نظام Anubis
+                <br />
+                Additional security layer for your account via Anubis system
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="arabic-text">
-                    تفعيل المصادقة الثنائية | Enable 2FA
-                  </Label>
-                  <p className="text-sm text-muted-foreground arabic-text">
-                    حماية إضافية عبر الهاتف المحمول | Extra protection via mobile phone
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.twoFactorEnabled}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, twoFactorEnabled: checked })
-                  }
-                />
-              </div>
-
-              {settings.twoFactorEnabled && (
+              {!anubisUser ? (
                 <Alert>
-                  <CheckCircle2 className="h-4 w-4" />
-                  <AlertDescription className="arabic-text">
-                    المصادقة الثنائية مفعلة وتحمي حسابك | Two-factor authentication is active and protecting your account
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="arabic-text space-y-2">
+                    <p>يجب إنشاء حساب Anubis أولاً لتفعيل المصادقة الثنائية</p>
+                    <p className="text-sm">You need to create an Anubis account first to enable 2FA</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate('/anubis-auth');
+                      }}
+                      className="mt-2 w-full arabic-text"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      إنشاء حساب Anubis | Create Anubis Account
+                    </Button>
                   </AlertDescription>
                 </Alert>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="arabic-text">
+                        تفعيل المصادقة الثنائية | Enable 2FA
+                      </Label>
+                      <p className="text-sm text-muted-foreground arabic-text">
+                        حماية إضافية عبر البريد الإلكتروني | Extra protection via email
+                      </p>
+                    </div>
+                    <Switch
+                      checked={settings.twoFactorEnabled}
+                      onCheckedChange={(checked) =>
+                        setSettings({ ...settings, twoFactorEnabled: checked })
+                      }
+                      disabled={loadingSettings}
+                    />
+                  </div>
+
+                  {settings.twoFactorEnabled && (
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <AlertDescription className="arabic-text">
+                        المصادقة الثنائية مفعلة وتحمي حسابك | Two-factor authentication is active and protecting your account
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onOpenChange(false);
+                      navigate('/anubis-auth');
+                    }}
+                    className="w-full arabic-text"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    تسجيل الدخول إلى Anubis | Login to Anubis
+                  </Button>
+                </>
               )}
             </CardContent>
           </Card>
@@ -234,11 +393,20 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="arabic-text">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)} 
+            className="arabic-text"
+            disabled={loading}
+          >
             إلغاء | Cancel
           </Button>
-          <Button onClick={handleSave} className="arabic-text">
-            حفظ الإعدادات | Save Settings
+          <Button 
+            onClick={handleSave} 
+            className="arabic-text"
+            disabled={loading || loadingSettings}
+          >
+            {loading ? 'جاري الحفظ...' : 'حفظ الإعدادات | Save Settings'}
           </Button>
         </DialogFooter>
       </DialogContent>
