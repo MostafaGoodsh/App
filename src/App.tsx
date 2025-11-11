@@ -69,6 +69,8 @@ import Documents from "./pages/Documents";
 import AnubisSettingsAdmin from "./pages/AnubisSettingsAdmin";
 import LiveStream from "./pages/LiveStream";
 import LiveStreamApprovalsAdmin from "./pages/LiveStreamApprovalsAdmin";
+import LiveStreamsGallery from "./pages/LiveStreamsGallery";
+import LiveStreamViewer from "./pages/LiveStreamViewer";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -106,6 +108,9 @@ const App = () => {
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
                   <Route path="live-stream" element={<RequireAuth><LiveStream /></RequireAuth>} />
+                  <Route path="live-streams" element={<LiveStreamsGallery />} />
+                  <Route path="live-stream/watch/:streamId" element={<LiveStreamViewer />} />
+                  <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/support" element={<RequireAdmin><SupportAdmin /></RequireAdmin>} />
                   <Route path="admin/verified-accounts" element={<RequireAdmin><VerifiedAccountsAdmin /></RequireAdmin>} />

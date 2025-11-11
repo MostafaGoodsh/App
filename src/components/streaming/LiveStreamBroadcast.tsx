@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const LiveStreamBroadcast = () => {
   const { toast } = useToast();
@@ -149,7 +150,7 @@ const LiveStreamBroadcast = () => {
     setIsScreenSharing(false);
   };
 
-  const startBroadcast = () => {
+  const startBroadcast = async () => {
     if (!streamTitle.trim()) {
       toast({
         title: "العنوان مطلوب",
@@ -168,18 +169,41 @@ const LiveStreamBroadcast = () => {
       return;
     }
 
-    setIsStreaming(true);
-    // محاكاة عدد المشاهدين
-    const interval = setInterval(() => {
-      setViewerCount(prev => prev + Math.floor(Math.random() * 3));
-    }, 5000);
+    try {
+      // حفظ البث في قاعدة البيانات
+      const { data, error } = await supabase
+        .from('active_live_streams')
+        .insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          title: streamTitle,
+          stream_key: Math.random().toString(36).substring(7),
+          is_active: true
+        })
+        .select()
+        .single();
 
-    toast({
-      title: "بدأ البث المباشر",
-      description: "أنت الآن على الهواء مباشرة!"
-    });
+      if (error) throw error;
 
-    return () => clearInterval(interval);
+      setIsStreaming(true);
+      
+      // محاكاة عدد المشاهدين
+      const interval = setInterval(() => {
+        setViewerCount(prev => prev + Math.floor(Math.random() * 3));
+      }, 5000);
+
+      toast({
+        title: "بدأ البث المباشر",
+        description: "أنت الآن على الهواء مباشرة!"
+      });
+
+      return () => clearInterval(interval);
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في بدء البث",
+        variant: "destructive"
+      });
+    }
   };
 
   const stopBroadcast = () => {
