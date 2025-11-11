@@ -152,17 +152,34 @@ export default function HomePageCardsManagement() {
     
     setSaving(true);
     try {
+      const cardData = {
+        ...editingCard,
+        title_en: editingCard.title_en || null,
+        description: editingCard.description || null,
+        description_en: editingCard.description_en || null,
+        background_image: editingCard.background_image || null,
+        icon_url: editingCard.icon_url || null,
+        route_path: editingCard.route_path || null,
+        page_content: editingCard.page_content || null,
+        page_content_en: editingCard.page_content_en || null,
+        external_widget_url: editingCard.external_widget_url || null,
+        widget_type: editingCard.widget_type || null,
+      };
+
       if (editingCard.id) {
+        // تحديث بطاقة موجودة
         const { error } = await supabase
           .from('home_page_cards')
-          .update(editingCard)
+          .update(cardData)
           .eq('id', editingCard.id);
         
         if (error) throw error;
       } else {
+        // إنشاء بطاقة جديدة - احذف id الفارغ
+        const { id, ...newCardData } = cardData;
         const { error } = await supabase
           .from('home_page_cards')
-          .insert([editingCard]);
+          .insert([newCardData]);
         
         if (error) throw error;
       }
@@ -170,9 +187,13 @@ export default function HomePageCardsManagement() {
       toast({ title: "تم الحفظ", description: "تم حفظ البطاقة بنجاح" });
       setDialogOpen(false);
       await fetchCards();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving card:', error);
-      toast({ title: "خطأ", description: "فشل في حفظ البطاقة", variant: "destructive" });
+      toast({ 
+        title: "خطأ", 
+        description: error.message || "فشل في حفظ البطاقة", 
+        variant: "destructive" 
+      });
     } finally {
       setSaving(false);
     }

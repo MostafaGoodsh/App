@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { WebRTCBroadcaster } from "@/utils/webrtc";
 
 const LiveStreamBroadcast = () => {
   const { toast } = useToast();
@@ -23,6 +24,8 @@ const LiveStreamBroadcast = () => {
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
+  const broadcasterRef = useRef<WebRTCBroadcaster | null>(null);
+  const currentStreamIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Handle fullscreen change events
@@ -170,11 +173,16 @@ const LiveStreamBroadcast = () => {
     }
 
     try {
+      const userData = await supabase.auth.getUser();
+      if (!userData.data.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
       // حفظ البث في قاعدة البيانات
       const { data, error } = await supabase
         .from('active_live_streams')
         .insert({
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: userData.data.user.id,
           title: streamTitle,
           stream_key: Math.random().toString(36).substring(7),
           is_active: true
@@ -184,20 +192,26 @@ const LiveStreamBroadcast = () => {
 
       if (error) throw error;
 
+      currentStreamIdRef.current = data.id;
       setIsStreaming(true);
       
-      // محاكاة عدد المشاهدين
-      const interval = setInterval(() => {
-        setViewerCount(prev => prev + Math.floor(Math.random() * 3));
-      }, 5000);
+      // بدء البث عبر WebRTC
+      const activeStream = screenStreamRef.current || streamRef.current;
+      if (activeStream) {
+        broadcasterRef.current = new WebRTCBroadcaster(
+          data.id,
+          userData.data.user.id,
+          (count) => setViewerCount(count)
+        );
+        await broadcasterRef.current.start(activeStream);
+      }
 
       toast({
         title: "بدأ البث المباشر",
         description: "أنت الآن على الهواء مباشرة!"
       });
-
-      return () => clearInterval(interval);
     } catch (error: any) {
+      console.error('Error starting broadcast:', error);
       toast({
         title: "خطأ",
         description: error.message || "فشل في بدء البث",
@@ -206,12 +220,30 @@ const LiveStreamBroadcast = () => {
     }
   };
 
-  const stopBroadcast = () => {
+  const stopBroadcast = async () => {
     setIsStreaming(false);
+    
+    // إيقاف WebRTC
+    broadcasterRef.current?.stop();
+    broadcasterRef.current = null;
+
+    // حذف البث من قاعدة البيانات
+    if (currentStreamIdRef.current) {
+      try {
+        await supabase
+          .from('active_live_streams')
+          .delete()
+          .eq('id', currentStreamIdRef.current);
+      } catch (error) {
+        console.error('Error deleting stream:', error);
+      }
+    }
+
     setViewerCount(0);
     stopAllStreams();
     setIsCameraOn(false);
     setIsScreenSharing(false);
+    currentStreamIdRef.current = null;
     
     // Exit fullscreen if active
     if (document.fullscreenElement) {

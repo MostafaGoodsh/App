@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
+import { WebRTCViewer } from "@/utils/webrtc";
 
 const LiveStreamViewer = () => {
   const { streamId } = useParams<{ streamId: string }>();
@@ -30,6 +31,27 @@ const LiveStreamViewer = () => {
 
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const viewerRef = useRef<WebRTCViewer | null>(null);
+
+  useEffect(() => {
+    if (streamId && user?.id && currentStream) {
+      console.log('Starting WebRTC viewer for stream:', streamId);
+      viewerRef.current = new WebRTCViewer(streamId, user.id, (stream) => {
+        console.log('Received remote stream');
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      });
+      
+      viewerRef.current.start();
+
+      return () => {
+        console.log('Stopping WebRTC viewer');
+        viewerRef.current?.stop();
+      };
+    }
+  }, [streamId, user?.id, currentStream]);
 
   const handleSendComment = async () => {
     if (!comment.trim() || !streamId) return;
@@ -68,14 +90,14 @@ const LiveStreamViewer = () => {
           <div>
             <Card className="overflow-hidden mb-4">
               <div className="relative aspect-video bg-black">
-                {currentStream.thumbnail_url ? (
-                  <img 
-                    src={currentStream.thumbnail_url} 
-                    alt={currentStream.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+                {!videoRef.current?.srcObject && (
+                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                     <Video className="w-24 h-24 opacity-50 text-white" />
                   </div>
                 )}
