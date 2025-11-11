@@ -10,6 +10,7 @@ import DailyTasksCard from "@/components/engagement/DailyTasksCard";
 import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
+import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import sphinxBg from "@/assets/sphinx-bg.jpg";
 import pharaohStatueBg from "@/assets/pharaoh-statue-bg.jpg";
 
@@ -110,10 +111,13 @@ const Index = () => {
             </Link>
           ))}
 
-          {/* Reels Card - Second Card */}
+          {/* Live Stream Card - Second Card */}
+          <LiveStreamCard />
+
+          {/* Reels Card - Third Card */}
           <ExternalReelsCard />
           
-          {/* Updates Card - Third Card */}
+          {/* Updates Card - Fourth Card */}
           <Link to="/updates" className="group">
             <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
               <img 
@@ -134,10 +138,10 @@ const Index = () => {
             </article>
           </Link>
           
-          {/* Daily Tasks Card - Fourth Card */}
+          {/* Daily Tasks Card - Fifth Card */}
           <DailyTasksCard />
 
-          {/* Call Out Card - Fifth Card */}
+          {/* Call Out Card - Sixth Card */}
           <Link to="/call-out" className="group">
             <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
               <img 

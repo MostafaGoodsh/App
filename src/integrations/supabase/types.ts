@@ -1163,6 +1163,57 @@ export type Database = {
           },
         ]
       }
+      live_stream_approvals: {
+        Row: {
+          created_at: string
+          description: string | null
+          email: string
+          follower_count: number | null
+          full_name: string
+          id: string
+          phone: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_media_links: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          email: string
+          follower_count?: number | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_links?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          email?: string
+          follower_count?: number | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_links?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mfa_sessions: {
         Row: {
           challenge_code: string

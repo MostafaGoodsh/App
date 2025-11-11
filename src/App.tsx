@@ -67,6 +67,8 @@ import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
 import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
 import Documents from "./pages/Documents";
 import AnubisSettingsAdmin from "./pages/AnubisSettingsAdmin";
+import LiveStream from "./pages/LiveStream";
+import LiveStreamApprovalsAdmin from "./pages/LiveStreamApprovalsAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -103,6 +105,7 @@ const App = () => {
                   <Route path="anubis-auth" element={<AnubisAuth />} />
                   <Route path="profile" element={<RequireAuth><Profile /></RequireAuth>} />
                   <Route path="daily-tasks" element={<RequireAuth><DailyTasks /></RequireAuth>} />
+                  <Route path="live-stream" element={<RequireAuth><LiveStream /></RequireAuth>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/support" element={<RequireAdmin><SupportAdmin /></RequireAdmin>} />
                   <Route path="admin/verified-accounts" element={<RequireAdmin><VerifiedAccountsAdmin /></RequireAdmin>} />
@@ -135,6 +138,7 @@ const App = () => {
                   <Route path="admin/anubis-settings" element={<RequireAdmin><AnubisSettingsAdmin /></RequireAdmin>} />
                   <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                   <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
+                  <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
