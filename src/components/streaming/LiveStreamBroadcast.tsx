@@ -1,0 +1,335 @@
+import { useState, useRef, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+const LiveStreamBroadcast = () => {
+  const { toast } = useToast();
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [streamTitle, setStreamTitle] = useState("");
+  const [viewerCount, setViewerCount] = useState(0);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const screenStreamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    return () => {
+      stopAllStreams();
+    };
+  }, []);
+
+  const stopAllStreams = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop());
+      screenStreamRef.current = null;
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
+        audio: isMicOn
+      });
+
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      setIsCameraOn(true);
+      toast({
+        title: "تم تشغيل الكاميرا",
+        description: "يمكنك الآن بدء البث المباشر"
+      });
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast({
+        title: "خطأ في الوصول للكاميرا",
+        description: "تأكد من السماح بالوصول للكاميرا والميكروفون",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOn(false);
+  };
+
+  const toggleMicrophone = async () => {
+    if (streamRef.current) {
+      const audioTrack = streamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsMicOn(audioTrack.enabled);
+      }
+    } else {
+      setIsMicOn(!isMicOn);
+    }
+  };
+
+  const startScreenShare = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: false
+      });
+
+      screenStreamRef.current = screenStream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = screenStream;
+      }
+      
+      setIsScreenSharing(true);
+      setIsCameraOn(false);
+      
+      // Handle when user stops sharing via browser UI
+      screenStream.getVideoTracks()[0].onended = () => {
+        stopScreenShare();
+      };
+      
+      toast({
+        title: "بدأ مشاركة الشاشة",
+        description: "يتم الآن بث شاشتك"
+      });
+    } catch (error) {
+      console.error('Error sharing screen:', error);
+      toast({
+        title: "خطأ في مشاركة الشاشة",
+        description: "تأكد من السماح بمشاركة الشاشة",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopScreenShare = () => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop());
+      screenStreamRef.current = null;
+    }
+    setIsScreenSharing(false);
+  };
+
+  const startBroadcast = () => {
+    if (!streamTitle.trim()) {
+      toast({
+        title: "العنوان مطلوب",
+        description: "يرجى إضافة عنوان للبث المباشر",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!isCameraOn && !isScreenSharing) {
+      toast({
+        title: "تشغيل الكاميرا أو مشاركة الشاشة",
+        description: "يجب تشغيل الكاميرا أو مشاركة الشاشة أولاً",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsStreaming(true);
+    // محاكاة عدد المشاهدين
+    const interval = setInterval(() => {
+      setViewerCount(prev => prev + Math.floor(Math.random() * 3));
+    }, 5000);
+
+    toast({
+      title: "بدأ البث المباشر",
+      description: "أنت الآن على الهواء مباشرة!"
+    });
+
+    return () => clearInterval(interval);
+  };
+
+  const stopBroadcast = () => {
+    setIsStreaming(false);
+    setViewerCount(0);
+    stopAllStreams();
+    setIsCameraOn(false);
+    setIsScreenSharing(false);
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    toast({
+      title: "انتهى البث المباشر",
+      description: "تم إيقاف البث بنجاح"
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* عنوان البث */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-cairo">إعدادات البث المباشر</CardTitle>
+          <CardDescription>قم بإعداد بثك المباشر قبل البدء</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="stream_title">عنوان البث *</Label>
+            <Input
+              id="stream_title"
+              value={streamTitle}
+              onChange={(e) => setStreamTitle(e.target.value)}
+              placeholder="مثال: جلسة أسئلة وأجوبة مباشرة"
+              disabled={isStreaming}
+              className="font-cairo"
+            />
+          </div>
+
+          {isStreaming && (
+            <Alert>
+              <Users className="w-4 h-4" />
+              <AlertDescription className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
+                  على الهواء
+                </Badge>
+                <span>{viewerCount} مشاهد</span>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* معاينة الفيديو */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-cairo">معاينة البث</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            {!isCameraOn && !isScreenSharing && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <VideoOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p className="font-cairo">الكاميرا غير مفعلة</p>
+                </div>
+              </div>
+            )}
+            {isStreaming && (
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-red-500 text-white animate-pulse">
+                  ● على الهواء
+                </Badge>
+              </div>
+            )}
+          </div>
+
+          {/* أزرار التحكم */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+            {!isScreenSharing && (
+              <Button
+                onClick={isCameraOn ? stopCamera : startCamera}
+                variant={isCameraOn ? "default" : "outline"}
+                disabled={isStreaming}
+                className="w-full"
+              >
+                {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
+                {isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
+              </Button>
+            )}
+
+            <Button
+              onClick={toggleMicrophone}
+              variant={isMicOn ? "default" : "outline"}
+              disabled={isStreaming}
+              className="w-full"
+            >
+              {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
+              {isMicOn ? "كتم الصوت" : "تشغيل الصوت"}
+            </Button>
+
+            {!isCameraOn && (
+              <Button
+                onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+                variant={isScreenSharing ? "default" : "outline"}
+                disabled={isStreaming}
+                className="w-full"
+              >
+                {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
+                {isScreenSharing ? "إيقاف المشاركة" : "مشاركة الشاشة"}
+              </Button>
+            )}
+
+            {!isStreaming ? (
+              <Button
+                onClick={startBroadcast}
+                className="w-full bg-red-500 hover:bg-red-600 text-white"
+              >
+                <Play className="w-4 h-4 ml-2" />
+                بدء البث
+              </Button>
+            ) : (
+              <Button
+                onClick={stopBroadcast}
+                variant="destructive"
+                className="w-full"
+              >
+                <Square className="w-4 h-4 ml-2" />
+                إيقاف البث
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* نصائح للبث */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
+            <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
+            <li>اختبر الصوت والصورة قبل بدء البث</li>
+            <li>استخدم اتصال إنترنت مستقر</li>
+            <li>تفاعل مع المشاهدين في التعليقات</li>
+            <li>حضّر محتوى جذاب ومفيد للجمهور</li>
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default LiveStreamBroadcast;

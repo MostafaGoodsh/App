@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Video, Users, CheckCircle, Clock, XCircle } from "lucide-react";
+import LiveStreamBroadcast from "@/components/streaming/LiveStreamBroadcast";
 
 interface ApplicationStatus {
   id: string;
@@ -230,95 +231,16 @@ const LiveStream = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-cairo text-green-600">
                     <CheckCircle className="w-6 h-6" />
-                    تم اعتماد حسابك - يمكنك البث الآن
+                    تم اعتماد حسابك - ابدأ البث الآن!
                   </CardTitle>
                   <CardDescription>
-                    استخدم الأدوات أدناه للبث المباشر مع جمهورك
+                    يمكنك الآن بدء البث المباشر من التطبيق مباشرة
                   </CardDescription>
                 </CardHeader>
               </Card>
 
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="font-cairo">بث مباشر عبر YouTube</CardTitle>
-                  <CardDescription>
-                    الطريقة الأولى: ابدأ البث من خلال YouTube Studio
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Alert>
-                    <Video className="w-4 h-4" />
-                    <AlertDescription>
-                      <ol className="list-decimal mr-4 space-y-2">
-                        <li>افتح <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">YouTube Studio</a></li>
-                        <li>انقر على "إنشاء" ثم "بث مباشر"</li>
-                        <li>اختر "البث الآن" واتبع التعليمات</li>
-                        <li>انسخ رابط البث وشاركه مع متابعيك</li>
-                      </ol>
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={() => window.open('https://studio.youtube.com/channel/UC/livestreaming', '_blank')}
-                  >
-                    <Video className="w-5 h-5 ml-2" />
-                    فتح YouTube Studio
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="font-cairo">بث مباشر عبر Facebook</CardTitle>
-                  <CardDescription>
-                    الطريقة الثانية: ابدأ البث من خلال Facebook Live
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Alert>
-                    <Video className="w-4 h-4" />
-                    <AlertDescription>
-                      <ol className="list-decimal mr-4 space-y-2">
-                        <li>افتح <a href="https://www.facebook.com/live/create" target="_blank" rel="noopener noreferrer" className="text-primary underline">Facebook Live</a></li>
-                        <li>اختر حسابك أو صفحتك</li>
-                        <li>اضغط "بث مباشر" واتبع التعليمات</li>
-                        <li>شارك البث مع جمهورك</li>
-                      </ol>
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    onClick={() => window.open('https://www.facebook.com/live/create', '_blank')}
-                  >
-                    <Video className="w-5 h-5 ml-2" />
-                    فتح Facebook Live
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-cairo">بث مباشر عبر Instagram</CardTitle>
-                  <CardDescription>
-                    الطريقة الثالثة: ابدأ البث من خلال تطبيق Instagram
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Alert>
-                    <Video className="w-4 h-4" />
-                    <AlertDescription>
-                      <ol className="list-decimal mr-4 space-y-2">
-                        <li>افتح تطبيق Instagram على هاتفك</li>
-                        <li>اضغط على "+" ثم "بث مباشر"</li>
-                        <li>أضف عنوانًا للبث</li>
-                        <li>اضغط "بدء بث مباشر"</li>
-                      </ol>
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
+              {/* واجهة البث المباشر من التطبيق */}
+              <LiveStreamBroadcast />
             </>
           )}
 
