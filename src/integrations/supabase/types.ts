@@ -56,6 +56,54 @@ export type Database = {
         }
         Relationships: []
       }
+      active_live_streams: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean | null
+          likes_count: number | null
+          started_at: string | null
+          stream_key: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          viewer_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          likes_count?: number | null
+          started_at?: string | null
+          stream_key: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          viewer_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          likes_count?: number | null
+          started_at?: string | null
+          stream_key?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          viewer_count?: number | null
+        }
+        Relationships: []
+      }
       anubis_2fa_codes: {
         Row: {
           anubis_user_id: string
@@ -1213,6 +1261,99 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      live_stream_comments: {
+        Row: {
+          comment: string
+          created_at: string | null
+          id: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string | null
+          id?: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string | null
+          id?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_comments_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "active_live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_stream_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          stream_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          stream_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          stream_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_likes_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "active_live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_stream_views: {
+        Row: {
+          id: string
+          joined_at: string | null
+          left_at: string | null
+          stream_id: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          stream_id: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          left_at?: string | null
+          stream_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_views_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "active_live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mfa_sessions: {
         Row: {
