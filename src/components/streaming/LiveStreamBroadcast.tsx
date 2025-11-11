@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const LiveStreamBroadcast = () => {
@@ -16,14 +16,24 @@ const LiveStreamBroadcast = () => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [streamTitle, setStreamTitle] = useState("");
   const [viewerCount, setViewerCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    // Handle fullscreen change events
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
     return () => {
       stopAllStreams();
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
@@ -179,6 +189,11 @@ const LiveStreamBroadcast = () => {
     setIsCameraOn(false);
     setIsScreenSharing(false);
     
+    // Exit fullscreen if active
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
@@ -187,6 +202,27 @@ const LiveStreamBroadcast = () => {
       title: "انتهى البث المباشر",
       description: "تم إيقاف البث بنجاح"
     });
+  };
+
+  const toggleFullscreen = async () => {
+    if (!videoContainerRef.current) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await videoContainerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error('Error toggling fullscreen:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في تفعيل وضع الشاشة الكاملة",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -230,7 +266,11 @@ const LiveStreamBroadcast = () => {
           <CardTitle className="font-cairo">معاينة البث</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+          <div 
+            ref={videoContainerRef}
+            className="relative aspect-video bg-black rounded-lg overflow-hidden group cursor-pointer"
+            onClick={toggleFullscreen}
+          >
             <video
               ref={videoRef}
               autoPlay
@@ -239,7 +279,7 @@ const LiveStreamBroadcast = () => {
               className="w-full h-full object-cover"
             />
             {!isCameraOn && !isScreenSharing && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center text-white">
                   <VideoOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
                   <p className="font-cairo">الكاميرا غير مفعلة</p>
@@ -247,10 +287,29 @@ const LiveStreamBroadcast = () => {
               </div>
             )}
             {isStreaming && (
-              <div className="absolute top-4 left-4">
+              <div className="absolute top-4 left-4 pointer-events-none">
                 <Badge className="bg-red-500 text-white animate-pulse">
                   ● على الهواء
                 </Badge>
+              </div>
+            )}
+            {/* زر الشاشة الكاملة */}
+            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="bg-black/60 p-2 rounded-lg backdrop-blur-sm">
+                {isFullscreen ? (
+                  <Minimize className="w-6 h-6 text-white" />
+                ) : (
+                  <Maximize className="w-6 h-6 text-white" />
+                )}
+              </div>
+            </div>
+            {/* رسالة توضيحية */}
+            {(isCameraOn || isScreenSharing) && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-black/20">
+                <div className="text-center text-white">
+                  <Maximize className="w-12 h-12 mx-auto mb-2" />
+                  <p className="font-cairo text-sm">اضغط للشاشة الكاملة</p>
+                </div>
               </div>
             )}
           </div>
