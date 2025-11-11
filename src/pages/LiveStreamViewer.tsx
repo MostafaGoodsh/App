@@ -74,184 +74,173 @@ const LiveStreamViewer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 lg:p-6">
+    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <Button 
           variant="ghost" 
+          size="sm"
           onClick={() => navigate('/live-streams')}
-          className="mb-4"
+          className="text-white hover:bg-white/10"
         >
           <ArrowLeft className="w-4 h-4 ml-2" />
-          العودة للبثوث
+          العودة
         </Button>
+        
+        <div className="flex items-center gap-4">
+          <Badge className="bg-red-500 text-white animate-pulse px-3 py-1">
+            ● مباشر
+          </Badge>
+          <Badge className="bg-white/10 backdrop-blur-sm text-white px-3 py-1">
+            <Users className="w-4 h-4 ml-2" />
+            {currentStream.viewer_count}
+          </Badge>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-6">
-          {/* Video Area */}
-          <div>
-            <Card className="overflow-hidden mb-4">
-              <div className="relative aspect-video bg-black">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                />
-                {!videoRef.current?.srcObject && (
-                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                    <Video className="w-24 h-24 opacity-50 text-white" />
-                  </div>
-                )}
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-red-500 text-white animate-pulse text-lg px-4 py-2">
-                    ● مباشر
-                  </Badge>
-                </div>
-                <div className="absolute bottom-4 right-4">
-                  <Badge className="bg-black/60 backdrop-blur-sm text-white text-lg px-4 py-2">
-                    <Users className="w-5 h-5 ml-2" />
-                    {currentStream.viewer_count} مشاهد
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Stream Info */}
-            <Card>
-              <CardContent className="p-6">
-                <h1 className="text-2xl lg:text-3xl font-cairo font-bold mb-4">
-                  {currentStream.title}
-                </h1>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={currentStream.profiles?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {currentStream.profiles?.full_name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-cairo font-semibold">
-                        {currentStream.profiles?.full_name || 'مستخدم'}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        بدأ منذ {formatDistanceToNow(new Date(currentStream.started_at), { 
-                          addSuffix: true, 
-                          locale: ar 
-                        })}
-                      </p>
-                    </div>
-                  </div>
-
-                  {user && user.id !== currentStream.user_id && (
-                    <Button 
-                      variant={isFollowing ? "secondary" : "default"}
-                      onClick={() => toggleFollow(currentStream.user_id)}
-                    >
-                      {isFollowing ? (
-                        <>
-                          <UserCheck className="w-4 h-4 ml-2" />
-                          متابَع
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="w-4 h-4 ml-2" />
-                          متابعة
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-
-                {currentStream.description && (
-                  <p className="text-muted-foreground mb-4">
-                    {currentStream.description}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant={isLiked ? "default" : "outline"}
-                    onClick={() => streamId && toggleLike(streamId)}
-                    disabled={!user}
-                  >
-                    <Heart className={`w-4 h-4 ml-2 ${isLiked ? 'fill-current' : ''}`} />
-                    {currentStream.likes_count} إعجاب
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Chat Area */}
-          <Card className="lg:h-[calc(100vh-120px)] flex flex-col">
-            <div className="p-4 border-b">
-              <h2 className="font-cairo font-bold text-lg">الدردشة المباشرة</h2>
-              <p className="text-sm text-muted-foreground">
-                {comments.length} تعليق
-              </p>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* Video Area - Full Screen */}
+        <div className="flex-1 relative bg-black flex items-center justify-center">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full h-full object-contain"
+          />
+          {!videoRef.current?.srcObject && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Video className="w-32 h-32 opacity-30 text-white" />
             </div>
-
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-3">
-                    <Avatar className="w-8 h-8 shrink-0">
-                      <AvatarImage src={comment.profiles?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {comment.profiles?.full_name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-cairo font-semibold text-sm">
-                          {comment.profiles?.full_name || 'مستخدم'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(comment.created_at), { 
-                            addSuffix: true, 
-                            locale: ar 
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-sm break-words">{comment.comment}</p>
-                    </div>
-                  </div>
-                ))}
+          )}
+          
+          {/* Stream Info Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+            <h1 className="text-white text-2xl font-cairo font-bold mb-2">
+              {currentStream.title}
+            </h1>
+            <div className="flex items-center gap-3 mb-3">
+              <Avatar className="w-10 h-10 border-2 border-white">
+                <AvatarImage src={currentStream.profiles?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary text-white">
+                  {currentStream.profiles?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-white font-cairo font-semibold">
+                  {currentStream.profiles?.full_name || 'مستخدم'}
+                </h3>
+                <p className="text-white/70 text-sm">
+                  بدأ منذ {formatDistanceToNow(new Date(currentStream.started_at), { 
+                    addSuffix: true, 
+                    locale: ar 
+                  })}
+                </p>
               </div>
-            </ScrollArea>
-
-            <Separator />
-
-            <div className="p-4">
-              {user ? (
-                <div className="flex gap-2">
-                  <Input
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="اكتب تعليقاً..."
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendComment()}
-                    disabled={sending}
-                    className="font-cairo"
-                  />
-                  <Button 
-                    onClick={handleSendComment}
-                    disabled={!comment.trim() || sending}
-                    size="icon"
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              ) : (
+              {user && user.id !== currentStream.user_id && (
                 <Button 
-                  className="w-full" 
-                  onClick={() => navigate('/auth')}
+                  size="sm"
+                  variant={isFollowing ? "secondary" : "default"}
+                  onClick={() => toggleFollow(currentStream.user_id)}
+                  className="mr-auto"
                 >
-                  سجل الدخول للتعليق
+                  {isFollowing ? (
+                    <>
+                      <UserCheck className="w-4 h-4 ml-2" />
+                      متابَع
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 ml-2" />
+                      متابعة
+                    </>
+                  )}
                 </Button>
               )}
             </div>
-          </Card>
+            
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant={isLiked ? "default" : "outline"}
+                onClick={() => streamId && toggleLike(streamId)}
+                disabled={!user}
+                className={isLiked ? "bg-red-500 hover:bg-red-600 text-white" : "bg-white/10 hover:bg-white/20 text-white border-white/20"}
+              >
+                <Heart className={`w-4 h-4 ml-2 ${isLiked ? 'fill-current' : ''}`} />
+                {currentStream.likes_count}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Sidebar */}
+        <div className="w-full lg:w-96 bg-black/90 backdrop-blur-sm border-t lg:border-t-0 lg:border-r border-white/10 flex flex-col max-h-[40vh] lg:max-h-none">
+          <div className="p-4 border-b border-white/10">
+            <h2 className="text-white font-cairo font-bold text-lg">الدردشة المباشرة</h2>
+            <p className="text-white/60 text-sm">
+              {comments.length} تعليق
+            </p>
+          </div>
+
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-3">
+                  <Avatar className="w-8 h-8 shrink-0">
+                    <AvatarImage src={comment.profiles?.avatar_url || undefined} />
+                    <AvatarFallback className="bg-primary text-white">
+                      {comment.profiles?.full_name?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-white font-cairo font-semibold text-sm">
+                        {comment.profiles?.full_name || 'مستخدم'}
+                      </span>
+                      <span className="text-white/50 text-xs">
+                        {formatDistanceToNow(new Date(comment.created_at), { 
+                          addSuffix: true, 
+                          locale: ar 
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-white/90 text-sm break-words">{comment.comment}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="p-4 border-t border-white/10">
+            {user ? (
+              <div className="flex gap-2">
+                <Input
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="اكتب تعليقاً..."
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendComment()}
+                  disabled={sending}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50 font-cairo"
+                />
+                <Button 
+                  onClick={handleSendComment}
+                  disabled={!comment.trim() || sending}
+                  size="icon"
+                  className="bg-primary hover:bg-primary/80"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                className="w-full" 
+                onClick={() => navigate('/auth')}
+              >
+                سجل الدخول للتعليق
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

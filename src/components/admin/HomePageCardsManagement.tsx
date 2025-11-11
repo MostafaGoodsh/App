@@ -150,10 +150,35 @@ export default function HomePageCardsManagement() {
   const handleSave = async () => {
     if (!editingCard) return;
     
+    // التحقق من الحقول المطلوبة
+    if (!editingCard.title || !editingCard.slug) {
+      toast({ 
+        title: "خطأ", 
+        description: "العنوان والـ Slug مطلوبان", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    
     setSaving(true);
     try {
-      const cardData = {
-        ...editingCard,
+      const isNewCard = !editingCard.id || editingCard.id === '';
+      
+      // تجهيز البيانات
+      const cardData: any = {
+        title: editingCard.title,
+        slug: editingCard.slug,
+        card_type: editingCard.card_type,
+        display_order: editingCard.display_order,
+        is_active: editingCard.is_active,
+        background_color: editingCard.background_color,
+        background_gradient: editingCard.background_gradient,
+        font_size: editingCard.font_size,
+        font_family: editingCard.font_family,
+        font_weight: editingCard.font_weight,
+        title_font_size: editingCard.title_font_size,
+        content_font_size: editingCard.content_font_size,
+        text_color: editingCard.text_color,
         title_en: editingCard.title_en || null,
         description: editingCard.description || null,
         description_en: editingCard.description_en || null,
@@ -164,34 +189,41 @@ export default function HomePageCardsManagement() {
         page_content_en: editingCard.page_content_en || null,
         external_widget_url: editingCard.external_widget_url || null,
         widget_type: editingCard.widget_type || null,
+        widget_config: editingCard.widget_config || {}
       };
 
-      if (editingCard.id) {
+      if (isNewCard) {
+        // إنشاء بطاقة جديدة
+        const { error } = await supabase
+          .from('home_page_cards')
+          .insert([cardData]);
+        
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+      } else {
         // تحديث بطاقة موجودة
         const { error } = await supabase
           .from('home_page_cards')
           .update(cardData)
           .eq('id', editingCard.id);
         
-        if (error) throw error;
-      } else {
-        // إنشاء بطاقة جديدة - احذف id الفارغ
-        const { id, ...newCardData } = cardData;
-        const { error } = await supabase
-          .from('home_page_cards')
-          .insert([newCardData]);
-        
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
       }
 
       toast({ title: "تم الحفظ", description: "تم حفظ البطاقة بنجاح" });
       setDialogOpen(false);
+      setEditingCard(null);
       await fetchCards();
     } catch (error: any) {
       console.error('Error saving card:', error);
       toast({ 
         title: "خطأ", 
-        description: error.message || "فشل في حفظ البطاقة", 
+        description: error.message || error.details || "فشل في حفظ البطاقة", 
         variant: "destructive" 
       });
     } finally {
