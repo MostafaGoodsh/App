@@ -315,6 +315,7 @@ export default function HomePageCardsManagement() {
                         <SelectItem value="identity">هوية</SelectItem>
                         <SelectItem value="wallet">محفظة</SelectItem>
                         <SelectItem value="anubis">أنوبيس</SelectItem>
+                        <SelectItem value="live_stream">البث المباشر</SelectItem>
                         <SelectItem value="custom">مخصص</SelectItem>
                       </SelectContent>
                     </Select>
