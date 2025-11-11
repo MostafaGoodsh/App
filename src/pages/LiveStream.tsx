@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Video, Users, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Video, Users, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
 import LiveStreamBroadcast from "@/components/streaming/LiveStreamBroadcast";
+import { useNavigate } from "react-router-dom";
 
 interface ApplicationStatus {
   id: string;
@@ -23,6 +24,7 @@ interface ApplicationStatus {
 const LiveStream = () => {
   const { user, session } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
   
@@ -187,6 +189,16 @@ const LiveStream = () => {
     >
       <div className="min-h-screen bg-background/90">
         <div className="container mx-auto p-6 max-w-4xl">
+          <Button 
+            onClick={() => navigate('/live-streams')}
+            className="mb-4 w-full sm:w-auto"
+            variant="outline"
+            size="lg"
+          >
+            <Eye className="w-5 h-5 ml-2" />
+            شاهد البثوث المباشرة للآخرين
+          </Button>
+
           <Card className="mb-6 bg-gradient-to-br from-primary/10 to-secondary/10">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
