@@ -9,11 +9,14 @@ interface SignalingMessage {
   type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave';
   streamId: string;
   userId: string;
+  toUserId?: string;
+  fromUserId?: string;
+  role?: 'broadcaster' | 'viewer';
   data?: any;
 }
 
-// Store active connections per stream
-const streams = new Map<string, Map<string, WebSocket>>();
+// Store active connections per stream with roles
+const streams = new Map<string, Map<string, { socket: WebSocket, role: string }>>();
 
 serve(async (req) => {
   // Handle CORS
@@ -39,32 +42,47 @@ serve(async (req) => {
     socket.onmessage = (event) => {
       try {
         const message: SignalingMessage = JSON.parse(event.data);
-        console.log("Received message:", message.type, "for stream:", message.streamId);
+        console.log("Received:", message.type, "from:", message.userId, "role:", message.role);
 
         if (message.type === 'join') {
           currentStreamId = message.streamId;
           currentUserId = message.userId;
+          const role = message.role || 'viewer';
           
           if (!streams.has(currentStreamId)) {
             streams.set(currentStreamId, new Map());
           }
           
-          streams.get(currentStreamId)!.set(currentUserId, socket);
-          console.log(`User ${currentUserId} joined stream ${currentStreamId}`);
+          const streamUsers = streams.get(currentStreamId)!;
+          streamUsers.set(currentUserId, { socket, role });
+          console.log(`${role} ${currentUserId} joined stream ${currentStreamId}`);
           
-          // Notify others in the stream
-          broadcastToStream(currentStreamId, {
-            type: 'user-joined',
-            userId: currentUserId,
-          }, currentUserId);
+          // If a viewer joins, notify the broadcaster
+          if (role === 'viewer') {
+            streamUsers.forEach((user, userId) => {
+              if (user.role === 'broadcaster' && user.socket.readyState === WebSocket.OPEN) {
+                user.socket.send(JSON.stringify({
+                  type: 'viewer-joined',
+                  fromUserId: currentUserId,
+                  streamId: currentStreamId
+                }));
+              }
+            });
+          }
           
         } else if (message.type === 'leave') {
           handleLeave(socket, currentStreamId, currentUserId);
           
         } else if (message.type === 'offer' || message.type === 'answer' || message.type === 'ice-candidate') {
-          // Forward signaling data to all viewers
-          if (currentStreamId) {
-            broadcastToStream(currentStreamId, message, currentUserId);
+          // Route message to specific user
+          if (currentStreamId && message.toUserId) {
+            const targetUser = streams.get(currentStreamId)?.get(message.toUserId);
+            if (targetUser && targetUser.socket.readyState === WebSocket.OPEN) {
+              targetUser.socket.send(JSON.stringify({
+                ...message,
+                fromUserId: currentUserId
+              }));
+            }
           }
         }
       } catch (error) {
@@ -91,36 +109,29 @@ serve(async (req) => {
   }
 });
 
-function broadcastToStream(streamId: string, message: any, excludeUserId?: string | null) {
-  const streamSockets = streams.get(streamId);
-  if (!streamSockets) return;
-
-  const messageStr = JSON.stringify(message);
-  
-  streamSockets.forEach((socket, userId) => {
-    if (userId !== excludeUserId && socket.readyState === WebSocket.OPEN) {
-      try {
-        socket.send(messageStr);
-      } catch (error) {
-        console.error(`Error sending to user ${userId}:`, error);
-      }
-    }
-  });
-}
 
 function handleLeave(socket: WebSocket, streamId: string | null, userId: string | null) {
   if (streamId && userId) {
-    const streamSockets = streams.get(streamId);
-    if (streamSockets) {
-      streamSockets.delete(userId);
-      if (streamSockets.size === 0) {
+    const streamUsers = streams.get(streamId);
+    if (streamUsers) {
+      const userInfo = streamUsers.get(userId);
+      streamUsers.delete(userId);
+      
+      if (streamUsers.size === 0) {
         streams.delete(streamId);
-      } else {
-        broadcastToStream(streamId, {
-          type: 'user-left',
-          userId: userId,
-        }, userId);
+      } else if (userInfo?.role === 'viewer') {
+        // Notify broadcaster that viewer left
+        streamUsers.forEach((user) => {
+          if (user.role === 'broadcaster' && user.socket.readyState === WebSocket.OPEN) {
+            user.socket.send(JSON.stringify({
+              type: 'viewer-left',
+              fromUserId: userId,
+              streamId: streamId
+            }));
+          }
+        });
       }
+      console.log(`User ${userId} left stream ${streamId}`);
     }
   }
 }

@@ -9,6 +9,7 @@ import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users,
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WebRTCBroadcaster } from "@/utils/webrtc";
+import { BroadcasterInteractions } from "./BroadcasterInteractions";
 
 const LiveStreamBroadcast = () => {
   const { toast } = useToast();
@@ -282,9 +283,10 @@ const LiveStreamBroadcast = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* عنوان البث */}
-      <Card>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-6">
+        {/* عنوان البث */}
+        <Card>
         <CardHeader>
           <CardTitle className="font-cairo">إعدادات البث المباشر</CardTitle>
           <CardDescription>قم بإعداد بثك المباشر قبل البدء</CardDescription>
@@ -359,15 +361,6 @@ const LiveStreamBroadcast = () => {
                 )}
               </div>
             </div>
-            {/* رسالة توضيحية */}
-            {(isCameraOn || isScreenSharing) && (
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-black/20">
-                <div className="text-center text-white">
-                  <Maximize className="w-12 h-12 mx-auto mb-2" />
-                  <p className="font-cairo text-sm">اضغط للشاشة الكاملة</p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* أزرار التحكم */}
@@ -428,21 +421,32 @@ const LiveStreamBroadcast = () => {
         </CardContent>
       </Card>
 
-      {/* نصائح للبث */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
-            <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
-            <li>اختبر الصوت والصورة قبل بدء البث</li>
-            <li>استخدم اتصال إنترنت مستقر</li>
-            <li>تفاعل مع المشاهدين في التعليقات</li>
-            <li>حضّر محتوى جذاب ومفيد للجمهور</li>
-          </ul>
-        </CardContent>
-      </Card>
+        {/* نصائح للبث */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
+              <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
+              <li>اختبر الصوت والصورة قبل بدء البث</li>
+              <li>استخدم اتصال إنترنت مستقر</li>
+              <li>تفاعل مع المشاهدين في التعليقات</li>
+              <li>حضّر محتوى جذاب ومفيد للجمهور</li>
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* التفاعل المباشر */}
+      <div className="lg:col-span-1">
+        {isStreaming && (
+          <BroadcasterInteractions 
+            streamId={currentStreamIdRef.current}
+            viewerCount={viewerCount}
+          />
+        )}
+      </div>
     </div>
   );
 };
