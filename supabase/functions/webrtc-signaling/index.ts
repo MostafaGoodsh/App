@@ -1,137 +1,145 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface SignalingMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave';
+  type: 'join' | 'leave' | 'offer' | 'answer' | 'ice-candidate';
   streamId: string;
   userId: string;
-  toUserId?: string;
-  fromUserId?: string;
   role?: 'broadcaster' | 'viewer';
+  toUserId?: string;
   data?: any;
 }
 
-// Store active connections per stream with roles
-const streams = new Map<string, Map<string, { socket: WebSocket, role: string }>>();
+// Store active connections: streamId -> userId -> {socket, role}
+const streams = new Map<string, Map<string, { socket: WebSocket; role: string }>>();
 
-serve(async (req) => {
-  // Handle CORS
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const upgrade = req.headers.get("upgrade") || "";
-    if (upgrade.toLowerCase() !== "websocket") {
-      return new Response("Expected WebSocket upgrade", { status: 426 });
-    }
-
-    const { socket, response } = Deno.upgradeWebSocket(req);
-    
-    let currentStreamId: string | null = null;
-    let currentUserId: string | null = null;
-
-    socket.onopen = () => {
-      console.log("WebSocket connection opened");
-    };
-
-    socket.onmessage = (event) => {
-      try {
-        const message: SignalingMessage = JSON.parse(event.data);
-        console.log("Received:", message.type, "from:", message.userId, "role:", message.role);
-
-        if (message.type === 'join') {
-          currentStreamId = message.streamId;
-          currentUserId = message.userId;
-          const role = message.role || 'viewer';
-          
-          if (!streams.has(currentStreamId)) {
-            streams.set(currentStreamId, new Map());
-          }
-          
-          const streamUsers = streams.get(currentStreamId)!;
-          streamUsers.set(currentUserId, { socket, role });
-          console.log(`${role} ${currentUserId} joined stream ${currentStreamId}`);
-          
-          // If a viewer joins, notify the broadcaster
-          if (role === 'viewer') {
-            streamUsers.forEach((user, userId) => {
-              if (user.role === 'broadcaster' && user.socket.readyState === WebSocket.OPEN) {
-                user.socket.send(JSON.stringify({
-                  type: 'viewer-joined',
-                  fromUserId: currentUserId,
-                  streamId: currentStreamId
-                }));
-              }
-            });
-          }
-          
-        } else if (message.type === 'leave') {
-          handleLeave(socket, currentStreamId, currentUserId);
-          
-        } else if (message.type === 'offer' || message.type === 'answer' || message.type === 'ice-candidate') {
-          // Route message to specific user
-          if (currentStreamId && message.toUserId) {
-            const targetUser = streams.get(currentStreamId)?.get(message.toUserId);
-            if (targetUser && targetUser.socket.readyState === WebSocket.OPEN) {
-              targetUser.socket.send(JSON.stringify({
-                ...message,
-                fromUserId: currentUserId
-              }));
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing message:", error);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log("WebSocket connection closed");
-      handleLeave(socket, currentStreamId, currentUserId);
-    };
-
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return response;
-  } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  // Upgrade to WebSocket
+  const upgrade = req.headers.get('upgrade') || '';
+  if (upgrade.toLowerCase() !== 'websocket') {
+    return new Response('Expected WebSocket', { status: 426 });
   }
-});
 
+  const { socket, response } = Deno.upgradeWebSocket(req);
 
-function handleLeave(socket: WebSocket, streamId: string | null, userId: string | null) {
-  if (streamId && userId) {
-    const streamUsers = streams.get(streamId);
-    if (streamUsers) {
-      const userInfo = streamUsers.get(userId);
-      streamUsers.delete(userId);
+  let currentStreamId: string | null = null;
+  let currentUserId: string | null = null;
+
+  socket.onopen = () => {
+    console.log('WebSocket connection opened');
+  };
+
+  socket.onmessage = (event) => {
+    try {
+      const message: SignalingMessage = JSON.parse(event.data);
+      console.log('Received message:', message.type, 'from user:', message.userId);
+
+      const { type, streamId, userId, role, toUserId, data } = message;
+
+      if (type === 'join') {
+        // Initialize stream map if it doesn't exist
+        if (!streams.has(streamId)) {
+          streams.set(streamId, new Map());
+        }
+
+        const streamConnections = streams.get(streamId)!;
+        
+        // Add user to stream
+        streamConnections.set(userId, { socket, role: role || 'viewer' });
+        currentStreamId = streamId;
+        currentUserId = userId;
+
+        console.log(`User ${userId} joined stream ${streamId} as ${role}`);
+        console.log(`Current viewers in stream ${streamId}:`, streamConnections.size);
+
+        // If viewer joined, notify broadcaster
+        if (role === 'viewer') {
+          streamConnections.forEach((conn, connUserId) => {
+            if (conn.role === 'broadcaster' && conn.socket.readyState === WebSocket.OPEN) {
+              conn.socket.send(JSON.stringify({
+                type: 'viewer-joined',
+                fromUserId: userId,
+                streamId
+              }));
+              console.log(`Notified broadcaster about viewer ${userId}`);
+            }
+          });
+        }
+      } else if (type === 'leave') {
+        handleLeave(streamId, userId);
+      } else if (['offer', 'answer', 'ice-candidate'].includes(type)) {
+        // Forward message to specific user
+        const streamConnections = streams.get(streamId);
+        if (streamConnections && toUserId) {
+          const targetConnection = streamConnections.get(toUserId);
+          if (targetConnection && targetConnection.socket.readyState === WebSocket.OPEN) {
+            targetConnection.socket.send(JSON.stringify({
+              type,
+              fromUserId: userId,
+              data,
+              streamId
+            }));
+            console.log(`Forwarded ${type} from ${userId} to ${toUserId}`);
+          } else {
+            console.log(`Target user ${toUserId} not found or socket closed`);
+          }
+        } else {
+          console.log(`Stream ${streamId} not found or no target user specified`);
+        }
+      }
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
+  };
+
+  socket.onclose = () => {
+    console.log('WebSocket connection closed');
+    if (currentStreamId && currentUserId) {
+      handleLeave(currentStreamId, currentUserId);
+    }
+  };
+
+  socket.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  };
+
+  function handleLeave(streamId: string, userId: string) {
+    const streamConnections = streams.get(streamId);
+    if (streamConnections) {
+      const userConnection = streamConnections.get(userId);
+      streamConnections.delete(userId);
       
-      if (streamUsers.size === 0) {
-        streams.delete(streamId);
-      } else if (userInfo?.role === 'viewer') {
-        // Notify broadcaster that viewer left
-        streamUsers.forEach((user) => {
-          if (user.role === 'broadcaster' && user.socket.readyState === WebSocket.OPEN) {
-            user.socket.send(JSON.stringify({
+      console.log(`User ${userId} left stream ${streamId}`);
+      console.log(`Remaining viewers in stream ${streamId}:`, streamConnections.size);
+
+      // Notify broadcaster if viewer left
+      if (userConnection?.role === 'viewer') {
+        streamConnections.forEach((conn, connUserId) => {
+          if (conn.role === 'broadcaster' && conn.socket.readyState === WebSocket.OPEN) {
+            conn.socket.send(JSON.stringify({
               type: 'viewer-left',
               fromUserId: userId,
-              streamId: streamId
+              streamId
             }));
+            console.log(`Notified broadcaster that viewer ${userId} left`);
           }
         });
       }
-      console.log(`User ${userId} left stream ${streamId}`);
+
+      // Clean up empty streams
+      if (streamConnections.size === 0) {
+        streams.delete(streamId);
+        console.log(`Stream ${streamId} removed (no more connections)`);
+      }
     }
   }
-}
+
+  return response;
+});
