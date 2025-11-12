@@ -1,9 +1,8 @@
-import { supabase } from "@/integrations/supabase/client";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+const WS_URL = 'wss://wnwfnziozwarlihrnjex.supabase.co/functions/v1/webrtc-signaling';
 
 export class WebRTCBroadcaster {
   private peerConnections = new Map<string, RTCPeerConnection>();
-  private channel: RealtimeChannel | null = null;
+  private ws: WebSocket | null = null;
   private localStream: MediaStream | null = null;
   private streamId: string;
   private userId: string;
@@ -18,45 +17,64 @@ export class WebRTCBroadcaster {
   async start(stream: MediaStream) {
     this.localStream = stream;
     
-    // Create Realtime channel for signaling
-    this.channel = supabase.channel(`stream:${this.streamId}`);
+    return new Promise<void>((resolve, reject) => {
+      this.ws = new WebSocket(WS_URL);
 
-    // Listen for viewer join requests
-    this.channel.on('broadcast', { event: 'viewer-join' }, async (payload) => {
-      const viewerId = payload.payload.userId;
-      console.log('Viewer joined:', viewerId);
-      this.onViewerCountChange?.(this.peerConnections.size + 1);
-      await this.createOfferForViewer(viewerId);
-    });
+      this.ws.onopen = () => {
+        console.log('Broadcaster WebSocket connected');
+        this.ws?.send(JSON.stringify({
+          type: 'join',
+          streamId: this.streamId,
+          userId: this.userId,
+          role: 'broadcaster'
+        }));
+        resolve();
+      };
 
-    // Listen for answers from viewers
-    this.channel.on('broadcast', { event: 'answer' }, async (payload) => {
-      const { userId: viewerId, answer } = payload.payload;
-      console.log('Received answer from viewer:', viewerId);
-      const pc = this.peerConnections.get(viewerId);
-      if (pc && answer) {
-        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-      }
-    });
+      this.ws.onmessage = async (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          console.log('Broadcaster received:', message.type);
 
-    // Listen for ICE candidates from viewers
-    this.channel.on('broadcast', { event: 'ice-candidate' }, async (payload) => {
-      const { userId: viewerId, candidate } = payload.payload;
-      const pc = this.peerConnections.get(viewerId);
-      if (pc && candidate) {
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-    });
+          if (message.type === 'viewer-joined') {
+            const viewerId = message.fromUserId;
+            console.log('Viewer joined:', viewerId);
+            this.onViewerCountChange?.(this.peerConnections.size + 1);
+            await this.createOfferForViewer(viewerId);
+          } else if (message.type === 'answer') {
+            const { fromUserId, data } = message;
+            const pc = this.peerConnections.get(fromUserId);
+            if (pc && data) {
+              await pc.setRemoteDescription(new RTCSessionDescription(data));
+            }
+          } else if (message.type === 'ice-candidate') {
+            const { fromUserId, data } = message;
+            const pc = this.peerConnections.get(fromUserId);
+            if (pc && data) {
+              await pc.addIceCandidate(new RTCIceCandidate(data));
+            }
+          } else if (message.type === 'viewer-left') {
+            const viewerId = message.fromUserId;
+            const pc = this.peerConnections.get(viewerId);
+            if (pc) {
+              pc.close();
+              this.peerConnections.delete(viewerId);
+              this.onViewerCountChange?.(this.peerConnections.size);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing message:', error);
+        }
+      };
 
-    // Subscribe to channel
-    await this.channel.subscribe();
-    console.log('Broadcaster subscribed to channel');
+      this.ws.onerror = (error) => {
+        console.error('Broadcaster WebSocket error:', error);
+        reject(error);
+      };
 
-    // Announce broadcaster is ready
-    await this.channel.send({
-      type: 'broadcast',
-      event: 'broadcaster-ready',
-      payload: { userId: this.userId }
+      this.ws.onclose = () => {
+        console.log('Broadcaster WebSocket closed');
+      };
     });
   }
 
@@ -79,18 +97,16 @@ export class WebRTCBroadcaster {
     });
 
     // Handle ICE candidates
-    pc.onicecandidate = async (event) => {
-      if (event.candidate) {
+    pc.onicecandidate = (event) => {
+      if (event.candidate && this.ws?.readyState === WebSocket.OPEN) {
         console.log('Sending ICE candidate to viewer:', viewerId);
-        await this.channel?.send({
-          type: 'broadcast',
-          event: 'offer-ice',
-          payload: {
-            userId: this.userId,
-            toUserId: viewerId,
-            candidate: event.candidate
-          }
-        });
+        this.ws.send(JSON.stringify({
+          type: 'ice-candidate',
+          streamId: this.streamId,
+          userId: this.userId,
+          toUserId: viewerId,
+          data: event.candidate
+        }));
       }
     };
 
@@ -107,32 +123,41 @@ export class WebRTCBroadcaster {
     await pc.setLocalDescription(offer);
     
     console.log('Sending offer to viewer:', viewerId);
-    await this.channel?.send({
-      type: 'broadcast',
-      event: 'offer',
-      payload: {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'offer',
+        streamId: this.streamId,
         userId: this.userId,
         toUserId: viewerId,
-        offer: offer
-      }
-    });
+        data: offer
+      }));
+    }
   }
 
   stop() {
     console.log('Stopping broadcaster');
+    
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'leave',
+        streamId: this.streamId,
+        userId: this.userId
+      }));
+      this.ws.close();
+    }
+    
     this.peerConnections.forEach(pc => pc.close());
     this.peerConnections.clear();
-    this.channel?.unsubscribe();
     this.localStream = null;
+    this.ws = null;
   }
 }
 
 export class WebRTCViewer {
   private pc: RTCPeerConnection | null = null;
-  private channel: RealtimeChannel | null = null;
+  private ws: WebSocket | null = null;
   private streamId: string;
   private userId: string;
-  private broadcasterId: string | null = null;
   private onStream?: (stream: MediaStream) => void;
 
   constructor(streamId: string, userId: string, onStream?: (stream: MediaStream) => void) {
@@ -142,49 +167,54 @@ export class WebRTCViewer {
   }
 
   async start() {
-    // Create Realtime channel
-    this.channel = supabase.channel(`stream:${this.streamId}`);
+    return new Promise<void>((resolve, reject) => {
+      this.ws = new WebSocket(WS_URL);
 
-    // Listen for broadcaster ready
-    this.channel.on('broadcast', { event: 'broadcaster-ready' }, async (payload) => {
-      this.broadcasterId = payload.payload.userId;
-      console.log('Broadcaster is ready:', this.broadcasterId);
-      
-      // Request to join
-      await this.channel?.send({
-        type: 'broadcast',
-        event: 'viewer-join',
-        payload: { userId: this.userId }
-      });
+      this.ws.onopen = () => {
+        console.log('Viewer WebSocket connected');
+        this.ws?.send(JSON.stringify({
+          type: 'join',
+          streamId: this.streamId,
+          userId: this.userId,
+          role: 'viewer'
+        }));
+        resolve();
+      };
+
+      this.ws.onmessage = async (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          console.log('Viewer received:', message.type);
+
+          if (message.type === 'offer') {
+            const { fromUserId, data } = message;
+            if (data) {
+              await this.handleOffer(data, fromUserId);
+            }
+          } else if (message.type === 'ice-candidate') {
+            const { data } = message;
+            if (this.pc && data) {
+              await this.pc.addIceCandidate(new RTCIceCandidate(data));
+            }
+          }
+        } catch (error) {
+          console.error('Error processing message:', error);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('Viewer WebSocket error:', error);
+        reject(error);
+      };
+
+      this.ws.onclose = () => {
+        console.log('Viewer WebSocket closed');
+      };
     });
-
-    // Listen for offers from broadcaster
-    this.channel.on('broadcast', { event: 'offer' }, async (payload) => {
-      const { userId: fromUserId, toUserId, offer } = payload.payload;
-      console.log('Received offer from broadcaster');
-      
-      if (toUserId === this.userId && offer) {
-        await this.handleOffer(offer, fromUserId);
-      }
-    });
-
-    // Listen for ICE candidates from broadcaster
-    this.channel.on('broadcast', { event: 'offer-ice' }, async (payload) => {
-      const { toUserId, candidate } = payload.payload;
-      
-      if (toUserId === this.userId && this.pc && candidate) {
-        await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-    });
-
-    // Subscribe to channel
-    await this.channel.subscribe();
-    console.log('Viewer subscribed to channel');
   }
 
   private async handleOffer(offer: RTCSessionDescriptionInit, broadcasterId: string) {
     console.log('Handling offer from broadcaster:', broadcasterId);
-    this.broadcasterId = broadcasterId;
     
     this.pc = new RTCPeerConnection({
       iceServers: [
@@ -203,17 +233,16 @@ export class WebRTCViewer {
     };
 
     // Handle ICE candidates
-    this.pc.onicecandidate = async (event) => {
-      if (event.candidate) {
+    this.pc.onicecandidate = (event) => {
+      if (event.candidate && this.ws?.readyState === WebSocket.OPEN) {
         console.log('Sending ICE candidate to broadcaster');
-        await this.channel?.send({
-          type: 'broadcast',
-          event: 'ice-candidate',
-          payload: {
-            userId: this.userId,
-            candidate: event.candidate
-          }
-        });
+        this.ws.send(JSON.stringify({
+          type: 'ice-candidate',
+          streamId: this.streamId,
+          userId: this.userId,
+          toUserId: broadcasterId,
+          data: event.candidate
+        }));
       }
     };
 
@@ -228,19 +257,31 @@ export class WebRTCViewer {
 
     // Send answer
     console.log('Sending answer to broadcaster');
-    await this.channel?.send({
-      type: 'broadcast',
-      event: 'answer',
-      payload: {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'answer',
+        streamId: this.streamId,
         userId: this.userId,
-        answer: answer
-      }
-    });
+        toUserId: broadcasterId,
+        data: answer
+      }));
+    }
   }
 
   stop() {
     console.log('Stopping viewer');
+    
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        type: 'leave',
+        streamId: this.streamId,
+        userId: this.userId
+      }));
+      this.ws.close();
+    }
+    
     this.pc?.close();
-    this.channel?.unsubscribe();
+    this.pc = null;
+    this.ws = null;
   }
 }
