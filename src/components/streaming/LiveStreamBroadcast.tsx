@@ -201,7 +201,11 @@ const LiveStreamBroadcast = () => {
       // بدء البث عبر WebRTC
       const activeStream = screenStreamRef.current || streamRef.current;
       if (activeStream) {
-        broadcasterRef.current = new WebRTCBroadcaster(streamKey, data.id);
+        broadcasterRef.current = new WebRTCBroadcaster(
+          data.id, 
+          userData.data.user.id,
+          (count) => setViewerCount(count)
+        );
         await broadcasterRef.current.start(activeStream);
       }
 
