@@ -12,8 +12,10 @@ interface LiveStream {
   stream_key: string;
   viewer_count: number;
   likes_count: number;
-  is_active: boolean;
+  total_views: number;
+  status: string;
   started_at: string;
+  ended_at: string | null;
   profiles?: {
     full_name: string;
     avatar_url: string | null;
@@ -46,9 +48,9 @@ export const useLiveStream = (streamId?: string) => {
   const fetchActiveStreams = async () => {
     try {
       const { data, error } = await supabase
-        .from('active_live_streams')
+        .from('live_streams')
         .select('*')
-        .eq('is_active', true)
+        .eq('status', 'active')
         .order('started_at', { ascending: false });
 
       if (error) throw error;
@@ -80,7 +82,7 @@ export const useLiveStream = (streamId?: string) => {
   const fetchStream = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from('active_live_streams')
+        .from('live_streams')
         .select('*')
         .eq('id', id)
         .single();

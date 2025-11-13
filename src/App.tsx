@@ -71,6 +71,8 @@ import LiveStream from "./pages/LiveStream";
 import LiveStreamApprovalsAdmin from "./pages/LiveStreamApprovalsAdmin";
 import LiveStreamsGallery from "./pages/LiveStreamsGallery";
 import LiveStreamViewer from "./pages/LiveStreamViewer";
+import MyLiveStreams from "./pages/MyLiveStreams";
+import ProfileCustomizationAdmin from "./pages/ProfileCustomizationAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -110,6 +112,7 @@ const App = () => {
                   <Route path="live-stream" element={<RequireAuth><LiveStream /></RequireAuth>} />
                   <Route path="live-streams" element={<LiveStreamsGallery />} />
                   <Route path="live-stream/watch/:streamId" element={<LiveStreamViewer />} />
+                  <Route path="my-live-streams" element={<RequireAuth><MyLiveStreams /></RequireAuth>} />
                   <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
                   <Route path="admin/users" element={<RequireAdmin><UsersAdmin /></RequireAdmin>} />
                   <Route path="admin/support" element={<RequireAdmin><SupportAdmin /></RequireAdmin>} />

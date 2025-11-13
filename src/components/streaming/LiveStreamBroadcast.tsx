@@ -179,14 +179,16 @@ const LiveStreamBroadcast = () => {
         throw new Error("User not authenticated");
       }
 
-      // حفظ البث في قاعدة البيانات
+      // حفظ البث في قاعدة البيانات live_streams
+      const streamKey = `stream_${Date.now()}`;
       const { data, error } = await supabase
-        .from('active_live_streams')
+        .from('live_streams')
         .insert({
           user_id: userData.data.user.id,
           title: streamTitle,
-          stream_key: Math.random().toString(36).substring(7),
-          is_active: true
+          description: 'بث مباشر',
+          stream_key: streamKey,
+          status: 'active'
         })
         .select()
         .single();
@@ -199,11 +201,7 @@ const LiveStreamBroadcast = () => {
       // بدء البث عبر WebRTC
       const activeStream = screenStreamRef.current || streamRef.current;
       if (activeStream) {
-        broadcasterRef.current = new WebRTCBroadcaster(
-          data.id,
-          userData.data.user.id,
-          (count) => setViewerCount(count)
-        );
+        broadcasterRef.current = new WebRTCBroadcaster(streamKey, data.id);
         await broadcasterRef.current.start(activeStream);
       }
 
