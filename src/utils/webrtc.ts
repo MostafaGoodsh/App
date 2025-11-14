@@ -81,6 +81,11 @@ export class WebRTCBroadcaster {
   private async createOfferForViewer(viewerId: string) {
     console.log('Creating offer for viewer:', viewerId);
     
+    if (!this.localStream) {
+      console.error('No local stream available!');
+      return;
+    }
+
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -90,9 +95,12 @@ export class WebRTCBroadcaster {
 
     this.peerConnections.set(viewerId, pc);
 
-    // Add local stream tracks
-    this.localStream?.getTracks().forEach(track => {
-      console.log('Adding track to peer connection:', track.kind);
+    // Add local stream tracks with detailed logging
+    const tracks = this.localStream.getTracks();
+    console.log(`Adding ${tracks.length} tracks to peer connection for viewer ${viewerId}`);
+    
+    tracks.forEach(track => {
+      console.log(`Adding track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
       pc.addTrack(track, this.localStream!);
     });
 
@@ -223,12 +231,23 @@ export class WebRTCViewer {
       ],
     });
 
-    // Handle incoming stream
+    // Handle incoming stream with detailed logging
     this.pc.ontrack = (event) => {
-      console.log('Received remote track:', event.track.kind);
+      console.log('Received remote track:', event.track.kind, 'enabled:', event.track.enabled, 'readyState:', event.track.readyState);
+      console.log('Number of streams:', event.streams?.length);
+      
       if (event.streams && event.streams[0]) {
-        console.log('Setting remote stream');
-        this.onStream?.(event.streams[0]);
+        const stream = event.streams[0];
+        const tracks = stream.getTracks();
+        console.log('Remote stream has', tracks.length, 'tracks');
+        tracks.forEach(track => {
+          console.log(`Track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
+        });
+        
+        console.log('Calling onStream callback with remote stream');
+        this.onStream?.(stream);
+      } else {
+        console.error('No streams in track event!');
       }
     };
 

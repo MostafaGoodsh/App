@@ -38,9 +38,23 @@ const LiveStreamViewer = () => {
     if (streamId && user?.id && currentStream) {
       console.log('Starting WebRTC viewer for stream:', streamId);
       viewerRef.current = new WebRTCViewer(streamId, user.id, (stream) => {
-        console.log('Received remote stream');
+        console.log('Received remote stream, tracks:', stream.getTracks().length);
+        stream.getTracks().forEach(track => {
+          console.log(`Remote track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
+        });
+        
         if (videoRef.current) {
+          console.log('Setting srcObject on video element');
           videoRef.current.srcObject = stream;
+          
+          // Force play
+          videoRef.current.play().then(() => {
+            console.log('Video playing successfully');
+          }).catch(err => {
+            console.error('Error playing video:', err);
+          });
+        } else {
+          console.error('Video element ref is null!');
         }
       });
       
@@ -106,7 +120,12 @@ const LiveStreamViewer = () => {
             ref={videoRef}
             autoPlay
             playsInline
+            muted={false}
             className="w-full h-full object-contain"
+            onLoadedMetadata={() => console.log('Video metadata loaded')}
+            onCanPlay={() => console.log('Video can play')}
+            onPlay={() => console.log('Video started playing')}
+            onError={(e) => console.error('Video error:', e)}
           />
           {!videoRef.current?.srcObject && (
             <div className="absolute inset-0 flex items-center justify-center">
