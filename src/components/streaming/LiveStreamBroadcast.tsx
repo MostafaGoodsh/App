@@ -366,40 +366,35 @@ const LiveStreamBroadcast = () => {
           </div>
 
           {/* أزرار التحكم */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-            {!isScreenSharing && (
-              <Button
-                onClick={isCameraOn ? stopCamera : startCamera}
-                variant={isCameraOn ? "default" : "outline"}
-                disabled={isStreaming}
-                className="w-full"
-              >
-                {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
-                {isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
-              </Button>
-            )}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+            <Button
+              onClick={isCameraOn ? stopCamera : startCamera}
+              variant={isCameraOn ? "default" : "outline"}
+              disabled={isStreaming || isScreenSharing}
+              className="w-full"
+            >
+              {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
+              {isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
+            </Button>
 
             <Button
               onClick={toggleMicrophone}
               variant={isMicOn ? "default" : "outline"}
-              disabled={isStreaming}
               className="w-full"
             >
               {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
               {isMicOn ? "كتم الصوت" : "تشغيل الصوت"}
             </Button>
 
-            {!isCameraOn && (
-              <Button
-                onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-                variant={isScreenSharing ? "default" : "outline"}
-                disabled={isStreaming}
-                className="w-full"
-              >
-                {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
-                {isScreenSharing ? "إيقاف المشاركة" : "مشاركة الشاشة"}
-              </Button>
-            )}
+            <Button
+              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+              variant={isScreenSharing ? "default" : "outline"}
+              disabled={isStreaming || isCameraOn}
+              className="w-full"
+            >
+              {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
+              {isScreenSharing ? "إيقاف المشاركة" : "مشاركة الشاشة"}
+            </Button>
 
             {!isStreaming ? (
               <Button
