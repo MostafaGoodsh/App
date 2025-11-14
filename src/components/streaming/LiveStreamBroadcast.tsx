@@ -201,7 +201,11 @@ const LiveStreamBroadcast = () => {
           title: streamTitle,
           description: 'بث مباشر',
           stream_key: streamKey,
-          status: 'active'
+          status: 'active',
+          started_at: new Date().toISOString(),
+          viewer_count: 0,
+          likes_count: 0,
+          total_views: 0
         })
         .select()
         .single();
@@ -210,6 +214,9 @@ const LiveStreamBroadcast = () => {
 
       currentStreamIdRef.current = data.id;
       setIsStreaming(true);
+      
+      console.log('تم إنشاء البث بنجاح:', data.id);
+      console.log('البث الآن مرئي في صفحة البثوث المباشرة');
       
       // بدء البث عبر WebRTC
       const activeStream = screenStreamRef.current || streamRef.current;
@@ -220,11 +227,12 @@ const LiveStreamBroadcast = () => {
           (count) => setViewerCount(count)
         );
         await broadcasterRef.current.start(activeStream);
+        console.log('WebRTC broadcaster بدأ بنجاح');
       }
 
       toast({
         title: "بدأ البث المباشر",
-        description: "أنت الآن على الهواء مباشرة!"
+        description: "أنت الآن على الهواء مباشرة! المشاهدون يمكنهم رؤية بثك الآن."
       });
     } catch (error: any) {
       console.error('Error starting broadcast:', error);
@@ -243,15 +251,20 @@ const LiveStreamBroadcast = () => {
     broadcasterRef.current?.stop();
     broadcasterRef.current = null;
 
-    // حذف البث من قاعدة البيانات
+    // تحديث حالة البث إلى "ended"
     if (currentStreamIdRef.current) {
       try {
         await supabase
-          .from('active_live_streams')
-          .delete()
+          .from('live_streams')
+          .update({ 
+            status: 'ended',
+            ended_at: new Date().toISOString()
+          })
           .eq('id', currentStreamIdRef.current);
+        
+        console.log('البث تم إيقافه وتحديث حالته في قاعدة البيانات');
       } catch (error) {
-        console.error('Error deleting stream:', error);
+        console.error('Error updating stream status:', error);
       }
     }
 

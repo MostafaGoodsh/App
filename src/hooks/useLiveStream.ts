@@ -328,10 +328,11 @@ export const useLiveStream = (streamId?: string) => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'active_live_streams',
+          table: 'live_streams',
           filter: `id=eq.${streamId}`
         },
         (payload) => {
+          console.log('تحديث البث:', payload);
           fetchStream(streamId);
         }
       )
@@ -356,9 +357,10 @@ export const useLiveStream = (streamId?: string) => {
           {
             event: '*',
             schema: 'public',
-            table: 'active_live_streams'
+            table: 'live_streams'
           },
-          () => {
+          (payload) => {
+            console.log('تغيير في البثوث:', payload);
             fetchActiveStreams();
           }
         )
