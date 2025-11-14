@@ -221,6 +221,11 @@ const LiveStreamBroadcast = () => {
       // بدء البث عبر WebRTC
       const activeStream = screenStreamRef.current || streamRef.current;
       if (activeStream) {
+        console.log('Active stream tracks:', activeStream.getTracks().length);
+        activeStream.getTracks().forEach(track => {
+          console.log(`Broadcast track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
+        });
+        
         broadcasterRef.current = new WebRTCBroadcaster(
           data.id, 
           userData.data.user.id,
@@ -228,6 +233,8 @@ const LiveStreamBroadcast = () => {
         );
         await broadcasterRef.current.start(activeStream);
         console.log('WebRTC broadcaster بدأ بنجاح');
+      } else {
+        console.error('No active stream available for broadcasting!');
       }
 
       toast({
