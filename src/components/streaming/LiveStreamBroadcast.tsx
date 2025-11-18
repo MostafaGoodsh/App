@@ -110,16 +110,6 @@ const LiveStreamBroadcast = () => {
 
   const startScreenShare = async () => {
     try {
-      // التحقق من دعم المتصفح لمشاركة الشاشة
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        toast({
-          title: "مشاركة الشاشة غير مدعومة",
-          description: "المتصفح لا يدعم مشاركة الشاشة أو يتطلب HTTPS. الرجاء استخدام متصفح حديث والتأكد من أن الموقع يعمل على HTTPS.",
-          variant: "destructive"
-        });
-        return;
-      }
-
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: { ideal: 1920 },
