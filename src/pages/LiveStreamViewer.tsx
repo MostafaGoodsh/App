@@ -31,6 +31,9 @@ const LiveStreamViewer = () => {
 
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
+  const [hasRemoteStream, setHasRemoteStream] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [playError, setPlayError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const viewerRef = useRef<WebRTCViewer | null>(null);
 
@@ -42,16 +45,21 @@ const LiveStreamViewer = () => {
         stream.getTracks().forEach(track => {
           console.log(`Remote track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
         });
+
+        setHasRemoteStream(true);
+        setIsVideoPlaying(false);
+        setPlayError(null);
         
         if (videoRef.current) {
           console.log('Setting srcObject on video element');
           videoRef.current.srcObject = stream;
           
-          // Force play
+          // Try to autoplay
           videoRef.current.play().then(() => {
             console.log('Video playing successfully');
           }).catch(err => {
             console.error('Error playing video:', err);
+            setPlayError('يتطلب تشغيل الفيديو الضغط على زر التشغيل بسبب إعدادات المتصفح');
           });
         } else {
           console.error('Video element ref is null!');
@@ -120,16 +128,58 @@ const LiveStreamViewer = () => {
             ref={videoRef}
             autoPlay
             playsInline
-            muted={false}
+            muted
             className="w-full h-full object-contain"
             onLoadedMetadata={() => console.log('Video metadata loaded')}
             onCanPlay={() => console.log('Video can play')}
-            onPlay={() => console.log('Video started playing')}
-            onError={(e) => console.error('Video error:', e)}
+            onPlay={() => {
+              console.log('Video started playing');
+              setIsVideoPlaying(true);
+              setPlayError(null);
+            }}
+            onPause={() => {
+              setIsVideoPlaying(false);
+            }}
+            onError={(e) => {
+              console.error('Video error:', e);
+              setPlayError('حدث خطأ أثناء تشغيل الفيديو');
+            }}
           />
-          {!videoRef.current?.srcObject && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Video className="w-32 h-32 opacity-30 text-white" />
+          {!hasRemoteStream && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <Video className="w-20 h-20 opacity-30 text-white mb-4" />
+              <p className="text-white/80 font-cairo">في انتظار اتصال البث...</p>
+            </div>
+          )}
+
+          {hasRemoteStream && !isVideoPlaying && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+              <Button
+                variant="outline"
+                className="bg-white/10 text-white border-white/40 font-cairo"
+                onClick={() => {
+                  if (videoRef.current) {
+                    videoRef.current.muted = false;
+                    videoRef.current
+                      .play()
+                      .then(() => {
+                        setIsVideoPlaying(true);
+                        setPlayError(null);
+                      })
+                      .catch((err) => {
+                        console.error('Manual play failed:', err);
+                        setPlayError('تعذر تشغيل الفيديو، تحقق من إعدادات المتصفح');
+                      });
+                  }
+                }}
+              >
+                اضغط لتشغيل البث
+              </Button>
+              {playError && (
+                <p className="mt-2 text-sm text-red-400 text-center max-w-xs">
+                  {playError}
+                </p>
+              )}
             </div>
           )}
           
