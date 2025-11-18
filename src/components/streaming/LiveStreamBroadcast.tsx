@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WebRTCBroadcaster } from "@/utils/webrtc";
@@ -340,15 +340,33 @@ const LiveStreamBroadcast = () => {
           </div>
 
           {isStreaming && (
-            <Alert>
-              <Users className="w-4 h-4" />
-              <AlertDescription className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
-                  على الهواء
-                </Badge>
-                <span>{viewerCount} مشاهد</span>
-              </AlertDescription>
-            </Alert>
+            <>
+              <Alert>
+                <Users className="w-4 h-4" />
+                <AlertDescription className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
+                    على الهواء
+                  </Badge>
+                  <span>{viewerCount} مشاهد</span>
+                </AlertDescription>
+              </Alert>
+              
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const url = `${window.location.origin}/live-stream/watch/${currentStreamIdRef.current}`;
+                  navigator.clipboard.writeText(url);
+                  toast({
+                    title: "✓ تم نسخ رابط المشاهدة",
+                    description: "افتح الرابط في نافذة أخرى أو شاركه مع المشاهدين",
+                  });
+                }}
+                className="w-full"
+              >
+                <Copy className="w-4 h-4 ml-2" />
+                نسخ رابط المشاهدة
+              </Button>
+            </>
           )}
         </CardContent>
       </Card>
