@@ -48,9 +48,9 @@ export const useLiveStream = (streamId?: string) => {
   const fetchActiveStreams = async () => {
     try {
       const { data, error } = await supabase
-        .from('live_streams')
+        .from('active_live_streams')
         .select('*')
-        .eq('status', 'active')
+        .eq('is_active', true)
         .order('started_at', { ascending: false });
 
       if (error) throw error;
@@ -64,6 +64,8 @@ export const useLiveStream = (streamId?: string) => {
 
       const streamsWithProfiles = data?.map(stream => ({
         ...stream,
+        total_views: 0, // active_live_streams لا يحتوي على هذا الحقل
+        status: 'active', // البثوث النشطة دائماً active
         profiles: profiles?.find(p => p.user_id === stream.user_id) || {
           full_name: 'مستخدم',
           avatar_url: null
@@ -82,7 +84,7 @@ export const useLiveStream = (streamId?: string) => {
   const fetchStream = async (id: string) => {
     try {
       const { data, error } = await supabase
-        .from('live_streams')
+        .from('active_live_streams')
         .select('*')
         .eq('id', id)
         .single();
@@ -98,6 +100,8 @@ export const useLiveStream = (streamId?: string) => {
 
       const streamWithProfile = {
         ...data,
+        total_views: 0, // active_live_streams لا يحتوي على هذا الحقل
+        status: 'active', // البثوث النشطة دائماً active
         profiles: profile || {
           full_name: 'مستخدم',
           avatar_url: null
@@ -328,7 +332,7 @@ export const useLiveStream = (streamId?: string) => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'live_streams',
+          table: 'active_live_streams',
           filter: `id=eq.${streamId}`
         },
         (payload) => {
@@ -357,7 +361,7 @@ export const useLiveStream = (streamId?: string) => {
           {
             event: '*',
             schema: 'public',
-            table: 'live_streams'
+            table: 'active_live_streams'
           },
           (payload) => {
             console.log('تغيير في البثوث:', payload);
