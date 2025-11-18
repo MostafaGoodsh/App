@@ -182,9 +182,11 @@ const LiveStreamBroadcast = () => {
         throw new Error("User not authenticated");
       }
 
-      // حفظ البث في قاعدة البيانات live_streams
+      // حفظ البث في قاعدة البيانات
       const streamKey = `stream_${Date.now()}`;
-      const { data, error } = await supabase
+      
+      // حفظ في live_streams
+      const { data: streamData, error: streamError } = await supabase
         .from('live_streams')
         .insert({
           user_id: userData.data.user.id,
@@ -200,12 +202,32 @@ const LiveStreamBroadcast = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (streamError) throw streamError;
 
-      currentStreamIdRef.current = data.id;
+      // حفظ في active_live_streams ليكون مرئياً للمشاهدين
+      const { error: activeError } = await supabase
+        .from('active_live_streams')
+        .insert({
+          id: streamData.id,
+          user_id: userData.data.user.id,
+          title: streamTitle,
+          description: 'بث مباشر',
+          stream_key: streamKey,
+          is_active: true,
+          started_at: new Date().toISOString(),
+          viewer_count: 0,
+          likes_count: 0
+        });
+
+      if (activeError) {
+        console.error('Error adding to active streams:', activeError);
+        // استمر حتى لو فشل إضافته للجدول النشط
+      }
+
+      currentStreamIdRef.current = streamData.id;
       setIsStreaming(true);
       
-      console.log('تم إنشاء البث بنجاح:', data.id);
+      console.log('تم إنشاء البث بنجاح:', streamData.id);
       console.log('البث الآن مرئي في صفحة البثوث المباشرة');
       
       // بدء البث عبر WebRTC
@@ -217,7 +239,7 @@ const LiveStreamBroadcast = () => {
         });
         
         broadcasterRef.current = new WebRTCBroadcaster(
-          data.id, 
+          streamData.id, 
           userData.data.user.id,
           (count) => setViewerCount(count)
         );
@@ -248,9 +270,10 @@ const LiveStreamBroadcast = () => {
     broadcasterRef.current?.stop();
     broadcasterRef.current = null;
 
-    // تحديث حالة البث إلى "ended"
+    // تحديث حالة البث وحذفه من البثوث النشطة
     if (currentStreamIdRef.current) {
       try {
+        // تحديث live_streams
         await supabase
           .from('live_streams')
           .update({ 
@@ -259,7 +282,13 @@ const LiveStreamBroadcast = () => {
           })
           .eq('id', currentStreamIdRef.current);
         
-        console.log('البث تم إيقافه وتحديث حالته في قاعدة البيانات');
+        // حذف من active_live_streams
+        await supabase
+          .from('active_live_streams')
+          .delete()
+          .eq('id', currentStreamIdRef.current);
+        
+        console.log('البث تم إيقافه وحذفه من البثوث النشطة');
       } catch (error) {
         console.error('Error updating stream status:', error);
       }
