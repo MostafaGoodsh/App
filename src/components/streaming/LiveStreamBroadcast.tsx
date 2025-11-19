@@ -182,13 +182,43 @@ const LiveStreamBroadcast = () => {
         throw new Error("User not authenticated");
       }
 
-      // حفظ البث في قاعدة البيانات
+      // إنشاء stream ID و stream key
+      const streamId = crypto.randomUUID();
       const streamKey = `stream_${Date.now()}`;
       
-      // حفظ في live_streams
-      const { data: streamData, error: streamError } = await supabase
+      currentStreamIdRef.current = streamId;
+      
+      // بدء WebRTC أولاً قبل حفظ البث في قاعدة البيانات
+      const activeStream = screenStreamRef.current || streamRef.current;
+      if (!activeStream) {
+        throw new Error('No active stream available for broadcasting!');
+      }
+      
+      console.log('Starting WebRTC broadcaster first...');
+      console.log('Active stream tracks:', activeStream.getTracks().length);
+      activeStream.getTracks().forEach(track => {
+        console.log(`Broadcast track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
+      });
+      
+      broadcasterRef.current = new WebRTCBroadcaster(
+        streamId, 
+        userData.data.user.id,
+        (count) => setViewerCount(count)
+      );
+      
+      await broadcasterRef.current.start(activeStream);
+      console.log('✅ WebRTC broadcaster started successfully');
+      
+      setIsStreaming(true);
+      
+      // الآن بعد أن أصبح المذيع جاهزاً، احفظ البث في قاعدة البيانات
+      console.log('Saving stream to database...');
+      
+      // حفظ في live_streams للسجل
+      const { error: streamError } = await supabase
         .from('live_streams')
         .insert({
+          id: streamId,
           user_id: userData.data.user.id,
           title: streamTitle,
           description: 'بث مباشر',
@@ -198,17 +228,17 @@ const LiveStreamBroadcast = () => {
           viewer_count: 0,
           likes_count: 0,
           total_views: 0
-        })
-        .select()
-        .single();
+        });
 
-      if (streamError) throw streamError;
+      if (streamError) {
+        console.error('Error saving to live_streams:', streamError);
+      }
 
       // حفظ في active_live_streams ليكون مرئياً للمشاهدين
       const { error: activeError } = await supabase
         .from('active_live_streams')
         .insert({
-          id: streamData.id,
+          id: streamId,
           user_id: userData.data.user.id,
           title: streamTitle,
           description: 'بث مباشر',
@@ -221,33 +251,11 @@ const LiveStreamBroadcast = () => {
 
       if (activeError) {
         console.error('Error adding to active streams:', activeError);
-        // استمر حتى لو فشل إضافته للجدول النشط
+        throw activeError;
       }
-
-      currentStreamIdRef.current = streamData.id;
-      setIsStreaming(true);
       
-      console.log('تم إنشاء البث بنجاح:', streamData.id);
-      console.log('البث الآن مرئي في صفحة البثوث المباشرة');
-      
-      // بدء البث عبر WebRTC
-      const activeStream = screenStreamRef.current || streamRef.current;
-      if (activeStream) {
-        console.log('Active stream tracks:', activeStream.getTracks().length);
-        activeStream.getTracks().forEach(track => {
-          console.log(`Broadcast track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
-        });
-        
-        broadcasterRef.current = new WebRTCBroadcaster(
-          streamData.id, 
-          userData.data.user.id,
-          (count) => setViewerCount(count)
-        );
-        await broadcasterRef.current.start(activeStream);
-        console.log('WebRTC broadcaster بدأ بنجاح');
-      } else {
-        console.error('No active stream available for broadcasting!');
-      }
+      console.log('✅ Stream saved to database:', streamId);
+      console.log('✅ Stream is now visible to viewers');
 
       toast({
         title: "بدأ البث المباشر",
@@ -255,6 +263,13 @@ const LiveStreamBroadcast = () => {
       });
     } catch (error: any) {
       console.error('Error starting broadcast:', error);
+      
+      // إذا فشل، توقف عن البث
+      setIsStreaming(false);
+      broadcasterRef.current?.stop();
+      broadcasterRef.current = null;
+      currentStreamIdRef.current = null;
+      
       toast({
         title: "خطأ",
         description: error.message || "فشل في بدء البث",
