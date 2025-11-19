@@ -3363,6 +3363,7 @@ export type Database = {
       check_early_access: { Args: { _user_id: string }; Returns: boolean }
       cleanup_expired_2fa_codes: { Args: never; Returns: undefined }
       cleanup_expired_anubis_sessions: { Args: never; Returns: undefined }
+      cleanup_old_live_streams: { Args: never; Returns: undefined }
       complete_daily_task: { Args: { p_task_id: string }; Returns: Json }
       count_admin_unread_notifications: {
         Args: { p_user_id: string }
