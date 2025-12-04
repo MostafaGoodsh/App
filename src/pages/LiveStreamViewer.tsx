@@ -29,6 +29,15 @@ const LiveStreamViewer = () => {
     toggleFollow
   } = useLiveStream(streamId);
 
+  // معرف فريد للمشاهد حتى بدون تسجيل دخول
+  const [viewerId] = useState(() => {
+    const existing = localStorage.getItem("live_viewer_id");
+    if (existing) return existing;
+    const id = crypto.randomUUID();
+    localStorage.setItem("live_viewer_id", id);
+    return id;
+  });
+
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
   const [hasRemoteStream, setHasRemoteStream] = useState(false);
@@ -38,9 +47,9 @@ const LiveStreamViewer = () => {
   const viewerRef = useRef<WebRTCViewer | null>(null);
 
   useEffect(() => {
-    if (streamId && user?.id && currentStream) {
-      console.log('Starting WebRTC viewer for stream:', streamId);
-      viewerRef.current = new WebRTCViewer(streamId, user.id, (stream) => {
+    if (streamId && currentStream) {
+      console.log('Starting WebRTC viewer for stream:', streamId, 'as viewer:', viewerId);
+      viewerRef.current = new WebRTCViewer(streamId, viewerId, (stream) => {
         console.log('Received remote stream, tracks:', stream.getTracks().length);
         stream.getTracks().forEach(track => {
           console.log(`Remote track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
@@ -73,7 +82,7 @@ const LiveStreamViewer = () => {
         viewerRef.current?.stop();
       };
     }
-  }, [streamId, user?.id, currentStream]);
+  }, [streamId, currentStream, viewerId]);
 
   const handleSendComment = async () => {
     if (!comment.trim() || !streamId) return;
