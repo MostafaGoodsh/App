@@ -66,6 +66,8 @@ export const useFollow = (profileUserId?: string) => {
       return;
     }
 
+    if (loading) return; // Prevent double-click
+
     setLoading(true);
     try {
       if (isFollowing) {
@@ -81,7 +83,20 @@ export const useFollow = (profileUserId?: string) => {
         setFollowersCount(prev => Math.max(0, prev - 1));
         toast.success('تم إلغاء المتابعة');
       } else {
-        // Follow
+        // Follow - check if already following first
+        const { data: existing } = await supabase
+          .from('user_follows')
+          .select('id')
+          .eq('follower_id', user.id)
+          .eq('following_id', profileUserId)
+          .maybeSingle();
+
+        if (existing) {
+          // Already following
+          setIsFollowing(true);
+          return;
+        }
+
         const { error } = await supabase
           .from('user_follows')
           .insert({
@@ -89,7 +104,14 @@ export const useFollow = (profileUserId?: string) => {
             following_id: profileUserId
           });
 
-        if (error) throw error;
+        if (error) {
+          // Handle duplicate key error gracefully
+          if (error.code === '23505') {
+            setIsFollowing(true);
+            return;
+          }
+          throw error;
+        }
         setIsFollowing(true);
         setFollowersCount(prev => prev + 1);
         toast.success('تمت المتابعة بنجاح');

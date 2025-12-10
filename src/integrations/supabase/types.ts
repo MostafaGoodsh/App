@@ -3370,8 +3370,8 @@ export type Database = {
         Returns: number
       }
       count_unread_notifications:
-        | { Args: { p_user_id: string }; Returns: number }
         | { Args: never; Returns: number }
+        | { Args: { p_user_id: string }; Returns: number }
       create_initial_internal_balances: {
         Args: { p_user_id: string }
         Returns: undefined
