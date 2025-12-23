@@ -83,30 +83,20 @@ export const useFollow = (profileUserId?: string) => {
         setFollowersCount(prev => Math.max(0, prev - 1));
         toast.success('تم إلغاء المتابعة');
       } else {
-        // Follow - check if already following first
-        const { data: existing } = await supabase
-          .from('user_follows')
-          .select('id')
-          .eq('follower_id', user.id)
-          .eq('following_id', profileUserId)
-          .maybeSingle();
-
-        if (existing) {
-          // Already following
-          setIsFollowing(true);
-          return;
-        }
-
+        // Follow - use upsert to handle duplicates gracefully
         const { error } = await supabase
           .from('user_follows')
-          .insert({
+          .upsert({
             follower_id: user.id,
             following_id: profileUserId
+          }, {
+            onConflict: 'follower_id,following_id',
+            ignoreDuplicates: true
           });
 
         if (error) {
-          // Handle duplicate key error gracefully
-          if (error.code === '23505') {
+          // Handle duplicate key error gracefully (just in case upsert doesn't catch it)
+          if (error.code === '23505' || error.message?.includes('duplicate')) {
             setIsFollowing(true);
             return;
           }
@@ -117,6 +107,11 @@ export const useFollow = (profileUserId?: string) => {
         toast.success('تمت المتابعة بنجاح');
       }
     } catch (error: any) {
+      // Silently handle duplicate key errors
+      if (error?.code === '23505' || error?.message?.includes('duplicate')) {
+        setIsFollowing(true);
+        return;
+      }
       console.error('Error toggling follow:', error);
       toast.error('حدث خطأ أثناء تحديث المتابعة');
     } finally {

@@ -171,6 +171,8 @@ export class WebRTCViewer {
   private viewerId: string;
   private onStream?: (stream: MediaStream) => void;
   private broadcasterId: string | null = null;
+  private retryInterval: NodeJS.Timeout | null = null;
+  private hasReceivedOffer = false;
 
   constructor(streamId: string, viewerId: string, onStream?: (stream: MediaStream) => void) {
     this.streamId = streamId;
@@ -190,12 +192,16 @@ export class WebRTCViewer {
       .on('broadcast', { event: 'broadcaster-ready' }, (payload) => {
         console.log('Broadcaster ready:', payload.payload.broadcasterId);
         this.broadcasterId = payload.payload.broadcasterId;
+        // Re-announce viewer when broadcaster becomes ready
+        this.announceViewer();
       })
       .on('broadcast', { event: 'offer' }, async (payload) => {
         const { viewerId, offer } = payload.payload;
         // Only handle offers meant for this viewer
         if (viewerId === this.viewerId && offer) {
           console.log('Received offer for this viewer');
+          this.hasReceivedOffer = true;
+          this.stopRetrying();
           await this.handleOffer(offer);
         }
       })
@@ -218,16 +224,46 @@ export class WebRTCViewer {
 
     await this.channel.subscribe((status) => {
       console.log('Viewer channel status:', status);
+      if (status === 'SUBSCRIBED') {
+        // Announce viewer and start retry mechanism
+        this.announceViewer();
+        this.startRetrying();
+      }
     });
 
-    // Announce viewer has joined
+    console.log('Viewer connected, waiting for offer...');
+  }
+
+  private async announceViewer() {
+    if (!this.channel || this.hasReceivedOffer) return;
+    
+    console.log('Announcing viewer:', this.viewerId);
     await this.channel.send({
       type: 'broadcast',
       event: 'viewer-joined',
       payload: { viewerId: this.viewerId }
     });
+  }
 
-    console.log('Viewer connected, waiting for offer...');
+  private startRetrying() {
+    // Retry announcing every 2 seconds for up to 30 seconds
+    let attempts = 0;
+    this.retryInterval = setInterval(() => {
+      attempts++;
+      if (attempts > 15 || this.hasReceivedOffer) {
+        this.stopRetrying();
+        return;
+      }
+      console.log('Retrying viewer announcement, attempt:', attempts);
+      this.announceViewer();
+    }, 2000);
+  }
+
+  private stopRetrying() {
+    if (this.retryInterval) {
+      clearInterval(this.retryInterval);
+      this.retryInterval = null;
+    }
   }
 
   private async handleOffer(offer: RTCSessionDescriptionInit) {
@@ -296,6 +332,8 @@ export class WebRTCViewer {
 
   stop() {
     console.log('Stopping viewer');
+    
+    this.stopRetrying();
     
     if (this.channel) {
       this.channel.send({
