@@ -50,12 +50,15 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'esnext',
     rollupOptions: {
-      external: [],
+      external: ['usb'],
       output: {
         globals: {
           buffer: 'Buffer'
         }
       }
     }
+  },
+  ssr: {
+    noExternal: ['usb']
   }
 }))
