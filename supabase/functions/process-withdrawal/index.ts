@@ -106,18 +106,27 @@ serve(async (req) => {
     let targetAmount = 0
     let conversionRate = 0
 
-    if (target_token === 'SOL') {
-      // Convert to SOL using USD rates
-      const solPrice = 100 // Approximate SOL price in USD - should be fetched from API
-      const internalTokenUsdValue = internal_amount * token.exchange_rate_usd
-      targetAmount = internalTokenUsdValue / solPrice
-      conversionRate = targetAmount / internal_amount
-    } else {
+    // Token price estimates in USD (should be fetched from API in production)
+    const tokenPrices: Record<string, number> = {
+      'SOL': 100,
+      'USDC': 1,
+      'BTC': 40000,
+      'ETH': 2000
+    }
+
+    const targetPrice = tokenPrices[target_token]
+    if (!targetPrice) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Target token not supported yet' }),
+        JSON.stringify({ success: false, error: `Target token ${target_token} not supported` }),
         { status: 400, headers: corsHeaders }
       )
     }
+
+    const internalTokenUsdValue = internal_amount * token.exchange_rate_usd
+    targetAmount = internalTokenUsdValue / targetPrice
+    conversionRate = targetAmount / internal_amount
+
+    console.log(`Converting ${internal_amount} ${internal_token_symbol} to ${targetAmount} ${target_token}`)
 
     // Create withdrawal request record
     const { data: withdrawalRequest, error: requestError } = await supabase
@@ -141,8 +150,11 @@ serve(async (req) => {
       )
     }
 
-    // Process blockchain transaction for SOL
-    if (target_token === 'SOL') {
+    // USDC devnet mint address
+    const USDC_DEVNET_MINT = 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr'
+
+    // Process blockchain transaction for SOL or USDC on Solana
+    if (target_token === 'SOL' || target_token === 'USDC') {
       try {
         // Initialize Solana connection
         const connection = new Connection('https://api.devnet.solana.com', 'confirmed')
@@ -168,30 +180,77 @@ serve(async (req) => {
           }
         }
 
-        // Check hot wallet balance
-        const hotWalletBalance = await connection.getBalance(hotWallet.publicKey)
-        const requiredLamports = targetAmount * LAMPORTS_PER_SOL
-        
-        if (hotWalletBalance < requiredLamports) {
-          throw new Error('Insufficient hot wallet balance')
-        }
-
-        // Create transfer transaction
         const targetPublicKey = new PublicKey(target_address)
-        const transaction = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey: hotWallet.publicKey,
-            toPubkey: targetPublicKey,
-            lamports: requiredLamports,
-          })
-        )
+        let signature: string
 
-        // Send transaction
-        const signature = await sendAndConfirmTransaction(
-          connection,
-          transaction,
-          [hotWallet]
-        )
+        if (target_token === 'SOL') {
+          // Check hot wallet balance
+          const hotWalletBalance = await connection.getBalance(hotWallet.publicKey)
+          const requiredLamports = Math.floor(targetAmount * LAMPORTS_PER_SOL)
+          
+          if (hotWalletBalance < requiredLamports) {
+            throw new Error('Insufficient hot wallet SOL balance')
+          }
+
+          // Create SOL transfer transaction
+          const transaction = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey: hotWallet.publicKey,
+              toPubkey: targetPublicKey,
+              lamports: requiredLamports,
+            })
+          )
+
+          signature = await sendAndConfirmTransaction(
+            connection,
+            transaction,
+            [hotWallet]
+          )
+        } else {
+          // USDC SPL token transfer
+          const mintPubkey = new PublicKey(USDC_DEVNET_MINT)
+          
+          // Get or create associated token accounts
+          const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+            connection,
+            hotWallet,
+            mintPubkey,
+            hotWallet.publicKey
+          )
+
+          const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+            connection,
+            hotWallet,
+            mintPubkey,
+            targetPublicKey
+          )
+
+          // USDC has 6 decimals
+          const amount = Math.floor(targetAmount * 1_000_000)
+
+          // Check hot wallet USDC balance
+          if (Number(fromTokenAccount.amount) < amount) {
+            throw new Error('Insufficient hot wallet USDC balance')
+          }
+
+          // Create SPL token transfer transaction
+          const transaction = new Transaction().add(
+            createTransferInstruction(
+              fromTokenAccount.address,
+              toTokenAccount.address,
+              hotWallet.publicKey,
+              amount,
+              [],
+              TOKEN_PROGRAM_ID
+            )
+          )
+
+          signature = await sendAndConfirmTransaction(
+            connection,
+            transaction,
+            [hotWallet]
+          )
+        }
 
         // Update withdrawal request with transaction hash
         await supabase
@@ -223,7 +282,7 @@ serve(async (req) => {
           }),
           { 
             status: 200, 
-            headers: corsHeaders 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           }
         )
 
@@ -241,7 +300,7 @@ serve(async (req) => {
         throw new Error(`Blockchain transaction failed: ${blockchainError instanceof Error ? blockchainError.message : 'Unknown blockchain error'}`)
       }
     } else {
-      // For other tokens, just create pending request for manual processing
+      // For other tokens (BTC, ETH), just create pending request for manual processing
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -251,7 +310,7 @@ serve(async (req) => {
         }),
         { 
           status: 200, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     }
