@@ -1,9 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Generate cryptographically secure random token
+const generateSecureToken = (): string => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// Generate cryptographically secure 2FA code
+const generateSecure2FACode = (): string => {
+  const array = new Uint8Array(4);
+  crypto.getRandomValues(array);
+  // Convert to a 6-digit number
+  const num = ((array[0] << 24) | (array[1] << 16) | (array[2] << 8) | array[3]) >>> 0;
+  return String(num % 1000000).padStart(6, '0');
 };
 
 serve(async (req) => {
@@ -21,7 +38,7 @@ serve(async (req) => {
 
     const { action, email, password, full_name, phone, twofa_code } = await req.json();
 
-    console.log('Anubis Auth Request:', { action, email });
+    console.log('Anubis Auth Request:', { action, email: email ? '[REDACTED]' : undefined });
 
     if (action === 'register') {
       // التحقق من البيانات المطلوبة
@@ -32,11 +49,19 @@ serve(async (req) => {
         );
       }
 
+      // Validate password strength
+      if (password.length < 8) {
+        return new Response(
+          JSON.stringify({ error: 'Password must be at least 8 characters' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+
       // التحقق من وجود المستخدم
       const { data: existingUser } = await supabaseClient
         .from('anubis_users')
         .select('id')
-        .eq('email', email)
+        .eq('email', email.toLowerCase().trim())
         .single();
 
       if (existingUser) {
@@ -46,18 +71,14 @@ serve(async (req) => {
         );
       }
 
-      // تشفير كلمة المرور (في الإنتاج، استخدم bcrypt أو argon2)
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const password_hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      // Hash password with bcrypt (secure password hashing)
+      const password_hash = await bcrypt.hash(password);
 
       // إنشاء المستخدم
       const { data: newUser, error: createError } = await supabaseClient
         .from('anubis_users')
         .insert({
-          email,
+          email: email.toLowerCase().trim(),
           password_hash,
           full_name,
           phone,
@@ -75,8 +96,8 @@ serve(async (req) => {
         );
       }
 
-      // إنشاء جلسة
-      const session_token = crypto.randomUUID() + '-' + Date.now();
+      // Generate cryptographically secure session token
+      const session_token = generateSecureToken();
       const expires_at = new Date();
       expires_at.setDate(expires_at.getDate() + 30); // صلاحية 30 يوم
 
@@ -86,8 +107,8 @@ serve(async (req) => {
           anubis_user_id: newUser.id,
           session_token,
           expires_at: expires_at.toISOString(),
-          ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-          user_agent: req.headers.get('user-agent') || 'unknown'
+          ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown',
+          user_agent: req.headers.get('user-agent')?.substring(0, 255) || 'unknown'
         });
 
       if (sessionError) {
@@ -121,22 +142,24 @@ serve(async (req) => {
         );
       }
 
-      // تشفير كلمة المرور للمقارنة
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const password_hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
       // البحث عن المستخدم
       const { data: user, error: userError } = await supabaseClient
         .from('anubis_users')
         .select('*')
-        .eq('email', email)
-        .eq('password_hash', password_hash)
+        .eq('email', email.toLowerCase().trim())
         .single();
 
       if (userError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+        );
+      }
+
+      // Verify password with bcrypt
+      const passwordValid = await bcrypt.compare(password, user.password_hash);
+      
+      if (!passwordValid) {
         return new Response(
           JSON.stringify({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
@@ -158,8 +181,8 @@ serve(async (req) => {
         .single();
 
       if (twoFASettings?.is_enabled) {
-        // إنشاء رمز التحقق
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        // Generate cryptographically secure 2FA code
+        const code = generateSecure2FACode();
         const codeExpiresAt = new Date();
         codeExpiresAt.setMinutes(codeExpiresAt.getMinutes() + 10);
 
@@ -181,7 +204,7 @@ serve(async (req) => {
             }
           });
         } catch (emailError) {
-          console.error('Failed to send 2FA email:', emailError);
+          console.error('Failed to send 2FA email');
         }
 
         return new Response(
@@ -195,7 +218,7 @@ serve(async (req) => {
       }
 
       // تسجيل دخول عادي بدون مصادقة ثنائية
-      const session_token = crypto.randomUUID() + '-' + Date.now();
+      const session_token = generateSecureToken();
       const expires_at = new Date();
       expires_at.setDate(expires_at.getDate() + 30);
 
@@ -205,8 +228,8 @@ serve(async (req) => {
           anubis_user_id: user.id,
           session_token,
           expires_at: expires_at.toISOString(),
-          ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-          user_agent: req.headers.get('user-agent') || 'unknown'
+          ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown',
+          user_agent: req.headers.get('user-agent')?.substring(0, 255) || 'unknown'
         });
 
       if (sessionError) {
@@ -250,7 +273,7 @@ serve(async (req) => {
       const { data: user } = await supabaseClient
         .from('anubis_users')
         .select('*')
-        .eq('email', email)
+        .eq('email', email.toLowerCase().trim())
         .single();
 
       if (!user) {
@@ -285,8 +308,8 @@ serve(async (req) => {
         .update({ used_at: new Date().toISOString() })
         .eq('id', codeRecord.id);
 
-      // إنشاء جلسة
-      const session_token = crypto.randomUUID() + '-' + Date.now();
+      // Generate cryptographically secure session token
+      const session_token = generateSecureToken();
       const expires_at = new Date();
       expires_at.setDate(expires_at.getDate() + 30);
 
@@ -296,8 +319,8 @@ serve(async (req) => {
           anubis_user_id: user.id,
           session_token,
           expires_at: expires_at.toISOString(),
-          ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-          user_agent: req.headers.get('user-agent') || 'unknown'
+          ip_address: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown',
+          user_agent: req.headers.get('user-agent')?.substring(0, 255) || 'unknown'
         });
 
       await supabaseClient
@@ -343,9 +366,9 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Server error:', error);
+    console.error('Server error');
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'An error occurred. Please try again.' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }

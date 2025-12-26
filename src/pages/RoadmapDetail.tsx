@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Configure DOMPurify to allow safe HTML elements for content
+const sanitizeHTML = (dirty: string) => {
+  return DOMPurify.sanitize(dirty, {
+    ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'img', 'video', 'iframe', 'div', 'span', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'style', 'target', 'rel', 'width', 'height', 'title', 'dir', 'controls', 'allowfullscreen', 'frameborder'],
+    ALLOW_DATA_ATTR: false,
+  });
+};
 interface RoadmapData {
   id: string;
   title: string;
@@ -128,7 +137,7 @@ const RoadmapDetail = () => {
         return (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
             <CardContent className="pt-6">
-              <div dangerouslySetInnerHTML={{ __html: data.external_widget_url }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHTML(data.external_widget_url) }} />
             </CardContent>
           </Card>
         );
@@ -223,7 +232,7 @@ const RoadmapDetail = () => {
               [&_.border-primary\\/30]:border-primary/30
               [&_.arabic-text]:text-right [&_.arabic-text]:font-cairo" 
             style={{ fontSize: getFontSize(data.content_font_size) }}
-            dangerouslySetInnerHTML={{ __html: data.page_content }} 
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML(data.page_content) }}
           />
         ) : (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
@@ -251,7 +260,7 @@ const RoadmapDetail = () => {
                   <CardContent>
                     <div 
                       className="text-white prose prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg [&_iframe]:max-w-full [&_iframe]:aspect-video" 
-                      dangerouslySetInnerHTML={{ __html: section.content }} 
+                      dangerouslySetInnerHTML={{ __html: sanitizeHTML(section.content) }}
                     />
                   </CardContent>
                 )}
