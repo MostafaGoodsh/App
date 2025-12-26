@@ -112,11 +112,51 @@ serve(async (req) => {
       );
     }
 
-    // Get integration ID based on payment method
-    // Integration IDs من Paymob Dashboard (Live Mode)
-    const integration_id = payment_method === 'card' ? 1783487 :           // Card integration (Live)
-                          payment_method === 'fawry' ? 1197843 :          // Kiosk/Fawry (Live)
-                          1197843;                                        // Wallet (All mobile wallets: Vodafone, Etisalat, Orange) (Live)
+    // Get integration ID based on payment method from environment variables
+    const INTEGRATION_VODAFONE = Deno.env.get('PAYMOB_INTEGRATION_VODAFONE');
+    const INTEGRATION_ORANGE = Deno.env.get('PAYMOB_INTEGRATION_ORANGE');
+    const INTEGRATION_ETISALAT = Deno.env.get('PAYMOB_INTEGRATION_ETISALAT');
+    const INTEGRATION_FAWRY = Deno.env.get('PAYMOB_INTEGRATION_FAWRY');
+    const INTEGRATION_CARD = Deno.env.get('PAYMOB_INTEGRATION_CARD');
+
+    let integration_id: string | undefined;
+    switch (payment_method) {
+      case 'vodafone_cash':
+        integration_id = INTEGRATION_VODAFONE;
+        break;
+      case 'orange_cash':
+        integration_id = INTEGRATION_ORANGE;
+        break;
+      case 'etisalat_cash':
+        integration_id = INTEGRATION_ETISALAT;
+        break;
+      case 'fawry':
+        integration_id = INTEGRATION_FAWRY;
+        break;
+      case 'card':
+        integration_id = INTEGRATION_CARD;
+        break;
+    }
+
+    if (!integration_id) {
+      console.error('Integration ID not configured for payment method:', payment_method);
+      await supabaseClient
+        .from('payment_transactions')
+        .update({ 
+          status: 'failed', 
+          failed_at: new Date().toISOString(),
+          notes: `Integration ID not configured for ${payment_method}`
+        })
+        .eq('id', transaction.id);
+
+      return new Response(
+        JSON.stringify({ 
+          error: `Payment method ${payment_method} not configured`,
+          transaction_id: transaction.id
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
     console.log('Phone number received:', phone_number);
@@ -125,7 +165,7 @@ serve(async (req) => {
     const intentionData = {
       amount: amount * 100, // Amount in cents (piasters)
       currency: 'EGP',
-      payment_methods: [integration_id],
+      payment_methods: [parseInt(integration_id, 10)],
       billing_data: {
         apartment: 'NA',
         first_name: user.user_metadata?.full_name || 'User',
