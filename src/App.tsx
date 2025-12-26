@@ -73,6 +73,7 @@ import LiveStreamsGallery from "./pages/LiveStreamsGallery";
 import LiveStreamViewer from "./pages/LiveStreamViewer";
 import MyLiveStreams from "./pages/MyLiveStreams";
 import ProfileCustomizationAdmin from "./pages/ProfileCustomizationAdmin";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -88,6 +89,7 @@ const App = () => {
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<RequireAccess><Index /></RequireAccess>} />
                   <Route path="auth" element={<Auth />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="payment-demo" element={<PaymentDemo />} />
                   <Route path="wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
                   <Route path="recharge" element={<RequireAuth><Recharge /></RequireAuth>} />
