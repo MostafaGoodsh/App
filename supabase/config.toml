@@ -23,3 +23,9 @@ verify_jwt = false
 
 [functions.webrtc-signaling]
 verify_jwt = false
+
+[functions.pi-payment-approve]
+verify_jwt = false
+
+[functions.pi-payment-complete]
+verify_jwt = false
