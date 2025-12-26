@@ -1,5 +1,8 @@
 project_id = "wnwfnziozwarlihrnjex"
 
+[functions.process-withdrawal]
+verify_jwt = true
+
 [functions.anubis-auth]
 verify_jwt = false
 
