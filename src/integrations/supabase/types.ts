@@ -3459,6 +3459,17 @@ export type Database = {
           transaction_count: number
         }[]
       }
+      get_wallet_security_with_logging: {
+        Args: { p_wallet_id: string }
+        Returns: {
+          access_count: number
+          encryption_version: number
+          last_accessed: string
+          mnemonic_encrypted: string
+          private_key_encrypted: string
+          wallet_id: string
+        }[]
+      }
       grant_admin_role: { Args: { user_email: string }; Returns: boolean }
       grant_anubis_access: {
         Args: {
@@ -3485,7 +3496,7 @@ export type Database = {
         }
         Returns: Json
       }
-      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_admin: { Args: { _user_id?: string }; Returns: boolean }
       mark_all_notifications_read: {
         Args: { p_is_admin?: boolean; p_user_id: string }
         Returns: number
