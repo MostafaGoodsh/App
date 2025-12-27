@@ -165,20 +165,48 @@ serve(async (req) => {
           throw new Error('Hot wallet private key not configured')
         }
 
+        console.log('Hot wallet key length:', hotWalletKey.length)
+        console.log('Hot wallet key starts with:', hotWalletKey.substring(0, 10))
+
         let hotWallet: Keypair
         try {
-          // Try parsing as JSON array first
+          // Try parsing as JSON array first (e.g., [1,2,3,...])
           const keyArray = JSON.parse(hotWalletKey)
+          console.log('Parsed as JSON array, length:', keyArray.length)
           hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
         } catch (parseError) {
-          // If JSON parsing fails, try base58 format
+          console.log('JSON parse failed, trying base58...')
+          // If JSON parsing fails, try base58 format using bs58 decoding
           try {
-            const keyBytes = new TextEncoder().encode(hotWalletKey)
-            hotWallet = Keypair.fromSecretKey(keyBytes.slice(0, 64))
+            // Base58 decode - Solana private keys are typically 64 bytes
+            const bs58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+            let decoded = BigInt(0)
+            for (const char of hotWalletKey) {
+              const index = bs58chars.indexOf(char)
+              if (index === -1) throw new Error('Invalid base58 character')
+              decoded = decoded * BigInt(58) + BigInt(index)
+            }
+            
+            const bytes = []
+            while (decoded > 0) {
+              bytes.unshift(Number(decoded % BigInt(256)))
+              decoded = decoded / BigInt(256)
+            }
+            
+            // Pad to 64 bytes if needed
+            while (bytes.length < 64) {
+              bytes.unshift(0)
+            }
+            
+            console.log('Base58 decoded, bytes length:', bytes.length)
+            hotWallet = Keypair.fromSecretKey(new Uint8Array(bytes))
           } catch (base58Error) {
-            throw new Error('Invalid private key format. Please provide as JSON array or base58 string')
+            console.error('Base58 decode error:', base58Error)
+            throw new Error('Invalid private key format. Please provide as JSON array [1,2,3...] or base58 string')
           }
         }
+        
+        console.log('Hot wallet public key:', hotWallet.publicKey.toBase58())
 
         const targetPublicKey = new PublicKey(target_address)
         let signature: string
@@ -287,17 +315,35 @@ serve(async (req) => {
         )
 
       } catch (blockchainError) {
-        console.error('Blockchain error:', blockchainError)
+        const errorMessage = blockchainError instanceof Error ? blockchainError.message : 'Unknown blockchain error'
+        console.error('Blockchain error details:', {
+          error: errorMessage,
+          stack: blockchainError instanceof Error ? blockchainError.stack : undefined,
+          target_token,
+          target_address,
+          target_amount: targetAmount
+        })
         
-        // Update withdrawal request status to failed
+        // Update withdrawal request status to failed with error details
         await supabase
           .from('withdrawal_requests')
           .update({
-            status: 'failed'
+            status: 'failed',
+            notes: errorMessage
           })
           .eq('id', withdrawalRequest.id)
 
-        throw new Error(`Blockchain transaction failed: ${blockchainError instanceof Error ? blockchainError.message : 'Unknown blockchain error'}`)
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `Blockchain transaction failed: ${errorMessage}`,
+            withdrawal_id: withdrawalRequest.id
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
       }
     } else {
       // For other tokens (BTC, ETH), just create pending request for manual processing

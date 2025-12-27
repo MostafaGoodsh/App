@@ -82,10 +82,10 @@ export const useWithdrawal = () => {
 
       // Trigger balance refresh in wallet components
       window.dispatchEvent(new CustomEvent('withdrawalCompleted', {
-        detail: response.data.data
+        detail: response.data
       }));
 
-      return response.data.data;
+      return response.data;
 
     } catch (error: any) {
       console.error('Withdrawal error:', error);
