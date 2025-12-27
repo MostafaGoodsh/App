@@ -129,6 +129,15 @@ serve(async (req) => {
     console.log(`Converting ${internal_amount} ${internal_token_symbol} to ${targetAmount} ${target_token}`)
 
     // Create withdrawal request record
+    console.log('Creating withdrawal request:', {
+      user_id: user.id,
+      internal_token_id: token.id,
+      internal_amount,
+      target_token,
+      target_address,
+      target_amount: targetAmount
+    })
+
     const { data: withdrawalRequest, error: requestError } = await supabase
       .from('withdrawal_requests')
       .insert({
@@ -144,11 +153,14 @@ serve(async (req) => {
       .single()
 
     if (requestError) {
+      console.error('Withdrawal request creation error:', requestError)
       return new Response(
-        JSON.stringify({ success: false, error: 'Failed to create withdrawal request' }),
-        { status: 500, headers: corsHeaders }
+        JSON.stringify({ success: false, error: 'Failed to create withdrawal request', details: requestError.message }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Withdrawal request created:', withdrawalRequest.id)
 
     // USDC devnet mint address
     const USDC_DEVNET_MINT = 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr'
@@ -324,12 +336,11 @@ serve(async (req) => {
           target_amount: targetAmount
         })
         
-        // Update withdrawal request status to failed with error details
+        // Update withdrawal request status to failed
         await supabase
           .from('withdrawal_requests')
           .update({
-            status: 'failed',
-            notes: errorMessage
+            status: 'failed'
           })
           .eq('id', withdrawalRequest.id)
 
