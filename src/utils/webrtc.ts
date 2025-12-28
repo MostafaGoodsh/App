@@ -22,10 +22,8 @@ export class WebRTCBroadcaster {
     console.log('Broadcaster starting with stream:', stream.id);
     console.log('Tracks:', stream.getTracks().map(t => `${t.kind}: ${t.enabled}`));
     
-    // Use Supabase Realtime for signaling
-    this.channel = supabase.channel(`stream-${this.streamId}`, {
-      config: { broadcast: { self: false, ack: true } }
-    });
+    // Use Supabase Realtime for signaling - simpler config
+    this.channel = supabase.channel(`stream-${this.streamId}`);
 
     this.channel
       .on('broadcast', { event: 'viewer-joined' }, async (payload) => {
@@ -83,8 +81,11 @@ export class WebRTCBroadcaster {
         }
       });
 
-    await this.channel.subscribe((status) => {
+    const subscribeResult = await this.channel.subscribe((status, err) => {
       console.log('Broadcaster channel status:', status);
+      if (err) {
+        console.error('Broadcaster channel error:', err);
+      }
       if (status === 'SUBSCRIBED') {
         this.isReady = true;
         this.announceReady();
@@ -92,9 +93,18 @@ export class WebRTCBroadcaster {
         this.readyAnnounceInterval = setInterval(() => {
           this.announceReady();
         }, 3000);
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error('Channel subscription failed, retrying...');
+        // Retry subscription after a short delay
+        setTimeout(() => {
+          if (this.channel && !this.isReady) {
+            this.channel.subscribe();
+          }
+        }, 2000);
       }
     });
 
+    console.log('Broadcaster subscribe result:', subscribeResult);
     console.log('Broadcaster started successfully');
   }
 
@@ -225,10 +235,8 @@ export class WebRTCViewer {
   async start() {
     console.log('Viewer starting for stream:', this.streamId);
     
-    // Use Supabase Realtime for signaling
-    this.channel = supabase.channel(`stream-${this.streamId}`, {
-      config: { broadcast: { self: false, ack: true } }
-    });
+    // Use Supabase Realtime for signaling - simpler config
+    this.channel = supabase.channel(`stream-${this.streamId}`);
 
     this.channel
       .on('broadcast', { event: 'broadcaster-ready' }, (payload) => {
@@ -277,12 +285,22 @@ export class WebRTCViewer {
         this.onStream?.(new MediaStream()); // Clear stream
       });
 
-    await this.channel.subscribe((status) => {
+    await this.channel.subscribe((status, err) => {
       console.log('Viewer channel status:', status);
+      if (err) {
+        console.error('Viewer channel error:', err);
+      }
       if (status === 'SUBSCRIBED') {
         // Announce viewer and start retry mechanism
         this.announceViewer();
         this.startRetrying();
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error('Viewer channel subscription failed, retrying...');
+        setTimeout(() => {
+          if (this.channel && !this.hasReceivedOffer) {
+            this.channel.subscribe();
+          }
+        }, 2000);
       }
     });
 
