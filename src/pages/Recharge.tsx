@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,24 +8,67 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePayment } from '@/hooks/usePayment';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, ArrowRight, Wallet, TrendingUp, RefreshCw } from 'lucide-react';
+import { Loader2, ArrowRight, Wallet, TrendingUp, RefreshCw, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Recharge = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { processPayment, checkPaymentStatus, loading, getSupportedMethods, transactions, getTransactions } = usePayment();
-  const { tokens } = useInternalWallet();
+  const { tokens, refreshData } = useInternalWallet();
   
   const [amount, setAmount] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('');
   const [selectedToken, setSelectedToken] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [paymentCallback, setPaymentCallback] = useState<{
+    show: boolean;
+    transactionId: string | null;
+    status: 'checking' | 'completed' | 'failed' | 'pending';
+  }>({ show: false, transactionId: null, status: 'checking' });
 
   const paymentMethods = getSupportedMethods();
   const quickAmounts = [50, 100, 200, 500, 1000];
+
+  // Handle payment callback from Paymob redirect
+  useEffect(() => {
+    const isCallback = searchParams.get('payment_callback');
+    const transactionId = searchParams.get('transaction_id');
+    
+    if (isCallback && transactionId) {
+      setPaymentCallback({ show: true, transactionId, status: 'checking' });
+      
+      // Check payment status
+      const checkStatus = async () => {
+        try {
+          const result = await checkPaymentStatus(transactionId);
+          if (result.status === 'completed') {
+            setPaymentCallback(prev => ({ ...prev, status: 'completed' }));
+            toast({
+              title: "✅ تم الدفع بنجاح | Payment Successful",
+              description: "تم إضافة الرصيد لحسابك",
+            });
+            await refreshData();
+          } else if (result.status === 'failed') {
+            setPaymentCallback(prev => ({ ...prev, status: 'failed' }));
+          } else {
+            setPaymentCallback(prev => ({ ...prev, status: 'pending' }));
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+          setPaymentCallback(prev => ({ ...prev, status: 'pending' }));
+        }
+      };
+      
+      checkStatus();
+      
+      // Clean URL params
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams, checkPaymentStatus, toast, refreshData]);
 
   useEffect(() => {
     // Don't redirect until auth loading is complete
@@ -55,7 +98,59 @@ const Recharge = () => {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p>جاري التحميل...</p>
+        <p>جاري التحميل... | Loading...</p>
+      </div>
+    );
+  }
+
+  // Show payment callback result
+  if (paymentCallback.show) {
+    return (
+      <div className="container mx-auto px-4 py-16 max-w-md" dir="rtl">
+        <Card className="text-center">
+          <CardContent className="pt-8 pb-6 space-y-4">
+            {paymentCallback.status === 'checking' && (
+              <>
+                <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+                <h2 className="text-xl font-bold">جاري التحقق من الدفع...</h2>
+                <p className="text-sm text-muted-foreground">Checking payment status...</p>
+              </>
+            )}
+            {paymentCallback.status === 'completed' && (
+              <>
+                <CheckCircle2 className="h-16 w-16 mx-auto text-green-500" />
+                <h2 className="text-xl font-bold text-green-600">تم الدفع بنجاح!</h2>
+                <p className="text-sm text-muted-foreground">Payment completed successfully!</p>
+                <p className="text-sm">تم إضافة الرصيد لحسابك</p>
+              </>
+            )}
+            {paymentCallback.status === 'failed' && (
+              <>
+                <XCircle className="h-16 w-16 mx-auto text-destructive" />
+                <h2 className="text-xl font-bold text-destructive">فشل الدفع</h2>
+                <p className="text-sm text-muted-foreground">Payment failed</p>
+                <p className="text-sm">الرجاء المحاولة مرة أخرى</p>
+              </>
+            )}
+            {paymentCallback.status === 'pending' && (
+              <>
+                <Clock className="h-16 w-16 mx-auto text-yellow-500" />
+                <h2 className="text-xl font-bold text-yellow-600">قيد المعالجة</h2>
+                <p className="text-sm text-muted-foreground">Payment is being processed...</p>
+                <p className="text-sm">سيتم إضافة الرصيد عند اكتمال المعاملة</p>
+              </>
+            )}
+            <Button 
+              onClick={() => {
+                setPaymentCallback({ show: false, transactionId: null, status: 'checking' });
+                getTransactions();
+              }} 
+              className="mt-4"
+            >
+              العودة للشحن | Back to Recharge
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

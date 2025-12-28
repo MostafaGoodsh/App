@@ -191,7 +191,10 @@ serve(async (req) => {
         quantity: 1
       }],
       special_reference: transaction.id, // معرّف المعاملة للربط
-      redirection_url: `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.lovableproject.com/recharge?payment=success&transaction_id=${transaction.id}`
+      // تصحيح رابط العودة للمستخدم بعد الدفع
+      redirection_url: `https://wnwfnziozwarlihrnjex.lovableproject.com/recharge?payment_callback=true&transaction_id=${transaction.id}`,
+      // رابط الـ webhook لتحديث حالة المعاملة
+      notification_url: `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/paymob-webhook`
     };
 
     console.log('Creating payment intention with data:', {
