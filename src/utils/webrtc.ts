@@ -7,6 +7,8 @@ export class WebRTCBroadcaster {
   private streamId: string;
   private userId: string;
   private onViewerCountChange?: (count: number) => void;
+  private isReady = false;
+  private readyAnnounceInterval: NodeJS.Timeout | null = null;
 
   constructor(streamId: string, userId: string, onViewerCountChange?: (count: number) => void) {
     this.streamId = streamId;
@@ -22,13 +24,22 @@ export class WebRTCBroadcaster {
     
     // Use Supabase Realtime for signaling
     this.channel = supabase.channel(`stream-${this.streamId}`, {
-      config: { broadcast: { self: false } }
+      config: { broadcast: { self: false, ack: true } }
     });
 
     this.channel
       .on('broadcast', { event: 'viewer-joined' }, async (payload) => {
         const viewerId = payload.payload.viewerId;
         console.log('Viewer joined:', viewerId);
+        
+        // Check if we already have a connection for this viewer
+        if (this.peerConnections.has(viewerId)) {
+          console.log('Already have connection for viewer, recreating...');
+          const oldPc = this.peerConnections.get(viewerId);
+          oldPc?.close();
+          this.peerConnections.delete(viewerId);
+        }
+        
         this.onViewerCountChange?.(this.peerConnections.size + 1);
         await this.createOfferForViewer(viewerId);
       })
@@ -37,16 +48,28 @@ export class WebRTCBroadcaster {
         console.log('Received answer from viewer:', viewerId);
         const pc = this.peerConnections.get(viewerId);
         if (pc && answer) {
-          await pc.setRemoteDescription(new RTCSessionDescription(answer));
-          console.log('Set remote description for viewer:', viewerId);
+          try {
+            if (pc.signalingState === 'have-local-offer') {
+              await pc.setRemoteDescription(new RTCSessionDescription(answer));
+              console.log('Set remote description for viewer:', viewerId);
+            } else {
+              console.warn('Wrong signaling state for answer:', pc.signalingState);
+            }
+          } catch (e) {
+            console.error('Error setting remote description:', e);
+          }
         }
       })
       .on('broadcast', { event: 'ice-candidate-viewer' }, async (payload) => {
         const { viewerId, candidate } = payload.payload;
         const pc = this.peerConnections.get(viewerId);
-        if (pc && candidate) {
+        if (pc && candidate && pc.remoteDescription) {
           console.log('Adding ICE candidate from viewer:', viewerId);
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (e) {
+            console.error('Error adding ICE candidate:', e);
+          }
         }
       })
       .on('broadcast', { event: 'viewer-left' }, (payload) => {
@@ -62,16 +85,28 @@ export class WebRTCBroadcaster {
 
     await this.channel.subscribe((status) => {
       console.log('Broadcaster channel status:', status);
-    });
-
-    // Announce broadcaster is ready
-    await this.channel.send({
-      type: 'broadcast',
-      event: 'broadcaster-ready',
-      payload: { broadcasterId: this.userId }
+      if (status === 'SUBSCRIBED') {
+        this.isReady = true;
+        this.announceReady();
+        // Keep announcing periodically so new viewers can find us
+        this.readyAnnounceInterval = setInterval(() => {
+          this.announceReady();
+        }, 3000);
+      }
     });
 
     console.log('Broadcaster started successfully');
+  }
+
+  private async announceReady() {
+    if (!this.channel || !this.isReady) return;
+    
+    console.log('Announcing broadcaster ready');
+    await this.channel.send({
+      type: 'broadcast',
+      event: 'broadcaster-ready',
+      payload: { broadcasterId: this.userId, streamId: this.streamId }
+    });
   }
 
   private async createOfferForViewer(viewerId: string) {
@@ -148,6 +183,13 @@ export class WebRTCBroadcaster {
   stop() {
     console.log('Stopping broadcaster');
     
+    this.isReady = false;
+    
+    if (this.readyAnnounceInterval) {
+      clearInterval(this.readyAnnounceInterval);
+      this.readyAnnounceInterval = null;
+    }
+    
     if (this.channel) {
       this.channel.send({
         type: 'broadcast',
@@ -185,7 +227,7 @@ export class WebRTCViewer {
     
     // Use Supabase Realtime for signaling
     this.channel = supabase.channel(`stream-${this.streamId}`, {
-      config: { broadcast: { self: false } }
+      config: { broadcast: { self: false, ack: true } }
     });
 
     this.channel
@@ -193,7 +235,9 @@ export class WebRTCViewer {
         console.log('Broadcaster ready:', payload.payload.broadcasterId);
         this.broadcasterId = payload.payload.broadcasterId;
         // Re-announce viewer when broadcaster becomes ready
-        this.announceViewer();
+        if (!this.hasReceivedOffer) {
+          this.announceViewer();
+        }
       })
       .on('broadcast', { event: 'offer' }, async (payload) => {
         const { viewerId, offer } = payload.payload;
@@ -202,6 +246,13 @@ export class WebRTCViewer {
           console.log('Received offer for this viewer');
           this.hasReceivedOffer = true;
           this.stopRetrying();
+          
+          // Close existing connection if any
+          if (this.pc) {
+            this.pc.close();
+            this.pc = null;
+          }
+          
           await this.handleOffer(offer);
         }
       })
@@ -211,7 +262,11 @@ export class WebRTCViewer {
         if (viewerId === this.viewerId && this.pc && candidate) {
           console.log('Adding ICE candidate from broadcaster');
           try {
-            await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
+            if (this.pc.remoteDescription) {
+              await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+              console.log('Queuing ICE candidate - no remote description yet');
+            }
           } catch (e) {
             console.error('Error adding ICE candidate:', e);
           }
@@ -219,7 +274,7 @@ export class WebRTCViewer {
       })
       .on('broadcast', { event: 'broadcaster-stopped' }, () => {
         console.log('Broadcaster stopped');
-        this.stop();
+        this.onStream?.(new MediaStream()); // Clear stream
       });
 
     await this.channel.subscribe((status) => {
