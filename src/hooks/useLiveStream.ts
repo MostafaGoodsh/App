@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
@@ -43,9 +43,13 @@ export const useLiveStream = (streamId?: string) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [likesCount, setLikesCount] = useState(0);
+  
+  // Use refs to track subscription state
+  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
 
   // Fetch all active streams
-  const fetchActiveStreams = async () => {
+  const fetchActiveStreams = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('active_live_streams')
@@ -55,7 +59,6 @@ export const useLiveStream = (streamId?: string) => {
 
       if (error) throw error;
 
-      // Fetch profiles separately
       const userIds = [...new Set(data?.map(s => s.user_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -64,8 +67,8 @@ export const useLiveStream = (streamId?: string) => {
 
       const streamsWithProfiles = data?.map(stream => ({
         ...stream,
-        total_views: 0, // active_live_streams لا يحتوي على هذا الحقل
-        status: 'active', // البثوث النشطة دائماً active
+        total_views: 0,
+        status: 'active',
         profiles: profiles?.find(p => p.user_id === stream.user_id) || {
           full_name: 'مستخدم',
           avatar_url: null
@@ -78,10 +81,10 @@ export const useLiveStream = (streamId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Fetch specific stream
-  const fetchStream = async (id: string) => {
+  const fetchStream = useCallback(async (id: string) => {
     try {
       const { data, error } = await supabase
         .from('active_live_streams')
@@ -91,7 +94,6 @@ export const useLiveStream = (streamId?: string) => {
 
       if (error) throw error;
 
-      // Fetch profile separately
       const { data: profile } = await supabase
         .from('profiles')
         .select('user_id, full_name, avatar_url')
@@ -100,8 +102,8 @@ export const useLiveStream = (streamId?: string) => {
 
       const streamWithProfile = {
         ...data,
-        total_views: 0, // active_live_streams لا يحتوي على هذا الحقل
-        status: 'active', // البثوث النشطة دائماً active
+        total_views: 0,
+        status: 'active',
         profiles: profile || {
           full_name: 'مستخدم',
           avatar_url: null
@@ -109,6 +111,7 @@ export const useLiveStream = (streamId?: string) => {
       };
 
       setCurrentStream(streamWithProfile);
+      setLikesCount(data.likes_count || 0);
 
       // Check if user liked this stream
       if (user) {
@@ -117,7 +120,7 @@ export const useLiveStream = (streamId?: string) => {
           .select('id')
           .eq('stream_id', id)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         setIsLiked(!!likeData);
 
@@ -127,27 +130,27 @@ export const useLiveStream = (streamId?: string) => {
           .select('id')
           .eq('follower_id', user.id)
           .eq('following_id', data.user_id)
-          .single();
+          .maybeSingle();
 
         setIsFollowing(!!followData);
       }
     } catch (error) {
       console.error('Error fetching stream:', error);
     }
-  };
+  }, [user]);
 
-  // Fetch comments
-  const fetchComments = async (id: string) => {
+  // Fetch comments with optimized query
+  const fetchComments = useCallback(async (id: string) => {
     try {
       const { data, error } = await supabase
         .from('live_stream_comments')
         .select('*')
         .eq('stream_id', id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: true })
+        .limit(100);
 
       if (error) throw error;
 
-      // Fetch profiles separately
       const userIds = [...new Set(data?.map(c => c.user_id) || [])];
       const { data: profiles } = await supabase
         .from('profiles')
@@ -166,10 +169,10 @@ export const useLiveStream = (streamId?: string) => {
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
-  };
+  }, []);
 
-  // Add comment
-  const addComment = async (streamId: string, comment: string) => {
+  // Add comment - optimistic update
+  const addComment = useCallback(async (streamId: string, comment: string) => {
     if (!user) {
       toast({
         title: "تسجيل الدخول مطلوب",
@@ -178,6 +181,21 @@ export const useLiveStream = (streamId?: string) => {
       });
       return;
     }
+
+    // Optimistic update
+    const tempComment: Comment = {
+      id: crypto.randomUUID(),
+      stream_id: streamId,
+      user_id: user.id,
+      comment,
+      created_at: new Date().toISOString(),
+      profiles: {
+        full_name: 'أنت',
+        avatar_url: null
+      }
+    };
+    
+    setComments(prev => [...prev, tempComment]);
 
     try {
       const { error } = await supabase
@@ -189,22 +207,19 @@ export const useLiveStream = (streamId?: string) => {
         });
 
       if (error) throw error;
-
-      toast({
-        title: "تم إضافة التعليق",
-        description: "تم نشر تعليقك بنجاح"
-      });
     } catch (error: any) {
+      // Rollback on error
+      setComments(prev => prev.filter(c => c.id !== tempComment.id));
       toast({
         title: "خطأ",
         description: error.message,
         variant: "destructive"
       });
     }
-  };
+  }, [user, toast]);
 
-  // Toggle like
-  const toggleLike = async (streamId: string) => {
+  // Toggle like - optimistic update
+  const toggleLike = useCallback(async (streamId: string) => {
     if (!user) {
       toast({
         title: "تسجيل الدخول مطلوب",
@@ -214,8 +229,14 @@ export const useLiveStream = (streamId?: string) => {
       return;
     }
 
+    const wasLiked = isLiked;
+    
+    // Optimistic update
+    setIsLiked(!wasLiked);
+    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
+
     try {
-      if (isLiked) {
+      if (wasLiked) {
         const { error } = await supabase
           .from('live_stream_likes')
           .delete()
@@ -223,7 +244,6 @@ export const useLiveStream = (streamId?: string) => {
           .eq('user_id', user.id);
 
         if (error) throw error;
-        setIsLiked(false);
       } else {
         const { error } = await supabase
           .from('live_stream_likes')
@@ -233,19 +253,21 @@ export const useLiveStream = (streamId?: string) => {
           });
 
         if (error) throw error;
-        setIsLiked(true);
       }
     } catch (error: any) {
+      // Rollback on error
+      setIsLiked(wasLiked);
+      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
       toast({
         title: "خطأ",
         description: error.message,
         variant: "destructive"
       });
     }
-  };
+  }, [user, isLiked, toast]);
 
-  // Toggle follow
-  const toggleFollow = async (targetUserId: string) => {
+  // Toggle follow - with proper error handling
+  const toggleFollow = useCallback(async (targetUserId: string) => {
     if (!user) {
       toast({
         title: "تسجيل الدخول مطلوب",
@@ -255,8 +277,22 @@ export const useLiveStream = (streamId?: string) => {
       return;
     }
 
+    if (user.id === targetUserId) {
+      toast({
+        title: "خطأ",
+        description: "لا يمكنك متابعة نفسك",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const wasFollowing = isFollowing;
+    
+    // Optimistic update
+    setIsFollowing(!wasFollowing);
+
     try {
-      if (isFollowing) {
+      if (wasFollowing) {
         const { error } = await supabase
           .from('user_follows')
           .delete()
@@ -264,7 +300,6 @@ export const useLiveStream = (streamId?: string) => {
           .eq('following_id', targetUserId);
 
         if (error) throw error;
-        setIsFollowing(false);
         toast({ title: "تم إلغاء المتابعة" });
       } else {
         const { error } = await supabase
@@ -275,20 +310,22 @@ export const useLiveStream = (streamId?: string) => {
           });
 
         if (error) throw error;
-        setIsFollowing(true);
         toast({ title: "تمت المتابعة بنجاح" });
       }
     } catch (error: any) {
+      // Rollback on error
+      setIsFollowing(wasFollowing);
+      console.error('Follow error:', error);
       toast({
-        title: "خطأ",
-        description: error.message,
+        title: "خطأ في المتابعة",
+        description: error.message || "حدث خطأ غير متوقع",
         variant: "destructive"
       });
     }
-  };
+  }, [user, isFollowing, toast]);
 
   // Record view
-  const recordView = async (streamId: string) => {
+  const recordView = useCallback(async (streamId: string) => {
     try {
       await supabase.from('live_stream_views').insert({
         stream_id: streamId,
@@ -297,9 +334,17 @@ export const useLiveStream = (streamId?: string) => {
     } catch (error) {
       console.error('Error recording view:', error);
     }
-  };
+  }, [user]);
 
-  // Subscribe to realtime updates
+  // Cleanup function for channels
+  const cleanupChannels = useCallback(() => {
+    channelsRef.current.forEach(channel => {
+      supabase.removeChannel(channel);
+    });
+    channelsRef.current = [];
+  }, []);
+
+  // Subscribe to realtime updates for specific stream
   useEffect(() => {
     if (!streamId) return;
 
@@ -307,9 +352,9 @@ export const useLiveStream = (streamId?: string) => {
     fetchComments(streamId);
     recordView(streamId);
 
-    // Subscribe to comments
+    // Subscribe to comments with immediate update
     const commentsChannel = supabase
-      .channel(`comments-${streamId}`)
+      .channel(`viewer-comments-${streamId}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -318,15 +363,58 @@ export const useLiveStream = (streamId?: string) => {
           table: 'live_stream_comments',
           filter: `stream_id=eq.${streamId}`
         },
+        async (payload) => {
+          console.log('New comment received:', payload);
+          // Fetch profile for new comment
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url')
+            .eq('user_id', payload.new.user_id)
+            .maybeSingle();
+          
+          const newComment: Comment = {
+            id: payload.new.id,
+            stream_id: payload.new.stream_id,
+            user_id: payload.new.user_id,
+            comment: payload.new.comment,
+            created_at: payload.new.created_at,
+            profiles: profile || { full_name: 'مستخدم', avatar_url: null }
+          };
+          
+          setComments(prev => {
+            // Avoid duplicates
+            if (prev.some(c => c.id === newComment.id)) return prev;
+            return [...prev, newComment];
+          });
+        }
+      )
+      .subscribe();
+
+    // Subscribe to likes updates
+    const likesChannel = supabase
+      .channel(`viewer-likes-${streamId}-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'live_stream_likes',
+          filter: `stream_id=eq.${streamId}`
+        },
         (payload) => {
-          fetchComments(streamId);
+          console.log('Likes update:', payload);
+          if (payload.eventType === 'INSERT') {
+            setLikesCount(prev => prev + 1);
+          } else if (payload.eventType === 'DELETE') {
+            setLikesCount(prev => Math.max(0, prev - 1));
+          }
         }
       )
       .subscribe();
 
     // Subscribe to stream updates
     const streamChannel = supabase
-      .channel(`stream-${streamId}`)
+      .channel(`viewer-stream-${streamId}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -336,45 +424,46 @@ export const useLiveStream = (streamId?: string) => {
           filter: `id=eq.${streamId}`
         },
         (payload) => {
-          console.log('تحديث البث:', payload);
-          fetchStream(streamId);
+          console.log('Stream update:', payload);
+          setCurrentStream(prev => prev ? { ...prev, ...payload.new } : null);
         }
       )
       .subscribe();
 
+    channelsRef.current = [commentsChannel, likesChannel, streamChannel];
+
     return () => {
-      supabase.removeChannel(commentsChannel);
-      supabase.removeChannel(streamChannel);
+      cleanupChannels();
     };
-  }, [streamId]);
+  }, [streamId, fetchStream, fetchComments, recordView, cleanupChannels]);
 
-  // Fetch active streams on mount
+  // Fetch active streams on mount (when no streamId)
   useEffect(() => {
-    if (!streamId) {
-      fetchActiveStreams();
+    if (streamId) return;
 
-      // Subscribe to new streams
-      const channel = supabase
-        .channel('active-streams')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'active_live_streams'
-          },
-          (payload) => {
-            console.log('تغيير في البثوث:', payload);
-            fetchActiveStreams();
-          }
-        )
-        .subscribe();
+    fetchActiveStreams();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [streamId]);
+    const channel = supabase
+      .channel(`active-streams-list-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_live_streams'
+        },
+        () => {
+          fetchActiveStreams();
+        }
+      )
+      .subscribe();
+
+    channelsRef.current = [channel];
+
+    return () => {
+      cleanupChannels();
+    };
+  }, [streamId, fetchActiveStreams, cleanupChannels]);
 
   return {
     activeStreams,
@@ -382,6 +471,7 @@ export const useLiveStream = (streamId?: string) => {
     comments,
     isLiked,
     isFollowing,
+    likesCount,
     loading,
     addComment,
     toggleLike,

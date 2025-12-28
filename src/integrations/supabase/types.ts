@@ -1294,6 +1294,44 @@ export type Database = {
           },
         ]
       }
+      live_stream_gifts: {
+        Row: {
+          created_at: string
+          gift_type: string
+          gift_value: number
+          id: string
+          message: string | null
+          sender_id: string
+          stream_id: string
+        }
+        Insert: {
+          created_at?: string
+          gift_type?: string
+          gift_value?: number
+          id?: string
+          message?: string | null
+          sender_id: string
+          stream_id: string
+        }
+        Update: {
+          created_at?: string
+          gift_type?: string
+          gift_value?: number
+          id?: string
+          message?: string | null
+          sender_id?: string
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_stream_gifts_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "active_live_streams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_stream_likes: {
         Row: {
           created_at: string | null

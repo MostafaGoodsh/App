@@ -4,14 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Video, Users, Heart, Send, ArrowLeft, UserPlus, UserCheck, MessageCircle, Gift, X } from "lucide-react";
 import { useLiveStream } from "@/hooks/useLiveStream";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDistanceToNow } from "date-fns";
-import { ar } from "date-fns/locale";
 import { WebRTCViewer } from "@/utils/webrtc";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+const GIFTS = [
+  { id: 'heart', emoji: '❤️', name: 'قلب', value: 1 },
+  { id: 'star', emoji: '⭐', name: 'نجمة', value: 5 },
+  { id: 'fire', emoji: '🔥', name: 'نار', value: 10 },
+  { id: 'diamond', emoji: '💎', name: 'ماسة', value: 50 },
+  { id: 'crown', emoji: '👑', name: 'تاج', value: 100 },
+  { id: 'rocket', emoji: '🚀', name: 'صاروخ', value: 200 },
+];
 
 const LiveStreamViewer = () => {
   const { streamId } = useParams<{ streamId: string }>();
@@ -23,12 +32,12 @@ const LiveStreamViewer = () => {
     comments,
     isLiked,
     isFollowing,
+    likesCount,
     addComment,
     toggleLike,
     toggleFollow
   } = useLiveStream(streamId);
 
-  // معرف فريد للمشاهد حتى بدون تسجيل دخول
   const [viewerId] = useState(() => {
     const existing = localStorage.getItem("live_viewer_id");
     if (existing) return existing;
@@ -44,6 +53,8 @@ const LiveStreamViewer = () => {
   const [playError, setPlayError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
+  const [showGiftDialog, setShowGiftDialog] = useState(false);
+  const [sendingGift, setSendingGift] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const viewerRef = useRef<WebRTCViewer | null>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
@@ -53,27 +64,16 @@ const LiveStreamViewer = () => {
       console.log('Starting WebRTC viewer for stream:', streamId, 'as viewer:', viewerId);
       viewerRef.current = new WebRTCViewer(streamId, viewerId, (stream) => {
         console.log('Received remote stream, tracks:', stream.getTracks().length);
-        stream.getTracks().forEach(track => {
-          console.log(`Remote track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
-        });
-
         setHasRemoteStream(true);
         setIsVideoPlaying(false);
         setPlayError(null);
         
         if (videoRef.current) {
-          console.log('Setting srcObject on video element');
           videoRef.current.srcObject = stream;
-          
-          // Try to autoplay
-          videoRef.current.play().then(() => {
-            console.log('Video playing successfully');
-          }).catch(err => {
+          videoRef.current.play().catch(err => {
             console.error('Error playing video:', err);
-            setPlayError('يتطلب تشغيل الفيديو الضغط على زر التشغيل بسبب إعدادات المتصفح');
+            setPlayError('يتطلب تشغيل الفيديو الضغط على زر التشغيل');
           });
-        } else {
-          console.error('Video element ref is null!');
         }
       });
       
@@ -115,10 +115,49 @@ const LiveStreamViewer = () => {
     setFollowLoading(true);
     try {
       await toggleFollow(currentStream.user_id);
-    } catch (error) {
-      console.error('Follow error:', error);
     } finally {
       setFollowLoading(false);
+    }
+  };
+
+  const handleSendGift = async (gift: typeof GIFTS[0]) => {
+    if (!user) {
+      toast({
+        title: "تسجيل الدخول مطلوب",
+        description: "يجب تسجيل الدخول لإرسال الهدايا",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!streamId) return;
+
+    setSendingGift(true);
+    try {
+      const { error } = await supabase
+        .from('live_stream_gifts')
+        .insert({
+          stream_id: streamId,
+          sender_id: user.id,
+          gift_type: gift.id,
+          gift_value: gift.value
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: `${gift.emoji} تم إرسال ${gift.name}!`,
+        description: `شكراً لدعمك للبث`
+      });
+      setShowGiftDialog(false);
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message || "فشل في إرسال الهدية",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingGift(false);
     }
   };
 
@@ -143,20 +182,12 @@ const LiveStreamViewer = () => {
           playsInline
           muted
           className="w-full h-full object-cover"
-          onLoadedMetadata={() => console.log('Video metadata loaded')}
-          onCanPlay={() => console.log('Video can play')}
           onPlay={() => {
-            console.log('Video started playing');
             setIsVideoPlaying(true);
             setPlayError(null);
           }}
-          onPause={() => {
-            setIsVideoPlaying(false);
-          }}
-          onError={(e) => {
-            console.error('Video error:', e);
-            setPlayError('حدث خطأ أثناء تشغيل الفيديو');
-          }}
+          onPause={() => setIsVideoPlaying(false)}
+          onError={() => setPlayError('حدث خطأ أثناء تشغيل الفيديو')}
         />
 
         {/* Waiting for stream overlay */}
@@ -177,30 +208,24 @@ const LiveStreamViewer = () => {
               onClick={() => {
                 if (videoRef.current) {
                   videoRef.current.muted = false;
-                  videoRef.current
-                    .play()
-                    .then(() => {
-                      setIsVideoPlaying(true);
-                      setPlayError(null);
-                    })
-                    .catch((err) => {
-                      console.error('Manual play failed:', err);
-                      setPlayError('تعذر تشغيل الفيديو، تحقق من إعدادات المتصفح');
-                    });
+                  videoRef.current.play().then(() => {
+                    setIsVideoPlaying(true);
+                    setPlayError(null);
+                  }).catch(() => {
+                    setPlayError('تعذر تشغيل الفيديو');
+                  });
                 }
               }}
             >
               اضغط لتشغيل البث
             </Button>
             {playError && (
-              <p className="mt-2 text-sm text-red-400 text-center max-w-xs">
-                {playError}
-              </p>
+              <p className="mt-2 text-sm text-red-400 text-center max-w-xs">{playError}</p>
             )}
           </div>
         )}
 
-        {/* Top Bar - Header with back button and stats */}
+        {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent flex items-center justify-between">
           <Button 
             variant="ghost" 
@@ -222,7 +247,7 @@ const LiveStreamViewer = () => {
           </div>
         </div>
 
-        {/* Comments Overlay - Left side like TikTok */}
+        {/* Comments Overlay */}
         {showComments && (
           <div className="absolute left-0 bottom-32 w-[70%] max-w-[350px] max-h-[50%] p-4 overflow-hidden">
             <div className="space-y-3 overflow-y-auto max-h-full scrollbar-hide">
@@ -260,7 +285,7 @@ const LiveStreamViewer = () => {
           {showComments ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
         </Button>
 
-        {/* Right Side Actions - Like and Gift */}
+        {/* Right Side Actions */}
         <div className="absolute right-4 bottom-36 flex flex-col items-center gap-4">
           <Button
             variant="ghost"
@@ -271,12 +296,13 @@ const LiveStreamViewer = () => {
           >
             <Heart className={`w-7 h-7 ${isLiked ? 'fill-current' : ''}`} />
           </Button>
-          <span className="text-white text-sm font-bold">{currentStream.likes_count || 0}</span>
+          <span className="text-white text-sm font-bold">{likesCount}</span>
           
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full w-12 h-12 text-white bg-black/30 hover:scale-110 transition-transform"
+            onClick={() => setShowGiftDialog(true)}
+            className="rounded-full w-12 h-12 text-yellow-400 bg-black/30 hover:scale-110 transition-transform hover:bg-yellow-400/20"
           >
             <Gift className="w-7 h-7" />
           </Button>
@@ -284,7 +310,7 @@ const LiveStreamViewer = () => {
         </div>
       </div>
 
-      {/* Bottom Bar - Broadcaster info & Comment input */}
+      {/* Bottom Bar */}
       <div className="bg-gradient-to-t from-black via-black/95 to-transparent p-4 pb-6 space-y-4">
         {/* Broadcaster Info */}
         <div className="flex items-center gap-3">
@@ -299,9 +325,7 @@ const LiveStreamViewer = () => {
             <h3 className="text-white font-cairo font-bold text-lg truncate">
               {currentStream.profiles?.full_name || 'مستخدم'}
             </h3>
-            <p className="text-white/60 text-sm truncate">
-              {currentStream.title}
-            </p>
+            <p className="text-white/60 text-sm truncate">{currentStream.title}</p>
           </div>
           
           {user && user.id !== currentStream.user_id && (
@@ -360,6 +384,38 @@ const LiveStreamViewer = () => {
           )}
         </div>
       </div>
+
+      {/* Gift Dialog */}
+      <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-cairo text-center">إرسال هدية</DialogTitle>
+            <DialogDescription className="font-cairo text-center">
+              اختر هدية لدعم صاحب البث
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-4 py-4">
+            {GIFTS.map((gift) => (
+              <Button
+                key={gift.id}
+                variant="outline"
+                onClick={() => handleSendGift(gift)}
+                disabled={sendingGift || !user}
+                className="flex flex-col items-center gap-2 h-auto py-4 hover:bg-primary/10 hover:border-primary transition-all"
+              >
+                <span className="text-3xl">{gift.emoji}</span>
+                <span className="font-cairo text-sm">{gift.name}</span>
+                <Badge variant="secondary" className="text-xs">{gift.value} نقطة</Badge>
+              </Button>
+            ))}
+          </div>
+          {!user && (
+            <p className="text-center text-sm text-muted-foreground font-cairo">
+              يجب تسجيل الدخول لإرسال الهدايا
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
