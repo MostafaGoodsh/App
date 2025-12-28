@@ -22,6 +22,9 @@ const GIFTS = [
   { id: 'rocket', emoji: '🚀', name: 'صاروخ', value: 200 },
 ];
 
+// Format gift value with XP label
+const formatGiftValue = (value: number) => `${value} XP`;
+
 const LiveStreamViewer = () => {
   const { streamId } = useParams<{ streamId: string }>();
   const navigate = useNavigate();
@@ -405,7 +408,7 @@ const LiveStreamViewer = () => {
               >
                 <span className="text-3xl">{gift.emoji}</span>
                 <span className="font-cairo text-sm">{gift.name}</span>
-                <Badge variant="secondary" className="text-xs">{gift.value} نقطة</Badge>
+                <Badge variant="secondary" className="text-xs">{formatGiftValue(gift.value)}</Badge>
               </Button>
             ))}
           </div>
