@@ -1,8 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import vodafoneImg from '@/assets/payment-vodafone.jpeg';
-import orangeImg from '@/assets/payment-orange.jpg';
 import ecashImg from '@/assets/payment-ecash.jpg';
 import fawryImg from '@/assets/payment-fawry.jpeg';
 import cardImg from '@/assets/payment-visa-mastercard.jpeg';
@@ -112,26 +110,10 @@ export const usePayment = () => {
   const getSupportedMethods = useCallback(() => {
     return [
       { 
-        id: 'vodafone_cash', 
-        name: 'فودافون كاش', 
-        name_en: 'Vodafone Cash',
-        icon: '📱',
-        color: 'from-red-500 to-red-600',
-        bgImage: vodafoneImg
-      },
-      { 
-        id: 'orange_cash', 
-        name: 'أورانج كاش', 
-        name_en: 'Orange Cash',
-        icon: '🍊',
-        color: 'from-orange-500 to-orange-600',
-        bgImage: orangeImg
-      },
-      { 
         id: 'etisalat_cash', 
-        name: 'اتصالات كاش', 
-        name_en: 'Etisalat Cash',
-        icon: '💚',
+        name: 'المحافظ الإلكترونية', 
+        name_en: 'Mobile Wallets',
+        icon: '📱',
         color: 'from-green-500 to-green-600',
         bgImage: ecashImg
       },
