@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ecashImg from '@/assets/payment-ecash.jpg';
+import mobileWalletsImg from '@/assets/payment-mobile-wallets.jpeg';
 import fawryImg from '@/assets/payment-fawry.jpeg';
 import cardImg from '@/assets/payment-visa-mastercard.jpeg';
 
@@ -115,7 +115,7 @@ export const usePayment = () => {
         name_en: 'Mobile Wallets',
         icon: '📱',
         color: 'from-green-500 to-green-600',
-        bgImage: ecashImg
+        bgImage: mobileWalletsImg
       },
       { 
         id: 'fawry', 
