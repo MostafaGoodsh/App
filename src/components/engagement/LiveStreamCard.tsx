@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Video } from "lucide-react";
 
 const LiveStreamCard = () => {
   return (
@@ -12,17 +11,14 @@ const LiveStreamCard = () => {
           loading="lazy" 
         />
         <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-          <div className="flex items-center gap-3 mb-3">
-            <Video className="w-8 h-8 text-primary" />
-            <h2 className="font-cairo text-2xl md:text-3xl text-primary transition-colors duration-300 font-bold">
-              Live Stream | البث المباشر
-            </h2>
-          </div>
+          <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
+            Live | البث المباشر
+          </h2>
           <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
-            للأعضاء المعتمدين والمؤثرين - يتطلب موافقة إدارية
+            للأعضاء المعتمدين والمؤثرين
           </p>
           <p className="font-cairo text-xs text-white/70 mt-2">
-            قدّم طلبك الآن للانضمام إلى منصة البث المباشر
+            يتطلب دعوة أو موافقة إدارية
           </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover:w-20 transition-all duration-300"></div>
         </div>
