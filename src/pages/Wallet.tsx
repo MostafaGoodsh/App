@@ -63,6 +63,16 @@ const WalletContent = () => {
         .order('created_at', { ascending: false })
         .limit(10);
 
+      const { data: withdrawals } = await supabase
+        .from('withdrawal_requests')
+        .select(`
+          *,
+          internal_token:internal_tokens!withdrawal_requests_internal_token_id_fkey(symbol, name)
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
       const allTx = [
         ...(swaps || []).map(s => ({
           id: s.id,
@@ -73,7 +83,8 @@ const WalletContent = () => {
           to_token: s.to_token?.symbol,
           date: new Date(s.created_at).toLocaleDateString('ar-EG'),
           time: new Date(s.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-          status: s.status
+          status: s.status,
+          created_at: s.created_at
         })),
         ...(payments || []).map(p => ({
           id: p.id,
@@ -83,9 +94,23 @@ const WalletContent = () => {
           payment_method: p.payment_method,
           date: new Date(p.created_at).toLocaleDateString('ar-EG'),
           time: new Date(p.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-          status: p.status
+          status: p.status,
+          created_at: p.created_at
+        })),
+        ...(withdrawals || []).map(w => ({
+          id: w.id,
+          type: 'withdrawal',
+          amount: w.internal_amount,
+          target_amount: w.target_amount,
+          from_token: w.internal_token?.symbol,
+          to_token: w.target_token,
+          target_address: w.target_address,
+          date: new Date(w.created_at).toLocaleDateString('ar-EG'),
+          time: new Date(w.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+          status: w.status,
+          created_at: w.created_at
         }))
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setInternalTransactions(allTx.slice(0, 10));
     };
@@ -173,6 +198,10 @@ const WalletContent = () => {
                       <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
                         <TrendingUp className="w-5 h-5 text-blue-400" />
                       </div>
+                    ) : tx.type === 'withdrawal' ? (
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                        <ArrowUpRight className="w-5 h-5 text-orange-400" />
+                      </div>
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
                         <ArrowDownLeft className="w-5 h-5 text-green-400" />
@@ -183,6 +212,8 @@ const WalletContent = () => {
                       <p className="font-cairo font-medium text-white">
                         {tx.type === 'swap' 
                           ? `تبديل ${tx.from_token} إلى ${tx.to_token}`
+                          : tx.type === 'withdrawal'
+                          ? `سحب ${tx.from_token} إلى ${tx.to_token}`
                           : `شحن ${tx.currency}`
                         }
                       </p>
@@ -196,15 +227,17 @@ const WalletContent = () => {
                     <p className="font-cairo font-medium text-white">
                       {tx.type === 'swap' 
                         ? `${tx.to_amount} ${tx.to_token}`
+                        : tx.type === 'withdrawal'
+                        ? `${tx.target_amount} ${tx.to_token}`
                         : `${tx.amount} ${tx.currency}`
                       }
                     </p>
                     <Badge 
-                      variant={tx.status === 'completed' ? 'default' : 'secondary'}
+                      variant={tx.status === 'completed' ? 'default' : tx.status === 'failed' ? 'destructive' : 'secondary'}
                       className="text-xs"
                     >
                       {tx.status === 'completed' ? 'مكتمل' : 
-                       tx.status === 'pending' ? 'قيد المعالجة' : 'فشل'}
+                       tx.status === 'pending' || tx.status === 'processing' ? 'قيد المعالجة' : 'فشل'}
                     </Badge>
                   </div>
                 </div>
