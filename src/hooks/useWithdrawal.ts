@@ -102,17 +102,24 @@ export const useWithdrawal = () => {
     }
   }, [toast, getWithdrawals]);
 
-  // Calculate estimated target amount
+  // Calculate estimated target amount - MUST match edge function logic!
   const calculateTargetAmount = useCallback((internalAmount: number, targetToken: string) => {
-    // Simplified exchange rates (in production, use real-time rates)
-    const exchangeRates: Record<string, number> = {
-      'SOL': 0.01,
-      'USDC': 0.001,
-      'BTC': 0.000001,
-      'ETH': 0.000005
+    // Token prices in USD (must match edge function process-withdrawal/index.ts)
+    const tokenPricesUsd: Record<string, number> = {
+      'SOL': 100,
+      'USDC': 1,
+      'BTC': 40000,
+      'ETH': 2000
     };
 
-    return internalAmount * (exchangeRates[targetToken] || 0.001);
+    // Internal token exchange rate (MSRA = 0.01 USD per token)
+    const internalTokenUsdRate = 0.01;
+    
+    // Calculate: (internal_amount * internal_usd_rate) / target_price
+    const internalValueUsd = internalAmount * internalTokenUsdRate;
+    const targetPrice = tokenPricesUsd[targetToken] || 1;
+    
+    return internalValueUsd / targetPrice;
   }, []);
 
   // Get supported target tokens
