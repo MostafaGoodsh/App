@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize, Copy, Heart, MessageSquare } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize, Copy, Heart, MessageSquare, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WebRTCBroadcaster } from "@/utils/webrtc";
@@ -23,6 +23,23 @@ interface Comment {
   } | null;
 }
 
+interface StreamGift {
+  id: string;
+  gift_type: string;
+  gift_value: number;
+  created_at: string;
+  sender_id: string;
+}
+
+const GIFT_EMOJIS: Record<string, string> = {
+  heart: '❤️',
+  star: '⭐',
+  fire: '🔥',
+  diamond: '💎',
+  crown: '👑',
+  rocket: '🚀'
+};
+
 const LiveStreamBroadcast = () => {
   const { toast } = useToast();
   const [isStreaming, setIsStreaming] = useState(false);
@@ -34,6 +51,8 @@ const LiveStreamBroadcast = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [likesCount, setLikesCount] = useState(0);
+  const [gifts, setGifts] = useState<StreamGift[]>([]);
+  const [totalGiftValue, setTotalGiftValue] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -42,9 +61,18 @@ const LiveStreamBroadcast = () => {
   const broadcasterRef = useRef<WebRTCBroadcaster | null>(null);
   const currentStreamIdRef = useRef<string | null>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
+
+  // Cleanup channels
+  const cleanupChannels = useCallback(() => {
+    channelsRef.current.forEach(channel => {
+      supabase.removeChannel(channel);
+    });
+    channelsRef.current = [];
+  }, []);
 
   // Fetch comments function
-  const fetchComments = async (streamId: string) => {
+  const fetchComments = useCallback(async (streamId: string) => {
     const { data } = await supabase
       .from('live_stream_comments')
       .select('id, comment, created_at, user_id')
@@ -70,28 +98,46 @@ const LiveStreamBroadcast = () => {
       
       setComments(commentsWithProfiles);
     }
-  };
+  }, []);
 
   // Fetch likes count
-  const fetchLikes = async (streamId: string) => {
+  const fetchLikes = useCallback(async (streamId: string) => {
     const { count } = await supabase
       .from('live_stream_likes')
       .select('*', { count: 'exact', head: true })
       .eq('stream_id', streamId);
 
     setLikesCount(count || 0);
-  };
+  }, []);
 
-  // Subscribe to comments when streaming
+  // Fetch gifts
+  const fetchGifts = useCallback(async (streamId: string) => {
+    const { data } = await supabase
+      .from('live_stream_gifts')
+      .select('*')
+      .eq('stream_id', streamId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (data) {
+      setGifts(data);
+      const total = data.reduce((sum, g) => sum + g.gift_value, 0);
+      setTotalGiftValue(total);
+    }
+  }, []);
+
+  // Subscribe to real-time updates when streaming
   useEffect(() => {
     if (!isStreaming || !currentStreamIdRef.current) return;
 
     const streamId = currentStreamIdRef.current;
     fetchComments(streamId);
     fetchLikes(streamId);
+    fetchGifts(streamId);
 
+    // Subscribe to comments
     const commentsChannel = supabase
-      .channel(`broadcaster-comments-${streamId}`)
+      .channel(`broadcaster-comments-${streamId}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -100,12 +146,32 @@ const LiveStreamBroadcast = () => {
           table: 'live_stream_comments',
           filter: `stream_id=eq.${streamId}`,
         },
-        () => fetchComments(streamId)
+        async (payload) => {
+          console.log('New comment for broadcaster:', payload);
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url')
+            .eq('user_id', payload.new.user_id)
+            .maybeSingle();
+          
+          const newComment: Comment = {
+            id: payload.new.id,
+            comment: payload.new.comment,
+            created_at: payload.new.created_at,
+            profiles: profile || null
+          };
+          
+          setComments(prev => {
+            if (prev.some(c => c.id === newComment.id)) return prev;
+            return [...prev, newComment];
+          });
+        }
       )
       .subscribe();
 
+    // Subscribe to likes
     const likesChannel = supabase
-      .channel(`broadcaster-likes-${streamId}`)
+      .channel(`broadcaster-likes-${streamId}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -114,15 +180,49 @@ const LiveStreamBroadcast = () => {
           table: 'live_stream_likes',
           filter: `stream_id=eq.${streamId}`,
         },
-        () => fetchLikes(streamId)
+        (payload) => {
+          console.log('Likes update for broadcaster:', payload);
+          if (payload.eventType === 'INSERT') {
+            setLikesCount(prev => prev + 1);
+          } else if (payload.eventType === 'DELETE') {
+            setLikesCount(prev => Math.max(0, prev - 1));
+          }
+        }
       )
       .subscribe();
 
+    // Subscribe to gifts
+    const giftsChannel = supabase
+      .channel(`broadcaster-gifts-${streamId}-${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'live_stream_gifts',
+          filter: `stream_id=eq.${streamId}`,
+        },
+        (payload) => {
+          console.log('New gift received:', payload);
+          const newGift = payload.new as StreamGift;
+          setGifts(prev => [newGift, ...prev].slice(0, 20));
+          setTotalGiftValue(prev => prev + newGift.gift_value);
+          
+          // Show toast for new gift
+          toast({
+            title: `${GIFT_EMOJIS[newGift.gift_type] || '🎁'} هدية جديدة!`,
+            description: `تلقيت ${newGift.gift_value} نقطة`
+          });
+        }
+      )
+      .subscribe();
+
+    channelsRef.current = [commentsChannel, likesChannel, giftsChannel];
+
     return () => {
-      commentsChannel.unsubscribe();
-      likesChannel.unsubscribe();
+      cleanupChannels();
     };
-  }, [isStreaming]);
+  }, [isStreaming, fetchComments, fetchLikes, fetchGifts, cleanupChannels, toast]);
 
   // Auto-scroll comments
   useEffect(() => {
@@ -130,7 +230,6 @@ const LiveStreamBroadcast = () => {
   }, [comments]);
 
   useEffect(() => {
-    // Handle fullscreen change events
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -139,9 +238,10 @@ const LiveStreamBroadcast = () => {
 
     return () => {
       stopAllStreams();
+      cleanupChannels();
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [cleanupChannels]);
 
   const stopAllStreams = () => {
     if (streamRef.current) {
@@ -212,10 +312,7 @@ const LiveStreamBroadcast = () => {
   const startScreenShare = async () => {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
+        video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
         audio: false
       });
 
@@ -228,7 +325,6 @@ const LiveStreamBroadcast = () => {
       setIsScreenSharing(true);
       setIsCameraOn(false);
       
-      // Handle when user stops sharing via browser UI
       screenStream.getVideoTracks()[0].onended = () => {
         stopScreenShare();
       };
@@ -239,12 +335,9 @@ const LiveStreamBroadcast = () => {
       });
     } catch (error) {
       console.error('Error sharing screen:', error);
-      const errorMessage = error instanceof Error ? error.message : "خطأ غير معروف";
       toast({
         title: "خطأ في مشاركة الشاشة",
-        description: errorMessage.includes("Permission denied") 
-          ? "تم رفض إذن مشاركة الشاشة. الرجاء السماح بمشاركة الشاشة وإعادة المحاولة."
-          : "تأكد من السماح بمشاركة الشاشة. قد تحتاج إلى استخدام HTTPS.",
+        description: "تأكد من السماح بمشاركة الشاشة",
         variant: "destructive"
       });
     }
@@ -283,23 +376,15 @@ const LiveStreamBroadcast = () => {
         throw new Error("User not authenticated");
       }
 
-      // إنشاء stream ID و stream key
       const streamId = crypto.randomUUID();
       const streamKey = `stream_${Date.now()}`;
       
       currentStreamIdRef.current = streamId;
       
-      // بدء WebRTC أولاً قبل حفظ البث في قاعدة البيانات
       const activeStream = screenStreamRef.current || streamRef.current;
       if (!activeStream) {
         throw new Error('No active stream available for broadcasting!');
       }
-      
-      console.log('Starting WebRTC broadcaster first...');
-      console.log('Active stream tracks:', activeStream.getTracks().length);
-      activeStream.getTracks().forEach(track => {
-        console.log(`Broadcast track: ${track.kind}, enabled: ${track.enabled}, readyState: ${track.readyState}`);
-      });
       
       broadcasterRef.current = new WebRTCBroadcaster(
         streamId, 
@@ -308,64 +393,42 @@ const LiveStreamBroadcast = () => {
       );
       
       await broadcasterRef.current.start(activeStream);
-      console.log('✅ WebRTC broadcaster started successfully');
       
       setIsStreaming(true);
       
-      // الآن بعد أن أصبح المذيع جاهزاً، احفظ البث في قاعدة البيانات
-      console.log('Saving stream to database...');
-      
-      // حفظ في live_streams للسجل
-      const { error: streamError } = await supabase
-        .from('live_streams')
-        .insert({
-          id: streamId,
-          user_id: userData.data.user.id,
-          title: streamTitle,
-          description: 'بث مباشر',
-          stream_key: streamKey,
-          status: 'active',
-          started_at: new Date().toISOString(),
-          viewer_count: 0,
-          likes_count: 0,
-          total_views: 0
-        });
+      // Save to live_streams
+      await supabase.from('live_streams').insert({
+        id: streamId,
+        user_id: userData.data.user.id,
+        title: streamTitle,
+        description: 'بث مباشر',
+        stream_key: streamKey,
+        status: 'active',
+        started_at: new Date().toISOString(),
+        viewer_count: 0,
+        likes_count: 0,
+        total_views: 0
+      });
 
-      if (streamError) {
-        console.error('Error saving to live_streams:', streamError);
-      }
-
-      // حفظ في active_live_streams ليكون مرئياً للمشاهدين
-      const { error: activeError } = await supabase
-        .from('active_live_streams')
-        .insert({
-          id: streamId,
-          user_id: userData.data.user.id,
-          title: streamTitle,
-          description: 'بث مباشر',
-          stream_key: streamKey,
-          is_active: true,
-          started_at: new Date().toISOString(),
-          viewer_count: 0,
-          likes_count: 0
-        });
-
-      if (activeError) {
-        console.error('Error adding to active streams:', activeError);
-        throw activeError;
-      }
-      
-      console.log('✅ Stream saved to database:', streamId);
-      console.log('✅ Stream is now visible to viewers');
+      // Save to active_live_streams
+      await supabase.from('active_live_streams').insert({
+        id: streamId,
+        user_id: userData.data.user.id,
+        title: streamTitle,
+        description: 'بث مباشر',
+        stream_key: streamKey,
+        is_active: true,
+        started_at: new Date().toISOString(),
+        viewer_count: 0,
+        likes_count: 0
+      });
 
       toast({
         title: "بدأ البث المباشر",
-        description: "أنت الآن على الهواء مباشرة! المشاهدون يمكنهم رؤية بثك الآن."
+        description: "أنت الآن على الهواء مباشرة!"
       });
     } catch (error: any) {
       console.error('Error starting broadcast:', error);
-      
-      // إذا فشل، توقف عن البث
       setIsStreaming(false);
       broadcasterRef.current?.stop();
       broadcasterRef.current = null;
@@ -382,41 +445,33 @@ const LiveStreamBroadcast = () => {
   const stopBroadcast = async () => {
     setIsStreaming(false);
     
-    // إيقاف WebRTC
     broadcasterRef.current?.stop();
     broadcasterRef.current = null;
 
-    // تحديث حالة البث وحذفه من البثوث النشطة
     if (currentStreamIdRef.current) {
       try {
-        // تحديث live_streams
-        await supabase
-          .from('live_streams')
-          .update({ 
-            status: 'ended',
-            ended_at: new Date().toISOString()
-          })
-          .eq('id', currentStreamIdRef.current);
+        await supabase.from('live_streams').update({ 
+          status: 'ended',
+          ended_at: new Date().toISOString()
+        }).eq('id', currentStreamIdRef.current);
         
-        // حذف من active_live_streams
-        await supabase
-          .from('active_live_streams')
-          .delete()
-          .eq('id', currentStreamIdRef.current);
-        
-        console.log('البث تم إيقافه وحذفه من البثوث النشطة');
+        await supabase.from('active_live_streams').delete().eq('id', currentStreamIdRef.current);
       } catch (error) {
         console.error('Error updating stream status:', error);
       }
     }
 
     setViewerCount(0);
+    setComments([]);
+    setLikesCount(0);
+    setGifts([]);
+    setTotalGiftValue(0);
     stopAllStreams();
     setIsCameraOn(false);
     setIsScreenSharing(false);
     currentStreamIdRef.current = null;
+    cleanupChannels();
     
-    // Exit fullscreen if active
     if (document.fullscreenElement) {
       document.exitFullscreen();
     }
@@ -437,239 +492,246 @@ const LiveStreamBroadcast = () => {
     try {
       if (!document.fullscreenElement) {
         await videoContainerRef.current.requestFullscreen();
-        setIsFullscreen(true);
       } else {
         await document.exitFullscreen();
-        setIsFullscreen(false);
       }
     } catch (error) {
       console.error('Error toggling fullscreen:', error);
-      toast({
-        title: "خطأ",
-        description: "فشل في تفعيل وضع الشاشة الكاملة",
-        variant: "destructive"
-      });
     }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        {/* عنوان البث */}
-        <Card>
-        <CardHeader>
-          <CardTitle className="font-cairo">إعدادات البث المباشر</CardTitle>
-          <CardDescription>قم بإعداد بثك المباشر قبل البدء</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="stream_title">عنوان البث *</Label>
-            <Input
-              id="stream_title"
-              value={streamTitle}
-              onChange={(e) => setStreamTitle(e.target.value)}
-              placeholder="مثال: جلسة أسئلة وأجوبة مباشرة"
-              disabled={isStreaming}
-              className="font-cairo"
-            />
-          </div>
-
-          {isStreaming && (
-            <>
-              <Alert>
-                <Users className="w-4 h-4" />
-                <AlertDescription className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
-                    على الهواء
-                  </Badge>
-                  <span>{viewerCount} مشاهد</span>
-                </AlertDescription>
-              </Alert>
-              
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const url = `${window.location.origin}/live-stream/watch/${currentStreamIdRef.current}`;
-                  navigator.clipboard.writeText(url);
-                  toast({
-                    title: "✓ تم نسخ رابط المشاهدة",
-                    description: "افتح الرابط في نافذة أخرى أو شاركه مع المشاهدين",
-                  });
-                }}
-                className="w-full"
-              >
-                <Copy className="w-4 h-4 ml-2" />
-                نسخ رابط المشاهدة
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* معاينة الفيديو */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-cairo">معاينة البث</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div 
-            ref={videoContainerRef}
-            className="relative aspect-video bg-black rounded-lg overflow-hidden group cursor-pointer"
-            onClick={toggleFullscreen}
-          >
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-            {!isCameraOn && !isScreenSharing && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center text-white">
-                  <VideoOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                  <p className="font-cairo">الكاميرا غير مفعلة</p>
-                </div>
-              </div>
-            )}
-            {isStreaming && (
-              <div className="absolute top-4 left-4 pointer-events-none">
-                <Badge className="bg-red-500 text-white animate-pulse">
-                  ● على الهواء
-                </Badge>
-              </div>
-            )}
-            {/* زر الشاشة الكاملة */}
-            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <div className="bg-black/60 p-2 rounded-lg backdrop-blur-sm">
-                {isFullscreen ? (
-                  <Minimize className="w-6 h-6 text-white" />
-                ) : (
-                  <Maximize className="w-6 h-6 text-white" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* أزرار التحكم */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-            <Button
-              onClick={isCameraOn ? stopCamera : startCamera}
-              variant={isCameraOn ? "default" : "outline"}
-              disabled={isStreaming || isScreenSharing}
-              className="w-full"
-            >
-              {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
-              {isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
-            </Button>
-
-            <Button
-              onClick={toggleMicrophone}
-              variant={isMicOn ? "default" : "outline"}
-              className="w-full"
-            >
-              {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
-              {isMicOn ? "كتم الصوت" : "تشغيل الصوت"}
-            </Button>
-
-            <Button
-              onClick={isScreenSharing ? stopScreenShare : startScreenShare}
-              variant={isScreenSharing ? "default" : "outline"}
-              disabled={isStreaming || isCameraOn}
-              className="w-full"
-            >
-              {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
-              {isScreenSharing ? "إيقاف المشاركة" : "مشاركة الشاشة"}
-            </Button>
-
-            {!isStreaming ? (
-              <Button
-                onClick={startBroadcast}
-                className="w-full bg-red-500 hover:bg-red-600 text-white"
-              >
-                <Play className="w-4 h-4 ml-2" />
-                بدء البث
-              </Button>
-            ) : (
-              <Button
-                onClick={stopBroadcast}
-                variant="destructive"
-                className="w-full"
-              >
-                <Square className="w-4 h-4 ml-2" />
-                إيقاف البث
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-        {/* نصائح للبث */}
+        {/* Stream Settings */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
+            <CardTitle className="font-cairo">إعدادات البث المباشر</CardTitle>
+            <CardDescription>قم بإعداد بثك المباشر قبل البدء</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
-              <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
-              <li>اختبر الصوت والصورة قبل بدء البث</li>
-              <li>استخدم اتصال إنترنت مستقر</li>
-              <li>تفاعل مع المشاهدين في التعليقات</li>
-              <li>حضّر محتوى جذاب ومفيد للجمهور</li>
-            </ul>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="stream_title">عنوان البث *</Label>
+              <Input
+                id="stream_title"
+                value={streamTitle}
+                onChange={(e) => setStreamTitle(e.target.value)}
+                placeholder="مثال: جلسة أسئلة وأجوبة مباشرة"
+                disabled={isStreaming}
+                className="font-cairo"
+              />
+            </div>
+
+            {isStreaming && (
+              <>
+                <Alert>
+                  <Users className="w-4 h-4" />
+                  <AlertDescription className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
+                      على الهواء
+                    </Badge>
+                    <span>{viewerCount} مشاهد</span>
+                  </AlertDescription>
+                </Alert>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const url = `${window.location.origin}/live-stream/watch/${currentStreamIdRef.current}`;
+                    navigator.clipboard.writeText(url);
+                    toast({
+                      title: "✓ تم نسخ رابط المشاهدة",
+                      description: "شارك الرابط مع المشاهدين",
+                    });
+                  }}
+                  className="w-full"
+                >
+                  <Copy className="w-4 h-4 ml-2" />
+                  نسخ رابط المشاهدة
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
+
+        {/* Video Preview */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-cairo">معاينة البث</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div 
+              ref={videoContainerRef}
+              className="relative aspect-video bg-black rounded-lg overflow-hidden group"
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+              />
+              {!isCameraOn && !isScreenSharing && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center text-white">
+                    <VideoOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="font-cairo">الكاميرا غير مفعلة</p>
+                  </div>
+                </div>
+              )}
+              {isStreaming && (
+                <div className="absolute top-4 left-4 pointer-events-none">
+                  <Badge className="bg-red-500 text-white animate-pulse">● على الهواء</Badge>
+                </div>
+              )}
+              
+              {/* Fullscreen button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleFullscreen}
+                className="absolute bottom-4 right-4 bg-black/60 text-white hover:bg-black/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+              </Button>
+
+              {/* Stats overlay in fullscreen */}
+              {isFullscreen && isStreaming && (
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <Badge variant="secondary" className="bg-black/60 backdrop-blur-sm">
+                    <Users className="w-4 h-4 mr-1" /> {viewerCount}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-black/60 backdrop-blur-sm">
+                    <Heart className="w-4 h-4 mr-1" /> {likesCount}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-black/60 backdrop-blur-sm">
+                    <Gift className="w-4 h-4 mr-1" /> {totalGiftValue}
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            {/* Control buttons */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <Button
+                onClick={isCameraOn ? stopCamera : startCamera}
+                variant={isCameraOn ? "default" : "outline"}
+                disabled={isStreaming || isScreenSharing}
+                className="w-full"
+              >
+                {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
+                {isCameraOn ? "إيقاف" : "الكاميرا"}
+              </Button>
+
+              <Button
+                onClick={toggleMicrophone}
+                variant={isMicOn ? "default" : "outline"}
+                className="w-full"
+              >
+                {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
+                {isMicOn ? "كتم" : "الصوت"}
+              </Button>
+
+              <Button
+                onClick={isScreenSharing ? stopScreenShare : startScreenShare}
+                variant={isScreenSharing ? "default" : "outline"}
+                disabled={isStreaming || isCameraOn}
+                className="w-full"
+              >
+                {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
+                {isScreenSharing ? "إيقاف" : "الشاشة"}
+              </Button>
+
+              {!isStreaming ? (
+                <Button
+                  onClick={startBroadcast}
+                  className="w-full bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <Play className="w-4 h-4 ml-2" />
+                  بدء البث
+                </Button>
+              ) : (
+                <Button
+                  onClick={stopBroadcast}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  <Square className="w-4 h-4 ml-2" />
+                  إيقاف
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tips */}
+        {!isStreaming && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
+                <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
+                <li>اختبر الصوت والصورة قبل بدء البث</li>
+                <li>استخدم اتصال إنترنت مستقر</li>
+                <li>تفاعل مع المشاهدين في التعليقات</li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* التفاعل المباشر */}
+      {/* Live Interactions Panel */}
       <div className="lg:col-span-1">
         {isStreaming && currentStreamIdRef.current && (
-          <Card className="h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="font-cairo text-lg">التفاعل المباشر</CardTitle>
-              <div className="flex gap-4 mt-2">
-                <Badge variant="secondary" className="gap-2">
-                  <Users className="w-4 h-4" />
-                  {viewerCount} مشاهد
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge variant="secondary" className="gap-1">
+                  <Users className="w-3 h-3" />
+                  {viewerCount}
                 </Badge>
-                <Badge variant="secondary" className="gap-2">
-                  <Heart className="w-4 h-4" />
-                  {likesCount} إعجاب
+                <Badge variant="secondary" className="gap-1">
+                  <Heart className="w-3 h-3" />
+                  {likesCount}
                 </Badge>
-                <Badge variant="secondary" className="gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  {comments.length} تعليق
+                <Badge variant="secondary" className="gap-1">
+                  <MessageSquare className="w-3 h-3" />
+                  {comments.length}
+                </Badge>
+                <Badge variant="secondary" className="gap-1 bg-yellow-500/20 text-yellow-600">
+                  <Gift className="w-3 h-3" />
+                  {totalGiftValue}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="h-[400px] overflow-y-auto pr-2 space-y-3">
+            <CardContent className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-2 space-y-3">
                 {comments.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p className="font-cairo">لا توجد تعليقات بعد</p>
-                    <p className="text-sm">سيظهر التفاعل من المشاهدين هنا</p>
+                    <p className="text-sm">سيظهر التفاعل هنا</p>
                   </div>
                 ) : (
                   <>
                     {comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-3 bg-muted/50 p-3 rounded-lg">
+                      <div key={comment.id} className="flex gap-3 bg-muted/50 p-3 rounded-lg animate-fade-in">
                         <Avatar className="w-8 h-8 shrink-0">
                           <AvatarImage src={comment.profiles?.avatar_url || undefined} />
-                          <AvatarFallback className="bg-primary text-white">
+                          <AvatarFallback className="bg-primary text-white text-sm">
                             {comment.profiles?.full_name?.charAt(0) || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-2">
-                            <span className="text-sm font-cairo font-semibold">
+                            <span className="text-sm font-cairo font-semibold truncate">
                               {comment.profiles?.full_name || 'مستخدم'}
                             </span>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(comment.created_at), { 
-                                addSuffix: true, 
-                                locale: ar 
-                              })}
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: ar })}
                             </span>
                           </div>
                           <p className="text-sm break-words">{comment.comment}</p>
