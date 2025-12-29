@@ -70,6 +70,7 @@ export const usePiNetwork = () => {
   const [piUser, setPiUser] = useState<PiAuthResult['user'] | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const { user } = useAuth();
 
   const isPiBrowser = useCallback(() => {
@@ -78,9 +79,25 @@ export const usePiNetwork = () => {
 
   const handleIncompletePayment = useCallback(async (payment: PiPaymentDTO) => {
     console.log('Incomplete payment found:', payment);
-    // Handle incomplete payment - you may want to complete or cancel it
+    // Try to complete the incomplete payment
+    if (payment.transaction?.txid) {
+      try {
+        const { error } = await supabase.functions.invoke('pi-payment-complete', {
+          body: { 
+            paymentId: payment.identifier, 
+            txid: payment.transaction.txid,
+            accessToken 
+          }
+        });
+        if (!error) {
+          toast.success('تم إتمام الدفعة المعلقة / Pending payment completed');
+        }
+      } catch (err) {
+        console.error('Error completing incomplete payment:', err);
+      }
+    }
     toast.info('تم العثور على دفعة غير مكتملة / Incomplete payment found');
-  }, []);
+  }, [accessToken]);
 
   const authenticate = useCallback(async () => {
     if (!isPiBrowser()) {
@@ -88,20 +105,28 @@ export const usePiNetwork = () => {
       return null;
     }
 
+    setIsInitializing(true);
+    
     try {
       const scopes = ['username', 'payments'];
+      console.log('Starting Pi authentication with scopes:', scopes);
+      
       const authResult = await window.Pi.authenticate(scopes, handleIncompletePayment);
       
+      console.log('Pi authentication successful:', authResult);
       setIsAuthenticated(true);
       setPiUser(authResult.user);
       setAccessToken(authResult.accessToken);
       
-      toast.success(`مرحباً ${authResult.user.username || 'Pioneer'}!`);
+      toast.success(`مرحباً ${authResult.user.username || 'Pioneer'}! / Welcome!`);
       return authResult;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Pi authentication error:', error);
-      toast.error('فشل المصادقة / Authentication failed');
+      const errorMessage = error?.message || 'Unknown error';
+      toast.error(`فشل المصادقة: ${errorMessage} / Authentication failed`);
       return null;
+    } finally {
+      setIsInitializing(false);
     }
   }, [isPiBrowser, handleIncompletePayment]);
 
@@ -204,6 +229,7 @@ export const usePiNetwork = () => {
     piUser,
     accessToken,
     isProcessing,
+    isInitializing,
     authenticate,
     createPayment,
   };

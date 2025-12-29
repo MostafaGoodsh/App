@@ -14,6 +14,7 @@ const PiPayment = () => {
     isAuthenticated,
     piUser,
     isProcessing,
+    isInitializing,
     authenticate,
     createPayment,
   } = usePiNetwork();
@@ -21,12 +22,16 @@ const PiPayment = () => {
   const [amount, setAmount] = useState<number>(1);
   const [memo, setMemo] = useState<string>('MS-RA Token Purchase');
 
-  // Auto-authenticate when in Pi Browser
+  // Auto-authenticate when in Pi Browser (with delay for SDK to initialize)
   useEffect(() => {
-    if (isPiBrowser && !isAuthenticated) {
-      authenticate();
+    if (isPiBrowser && !isAuthenticated && !isInitializing) {
+      // Small delay to ensure SDK is fully ready
+      const timer = setTimeout(() => {
+        authenticate();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [isPiBrowser, isAuthenticated, authenticate]);
+  }, [isPiBrowser, isAuthenticated, isInitializing, authenticate]);
 
   const handlePayment = async () => {
     if (amount <= 0) {
@@ -96,13 +101,25 @@ const PiPayment = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isAuthenticated && piUser ? (
+              {isInitializing ? (
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <div>
+                    <p className="font-semibold text-white">جاري الاتصال... / Connecting...</p>
+                    <p className="text-sm text-white/70">
+                      يرجى الانتظار / Please wait
+                    </p>
+                  </div>
+                </div>
+              ) : isAuthenticated && piUser ? (
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-6 h-6 text-green-500" />
                   <div>
                     <p className="font-semibold text-white">متصل / Connected</p>
                     <p className="text-sm text-white/70">
                       مرحباً، {piUser.username || piUser.uid}
+                      <br />
+                      <span className="text-xs">Welcome, {piUser.username || 'Pioneer'}</span>
                     </p>
                   </div>
                   <Badge variant="secondary" className="mr-auto">

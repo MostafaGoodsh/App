@@ -23,7 +23,8 @@
     <!-- Pi Network SDK -->
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
     <script>
-      Pi.init({ version: "2.0" });
+      // Initialize Pi SDK - sandbox: true for testing, false for production
+      Pi.init({ version: "2.0", sandbox: true });
     </script>
   </head>
 
