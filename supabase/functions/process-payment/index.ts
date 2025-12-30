@@ -161,6 +161,12 @@ serve(async (req) => {
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
     console.log('Phone number received:', phone_number);
 
+    // Get origin from request headers for dynamic redirect
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || 'https://69f736db-546a-4e1c-8a62-19d26c64f5a8.lovableproject.com';
+    const baseUrl = origin.replace(/\/$/, '');
+    
+    console.log('Using redirect origin:', baseUrl);
+
     // Create Payment Intention using Flash API
     const intentionData = {
       amount: amount * 100, // Amount in cents (piasters)
@@ -191,8 +197,8 @@ serve(async (req) => {
         quantity: 1
       }],
       special_reference: transaction.id, // معرّف المعاملة للربط
-      // تصحيح رابط العودة للمستخدم بعد الدفع
-      redirection_url: `https://wnwfnziozwarlihrnjex.lovableproject.com/recharge?payment_callback=true&transaction_id=${transaction.id}`,
+      // تصحيح رابط العودة للمستخدم بعد الدفع - يستخدم origin ديناميكي
+      redirection_url: `${baseUrl}/wallet?payment_callback=true&transaction_id=${transaction.id}`,
       // رابط الـ webhook لتحديث حالة المعاملة
       notification_url: `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/paymob-webhook`
     };
