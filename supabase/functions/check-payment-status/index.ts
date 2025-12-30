@@ -68,45 +68,50 @@ serve(async (req) => {
     }
 
     const PAYMOB_API_KEY = Deno.env.get('PAYMOB_API_KEY');
-    
-    if (!PAYMOB_API_KEY) {
+    const PAYMOB_PUBLIC_KEY = Deno.env.get('PAYMOB_PUBLIC_KEY');
+
+    if (!PAYMOB_API_KEY || !PAYMOB_PUBLIC_KEY) {
       return new Response(
         JSON.stringify({ error: 'Payment provider not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check payment status from Paymob
     const intentionId = transaction.provider_transaction_id;
-    
-    if (!intentionId) {
+    const clientSecret = (transaction.payment_details as any)?.client_secret as string | undefined;
+
+    if (!intentionId || !clientSecret) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           status: transaction.status,
-          message: 'Payment intention not created yet',
-          transaction
+          message: 'بيانات الدفع غير مكتملة (intention/client_secret غير متوفر)',
+          transaction,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Checking payment status for intention:', intentionId);
+    // Client secret عادةً صالح لمدة ساعة
+    const transactionAgeMs = Date.now() - new Date(transaction.created_at).getTime();
+    const oneHour = 60 * 60 * 1000;
 
-    // Check if transaction is too old (more than 30 minutes)
-    const transactionAge = Date.now() - new Date(transaction.created_at).getTime();
-    const thirtyMinutes = 30 * 60 * 1000;
-    console.log('Transaction age (ms):', transactionAge, 'Max allowed:', thirtyMinutes);
+    console.log('[check-payment-status] tx:', {
+      transaction_id,
+      intentionId,
+      ageMs: transactionAgeMs,
+      status: transaction.status,
+    });
 
-    if (transactionAge > thirtyMinutes) {
-      console.log('Transaction expired, marking as failed');
-      // Mark as failed/expired
+    if (transactionAgeMs > oneHour) {
+      console.log('[check-payment-status] Transaction expired, marking as failed');
+
       await supabaseClient
         .from('payment_transactions')
         .update({
           status: 'failed',
           failed_at: new Date().toISOString(),
-          notes: 'Payment session expired. Please start a new payment.',
-          provider_response: { error: 'Session expired after 30 minutes' }
+          notes: 'Payment session expired (client_secret expired).',
+          provider_response: { error: 'Session expired after 60 minutes' },
         })
         .eq('id', transaction_id);
 
@@ -117,145 +122,190 @@ serve(async (req) => {
           transaction: {
             ...transaction,
             status: 'failed',
-            notes: 'Payment session expired'
-          }
+            notes: 'Payment session expired',
+          },
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Authenticate with Paymob Accept API to search for transaction
-    console.log('Authenticating with Paymob Accept API');
-    
+    // Unified Intention API: اسهل استعلام هو endpoint الخاص بالـ Elements
+    // (publicKey + clientSecret) ويرجع confirmed/status/transactions.
+    const intentionLookupUrl = `https://accept.paymob.com/v1/intention/element/${encodeURIComponent(PAYMOB_PUBLIC_KEY)}/${encodeURIComponent(clientSecret)}/`;
+
+    console.log('[check-payment-status] Fetching intention:', intentionLookupUrl);
+
+    const intentionRes = await fetch(intentionLookupUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const intentionText = await intentionRes.text();
+    let intentionData: any = null;
+
     try {
-      // Step 1: Get authentication token
-      const authResponse = await fetch('https://accept.paymob.com/api/auth/tokens', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          api_key: PAYMOB_API_KEY
-        })
-      });
-
-      if (!authResponse.ok) {
-        throw new Error('Failed to authenticate with Paymob');
-      }
-
-      const authData = await authResponse.json();
-      const paymobToken = authData.token;
-      console.log('Paymob authentication successful');
-
-      // Step 2: Search for transaction using special_reference (our transaction ID)
-      const ordersResponse = await fetch(
-        `https://accept.paymob.com/api/ecommerce/orders?special_reference=${transaction_id}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${paymobToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('Orders API Status:', ordersResponse.status);
-      
-      if (ordersResponse.ok) {
-        const ordersData = await ordersResponse.json();
-        console.log('Orders found:', ordersData.count);
-        
-        if (ordersData.count > 0 && ordersData.results && ordersData.results.length > 0) {
-          const order = ordersData.results[0];
-          console.log('Order status:', order.status);
-          console.log('Order paid_amount_cents:', order.paid_amount_cents);
-          console.log('Order is_paid:', order.is_paid);
-          
-          // Check if payment is successful
-          if (order.is_paid || order.paid_amount_cents > 0) {
-            console.log('Payment confirmed! Crediting tokens...');
-            
-            // Calculate tokens
-            const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
-
-            // Update transaction
-            await supabaseClient
-              .from('payment_transactions')
-              .update({
-                status: 'completed',
-                completed_at: new Date().toISOString(),
-                tokens_credited: tokens_to_credit,
-                provider_response: order
-              })
-              .eq('id', transaction_id);
-
-            // Credit user wallet
-            await supabaseClient
-              .from('internal_wallet_balances')
-              .upsert({
-                user_id: transaction.user_id,
-                token_id: transaction.internal_token_id,
-                balance: tokens_to_credit
-              }, {
-                onConflict: 'user_id,token_id'
-              });
-
-            return new Response(
-              JSON.stringify({
-                status: 'completed',
-                message: 'تم الدفع بنجاح! ✅',
-                tokens_credited: tokens_to_credit,
-                transaction: {
-                  ...transaction,
-                  status: 'completed',
-                  tokens_credited: tokens_to_credit
-                }
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-          
-          // Check if payment failed
-          if (order.status === 'failed' || order.status === 'cancelled') {
-            await supabaseClient
-              .from('payment_transactions')
-              .update({
-                status: 'failed',
-                failed_at: new Date().toISOString(),
-                notes: `Payment ${order.status}`,
-                provider_response: order
-              })
-              .eq('id', transaction_id);
-
-            return new Response(
-              JSON.stringify({
-                status: 'failed',
-                message: 'فشل الدفع ❌',
-                reason: order.status,
-                transaction: {
-                  ...transaction,
-                  status: 'failed'
-                }
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
-          
-          console.log('Payment still pending...');
-        } else {
-          console.log('No orders found with this special_reference');
-        }
-      }
-    } catch (apiError) {
-      console.error('Paymob API check error:', apiError);
+      intentionData = intentionText ? JSON.parse(intentionText) : null;
+    } catch {
+      // ignore JSON parse error
     }
 
-    // If we can't determine status, return pending
+    if (!intentionRes.ok || !intentionData) {
+      console.error('[check-payment-status] Intention lookup failed:', {
+        status: intentionRes.status,
+        body: intentionText?.slice(0, 1000),
+      });
+
+      return new Response(
+        JSON.stringify({
+          status: transaction.status,
+          message: 'لا يمكن التحقق من الحالة حالياً. حاول مرة أخرى بعد قليل.',
+          transaction,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[check-payment-status] Intention data:', {
+      intention_status: intentionData.status,
+      confirmed: intentionData.confirmed,
+      transactions_count: Array.isArray(intentionData.transactions) ? intentionData.transactions.length : undefined,
+      transaction_records_count: Array.isArray(intentionData.transaction_records) ? intentionData.transaction_records.length : undefined,
+    });
+
+    const statusRaw = String(intentionData.status ?? '').toLowerCase();
+    const confirmed = Boolean(intentionData.confirmed);
+
+    // Heuristics لنجاح العملية
+    const hasSuccessfulTransaction =
+      (Array.isArray(intentionData.transactions) &&
+        intentionData.transactions.some((t: any) =>
+          Boolean(
+            t?.success === true ||
+              t?.is_success === true ||
+              t?.is_paid === true ||
+              String(t?.status ?? '').toLowerCase() === 'success' ||
+              String(t?.status ?? '').toLowerCase() === 'successful' ||
+              String(t?.status ?? '').toLowerCase() === 'processed' ||
+              String(t?.status ?? '').toLowerCase() === 'captured'
+          )
+        )) ||
+      (Array.isArray(intentionData.transaction_records) &&
+        intentionData.transaction_records.some((t: any) =>
+          Boolean(
+            t?.success === true ||
+              t?.is_success === true ||
+              t?.is_paid === true ||
+              String(t?.status ?? '').toLowerCase() === 'success' ||
+              String(t?.status ?? '').toLowerCase() === 'successful' ||
+              String(t?.status ?? '').toLowerCase() === 'processed' ||
+              String(t?.status ?? '').toLowerCase() === 'captured'
+          )
+        ));
+
+    const isSuccessful = confirmed || hasSuccessfulTransaction || ['processed', 'successful', 'captured', 'paid', 'confirmed'].includes(statusRaw);
+    const isFailed = ['failed', 'declined', 'expired', 'canceled', 'cancelled', 'voided'].includes(statusRaw);
+
+    if (isSuccessful) {
+      console.log('[check-payment-status] Payment confirmed ✅');
+
+      const tokens_to_credit = transaction.amount / transaction.internal_tokens.exchange_rate_usd;
+
+      // Update transaction
+      const { error: updateTxError } = await supabaseClient
+        .from('payment_transactions')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          tokens_credited: tokens_to_credit,
+          provider_response: intentionData,
+        })
+        .eq('id', transaction_id);
+
+      if (updateTxError) {
+        console.error('[check-payment-status] Failed updating transaction:', updateTxError);
+      }
+
+      // Credit wallet (increment balance)
+      const { data: existingBalance, error: balFetchError } = await supabaseClient
+        .from('internal_wallet_balances')
+        .select('balance')
+        .eq('user_id', transaction.user_id)
+        .eq('token_id', transaction.internal_token_id)
+        .maybeSingle();
+
+      if (balFetchError) {
+        console.error('[check-payment-status] Failed fetching balance:', balFetchError);
+      }
+
+      const newBalance = (existingBalance?.balance ?? 0) + tokens_to_credit;
+
+      const { error: balUpsertError } = await supabaseClient
+        .from('internal_wallet_balances')
+        .upsert(
+          {
+            user_id: transaction.user_id,
+            token_id: transaction.internal_token_id,
+            balance: newBalance,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,token_id' }
+        );
+
+      if (balUpsertError) {
+        console.error('[check-payment-status] Failed updating balance:', balUpsertError);
+      }
+
+      return new Response(
+        JSON.stringify({
+          status: 'completed',
+          message: 'تم الدفع بنجاح! ✅',
+          tokens_credited: tokens_to_credit,
+          transaction: {
+            ...transaction,
+            status: 'completed',
+            tokens_credited: tokens_to_credit,
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (isFailed) {
+      console.log('[check-payment-status] Payment failed ❌', { statusRaw });
+
+      await supabaseClient
+        .from('payment_transactions')
+        .update({
+          status: 'failed',
+          failed_at: new Date().toISOString(),
+          notes: `Payment ${statusRaw}`,
+          provider_response: intentionData,
+        })
+        .eq('id', transaction_id);
+
+      return new Response(
+        JSON.stringify({
+          status: 'failed',
+          message: 'فشل الدفع ❌',
+          reason: statusRaw,
+          transaction: {
+            ...transaction,
+            status: 'failed',
+          },
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[check-payment-status] Payment still processing...', { statusRaw, confirmed });
+
     return new Response(
       JSON.stringify({
         status: transaction.status,
-        message: 'لا يمكن التحقق من الحالة حالياً. إذا أكملت الدفع، انتظر قليلاً ثم تحقق مرة أخرى.',
-        transaction
+        message: 'الدفع قيد المعالجة. إذا أكملت الدفع، انتظر قليلاً ثم تحقق مرة أخرى.',
+        transaction,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
