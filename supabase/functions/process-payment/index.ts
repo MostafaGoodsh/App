@@ -161,9 +161,8 @@ serve(async (req) => {
     console.log('Payment method selected:', payment_method, 'Integration ID:', integration_id);
     console.log('Phone number received:', phone_number);
 
-    // Get origin from request headers for dynamic redirect
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || 'https://69f736db-546a-4e1c-8a62-19d26c64f5a8.lovableproject.com';
-    const baseUrl = origin.replace(/\/$/, '');
+    // Use the production domain for redirect
+    const baseUrl = 'https://crypto-msr.com';
     
     console.log('Using redirect origin:', baseUrl);
 
