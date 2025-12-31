@@ -91,7 +91,8 @@ serve(async (req) => {
       );
     }
 
-    // Client secret عادةً صالح لمدة ساعة
+    // ملاحظة: client_secret قد يكون له صلاحية محدودة حسب إعدادات Paymob،
+    // لذلك لا نعتمد على عمر المعاملة وحده لتحديد الفشل.
     const transactionAgeMs = Date.now() - new Date(transaction.created_at).getTime();
     const oneHour = 60 * 60 * 1000;
 
@@ -102,61 +103,117 @@ serve(async (req) => {
       status: transaction.status,
     });
 
-    if (transactionAgeMs > oneHour) {
-      console.log('[check-payment-status] Transaction expired, marking as failed');
+    const PAYMOB_BASE_URL = 'https://accept.paymob.com';
 
-      await supabaseClient
-        .from('payment_transactions')
-        .update({
-          status: 'failed',
-          failed_at: new Date().toISOString(),
-          notes: 'Payment session expired (client_secret expired).',
-          provider_response: { error: 'Session expired after 60 minutes' },
-        })
-        .eq('id', transaction_id);
-
-      return new Response(
-        JSON.stringify({
-          status: 'failed',
-          message: 'انتهت صلاحية الدفع. يرجى بدء عملية دفع جديدة',
-          transaction: {
-            ...transaction,
-            status: 'failed',
-            notes: 'Payment session expired',
-          },
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Unified Intention API: اسهل استعلام هو endpoint الخاص بالـ Elements
-    // (publicKey + clientSecret) ويرجع confirmed/status/transactions.
-    const intentionLookupUrl = `https://accept.paymob.com/v1/intention/element/${encodeURIComponent(PAYMOB_PUBLIC_KEY)}/${encodeURIComponent(clientSecret)}/`;
-
-    console.log('[check-payment-status] Fetching intention:', intentionLookupUrl);
-
-    const intentionRes = await fetch(intentionLookupUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const intentionText = await intentionRes.text();
-    let intentionData: any = null;
-
-    try {
-      intentionData = intentionText ? JSON.parse(intentionText) : null;
-    } catch {
-      // ignore JSON parse error
-    }
-
-    if (!intentionRes.ok || !intentionData) {
-      console.error('[check-payment-status] Intention lookup failed:', {
-        status: intentionRes.status,
-        body: intentionText?.slice(0, 1000),
+    const getPaymobAuthToken = async () => {
+      const tokenRes = await fetch(`${PAYMOB_BASE_URL}/api/auth/tokens`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: PAYMOB_API_KEY }),
       });
 
+      const tokenText = await tokenRes.text();
+      let tokenJson: any = null;
+      try {
+        tokenJson = tokenText ? JSON.parse(tokenText) : null;
+      } catch {
+        // ignore
+      }
+
+      if (!tokenRes.ok || !tokenJson?.token) {
+        throw new Error(`Paymob auth token failed (${tokenRes.status})`);
+      }
+
+      return tokenJson.token as string;
+    };
+
+    const inquireByMerchantOrderId = async (merchantOrderId: string) => {
+      const authToken = await getPaymobAuthToken();
+
+      const inquiryRes = await fetch(`${PAYMOB_BASE_URL}/api/ecommerce/orders/transaction_inquiry`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ merchant_order_id: merchantOrderId }),
+      });
+
+      const inquiryText = await inquiryRes.text();
+      let inquiryJson: any = null;
+      try {
+        inquiryJson = inquiryText ? JSON.parse(inquiryText) : null;
+      } catch {
+        // ignore
+      }
+
+      if (!inquiryRes.ok || !inquiryJson) {
+        throw new Error(`Paymob inquiry failed (${inquiryRes.status})`);
+      }
+
+      return inquiryJson;
+    };
+
+    // 1) حاول التحقق عبر Intention element endpoint (يعمل جيداً مع Unified Checkout طالما client_secret صالح)
+    let providerSource: 'intention' | 'inquiry' = 'intention';
+    let providerData: any = null;
+
+    if (clientSecret) {
+      const intentionLookupUrl = `https://accept.paymob.com/v1/intention/element/${encodeURIComponent(PAYMOB_PUBLIC_KEY)}/${encodeURIComponent(clientSecret)}/`;
+      console.log('[check-payment-status] Fetching intention:', intentionLookupUrl);
+
+      try {
+        const intentionRes = await fetch(intentionLookupUrl, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const intentionText = await intentionRes.text();
+        let intentionJson: any = null;
+        try {
+          intentionJson = intentionText ? JSON.parse(intentionText) : null;
+        } catch {
+          // ignore
+        }
+
+        if (intentionRes.ok && intentionJson) {
+          providerData = intentionJson;
+        } else {
+          console.warn('[check-payment-status] Intention lookup failed, will fallback to inquiry:', {
+            status: intentionRes.status,
+            body: intentionText?.slice(0, 400),
+            ageMs: transactionAgeMs,
+            over1h: transactionAgeMs > oneHour,
+          });
+        }
+      } catch (e) {
+        console.warn('[check-payment-status] Intention lookup threw, will fallback to inquiry:', {
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
+
+    // 2) Fallback: Transaction Inquiry API باستخدام merchant_order_id (special_reference)
+    // ملاحظة: هذا المسار مهم جداً للمحافظ الإلكترونية وفوري لأن callbacks/notification_url قد لا تعمل دائماً.
+    if (!providerData) {
+      try {
+        providerSource = 'inquiry';
+        providerData = await inquireByMerchantOrderId(transaction.id);
+        console.log('[check-payment-status] Inquiry data:', {
+          pending: providerData?.pending,
+          success: providerData?.success,
+          id: providerData?.id,
+          order_id: providerData?.order?.id,
+          merchant_order_id: providerData?.order?.merchant_order_id,
+        });
+      } catch (e) {
+        console.error('[check-payment-status] Inquiry failed:', {
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
+
+    if (!providerData) {
       return new Response(
         JSON.stringify({
           status: transaction.status,
@@ -167,45 +224,63 @@ serve(async (req) => {
       );
     }
 
-    console.log('[check-payment-status] Intention data:', {
-      intention_status: intentionData.status,
-      confirmed: intentionData.confirmed,
-      transactions_count: Array.isArray(intentionData.transactions) ? intentionData.transactions.length : undefined,
-      transaction_records_count: Array.isArray(intentionData.transaction_records) ? intentionData.transaction_records.length : undefined,
-    });
+    // === Normalize status ===
+    let statusRaw = '';
+    let confirmed = false;
+    let isSuccessful = false;
+    let isFailed = false;
 
-    const statusRaw = String(intentionData.status ?? '').toLowerCase();
-    const confirmed = Boolean(intentionData.confirmed);
+    if (providerSource === 'inquiry') {
+      const pending = Boolean(providerData?.pending);
+      const success = Boolean(providerData?.success);
+      isSuccessful = success && !pending;
+      isFailed = !success && !pending;
+      statusRaw = isSuccessful ? 'successful' : isFailed ? 'failed' : 'pending';
+      confirmed = isSuccessful;
 
-    // Heuristics لنجاح العملية
-    const hasSuccessfulTransaction =
-      (Array.isArray(intentionData.transactions) &&
-        intentionData.transactions.some((t: any) =>
-          Boolean(
-            t?.success === true ||
-              t?.is_success === true ||
-              t?.is_paid === true ||
-              String(t?.status ?? '').toLowerCase() === 'success' ||
-              String(t?.status ?? '').toLowerCase() === 'successful' ||
-              String(t?.status ?? '').toLowerCase() === 'processed' ||
-              String(t?.status ?? '').toLowerCase() === 'captured'
-          )
-        )) ||
-      (Array.isArray(intentionData.transaction_records) &&
-        intentionData.transaction_records.some((t: any) =>
-          Boolean(
-            t?.success === true ||
-              t?.is_success === true ||
-              t?.is_paid === true ||
-              String(t?.status ?? '').toLowerCase() === 'success' ||
-              String(t?.status ?? '').toLowerCase() === 'successful' ||
-              String(t?.status ?? '').toLowerCase() === 'processed' ||
-              String(t?.status ?? '').toLowerCase() === 'captured'
-          )
-        ));
+      console.log('[check-payment-status] Inquiry normalized:', { statusRaw, pending, success });
+    } else {
+      console.log('[check-payment-status] Intention data:', {
+        intention_status: providerData.status,
+        confirmed: providerData.confirmed,
+        transactions_count: Array.isArray(providerData.transactions) ? providerData.transactions.length : undefined,
+        transaction_records_count: Array.isArray(providerData.transaction_records) ? providerData.transaction_records.length : undefined,
+      });
 
-    const isSuccessful = confirmed || hasSuccessfulTransaction || ['processed', 'successful', 'captured', 'paid', 'confirmed'].includes(statusRaw);
-    const isFailed = ['failed', 'declined', 'expired', 'canceled', 'cancelled', 'voided'].includes(statusRaw);
+      statusRaw = String(providerData.status ?? '').toLowerCase();
+      confirmed = Boolean(providerData.confirmed);
+
+      // Heuristics لنجاح العملية
+      const hasSuccessfulTransaction =
+        (Array.isArray(providerData.transactions) &&
+          providerData.transactions.some((t: any) =>
+            Boolean(
+              t?.success === true ||
+                t?.is_success === true ||
+                t?.is_paid === true ||
+                String(t?.status ?? '').toLowerCase() === 'success' ||
+                String(t?.status ?? '').toLowerCase() === 'successful' ||
+                String(t?.status ?? '').toLowerCase() === 'processed' ||
+                String(t?.status ?? '').toLowerCase() === 'captured'
+            )
+          )) ||
+        (Array.isArray(providerData.transaction_records) &&
+          providerData.transaction_records.some((t: any) =>
+            Boolean(
+              t?.success === true ||
+                t?.is_success === true ||
+                t?.is_paid === true ||
+                String(t?.status ?? '').toLowerCase() === 'success' ||
+                String(t?.status ?? '').toLowerCase() === 'successful' ||
+                String(t?.status ?? '').toLowerCase() === 'processed' ||
+                String(t?.status ?? '').toLowerCase() === 'captured'
+            )
+          ));
+
+      isSuccessful = confirmed || hasSuccessfulTransaction || ['processed', 'successful', 'captured', 'paid', 'confirmed'].includes(statusRaw);
+      isFailed = ['failed', 'declined', 'expired', 'canceled', 'cancelled', 'voided'].includes(statusRaw);
+    }
+
 
     if (isSuccessful) {
       console.log('[check-payment-status] Payment confirmed ✅');
