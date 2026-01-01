@@ -53,33 +53,76 @@ serve(async (req) => {
     // Paymob Flash API webhook structure
     console.log('Raw webhook payload:', JSON.stringify(payload, null, 2));
 
-    // Extract payment intention ID from webhook
-    const intentionId = payload.intention?.id || payload.id;
-    const transactionStatus = payload.intention?.status || payload.status;
-    const isSuccessful = transactionStatus === 'PROCESSED' || 
-                        transactionStatus === 'SUCCESSFUL' || 
-                        transactionStatus === 'CAPTURED';
+    // Extract transaction data from webhook - Paymob uses different structures
+    // For transaction callbacks, the structure is { type: "TRANSACTION", obj: {...} }
+    const transactionObj = payload.obj || payload;
+    const paymentKeyClaims = transactionObj?.payment_key_claims;
+    
+    // Get the merchant_order_id which is our transaction ID
+    const merchantOrderId = paymentKeyClaims?.extra?.merchant_order_id || 
+                           transactionObj?.order?.merchant_order_id ||
+                           transactionObj?.merchant_order_id;
+    
+    // Get the intention ID from next_payment_intention
+    const intentionId = paymentKeyClaims?.next_payment_intention ||
+                       transactionObj?.payment_key_claims?.next_payment_intention ||
+                       payload.intention?.id || 
+                       payload.id;
+    
+    // Determine success from transaction object
+    const isSuccessful = transactionObj?.success === true || 
+                        transactionObj?.is_paid === true ||
+                        transactionObj?.order?.payment_status === 'PAID' ||
+                        payload.intention?.status === 'PROCESSED' || 
+                        payload.intention?.status === 'SUCCESSFUL' || 
+                        payload.intention?.status === 'CAPTURED';
+    
+    const transactionStatus = isSuccessful ? 'SUCCESSFUL' : 
+                             (transactionObj?.error_occured ? 'FAILED' : 'PENDING');
 
     console.log('Processing payment webhook:', {
+      merchant_order_id: merchantOrderId,
       intention_id: intentionId,
       status: transactionStatus,
-      is_successful: isSuccessful
+      is_successful: isSuccessful,
+      success_flag: transactionObj?.success,
+      payment_status: transactionObj?.order?.payment_status
     });
 
-    if (!intentionId) {
-      console.error('No intention ID in webhook payload');
-      return new Response(
-        JSON.stringify({ error: 'Invalid webhook payload' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Try to find transaction by merchant_order_id first (our transaction ID)
+    let transaction = null;
+    let txError = null;
+
+    if (merchantOrderId) {
+      const result = await supabaseClient
+        .from('payment_transactions')
+        .select('*, internal_tokens(*)')
+        .eq('id', merchantOrderId)
+        .maybeSingle();
+      
+      transaction = result.data;
+      txError = result.error;
+      
+      if (transaction) {
+        console.log('Found transaction by merchant_order_id:', merchantOrderId);
+      }
     }
 
-    // Find transaction by provider_transaction_id (intention ID)
-    const { data: transaction, error: txError } = await supabaseClient
-      .from('payment_transactions')
-      .select('*, internal_tokens(*)')
-      .eq('provider_transaction_id', intentionId)
-      .maybeSingle();
+    // Fallback: try by provider_transaction_id (intention ID)
+    if (!transaction && intentionId) {
+      const result = await supabaseClient
+        .from('payment_transactions')
+        .select('*, internal_tokens(*)')
+        .eq('provider_transaction_id', intentionId)
+        .maybeSingle();
+      
+      transaction = result.data;
+      txError = result.error;
+      
+      if (transaction) {
+        console.log('Found transaction by intention ID:', intentionId);
+      }
+    }
 
     if (txError) {
       console.error('Database error finding transaction:', txError);
@@ -90,7 +133,7 @@ serve(async (req) => {
     }
 
     if (!transaction) {
-      console.warn('Transaction not found for intention:', intentionId);
+      console.warn('Transaction not found for:', { merchantOrderId, intentionId });
       return new Response(
         JSON.stringify({ success: true, message: 'Transaction not found, ignoring' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
