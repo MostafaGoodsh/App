@@ -294,7 +294,7 @@ serve(async (req) => {
           status: 'completed',
           completed_at: new Date().toISOString(),
           tokens_credited: tokens_to_credit,
-          provider_response: intentionData,
+          provider_response: providerData,
         })
         .eq('id', transaction_id);
 
@@ -356,7 +356,7 @@ serve(async (req) => {
           status: 'failed',
           failed_at: new Date().toISOString(),
           notes: `Payment ${statusRaw}`,
-          provider_response: intentionData,
+          provider_response: providerData,
         })
         .eq('id', transaction_id);
 
