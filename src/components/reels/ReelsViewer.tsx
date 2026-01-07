@@ -548,7 +548,7 @@ export const ReelsViewer = () => {
         <video
           ref={videoRef}
           src={currentReel.video_url}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain max-h-[100dvh]"
           onClick={handleVideoClick}
           onLoadedData={handleVideoLoad}
           onEnded={goToNext}
