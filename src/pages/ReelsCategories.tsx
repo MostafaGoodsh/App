@@ -97,9 +97,6 @@ const ReelsCategories = () => {
             >
               <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-primary/30 hover:bg-card/50">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="text-2xl">
-                    {category.icon || '🎬'}
-                  </div>
                   <h3 className="font-cairo text-xl font-bold group-hover:text-primary transition-colors">
                     {category.title}
                   </h3>

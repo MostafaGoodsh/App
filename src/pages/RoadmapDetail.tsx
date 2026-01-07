@@ -5,8 +5,9 @@ import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, ExternalLink, CheckCircle, Circle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 // Configure DOMPurify to allow safe HTML elements for content
 const sanitizeHTML = (dirty: string) => {
@@ -16,6 +17,22 @@ const sanitizeHTML = (dirty: string) => {
     ALLOW_DATA_ATTR: false,
   });
 };
+interface ActionButton {
+  label: string;
+  label_en?: string;
+  url: string;
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
+  icon?: string;
+}
+
+interface ServiceOption {
+  id: string;
+  name: string;
+  name_en?: string;
+  description?: string;
+  isEnabled: boolean;
+}
+
 interface RoadmapData {
   id: string;
   title: string;
@@ -36,7 +53,12 @@ interface RoadmapData {
   content_font_size?: string;
   external_widget_url?: string;
   widget_type?: string;
-  widget_config?: any;
+  widget_config?: {
+    action_buttons?: ActionButton[];
+    services?: ServiceOption[];
+    show_payment_gateway?: boolean;
+    payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
+  };
 }
 
 const RoadmapDetail = () => {
@@ -60,7 +82,7 @@ const RoadmapDetail = () => {
         .single();
 
       if (error) throw error;
-      setData(roadmapData);
+      setData(roadmapData as unknown as RoadmapData);
     } catch (error) {
       console.error('Error fetching roadmap data:', error);
       setError(true);
@@ -158,6 +180,128 @@ const RoadmapDetail = () => {
     }
   };
 
+  const renderActionButtons = () => {
+    const buttons = data.widget_config?.action_buttons;
+    if (!buttons || buttons.length === 0) return null;
+
+    return (
+      <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
+        <CardHeader>
+          <CardTitle className="text-white">روابط سريعة | Quick Links</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {buttons.map((button: ActionButton, index: number) => (
+              <Button
+                key={index}
+                variant={button.variant || 'default'}
+                className="gap-2"
+                asChild
+              >
+                <a href={button.url} target="_blank" rel="noopener noreferrer">
+                  {button.label}
+                  {button.label_en && <span className="text-xs opacity-70">({button.label_en})</span>}
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderServices = () => {
+    const services = data.widget_config?.services;
+    if (!services || services.length === 0) return null;
+
+    return (
+      <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
+        <CardHeader>
+          <CardTitle className="text-white">الخدمات | Services</CardTitle>
+          <CardDescription className="text-white/70">
+            اختر الخدمات المتاحة
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {services.map((service: ServiceOption) => (
+              <div 
+                key={service.id}
+                className={`p-4 rounded-lg border transition-all ${
+                  service.isEnabled 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-white/20 bg-white/5 opacity-60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {service.isEnabled ? (
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-white/40" />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-white">{service.name}</span>
+                      {service.name_en && (
+                        <span className="text-sm text-white/60">| {service.name_en}</span>
+                      )}
+                      {service.isEnabled && (
+                        <Badge variant="default" className="text-xs">متاح</Badge>
+                      )}
+                    </div>
+                    {service.description && (
+                      <p className="text-sm text-white/70 mt-1">{service.description}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderPaymentGateway = () => {
+    if (!data.widget_config?.show_payment_gateway) return null;
+
+    const paymentType = data.widget_config?.payment_type || 'presale';
+    const typeLabels: Record<string, { ar: string; en: string }> = {
+      presale: { ar: 'البيع المسبق', en: 'Presale' },
+      liquidity: { ar: 'مجمع السيولة', en: 'Liquidity Pool' },
+      services: { ar: 'الخدمات', en: 'Services' },
+      vault: { ar: 'خزانة أنوبيس', en: 'Anubis Vault' },
+    };
+
+    return (
+      <Card className="bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border-primary/30 mb-8">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <span className="text-2xl">💳</span>
+            بوابة الدفع | Payment Gateway
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            {typeLabels[paymentType]?.ar} | {typeLabels[paymentType]?.en}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-6">
+            <p className="text-white/80 mb-4">
+              ستتمكن من الدفع عبر بوابة الدفع المتكاملة
+            </p>
+            <Button asChild size="lg" className="gap-2">
+              <Link to="/recharge">
+                انتقل إلى صفحة الشحن | Go to Recharge
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <>
       <Helmet>
@@ -215,6 +359,15 @@ const RoadmapDetail = () => {
           </div>
           </div>
         </div>
+
+        {/* Action Buttons Section */}
+        {renderActionButtons()}
+
+        {/* Services Section */}
+        {renderServices()}
+
+        {/* Payment Gateway Section */}
+        {renderPaymentGateway()}
 
         {/* Widget Section */}
         {renderWidget()}

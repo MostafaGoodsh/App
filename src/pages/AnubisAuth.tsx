@@ -31,6 +31,20 @@ const AnubisAuth = () => {
     return null;
   }
 
+  const getErrorMessage = (error: string) => {
+    // تحويل رسائل الخطأ التقنية إلى رسائل مفهومة
+    if (error.includes('non-2xx') || error.includes('Edge Function')) {
+      return 'خدمة المصادقة غير متاحة حالياً. يرجى المحاولة لاحقاً';
+    }
+    if (error.includes('password') || error.includes('email') || error.includes('credentials')) {
+      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+    }
+    if (error.includes('network') || error.includes('Network')) {
+      return 'مشكلة في الاتصال بالشبكة. تحقق من اتصالك بالإنترنت';
+    }
+    return error;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -47,8 +61,10 @@ const AnubisAuth = () => {
           navigate("/anubis");
         }
       } else {
-        toast.error(result.error || "فشل تسجيل الدخول");
+        toast.error(getErrorMessage(result.error || "فشل تسجيل الدخول"));
       }
+    } catch (err: any) {
+      toast.error(getErrorMessage(err?.message || "حدث خطأ غير متوقع"));
     } finally {
       setLoading(false);
     }
@@ -103,8 +119,10 @@ const AnubisAuth = () => {
         toast.success("تم التسجيل بنجاح! مرحباً بك في خزانة أنوبيس");
         navigate("/anubis");
       } else {
-        toast.error(result.error || "فشل التسجيل");
+        toast.error(getErrorMessage(result.error || "فشل التسجيل"));
       }
+    } catch (err: any) {
+      toast.error(getErrorMessage(err?.message || "حدث خطأ غير متوقع"));
     } finally {
       setLoading(false);
     }

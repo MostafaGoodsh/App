@@ -97,24 +97,32 @@ export const WalletDashboard = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* نظرة عامة */}
-      <WalletOverview wallets={wallets} totalValue={totalValue} />
+      <section>
+        <div className="bg-gradient-to-r from-primary/20 to-primary/5 border-l-4 border-primary px-4 py-2 rounded-r-lg mb-4">
+          <h2 className="font-cairo font-bold text-lg flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-primary" />
+            نظرة عامة | Overview
+          </h2>
+        </div>
+        <WalletOverview wallets={wallets} totalValue={totalValue} />
+      </section>
       
       {/* الواجهة الرئيسية */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* القائمة الجانبية للمحافظ */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <Card className="lg:col-span-1 border-2 border-border/50">
+          <CardHeader className="border-b border-primary/30 bg-gradient-to-r from-primary/10 to-transparent">
+            <CardTitle className="flex items-center gap-2 text-primary">
               <Wallet className="w-5 h-5" />
-              المحافظ المتصلة ({networkWallets.length})
+              المحافظ المتصلة | Connected Wallets ({networkWallets.length})
             </CardTitle>
             <CardDescription>
               شبكة {selectedNetwork} • اختر محفظة للتحكم بها
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 pt-4">
             {/* Solana Network Only */}
             <div className="pb-3 border-b">
               <div className="text-center p-2 bg-muted rounded-lg">
@@ -168,37 +176,52 @@ export const WalletDashboard = ({
           {selectedWallet && (
             <>
               {/* الإجراءات السريعة */}
-              <QuickActions 
-                wallet={selectedWallet}
-                onRefreshBalance={onRefreshBalance}
-                onSendTransaction={onSendTransaction}
-                onDisconnect={onDisconnect}
-              />
+              <section>
+                <div className="bg-gradient-to-r from-primary/20 to-primary/5 border-l-4 border-primary px-4 py-2 rounded-r-lg mb-4">
+                  <h2 className="font-cairo font-bold text-lg flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    الإجراءات السريعة | Quick Actions
+                  </h2>
+                </div>
+                <QuickActions 
+                  wallet={selectedWallet}
+                  onRefreshBalance={onRefreshBalance}
+                  onSendTransaction={onSendTransaction}
+                  onDisconnect={onDisconnect}
+                />
+              </section>
 
               {/* التبويبات */}
-              <Tabs defaultValue="details" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="details" className="flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
-                    التفاصيل
-                  </TabsTrigger>
-                  <TabsTrigger value="tokens" className="flex items-center gap-2">
-                    <Coins className="w-4 h-4" />
-                    العملات
-                  </TabsTrigger>
-                  <TabsTrigger value="exchange" className="flex items-center gap-2">
-                    <ArrowLeftRight className="w-4 h-4" />
-                    التبديل
-                  </TabsTrigger>
-                  <TabsTrigger value="transactions" className="flex items-center gap-2">
-                    <Activity className="w-4 h-4" />
-                    المعاملات
-                  </TabsTrigger>
-                  <TabsTrigger value="analytics" className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    الإحصائيات
-                  </TabsTrigger>
-                </TabsList>
+              <section>
+                <div className="bg-gradient-to-r from-primary/20 to-primary/5 border-l-4 border-primary px-4 py-2 rounded-r-lg mb-4">
+                  <h2 className="font-cairo font-bold text-lg flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-primary" />
+                    إدارة المحفظة | Wallet Management
+                  </h2>
+                </div>
+                <Tabs defaultValue="details" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="details" className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      التفاصيل
+                    </TabsTrigger>
+                    <TabsTrigger value="tokens" className="flex items-center gap-2">
+                      <Coins className="w-4 h-4" />
+                      العملات
+                    </TabsTrigger>
+                    <TabsTrigger value="exchange" className="flex items-center gap-2">
+                      <ArrowLeftRight className="w-4 h-4" />
+                      التبديل
+                    </TabsTrigger>
+                    <TabsTrigger value="transactions" className="flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      المعاملات
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4" />
+                      الإحصائيات
+                    </TabsTrigger>
+                  </TabsList>
 
                 <TabsContent value="details" className="space-y-4">
                   <EnhancedWalletCard
@@ -251,6 +274,7 @@ export const WalletDashboard = ({
                   </Card>
                 </TabsContent>
               </Tabs>
+              </section>
             </>
           )}
         </div>
