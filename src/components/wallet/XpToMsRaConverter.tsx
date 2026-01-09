@@ -90,10 +90,10 @@ export const XpToMsRaConverter = () => {
       <CardHeader className="space-y-3 relative z-10">
         <CardTitle className="flex items-center justify-center gap-3 text-lg sm:text-xl">
           <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" dir="ltr">
             <span className="text-primary font-bold">XP</span>
             <span className="text-muted-foreground">⟷</span>
-            <span className="text-primary font-bold">MS-RA</span>
+            <span className="text-primary font-bold">$MS-RA</span>
           </div>
         </CardTitle>
         <CardDescription className="text-center space-y-1">
@@ -105,8 +105,8 @@ export const XpToMsRaConverter = () => {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription className="space-y-1">
-            <div className="font-cairo font-bold text-center" dir="rtl">
-              معدل التحويل: 1000 XP = 1 MS-RA
+            <div className="font-cairo font-bold text-center" dir="ltr">
+              1000 XP = 1 $MS-RA :معدل التحويل
             </div>
             <div className="text-xs text-muted-foreground font-playfair text-center" dir="ltr">
               Conversion Rate
@@ -127,11 +127,11 @@ export const XpToMsRaConverter = () => {
             <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">XP Balance</div>
           </div>
           <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1 font-cairo" dir="rtl">رصيد MS-RA</div>
+            <div className="text-xs text-muted-foreground mb-1 font-cairo" dir="rtl">رصيد $MS-RA</div>
             <div className="text-base sm:text-lg font-bold text-primary">
               {msraBalance.toFixed(4)}
             </div>
-            <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">MS-RA Balance</div>
+            <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">$MS-RA Balance</div>
           </div>
         </div>
 
@@ -179,7 +179,7 @@ export const XpToMsRaConverter = () => {
           <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
           <div className="text-center flex-1">
             <div className="text-xs sm:text-sm text-muted-foreground font-cairo" dir="rtl">تحصل على</div>
-            <div className="text-base sm:text-xl font-bold text-primary break-all">{msraAmount} MS-RA</div>
+            <div className="text-base sm:text-xl font-bold text-primary break-all" dir="ltr">{msraAmount} $MS-RA</div>
             <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">You Get</div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export const XpToMsRaConverter = () => {
           size="lg"
         >
           <Zap className="w-4 h-4 ml-2 flex-shrink-0" />
-          <span>{isConverting ? "جاري التحويل..." : "تحويل إلى MS-RA"}</span>
+          <span>{isConverting ? "جاري التحويل..." : "تحويل إلى $MS-RA"}</span>
         </Button>
 
         <p className="text-xs text-center text-muted-foreground space-y-1">
