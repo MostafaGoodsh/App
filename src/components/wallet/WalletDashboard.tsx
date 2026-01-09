@@ -12,11 +12,15 @@ import { NetworkSwitcher } from "./NetworkSwitcher";
 import { CurrencyExchange } from "./CurrencyExchange";
 import { SolanaTokenList } from "./SolanaTokenList";
 import { PointsToTokensConverter } from "./PointsToTokensConverter";
+import { AddTokenDialog } from "./AddTokenDialog";
+import { HybridTokenSwap } from "./HybridTokenSwap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, TrendingUp, ArrowLeftRight, Network, 
-  Coins, Activity, BarChart3, Settings, Zap
+  Coins, Activity, BarChart3, Settings, Zap, Plus, Link2
 } from "lucide-react";
 
 interface WalletDashboardProps {
@@ -32,11 +36,49 @@ export const WalletDashboard = ({
   onSendTransaction, 
   onDisconnect 
 }: WalletDashboardProps) => {
-  const { user } = useAuth();
+  const { toast } = useToast();
+  const { connectWallet, isConnecting } = useWalletConnect();
   const [selectedWallet, setSelectedWallet] = useState<ConnectedWallet | null>(
     wallets.length > 0 ? wallets[0] : null
   );
   const [selectedNetwork, setSelectedNetwork] = useState<string>('solana');
+  const [showAddToken, setShowAddToken] = useState(false);
+  const [showTokenSwap, setShowTokenSwap] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
+
+  // Listen for events from WithdrawalDialog
+  useEffect(() => {
+    const handleOpenWalletConnect = async () => {
+      try {
+        const wallet = await connectWallet();
+        if (wallet) {
+          toast({
+            title: "تم توصيل المحفظة بنجاح",
+            description: `تم الاتصال بـ ${wallet.address.slice(0, 8)}...${wallet.address.slice(-6)}`,
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "خطأ في الاتصال",
+          description: error.message || "فشل في توصيل المحفظة",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const handleOpenTokenSwap = () => {
+      setShowTokenSwap(true);
+      setActiveTab('exchange');
+    };
+
+    window.addEventListener('open-wallet-connect', handleOpenWalletConnect);
+    window.addEventListener('open-token-swap', handleOpenTokenSwap);
+
+    return () => {
+      window.removeEventListener('open-wallet-connect', handleOpenWalletConnect);
+      window.removeEventListener('open-token-swap', handleOpenTokenSwap);
+    };
+  }, [connectWallet, toast]);
 
   if (wallets.length === 0) {
     return (
@@ -199,7 +241,7 @@ export const WalletDashboard = ({
                     إدارة المحفظة | Wallet Management
                   </h2>
                 </div>
-                <Tabs defaultValue="details" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="details" className="flex items-center gap-2">
                       <Settings className="w-4 h-4" />
@@ -230,14 +272,68 @@ export const WalletDashboard = ({
                     onSendTransaction={onSendTransaction}
                     onDisconnect={onDisconnect}
                   />
+                  
+                  {/* زر توصيل محفظة WalletConnect */}
+                  <Card className="border-dashed border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <Link2 className="w-4 h-4 text-primary" />
+                            توصيل محفظة إضافية | Connect Wallet
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            اتصل بمحفظة WalletConnect للوصول لجميع الميزات
+                          </p>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => window.dispatchEvent(new CustomEvent('open-wallet-connect'))}
+                          disabled={isConnecting}
+                          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                        >
+                          {isConnecting ? 'جاري الاتصال...' : 'توصيل'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="tokens" className="space-y-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold">العملات الرقمية | Tokens</h3>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowAddToken(true)}
+                      className="border-primary text-primary"
+                    >
+                      <Plus className="w-4 h-4 ml-2" />
+                      إضافة عقد عملة
+                    </Button>
+                  </div>
                   <SolanaTokenList wallet={selectedWallet} />
                   <PointsToTokensConverter />
+                  
+                  {/* Add Token Dialog */}
+                  <AddTokenDialog 
+                    open={showAddToken}
+                    onOpenChange={setShowAddToken}
+                    wallet={selectedWallet}
+                    onTokenAdded={(token) => {
+                      toast({
+                        title: "تم إضافة العملة",
+                        description: `تمت إضافة ${token.name} (${token.symbol}) بنجاح`,
+                      });
+                    }}
+                  />
                 </TabsContent>
 
                 <TabsContent value="exchange" className="space-y-4">
+                  {/* التبديل الداخلي السريع */}
+                  <HybridTokenSwap />
+                  
+                  {/* تبديل العملات الخارجية */}
                   <CurrencyExchange
                     wallet={selectedWallet}
                     availableTokens={[]}

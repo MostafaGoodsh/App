@@ -285,6 +285,46 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ open, onOpen
         </AlertDescription>
       </Alert>
 
+      {/* خيارات إضافية بعد النجاح */}
+      <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
+        <CardContent className="p-4 space-y-3">
+          <h4 className="font-semibold text-amber-900 flex items-center gap-2 justify-center">
+            <ArrowRight className="w-4 h-4" />
+            الخطوة التالية
+          </h4>
+          <p className="text-sm text-amber-700">
+            يمكنك الآن توصيل محفظة خارجية لتفعيل التبادل المباشر وإضافة عقود العملات
+          </p>
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              className="w-full border-amber-400 text-amber-800 hover:bg-amber-100"
+              onClick={() => {
+                onOpenChange(false);
+                // Navigate to wallet connect section
+                window.dispatchEvent(new CustomEvent('open-wallet-connect'));
+              }}
+            >
+              <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6.09 10.53a6.81 6.81 0 0 1 9.62 0l.32.31a.33.33 0 0 1 0 .47l-1.09 1.07a.17.17 0 0 1-.24 0l-.44-.43a4.75 4.75 0 0 0-6.71 0l-.47.46a.17.17 0 0 1-.24 0L5.75 11.34a.33.33 0 0 1 0-.47l.34-.34zm11.89 2.21 1 .94a.33.33 0 0 1 0 .47l-4.31 4.23a.34.34 0 0 1-.48 0l-3.06-3a.09.09 0 0 0-.12 0l-3.06 3a.34.34 0 0 1-.48 0l-4.31-4.23a.33.33 0 0 1 0-.47l1-.94a.34.34 0 0 1 .48 0l3.06 3a.09.09 0 0 0 .12 0l3.06-3a.34.34 0 0 1 .48 0l3.06 3a.09.09 0 0 0 .12 0l3.06-3a.34.34 0 0 1 .48 0z"/>
+              </svg>
+              توصيل محفظة WalletConnect
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full border-amber-400 text-amber-800 hover:bg-amber-100"
+              onClick={() => {
+                onOpenChange(false);
+                window.dispatchEvent(new CustomEvent('open-token-swap'));
+              }}
+            >
+              <ArrowRight className="w-4 h-4 ml-2" />
+              تفعيل التبادل بين العملات
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Button onClick={() => onOpenChange(false)} className="w-full">
         إغلاق
       </Button>
