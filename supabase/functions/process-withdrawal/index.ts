@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from 'https://esm.sh/@solana/web3.js@1.98.0'
 import { getOrCreateAssociatedTokenAccount, createTransferInstruction, TOKEN_PROGRAM_ID } from 'https://esm.sh/@solana/spl-token@0.4.13'
-
+import bs58 from 'https://esm.sh/bs58@6.0.0'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -15,6 +15,12 @@ interface WithdrawalRequest {
   target_address: string
 }
 
+const jsonResponse = (body: unknown, status = 200) => {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -26,17 +32,11 @@ serve(async (req) => {
 
     // Validate input
     if (!internal_token_symbol || !internal_amount || internal_amount <= 0) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid token or amount' }),
-        { status: 400, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Invalid token or amount' })
     }
 
     if (!target_token || !target_address) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Target token and address required' }),
-        { status: 400, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Target token and address required' })
     }
 
     // Initialize Supabase
@@ -48,21 +48,15 @@ serve(async (req) => {
     // Get user from auth header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Authentication required' }),
-        { status: 401, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Authentication required' }, 401)
     }
 
     // Extract and verify JWT
     const jwt = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
-    
+
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authentication' }),
-        { status: 401, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Invalid authentication' }, 401)
     }
 
     // Get user's internal token by symbol first
@@ -74,10 +68,7 @@ serve(async (req) => {
       .single()
 
     if (tokenError || !token) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Token not found' }),
-        { status: 404, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Token not found' })
     }
 
     // Get user's internal token balance
@@ -89,17 +80,11 @@ serve(async (req) => {
       .single()
 
     if (balanceError || !tokenBalance) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Token balance not found' }),
-        { status: 404, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Token balance not found' })
     }
 
     if (tokenBalance.balance < internal_amount) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Insufficient balance' }),
-        { status: 400, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: 'Insufficient balance' })
     }
 
     // Calculate target amount based on exchange rates
@@ -116,10 +101,7 @@ serve(async (req) => {
 
     const targetPrice = tokenPrices[target_token]
     if (!targetPrice) {
-      return new Response(
-        JSON.stringify({ success: false, error: `Target token ${target_token} not supported` }),
-        { status: 400, headers: corsHeaders }
-      )
+      return jsonResponse({ success: false, error: `Target token ${target_token} not supported` })
     }
 
     const internalTokenUsdValue = internal_amount * token.exchange_rate_usd
@@ -154,10 +136,11 @@ serve(async (req) => {
 
     if (requestError) {
       console.error('Withdrawal request creation error:', requestError)
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to create withdrawal request', details: requestError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return jsonResponse({
+        success: false,
+        error: 'Failed to create withdrawal request',
+        details: requestError.message,
+      })
     }
 
     console.log('Withdrawal request created:', withdrawalRequest.id)
@@ -184,37 +167,24 @@ serve(async (req) => {
         try {
           // Try parsing as JSON array first (e.g., [1,2,3,...])
           const keyArray = JSON.parse(hotWalletKey)
+          if (!Array.isArray(keyArray)) {
+            throw new Error('Private key JSON must be an array')
+          }
           console.log('Parsed as JSON array, length:', keyArray.length)
           hotWallet = Keypair.fromSecretKey(new Uint8Array(keyArray))
-        } catch (parseError) {
-          console.log('JSON parse failed, trying base58...')
-          // If JSON parsing fails, try base58 format using bs58 decoding
-          try {
-            // Base58 decode - Solana private keys are typically 64 bytes
-            const bs58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            let decoded = BigInt(0)
-            for (const char of hotWalletKey) {
-              const index = bs58chars.indexOf(char)
-              if (index === -1) throw new Error('Invalid base58 character')
-              decoded = decoded * BigInt(58) + BigInt(index)
-            }
-            
-            const bytes = []
-            while (decoded > 0) {
-              bytes.unshift(Number(decoded % BigInt(256)))
-              decoded = decoded / BigInt(256)
-            }
-            
-            // Pad to 64 bytes if needed
-            while (bytes.length < 64) {
-              bytes.unshift(0)
-            }
-            
-            console.log('Base58 decoded, bytes length:', bytes.length)
-            hotWallet = Keypair.fromSecretKey(new Uint8Array(bytes))
-          } catch (base58Error) {
-            console.error('Base58 decode error:', base58Error)
-            throw new Error('Invalid private key format. Please provide as JSON array [1,2,3...] or base58 string')
+        } catch (_parseError) {
+          // Fallback: base58 encoded secret key (64 bytes) or seed (32 bytes)
+          const decoded = bs58.decode(hotWalletKey.trim())
+          console.log('Base58 decoded length:', decoded.length)
+
+          if (decoded.length === 64) {
+            hotWallet = Keypair.fromSecretKey(decoded)
+          } else if (decoded.length === 32) {
+            hotWallet = Keypair.fromSeed(decoded)
+          } else {
+            throw new Error(
+              `Invalid private key length (${decoded.length}). Expected 64 (secretKey) or 32 (seed).`
+            )
           }
         }
         
@@ -313,18 +283,12 @@ serve(async (req) => {
 
         console.log(`Withdrawal processed: ${signature}`)
 
-        return new Response(
-          JSON.stringify({ 
-            success: true, 
-            transaction_hash: signature,
-            target_amount: targetAmount,
-            withdrawal_id: withdrawalRequest.id
-          }),
-          { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        )
+        return jsonResponse({
+          success: true,
+          transaction_hash: signature,
+          target_amount: targetAmount,
+          withdrawal_id: withdrawalRequest.id,
+        })
 
       } catch (blockchainError) {
         const errorMessage = blockchainError instanceof Error ? blockchainError.message : 'Unknown blockchain error'
@@ -344,45 +308,27 @@ serve(async (req) => {
           })
           .eq('id', withdrawalRequest.id)
 
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Blockchain transaction failed: ${errorMessage}`,
-            withdrawal_id: withdrawalRequest.id
-          }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        )
+        return jsonResponse({
+          success: false,
+          error: `Blockchain transaction failed: ${errorMessage}`,
+          withdrawal_id: withdrawalRequest.id,
+        })
       }
     } else {
       // For other tokens (BTC, ETH), just create pending request for manual processing
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Withdrawal request created and pending manual processing',
-          withdrawal_id: withdrawalRequest.id,
-          target_amount: targetAmount
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      )
+      return jsonResponse({
+        success: true,
+        message: 'Withdrawal request created and pending manual processing',
+        withdrawal_id: withdrawalRequest.id,
+        target_amount: targetAmount,
+      })
     }
 
   } catch (error) {
     console.error('Function error:', error)
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to process withdrawal'
-      }),
-      { 
-        status: 500, 
-        headers: corsHeaders 
-      }
-    )
+    return jsonResponse({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to process withdrawal',
+    })
   }
 })
