@@ -57,7 +57,7 @@ export const XpToMsRaConverter = () => {
       
       toast({
         title: "تم التحويل بنجاح! 🎉",
-        description: `تم تحويل ${amount} XP إلى ${msraAmount} MSRA`,
+        description: `تم تحويل XP ${amount} إلى $MS-RA ${msraAmount}`,
       });
       
       setXpAmount("");
@@ -65,7 +65,7 @@ export const XpToMsRaConverter = () => {
       console.error('Conversion error:', error);
       toast({
         title: "خطأ في التحويل",
-        description: "فشل في تحويل XP إلى MSRA. يرجى المحاولة مرة أخرى",
+        description: "فشل في تحويل XP إلى $MS-RA. يرجى المحاولة مرة أخرى",
         variant: "destructive"
       });
     } finally {
@@ -192,7 +192,7 @@ export const XpToMsRaConverter = () => {
           size="lg"
         >
           <Zap className="w-4 h-4 ml-2 flex-shrink-0" />
-          <span>{isConverting ? "جاري التحويل..." : "تحويل إلى $MS-RA"}</span>
+          <span>{isConverting ? "جاري التحويل..." : "تحويل إلى"} <span dir="ltr">$MS-RA</span></span>
         </Button>
 
         <p className="text-xs text-center text-muted-foreground space-y-1">
