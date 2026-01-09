@@ -1,305 +1,190 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useWalletConnect, ConnectedWallet } from '@/hooks/useWalletConnect';
-import { useToast } from '@/hooks/use-toast';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { 
-  Wallet, Link2, Unlink, Loader2, 
-  CheckCircle2, ExternalLink, Copy, RefreshCw 
-} from 'lucide-react';
+import { useSolanaWallet } from '@/hooks/useSolanaWallet';
+import { Wallet, Copy, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface WalletConnectButtonProps {
   variant?: 'default' | 'card' | 'compact';
   showBalance?: boolean;
-  onConnect?: (wallet: ConnectedWallet) => void;
+  onConnect?: () => void;
   onDisconnect?: () => void;
 }
 
-export const WalletConnectButton = ({
+export const WalletConnectButton = ({ 
   variant = 'default',
   showBalance = true,
   onConnect,
-  onDisconnect,
+  onDisconnect 
 }: WalletConnectButtonProps) => {
+  const { connected, publicKey, disconnect } = useWallet();
+  const { getBalance } = useSolanaWallet();
   const { toast } = useToast();
-  const { connectedWallet, isConnecting, connectWallet, disconnectWallet, refreshBalance } = useWalletConnect();
-  const { connected: solanaConnected, publicKey, disconnect: disconnectSolana } = useWallet();
-  
+  const [balance, setBalance] = useState<number>(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleConnect = async () => {
-    try {
-      const wallet = await connectWallet();
-      if (wallet) {
-        toast({
-          title: "تم التوصيل بنجاح | Connected",
-          description: `${wallet.address.slice(0, 8)}...${wallet.address.slice(-6)}`,
-        });
-        onConnect?.(wallet);
-      }
-    } catch (error: any) {
+  // Load balance when connected
+  useEffect(() => {
+    if (connected && publicKey) {
+      handleRefresh();
+      onConnect?.();
+    }
+  }, [connected, publicKey]);
+
+  const handleCopyAddress = () => {
+    if (publicKey) {
+      navigator.clipboard.writeText(publicKey.toString());
       toast({
-        title: "فشل التوصيل | Connection Failed",
-        description: error.message,
-        variant: "destructive",
+        title: "✅ تم النسخ",
+        description: "تم نسخ عنوان المحفظة",
       });
     }
   };
 
-  const handleDisconnect = () => {
-    disconnectWallet();
-    toast({
-      title: "تم قطع الاتصال",
-      description: "تم فصل المحفظة بنجاح",
-    });
-    onDisconnect?.();
-  };
-
   const handleRefresh = async () => {
+    if (!connected) return;
     setIsRefreshing(true);
     try {
-      await refreshBalance();
-      toast({
-        title: "تم التحديث",
-        description: "تم تحديث الرصيد",
-      });
+      const newBalance = await getBalance();
+      setBalance(newBalance);
     } catch (error) {
-      console.error('Refresh error:', error);
+      console.error('Error refreshing balance:', error);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
-    toast({
-      title: "تم النسخ",
-      description: "تم نسخ العنوان",
-    });
+  const handleDisconnect = async () => {
+    try {
+      await disconnect();
+      setBalance(0);
+      onDisconnect?.();
+      toast({
+        title: "تم قطع الاتصال",
+        description: "تم فصل المحفظة بنجاح",
+      });
+    } catch (error) {
+      console.error('Disconnect error:', error);
+    }
+  };
+
+  const openExplorer = () => {
+    if (publicKey) {
+      window.open(`https://solscan.io/account/${publicKey.toString()}`, '_blank');
+    }
   };
 
   // Compact variant - just a button
   if (variant === 'compact') {
-    if (connectedWallet) {
-      return (
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="font-mono text-xs">
-            {connectedWallet.address.slice(0, 6)}...{connectedWallet.address.slice(-4)}
-          </Badge>
-          <Button 
-            size="sm" 
-            variant="ghost"
-            onClick={handleDisconnect}
-          >
-            <Unlink className="w-4 h-4" />
-          </Button>
-        </div>
-      );
-    }
-
     return (
-      <Button 
-        size="sm"
-        onClick={handleConnect}
-        disabled={isConnecting}
-      >
-        {isConnecting ? (
-          <Loader2 className="w-4 h-4 animate-spin ml-1" />
-        ) : (
-          <Link2 className="w-4 h-4 ml-1" />
-        )}
-        توصيل
-      </Button>
+      <div className="wallet-adapter-button-container">
+        <WalletMultiButton />
+      </div>
     );
   }
 
-  // Card variant - full card display
+  // Card variant - full card with details
   if (variant === 'card') {
     return (
       <Card className="border-primary/20">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Wallet className="w-5 h-5 text-primary" />
             <div className="space-y-1">
-              <span className="font-cairo" dir="rtl">المحافظ الخارجية</span>
+              <span className="font-cairo" dir="rtl">محفظة Solana</span>
               <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
-                External Wallets
+                Solana Wallet
               </span>
             </div>
           </CardTitle>
           <CardDescription>
-            اتصل بمحفظتك الخارجية عبر WalletConnect أو Phantom
+            اتصل بمحفظتك الخارجية عبر Phantom أو Solflare
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* WalletConnect Section */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">WalletConnect</span>
-              {connectedWallet ? (
+          {connected && publicKey ? (
+            <>
+              {/* Connected State */}
+              <div className="flex items-center justify-between">
                 <Badge variant="default" className="bg-green-600">
-                  <CheckCircle2 className="w-3 h-3 ml-1" />
-                  متصل
+                  متصل | Connected
                 </Badge>
-              ) : (
-                <Badge variant="secondary">غير متصل</Badge>
-              )}
-            </div>
-
-            {connectedWallet ? (
-              <div className="p-3 bg-muted/50 rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">العنوان:</span>
-                  <div className="flex items-center gap-1">
-                    <code className="text-xs font-mono">
-                      {connectedWallet.address.slice(0, 10)}...{connectedWallet.address.slice(-8)}
-                    </code>
-                    <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      className="h-6 w-6"
-                      onClick={() => copyAddress(connectedWallet.address)}
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={openExplorer}>
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleDisconnect}>
+                    <LogOut className="w-4 h-4" />
+                  </Button>
                 </div>
-                
-                {showBalance && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">الرصيد:</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold">
-                        {parseFloat(connectedWallet.balance).toFixed(4)} {connectedWallet.currency}
-                      </span>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="h-6 w-6"
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                      >
-                        <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-                      </Button>
-                    </div>
-                  </div>
-                )}
+              </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">الشبكة:</span>
-                  <Badge variant="outline">{connectedWallet.network}</Badge>
-                </div>
-
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="w-full mt-2"
-                  onClick={handleDisconnect}
-                >
-                  <Unlink className="w-4 h-4 ml-1" />
-                  قطع الاتصال
+              {/* Wallet Address */}
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <span className="text-sm font-mono">
+                  {publicKey.toString().slice(0, 6)}...{publicKey.toString().slice(-6)}
+                </span>
+                <Button variant="ghost" size="sm" onClick={handleCopyAddress}>
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
-            ) : (
-              <Button 
-                className="w-full"
-                onClick={handleConnect}
-                disabled={isConnecting}
-              >
-                {isConnecting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                    جاري الاتصال...
-                  </>
-                ) : (
-                  <>
-                    <Link2 className="w-4 h-4 ml-2" />
-                    اتصل بـ WalletConnect
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
 
-          {/* Solana Wallet Section */}
-          <div className="pt-4 border-t space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Phantom Wallet</span>
-              {solanaConnected ? (
-                <Badge variant="default" className="bg-purple-600">
-                  <CheckCircle2 className="w-3 h-3 ml-1" />
-                  متصل
-                </Badge>
-              ) : (
-                <Badge variant="secondary">غير متصل</Badge>
-              )}
-            </div>
-
-            {solanaConnected && publicKey ? (
-              <div className="p-3 bg-muted/50 rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">العنوان:</span>
-                  <div className="flex items-center gap-1">
-                    <code className="text-xs font-mono">
-                      {publicKey.toString().slice(0, 10)}...{publicKey.toString().slice(-8)}
-                    </code>
-                    <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      className="h-6 w-6"
-                      onClick={() => copyAddress(publicKey.toString())}
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                  </div>
+              {/* Balance */}
+              {showBalance && (
+                <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground">الرصيد | Balance</p>
+                  <p className="text-2xl font-bold">{balance.toFixed(4)} SOL</p>
                 </div>
+              )}
 
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => disconnectSolana()}
-                >
-                  <Unlink className="w-4 h-4 ml-1" />
-                  قطع الاتصال
-                </Button>
+              {/* Wallet Button for changing wallet */}
+              <div className="pt-2">
+                <WalletMultiButton className="!w-full !bg-muted hover:!bg-muted/80 !rounded-md !h-10 !justify-center" />
               </div>
-            ) : (
-              <WalletMultiButton className="w-full !bg-gradient-to-r !from-purple-600 !to-blue-600 !rounded-lg" />
-            )}
-          </div>
+            </>
+          ) : (
+            <>
+              {/* Disconnected State */}
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm">Phantom / Solflare</span>
+                <Badge variant="secondary">غير متصل</Badge>
+              </div>
+              
+              <div className="flex justify-center">
+                <WalletMultiButton className="!bg-primary hover:!bg-primary/80 !rounded-md !h-10" />
+              </div>
+
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                يدعم Phantom, Solflare, وجميع محافظ Solana
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     );
   }
 
-  // Default variant - just a styled button
+  // Default variant
   return (
-    <Button 
-      className="w-full"
-      onClick={connectedWallet ? handleDisconnect : handleConnect}
-      disabled={isConnecting}
-      variant={connectedWallet ? "outline" : "default"}
-    >
-      {isConnecting ? (
+    <div className="flex items-center gap-2">
+      <WalletMultiButton />
+      {connected && publicKey && (
         <>
-          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-          جاري الاتصال...
-        </>
-      ) : connectedWallet ? (
-        <>
-          <Unlink className="w-4 h-4 ml-2" />
-          قطع الاتصال ({connectedWallet.address.slice(0, 6)}...)
-        </>
-      ) : (
-        <>
-          <Link2 className="w-4 h-4 ml-2" />
-          اتصل بالمحفظة الخارجية
+          <Button variant="ghost" size="sm" onClick={handleCopyAddress}>
+            <Copy className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleDisconnect}>
+            <LogOut className="w-4 h-4" />
+          </Button>
         </>
       )}
-    </Button>
+    </div>
   );
 };
