@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, ExternalLink, CheckCircle, Circle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-
+import { RoadmapPaymentGateway } from "@/components/roadmap/RoadmapPaymentGateway";
 // Configure DOMPurify to allow safe HTML elements for content
 const sanitizeHTML = (dirty: string) => {
   return DOMPurify.sanitize(dirty, {
@@ -58,6 +58,8 @@ interface RoadmapData {
     services?: ServiceOption[];
     show_payment_gateway?: boolean;
     payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
+    payment_title?: string;
+    payment_description?: string;
   };
 }
 
@@ -266,39 +268,14 @@ const RoadmapDetail = () => {
   const renderPaymentGateway = () => {
     if (!data.widget_config?.show_payment_gateway) return null;
 
-    const paymentType = data.widget_config?.payment_type || 'presale';
-    const typeLabels: Record<string, { ar: string; en: string }> = {
-      presale: { ar: 'البيع المسبق', en: 'Presale' },
-      liquidity: { ar: 'مجمع السيولة', en: 'Liquidity Pool' },
-      services: { ar: 'الخدمات', en: 'Services' },
-      vault: { ar: 'الخزانة الرقمية', en: 'Digital Vault' },
-    };
+    const paymentType = (data.widget_config?.payment_type || 'presale') as 'presale' | 'liquidity' | 'services' | 'vault';
 
     return (
-      <Card className="bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border-primary/30 mb-8">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <span className="text-2xl">💳</span>
-            بوابة الدفع | Payment Gateway
-          </CardTitle>
-          <CardDescription className="text-white/70">
-            {typeLabels[paymentType]?.ar} | {typeLabels[paymentType]?.en}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-6">
-            <p className="text-white/80 mb-4">
-              ستتمكن من الدفع عبر بوابة الدفع المتكاملة
-            </p>
-            <Button asChild size="lg" className="gap-2">
-              <Link to="/recharge">
-                انتقل إلى صفحة الشحن | Go to Recharge
-                <ExternalLink className="w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <RoadmapPaymentGateway 
+        paymentType={paymentType}
+        title={data.widget_config?.payment_title}
+        description={data.widget_config?.payment_description}
+      />
     );
   };
 
