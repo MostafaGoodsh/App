@@ -60,10 +60,10 @@ const MiningDashboard = () => {
       const result = await updateMiningProgress();
       if (result) {
         setCurrentMined(0); // Reset display counter
-        toast({
-          title: "تم التحديث",
-          description: `تم تعدين ${result.mined_amount.toFixed(8)} $MS-RA`,
-        });
+      toast({
+        title: "تم التحديث",
+        description: `تم تعدين $MS-RA ${result.mined_amount.toFixed(8)}`,
+      });
       }
     } catch (err) {
       toast({

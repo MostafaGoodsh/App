@@ -41,7 +41,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
   // Get custom content from admin panel
   const msRaContent = getContentItem('msra_mining_card_main');
-  const cardTitle = msRaContent?.text_content || '$MsRa Mining';
+  const cardTitle = msRaContent?.text_content || '$MS-RA Mining';
   const cardBackground = msRaContent?.image_url || '/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png';
 
   // Get MSRA balance from internal wallet
@@ -236,7 +236,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
     toast({
       title: "تم التعدين بنجاح!",
-      description: `حصلت على ${reward.toFixed(2)} $MS-RA`
+      description: `حصلت على $MS-RA ${reward.toFixed(2)}`
     });
   };
 
@@ -266,7 +266,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            <span className="text-right font-cairo" dir="rtl">تعدين $MS-RA</span>
+            <span className="text-right font-cairo" dir="rtl">تعدين <span dir="ltr">$MS-RA</span></span>
           </div>
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
