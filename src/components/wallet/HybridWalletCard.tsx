@@ -50,14 +50,14 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
       />
-      <CardHeader className="relative z-10">
+      <CardHeader className="relative z-10 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-primary/20">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-lg bg-primary/20 border border-primary/30">
               <Wallet className="w-5 h-5 text-primary" />
             </div>
             <div className="space-y-1">
-              <div className="text-lg font-cairo" dir="rtl">المحفظة</div>
+              <div className="text-lg font-cairo text-foreground" dir="rtl">المحفظة</div>
               <div className="text-sm font-normal text-muted-foreground font-playfair" dir="ltr">Wallet</div>
             </div>
           </div>

@@ -5,11 +5,14 @@ import { WithdrawalDialog } from '@/components/wallet/WithdrawalDialog';
 import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { RechargeSection } from '@/components/wallet/RechargeSection';
+import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
+import { TokenContractManager } from '@/components/wallet/TokenContractManager';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft, RefreshCw, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft, RefreshCw, CheckCircle, XCircle, Loader2, Link2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -195,23 +198,143 @@ const WalletContent = () => {
 
   return (
     <>
-      {/* المحفظة الداخلية فقط */}
-      <div className="space-y-6">
-        {/* محفظة XP و MS-RA */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <HybridWalletCard 
-            onSwapClick={() => setShowHybridSwap(true)}
-            onWithdrawClick={() => setShowWithdraw(true)}
-          />
-          <MsRaCurrencyCard isVerified={isVerified} />
-        </div>
+      {/* Tabs للتبديل بين المحفظة الداخلية والخارجية */}
+      <Tabs defaultValue="internal" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="internal" className="flex items-center gap-2">
+            <WalletIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">المحفظة الداخلية</span>
+            <span className="sm:hidden">داخلية</span>
+          </TabsTrigger>
+          <TabsTrigger value="external" className="flex items-center gap-2">
+            <Link2 className="w-4 h-4" />
+            <span className="hidden sm:inline">المحافظ الخارجية</span>
+            <span className="sm:hidden">خارجية</span>
+          </TabsTrigger>
+          <TabsTrigger value="contracts" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">عقود العملات</span>
+            <span className="sm:hidden">عقود</span>
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Recharge & Conversion Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RechargeSection />
-          <XpToMsRaConverter />
-        </div>
-      </div>
+        {/* المحفظة الداخلية */}
+        <TabsContent value="internal" className="space-y-6">
+          {/* محفظة XP و MS-RA */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <HybridWalletCard 
+              onSwapClick={() => setShowHybridSwap(true)}
+              onWithdrawClick={() => setShowWithdraw(true)}
+            />
+            <MsRaCurrencyCard isVerified={isVerified} />
+          </div>
+
+          {/* Recharge & Conversion Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RechargeSection />
+            <XpToMsRaConverter />
+          </div>
+        </TabsContent>
+
+        {/* المحافظ الخارجية */}
+        <TabsContent value="external" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <WalletConnectButton variant="card" showBalance={true} />
+            
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ArrowUpRight className="w-5 h-5 text-primary" />
+                  <div className="space-y-1">
+                    <span className="font-cairo" dir="rtl">التحويلات الخارجية</span>
+                    <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
+                      External Transfers
+                    </span>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  أرسل واستقبل العملات من محفظتك الخارجية
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="p-4 bg-muted/50 rounded-lg text-center">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    لتفعيل التحويلات، قم بتوصيل محفظتك أولاً
+                  </p>
+                  <Badge variant="outline">
+                    استخدم WalletConnect أو Phantom
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" className="w-full" disabled>
+                    <ArrowUpRight className="w-4 h-4 ml-1" />
+                    إرسال
+                  </Button>
+                  <Button variant="outline" className="w-full" disabled>
+                    <ArrowDownLeft className="w-4 h-4 ml-1" />
+                    استلام
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* عقود العملات */}
+        <TabsContent value="contracts" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TokenContractManager network="solana" />
+            
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Activity className="w-5 h-5 text-primary" />
+                  <div className="space-y-1">
+                    <span className="font-cairo" dir="rtl">العملات المدعومة</span>
+                    <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
+                      Supported Tokens
+                    </span>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  الشبكات والعملات المدعومة في التطبيق
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <span className="text-xs">◎</span>
+                      </div>
+                      <span className="text-sm">Solana</span>
+                    </div>
+                    <Badge variant="default" className="bg-green-600">مدعومة</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <span className="text-xs">Ξ</span>
+                      </div>
+                      <span className="text-sm">Ethereum</span>
+                    </div>
+                    <Badge variant="secondary">قريباً</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                        <span className="text-xs">₿</span>
+                      </div>
+                      <span className="text-sm">BSC</span>
+                    </div>
+                    <Badge variant="secondary">قريباً</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* نافذة التبديل السريع */}
       {showHybridSwap && (
