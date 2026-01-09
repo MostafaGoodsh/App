@@ -90,7 +90,7 @@ export const useAnubisSubscription = () => {
       queryClient.invalidateQueries({ queryKey: ["anubis-access"] });
       toast({
         title: "تم التسجيل بنجاح",
-        description: "مرحباً بك في خزانة أنوبيس الرقمية",
+        description: "مرحباً بك في الخزانة الرقمية",
       });
     },
     onError: (error: any) => {

@@ -116,7 +116,7 @@ const AnubisAuth = () => {
       );
       
       if (result.success) {
-        toast.success("تم التسجيل بنجاح! مرحباً بك في خزانة أنوبيس");
+        toast.success("تم التسجيل بنجاح! مرحباً بك في الخزانة الرقمية");
         navigate("/anubis");
       } else {
         toast.error(getErrorMessage(result.error || "فشل التسجيل"));
@@ -135,8 +135,8 @@ const AnubisAuth = () => {
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <Shield className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            خزانة أنوبيس الرقمية
+        <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            الخزانة الرقمية
           </CardTitle>
           <CardDescription className="text-lg">
             خدمة تخزين آمنة ومشفرة لملفاتك الشخصية
@@ -320,7 +320,7 @@ const AnubisAuth = () => {
 
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                    🎁 التسجيل مجاني حالياً! احصل على وصول فوري لخزانة أنوبيس الآمنة
+                    🎁 التسجيل مجاني حالياً! احصل على وصول فوري للخزانة الرقمية الآمنة
                   </p>
                 </div>
 

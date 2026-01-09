@@ -33,7 +33,7 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
               <Shield className="h-8 w-8 text-primary" />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              خزانة أنوبيس الرقمية
+              الخزانة الرقمية
             </CardTitle>
             <CardDescription className="text-lg">
               خدمة تخزين آمنة ومشفرة لملفاتك الشخصية
