@@ -75,7 +75,7 @@ export default function AnubisSubscription() {
   return (
     <>
       <Helmet>
-        <title>تسجيل في خزانة أنوبيس الرقمية | Anubis Vault Registration</title>
+        <title>تسجيل في الخزانة الرقمية | Digital Vault Registration</title>
       </Helmet>
 
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/50 to-background">
@@ -85,9 +85,9 @@ export default function AnubisSubscription() {
               <Shield className="h-10 w-10 text-primary" />
             </div>
             <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              خزانة أنوبيس الرقمية
+              الخزانة الرقمية
               <br />
-              <span className="text-2xl">Anubis Digital Vault</span>
+              <span className="text-2xl">Digital Vault</span>
             </CardTitle>
             <CardDescription className="text-lg">
               {settings.free_tier_enabled ? (

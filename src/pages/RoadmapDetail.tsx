@@ -271,7 +271,7 @@ const RoadmapDetail = () => {
       presale: { ar: 'البيع المسبق', en: 'Presale' },
       liquidity: { ar: 'مجمع السيولة', en: 'Liquidity Pool' },
       services: { ar: 'الخدمات', en: 'Services' },
-      vault: { ar: 'خزانة أنوبيس', en: 'Anubis Vault' },
+      vault: { ar: 'الخزانة الرقمية', en: 'Digital Vault' },
     };
 
     return (
