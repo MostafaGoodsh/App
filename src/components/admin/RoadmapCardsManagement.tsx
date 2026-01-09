@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, Upload, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Upload, ArrowUp, ArrowDown, Link, CreditCard, Settings2, ExternalLink } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -35,6 +35,38 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface ActionButton {
+  label: string;
+  label_en?: string;
+  url: string;
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost';
+}
+
+interface ServiceOption {
+  id: string;
+  name: string;
+  name_en?: string;
+  description?: string;
+  isEnabled: boolean;
+}
+
+interface WidgetConfig {
+  action_buttons?: ActionButton[];
+  services?: ServiceOption[];
+  show_payment_gateway?: boolean;
+  payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
+  payment_title?: string;
+  payment_description?: string;
+}
 
 interface RoadmapCard {
   id: string;
@@ -61,7 +93,7 @@ interface RoadmapCard {
   content_font_size?: string;
   external_widget_url?: string;
   widget_type?: string;
-  widget_config?: any;
+  widget_config?: WidgetConfig;
 }
 
 const RoadmapCardsManagement = () => {
@@ -84,7 +116,12 @@ const RoadmapCardsManagement = () => {
         .order('display_order', { ascending: true });
 
       if (error) throw error;
-      setCards(data || []);
+      // Cast data to handle widget_config JSON type
+      const typedData = (data || []).map(card => ({
+        ...card,
+        widget_config: card.widget_config as WidgetConfig | undefined
+      })) as RoadmapCard[];
+      setCards(typedData);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -101,10 +138,16 @@ const RoadmapCardsManagement = () => {
     if (!editingCard) return;
 
     try {
+      // Cast widget_config to any to handle JSON type compatibility
+      const cardToSave = {
+        ...editingCard,
+        widget_config: editingCard.widget_config as any
+      };
+
       if (editingCard.id) {
         const { error } = await supabase
           .from('roadmap_cards')
-          .update(editingCard)
+          .update(cardToSave)
           .eq('id', editingCard.id);
 
         if (error) throw error;
@@ -112,7 +155,7 @@ const RoadmapCardsManagement = () => {
       } else {
         const { error } = await supabase
           .from('roadmap_cards')
-          .insert([editingCard as any]);
+          .insert([cardToSave as any]);
 
         if (error) throw error;
         toast({ title: "تم الإضافة بنجاح" });
@@ -297,8 +340,9 @@ const RoadmapCardsManagement = () => {
             </DialogHeader>
 
             <Tabs defaultValue="basic" className="py-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="basic">الأساسي</TabsTrigger>
+                <TabsTrigger value="actions">الأزرار</TabsTrigger>
                 <TabsTrigger value="fonts">الفونتات</TabsTrigger>
                 <TabsTrigger value="widgets">Widgets</TabsTrigger>
                 <TabsTrigger value="advanced">متقدم</TabsTrigger>
@@ -478,6 +522,350 @@ const RoadmapCardsManagement = () => {
                     <Label>نشط</Label>
                   </div>
                 </div>
+              </TabsContent>
+
+              {/* Actions & Payment Tab */}
+              <TabsContent value="actions" className="space-y-6">
+                {/* Payment Gateway Section */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      بوابة الدفع
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label>تفعيل بوابة الدفع في هذه الصفحة</Label>
+                      <Switch
+                        checked={editingCard?.widget_config?.show_payment_gateway || false}
+                        onCheckedChange={(checked) => setEditingCard({
+                          ...editingCard,
+                          widget_config: {
+                            ...editingCard?.widget_config,
+                            show_payment_gateway: checked
+                          }
+                        })}
+                      />
+                    </div>
+
+                    {editingCard?.widget_config?.show_payment_gateway && (
+                      <div className="space-y-4 pt-2 border-t">
+                        <div className="space-y-2">
+                          <Label>نوع الدفع</Label>
+                          <Select
+                            value={editingCard?.widget_config?.payment_type || 'presale'}
+                            onValueChange={(value) => setEditingCard({
+                              ...editingCard,
+                              widget_config: {
+                                ...editingCard?.widget_config,
+                                payment_type: value as 'presale' | 'liquidity' | 'services' | 'vault'
+                              }
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر نوع الدفع" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="presale">البيع المسبق (Pre-sale)</SelectItem>
+                              <SelectItem value="liquidity">السيولة (Liquidity)</SelectItem>
+                              <SelectItem value="services">الخدمات (Services)</SelectItem>
+                              <SelectItem value="vault">الخزينة (Vault)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>عنوان بوابة الدفع</Label>
+                            <Input
+                              value={editingCard?.widget_config?.payment_title || ''}
+                              onChange={(e) => setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  payment_title: e.target.value
+                                }
+                              })}
+                              placeholder="شراء نقاط XP"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>وصف بوابة الدفع</Label>
+                            <Input
+                              value={editingCard?.widget_config?.payment_description || ''}
+                              onChange={(e) => setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  payment_description: e.target.value
+                                }
+                              })}
+                              placeholder="اشترِ نقاط XP بسهولة"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Action Buttons Section */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Link className="h-5 w-5" />
+                      أزرار الإجراءات
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      أضف أزرار للروابط المهمة مثل White Paper، Telegram، إلخ
+                    </p>
+
+                    {(editingCard?.widget_config?.action_buttons || []).map((button, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">زر {index + 1}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                              buttons.splice(index, 1);
+                              setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  action_buttons: buttons
+                                }
+                              });
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input
+                            value={button.label || ''}
+                            onChange={(e) => {
+                              const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                              buttons[index] = { ...buttons[index], label: e.target.value };
+                              setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  action_buttons: buttons
+                                }
+                              });
+                            }}
+                            placeholder="النص (عربي)"
+                          />
+                          <Input
+                            value={button.label_en || ''}
+                            onChange={(e) => {
+                              const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                              buttons[index] = { ...buttons[index], label_en: e.target.value };
+                              setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  action_buttons: buttons
+                                }
+                              });
+                            }}
+                            placeholder="Label (English)"
+                          />
+                        </div>
+                        <Input
+                          value={button.url || ''}
+                          onChange={(e) => {
+                            const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                            buttons[index] = { ...buttons[index], url: e.target.value };
+                            setEditingCard({
+                              ...editingCard,
+                              widget_config: {
+                                ...editingCard?.widget_config,
+                                action_buttons: buttons
+                              }
+                            });
+                          }}
+                          placeholder="الرابط (https://...)"
+                        />
+                        <Select
+                          value={button.variant || 'default'}
+                          onValueChange={(value) => {
+                            const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                            buttons[index] = { ...buttons[index], variant: value as ActionButton['variant'] };
+                            setEditingCard({
+                              ...editingCard,
+                              widget_config: {
+                                ...editingCard?.widget_config,
+                                action_buttons: buttons
+                              }
+                            });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="نوع الزر" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">رئيسي (ذهبي)</SelectItem>
+                            <SelectItem value="secondary">ثانوي</SelectItem>
+                            <SelectItem value="outline">محدد</SelectItem>
+                            <SelectItem value="ghost">شفاف</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const buttons = [...(editingCard?.widget_config?.action_buttons || [])];
+                        buttons.push({ label: '', url: '', variant: 'default' });
+                        setEditingCard({
+                          ...editingCard,
+                          widget_config: {
+                            ...editingCard?.widget_config,
+                            action_buttons: buttons
+                          }
+                        });
+                      }}
+                    >
+                      <Plus className="h-4 w-4 ml-2" />
+                      إضافة زر
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Services Section */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings2 className="h-5 w-5" />
+                      الخدمات / الخيارات
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      أضف خدمات أو خيارات يمكن للمستخدم الاختيار منها
+                    </p>
+
+                    {(editingCard?.widget_config?.services || []).map((service, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">خدمة {index + 1}</span>
+                          <div className="flex gap-2 items-center">
+                            <Switch
+                              checked={service.isEnabled}
+                              onCheckedChange={(checked) => {
+                                const services = [...(editingCard?.widget_config?.services || [])];
+                                services[index] = { ...services[index], isEnabled: checked };
+                                setEditingCard({
+                                  ...editingCard,
+                                  widget_config: {
+                                    ...editingCard?.widget_config,
+                                    services: services
+                                  }
+                                });
+                              }}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const services = [...(editingCard?.widget_config?.services || [])];
+                                services.splice(index, 1);
+                                setEditingCard({
+                                  ...editingCard,
+                                  widget_config: {
+                                    ...editingCard?.widget_config,
+                                    services: services
+                                  }
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input
+                            value={service.name || ''}
+                            onChange={(e) => {
+                              const services = [...(editingCard?.widget_config?.services || [])];
+                              services[index] = { ...services[index], name: e.target.value };
+                              setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  services: services
+                                }
+                              });
+                            }}
+                            placeholder="اسم الخدمة (عربي)"
+                          />
+                          <Input
+                            value={service.name_en || ''}
+                            onChange={(e) => {
+                              const services = [...(editingCard?.widget_config?.services || [])];
+                              services[index] = { ...services[index], name_en: e.target.value };
+                              setEditingCard({
+                                ...editingCard,
+                                widget_config: {
+                                  ...editingCard?.widget_config,
+                                  services: services
+                                }
+                              });
+                            }}
+                            placeholder="Service Name (English)"
+                          />
+                        </div>
+                        <Textarea
+                          value={service.description || ''}
+                          onChange={(e) => {
+                            const services = [...(editingCard?.widget_config?.services || [])];
+                            services[index] = { ...services[index], description: e.target.value };
+                            setEditingCard({
+                              ...editingCard,
+                              widget_config: {
+                                ...editingCard?.widget_config,
+                                services: services
+                              }
+                            });
+                          }}
+                          placeholder="وصف الخدمة"
+                          rows={2}
+                        />
+                      </div>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        const services = [...(editingCard?.widget_config?.services || [])];
+                        services.push({ 
+                          id: crypto.randomUUID(), 
+                          name: '', 
+                          isEnabled: true 
+                        });
+                        setEditingCard({
+                          ...editingCard,
+                          widget_config: {
+                            ...editingCard?.widget_config,
+                            services: services
+                          }
+                        });
+                      }}
+                    >
+                      <Plus className="h-4 w-4 ml-2" />
+                      إضافة خدمة
+                    </Button>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="fonts" className="space-y-4">
