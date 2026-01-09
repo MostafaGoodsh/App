@@ -5,9 +5,9 @@ const Mining = () => {
   return (
     <>
       <Helmet>
-        <title>التعدين - Ms-Ra Mining</title>
-        <meta name="description" content="لوحة تحكم التعدين - تتبع تقدمك في تعدين عملة Ms-Ra ومراقبة قوة حسابك" />
-        <meta name="keywords" content="تعدين, Ms-Ra, عملة رقمية, blockchain, mining dashboard" />
+        <title>التعدين - $MS-RA Mining</title>
+        <meta name="description" content="لوحة تحكم التعدين - تتبع تقدمك في تعدين عملة $MS-RA ومراقبة قوة حسابك" />
+        <meta name="keywords" content="تعدين, $MS-RA, عملة رقمية, blockchain, mining dashboard" />
       </Helmet>
       <MiningDashboard />
     </>

@@ -236,7 +236,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
 
     toast({
       title: "تم التعدين بنجاح!",
-      description: `حصلت على ${reward.toFixed(2)} Ms-Ra`
+      description: `حصلت على ${reward.toFixed(2)} $MS-RA`
     });
   };
 
@@ -364,8 +364,8 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                     <span className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد التعدين</span>
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
-                  <div className="text-xl font-bold text-primary">
-                    {msRaBalance.toFixed(2)} MS-RA
+                  <div className="text-xl font-bold text-primary" dir="ltr">
+                    {msRaBalance.toFixed(2)} $MS-RA
                   </div>
                   <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Mining Balance</div>
                   
@@ -373,7 +373,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد المحفظة</div>
-                    <div className="text-lg font-medium">{internalMsraBalance.toFixed(2)} MS-RA</div>
+                    <div className="text-lg font-medium" dir="ltr">{internalMsraBalance.toFixed(2)} $MS-RA</div>
                     <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Wallet Balance</div>
                   </div>
                   
@@ -381,7 +381,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   
                   <div className="pt-2 border-t-2 border-primary/30 space-y-1">
                     <div className="text-sm font-medium font-cairo" dir="rtl">الإجمالي</div>
-                    <div className="text-2xl font-bold text-primary">{totalMsRaBalance.toFixed(2)} MS-RA</div>
+                    <div className="text-2xl font-bold text-primary" dir="ltr">{totalMsRaBalance.toFixed(2)} $MS-RA</div>
                     <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Total Balance</div>
                   </div>
                 </div>
