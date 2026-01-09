@@ -61,7 +61,7 @@ export const HybridWalletCard = ({ onSwapClick, onWithdrawClick }: HybridWalletC
               <div className="text-sm font-normal text-muted-foreground font-playfair" dir="ltr">Wallet</div>
             </div>
           </div>
-          <Badge variant="secondary" className="bg-green-100 text-green-800 space-x-2">
+          <Badge variant="secondary" className="bg-green-900/50 text-green-400 border border-green-500/30 space-x-2">
             <span className="font-cairo" dir="rtl">نشطة</span>
             <span>•</span>
             <span className="font-playfair" dir="ltr">Active</span>
