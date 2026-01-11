@@ -99,14 +99,14 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
 
   if (!connected) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="border-primary/20">
+        <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
           <CardTitle className="flex items-center gap-2">
-            <Wallet className="w-5 h-5" />
+            <Wallet className="w-5 h-5 text-amber-500" />
             <span className="arabic-text">محفظة سولانا</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-4">
           <p className="text-center text-muted-foreground arabic-text">
             اتصل بمحفظة سولانا للبدء
           </p>
@@ -119,14 +119,14 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Wallet className="w-5 h-5" />
+            <Wallet className="w-5 h-5 text-amber-500" />
             <span className="arabic-text">محفظة سولانا</span>
           </div>
-          <Badge variant="secondary">متصل</Badge>
+          <Badge variant="secondary" className="bg-green-600 text-white">متصل</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
