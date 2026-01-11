@@ -87,7 +87,7 @@ export const XpToMsRaConverter = () => {
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
       />
-      <CardHeader className="space-y-3 relative z-10">
+      <CardHeader className="space-y-3 relative z-10 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-primary/20">
         <CardTitle className="flex items-center justify-center gap-3 text-lg sm:text-xl">
           <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
           <div className="flex items-center gap-2" dir="ltr">
@@ -118,7 +118,7 @@ export const XpToMsRaConverter = () => {
         </Alert>
 
         {/* Current Balances */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-black/50 rounded-lg border border-primary/20">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 bg-muted/50 rounded-lg border border-primary/20">
           <div className="text-center">
             <div className="text-xs text-muted-foreground mb-1 font-cairo" dir="rtl">رصيد XP</div>
             <div className="text-base sm:text-lg font-bold text-primary">
@@ -170,7 +170,7 @@ export const XpToMsRaConverter = () => {
         </div>
 
         {/* Conversion Preview */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-black/50 rounded-lg border border-primary/20">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 p-3 sm:p-4 bg-muted/50 rounded-lg border border-primary/20">
           <div className="text-center flex-1">
             <div className="text-xs sm:text-sm text-muted-foreground font-cairo" dir="rtl">تحويل</div>
             <div className="text-base sm:text-xl font-bold break-all">{xpAmount || "0"} XP</div>

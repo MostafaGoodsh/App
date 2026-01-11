@@ -262,7 +262,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           className="absolute inset-0 bg-cover bg-center opacity-10"
           style={{ backgroundImage: `url(${cardBackground})` }}
         />
-      <CardHeader className="relative z-10 pb-3">
+      <CardHeader className="relative z-10 pb-3 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-primary/20">
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
@@ -309,12 +309,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
       <CardContent className="relative z-10 space-y-6">
         {/* Identity Verification Warning - Only if not verified */}
         {!isVerified && (
-          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
-            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-2">
+          <div className="bg-muted/50 border border-primary/20 p-4 rounded-lg">
+            <div className="flex items-center gap-2 text-primary mb-2">
               <AlertCircle className="w-4 h-4" />
-              <span className="font-medium">تحقيق الهوية مطلوب</span>
+              <span className="font-medium font-cairo" dir="rtl">تحقيق الهوية مطلوب</span>
             </div>
-            <p className="text-sm text-amber-600 dark:text-amber-300 mb-3">
+            <p className="text-sm text-muted-foreground mb-3 font-cairo" dir="rtl">
               يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين
             </p>
             <Button variant="outline" size="sm" asChild>

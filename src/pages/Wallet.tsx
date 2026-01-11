@@ -6,6 +6,7 @@ import { XpToMsRaConverter } from '@/components/wallet/XpToMsRaConverter';
 import { MsRaCurrencyCard } from '@/components/wallet/MsRaCurrencyCard';
 import { RechargeSection } from '@/components/wallet/RechargeSection';
 import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
+import { EvmWalletConnectCard } from '@/components/wallet/EvmWalletConnectCard';
 import { SolanaTokenSwap } from '@/components/wallet/SolanaTokenSwap';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -228,47 +229,11 @@ const WalletContent = () => {
           </h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <WalletConnectButton variant="card" showBalance={true} />
-          
-          <Card className="border-primary/20">
-            <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ArrowUpRight className="w-5 h-5 text-amber-500" />
-                <div className="space-y-1">
-                  <span className="font-cairo" dir="rtl">التحويلات الخارجية</span>
-                  <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
-                    External Transfers
-                  </span>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                أرسل واستقبل العملات من محفظتك الخارجية
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-4 bg-muted/50 rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  لتفعيل التحويلات، قم بتوصيل محفظتك أولاً
-                </p>
-                <Badge variant="outline">
-                  استخدم WalletConnect أو Phantom
-                </Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="w-full" disabled>
-                  <ArrowUpRight className="w-4 h-4 ml-1" />
-                  إرسال
-                </Button>
-                <Button variant="outline" className="w-full" disabled>
-                  <ArrowDownLeft className="w-4 h-4 ml-1" />
-                  استلام
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <WalletConnectButton variant="card" showBalance={true} />
+            <EvmWalletConnectCard />
+          </div>
+        </section>
 
       {/* ===== القسم 3: تبادل العملات ===== */}
       <section className="space-y-4">

@@ -84,7 +84,7 @@ export const RechargeSection = () => {
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
       />
-      <CardHeader className="relative z-10">
+      <CardHeader className="relative z-10 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent border-b border-primary/20">
         <CardTitle className="flex items-center gap-2 text-base">
           <CreditCard className="w-5 h-5 text-primary" />
           <span>Recharge XP | شحن نقاط XP</span>
