@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
-import { Wallet, Copy, RefreshCw, LogOut, ExternalLink } from 'lucide-react';
+import { Wallet, Copy, RefreshCw, LogOut, ExternalLink, Ghost } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface WalletConnectButtonProps {
@@ -91,9 +91,9 @@ export const WalletConnectButton = ({
   if (variant === 'card') {
     return (
       <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
+        <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent rounded-t-lg border-b border-primary/20">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Wallet className="w-5 h-5 text-amber-500" />
+            <Ghost className="w-5 h-5 text-primary" />
             <div className="space-y-1">
               <span className="font-cairo" dir="rtl">محفظة Solana</span>
               <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
@@ -110,7 +110,7 @@ export const WalletConnectButton = ({
             <>
               {/* Connected State */}
               <div className="flex items-center justify-between">
-                <Badge variant="default" className="bg-green-600">
+                <Badge variant="outline" className="border-primary/30 text-primary">
                   متصل | Connected
                 </Badge>
                 <div className="flex items-center gap-2">
