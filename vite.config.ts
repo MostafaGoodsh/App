@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     global: 'globalThis',
     'process.env': {},
+    'Buffer': ['buffer', 'Buffer'],
   },
   optimizeDeps: {
     include: [
