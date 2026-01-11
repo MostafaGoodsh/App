@@ -76,8 +76,8 @@ export const WalletCard = ({ wallet, onRefreshBalance, onSendTransaction, onDisc
   };
 
   return (
-    <Card className="relative">
-      <CardHeader>
+    <Card className="relative border-primary/20">
+      <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
         <CardTitle className="flex items-center justify-between">
           <span>{wallet.name || wallet.type}</span>
           <div className="flex gap-1 items-center">

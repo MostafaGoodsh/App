@@ -242,9 +242,9 @@ const WalletContent = () => {
             <WalletConnectButton variant="card" showBalance={true} />
             
             <Card className="border-primary/20">
-              <CardHeader>
+              <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <ArrowUpRight className="w-5 h-5 text-primary" />
+                  <ArrowUpRight className="w-5 h-5 text-amber-500" />
                   <div className="space-y-1">
                     <span className="font-cairo" dir="rtl">التحويلات الخارجية</span>
                     <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
@@ -286,9 +286,9 @@ const WalletContent = () => {
             <SolanaTokenSwap />
             
             <Card className="border-primary/20">
-              <CardHeader>
+              <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Activity className="w-5 h-5 text-primary" />
+                  <Activity className="w-5 h-5 text-amber-500" />
                   <div className="space-y-1">
                     <span className="font-cairo" dir="rtl">العملات المدعومة</span>
                     <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">

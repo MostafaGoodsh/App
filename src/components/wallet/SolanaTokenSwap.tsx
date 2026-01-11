@@ -317,11 +317,11 @@ export const SolanaTokenSwap = () => {
   const fromTokenData = tokens.find(t => t.symbol === fromToken?.symbol);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-primary/20">
+      <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ArrowLeftRight className="w-5 h-5" />
+            <ArrowLeftRight className="w-5 h-5 text-amber-500" />
             <div className="space-y-1">
               <span className="font-cairo" dir="rtl">تبادل العملات</span>
               <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
