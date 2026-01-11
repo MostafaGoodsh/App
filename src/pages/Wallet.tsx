@@ -11,13 +11,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft, RefreshCw, CheckCircle, XCircle, Loader2, Link2, ArrowRightLeft } from 'lucide-react';
+import { TrendingUp, Wallet as WalletIcon, Activity, ArrowUpRight, ArrowDownLeft, RefreshCw, Loader2, Link2, ArrowRightLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
-// محتوى المحفظة البسيطة
+// محتوى المحفظة الموحد (بدون تبويبات)
 const WalletContent = () => {
   const [showHybridSwap, setShowHybridSwap] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -177,10 +176,7 @@ const WalletContent = () => {
     const transactionId = searchParams.get('transaction_id');
 
     if (paymentCallback === 'true' && transactionId) {
-      // Clear URL params
       setSearchParams({});
-      
-      // Check payment status
       checkPaymentStatus(transactionId);
     }
   }, [searchParams, setSearchParams, checkPaymentStatus]);
@@ -197,156 +193,156 @@ const WalletContent = () => {
   };
 
   return (
-    <>
-      {/* Tabs للتبديل بين المحفظة الداخلية والخارجية */}
-      <Tabs defaultValue="internal" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="internal" className="flex items-center gap-2">
-            <WalletIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">المحفظة الداخلية</span>
-            <span className="sm:hidden">داخلية</span>
-          </TabsTrigger>
-          <TabsTrigger value="external" className="flex items-center gap-2">
-            <Link2 className="w-4 h-4" />
-            <span className="hidden sm:inline">المحافظ الخارجية</span>
-            <span className="sm:hidden">خارجية</span>
-          </TabsTrigger>
-          <TabsTrigger value="swap" className="flex items-center gap-2">
-            <ArrowRightLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">تبادل العملات</span>
-            <span className="sm:hidden">تبادل</span>
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-8">
+      {/* ===== القسم 1: المحفظة الداخلية ===== */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <WalletIcon className="w-6 h-6 text-primary" />
+          <h2 className="font-cairo text-xl font-bold text-foreground">
+            المحفظة الداخلية | Internal Wallet
+          </h2>
+        </div>
+        
+        {/* محفظة XP و MS-RA */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <HybridWalletCard 
+            onSwapClick={() => setShowHybridSwap(true)}
+            onWithdrawClick={() => setShowWithdraw(true)}
+          />
+          <MsRaCurrencyCard isVerified={isVerified} />
+        </div>
 
-        {/* المحفظة الداخلية */}
-        <TabsContent value="internal" className="space-y-6">
-          {/* محفظة XP و MS-RA */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <HybridWalletCard 
-              onSwapClick={() => setShowHybridSwap(true)}
-              onWithdrawClick={() => setShowWithdraw(true)}
-            />
-            <MsRaCurrencyCard isVerified={isVerified} />
-          </div>
+        {/* Recharge & Conversion Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <RechargeSection />
+          <XpToMsRaConverter />
+        </div>
+      </section>
 
-          {/* Recharge & Conversion Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <RechargeSection />
-            <XpToMsRaConverter />
-          </div>
-        </TabsContent>
-
-        {/* المحافظ الخارجية */}
-        <TabsContent value="external" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <WalletConnectButton variant="card" showBalance={true} />
-            
-            <Card className="border-primary/20">
-              <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <ArrowUpRight className="w-5 h-5 text-amber-500" />
-                  <div className="space-y-1">
-                    <span className="font-cairo" dir="rtl">التحويلات الخارجية</span>
-                    <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
-                      External Transfers
-                    </span>
-                  </div>
-                </CardTitle>
-                <CardDescription>
-                  أرسل واستقبل العملات من محفظتك الخارجية
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-4 bg-muted/50 rounded-lg text-center">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    لتفعيل التحويلات، قم بتوصيل محفظتك أولاً
-                  </p>
-                  <Badge variant="outline">
-                    استخدم WalletConnect أو Phantom
-                  </Badge>
+      {/* ===== القسم 2: المحافظ الخارجية ===== */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Link2 className="w-6 h-6 text-primary" />
+          <h2 className="font-cairo text-xl font-bold text-foreground">
+            المحافظ الخارجية | External Wallets
+          </h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <WalletConnectButton variant="card" showBalance={true} />
+          
+          <Card className="border-primary/20">
+            <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ArrowUpRight className="w-5 h-5 text-amber-500" />
+                <div className="space-y-1">
+                  <span className="font-cairo" dir="rtl">التحويلات الخارجية</span>
+                  <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
+                    External Transfers
+                  </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="w-full" disabled>
-                    <ArrowUpRight className="w-4 h-4 ml-1" />
-                    إرسال
-                  </Button>
-                  <Button variant="outline" className="w-full" disabled>
-                    <ArrowDownLeft className="w-4 h-4 ml-1" />
-                    استلام
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* تبادل العملات */}
-        <TabsContent value="swap" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SolanaTokenSwap />
-            
-            <Card className="border-primary/20">
-              <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Activity className="w-5 h-5 text-amber-500" />
-                  <div className="space-y-1">
-                    <span className="font-cairo" dir="rtl">العملات المدعومة</span>
-                    <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
-                      Supported Tokens
-                    </span>
-                  </div>
-                </CardTitle>
-                <CardDescription>
-                  الشبكات والعملات المدعومة للتبادل
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
-                        <span className="text-xs">◎</span>
-                      </div>
-                      <span className="text-sm">Solana</span>
-                    </div>
-                    <Badge variant="default" className="bg-green-600">مدعومة</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                        <span className="text-xs">💵</span>
-                      </div>
-                      <span className="text-sm">USDC</span>
-                    </div>
-                    <Badge variant="default" className="bg-green-600">مدعومة</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-                        <span className="text-xs">💰</span>
-                      </div>
-                      <span className="text-sm">USDT</span>
-                    </div>
-                    <Badge variant="default" className="bg-green-600">مدعومة</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                        <span className="text-xs">🐶</span>
-                      </div>
-                      <span className="text-sm">BONK</span>
-                    </div>
-                    <Badge variant="default" className="bg-green-600">مدعومة</Badge>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground text-center pt-2">
-                  يمكنك إضافة عقود عملات مخصصة من خلال نافذة التبادل
+              </CardTitle>
+              <CardDescription>
+                أرسل واستقبل العملات من محفظتك الخارجية
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-4 bg-muted/50 rounded-lg text-center">
+                <p className="text-sm text-muted-foreground mb-2">
+                  لتفعيل التحويلات، قم بتوصيل محفظتك أولاً
                 </p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+                <Badge variant="outline">
+                  استخدم WalletConnect أو Phantom
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="w-full" disabled>
+                  <ArrowUpRight className="w-4 h-4 ml-1" />
+                  إرسال
+                </Button>
+                <Button variant="outline" className="w-full" disabled>
+                  <ArrowDownLeft className="w-4 h-4 ml-1" />
+                  استلام
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* ===== القسم 3: تبادل العملات ===== */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-3">
+          <ArrowRightLeft className="w-6 h-6 text-primary" />
+          <h2 className="font-cairo text-xl font-bold text-foreground">
+            تبادل العملات | Token Swap
+          </h2>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SolanaTokenSwap />
+          
+          <Card className="border-primary/20">
+            <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Activity className="w-5 h-5 text-amber-500" />
+                <div className="space-y-1">
+                  <span className="font-cairo" dir="rtl">العملات المدعومة</span>
+                  <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
+                    Supported Tokens
+                  </span>
+                </div>
+              </CardTitle>
+              <CardDescription>
+                الشبكات والعملات المدعومة للتبادل
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <span className="text-xs">◎</span>
+                    </div>
+                    <span className="text-sm">Solana</span>
+                  </div>
+                  <Badge variant="default" className="bg-green-600">مدعومة</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <span className="text-xs">💵</span>
+                    </div>
+                    <span className="text-sm">USDC</span>
+                  </div>
+                  <Badge variant="default" className="bg-green-600">مدعومة</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <span className="text-xs">💰</span>
+                    </div>
+                    <span className="text-sm">USDT</span>
+                  </div>
+                  <Badge variant="default" className="bg-green-600">مدعومة</Badge>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                      <span className="text-xs">🐶</span>
+                    </div>
+                    <span className="text-sm">BONK</span>
+                  </div>
+                  <Badge variant="default" className="bg-green-600">مدعومة</Badge>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center pt-2">
+                يمكنك إضافة عقود عملات مخصصة من خلال نافذة التبادل
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
       {/* نافذة التبديل السريع */}
       {showHybridSwap && (
@@ -375,117 +371,116 @@ const WalletContent = () => {
         onOpenChange={setShowWithdraw}
       />
 
-
-      {/* تاريخ المعاملات */}
-      <Card className="bg-black/60 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="font-cairo flex items-center gap-2 text-white">
-              <Activity className="w-5 h-5" />
-              Transaction History | تاريخ المعاملات
-            </CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="text-white/70 hover:text-white"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-          <CardDescription className="text-white/70">
-            آخر المعاملات في محفظتك الداخلية
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {internalTransactions.length === 0 ? (
-            <div className="text-center py-8">
-              <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-white/70 mb-2">لا توجد معاملات بعد</p>
-              <p className="text-sm text-white/50">
-                ستظهر معاملاتك هنا عند بدء الاستخدام
-              </p>
+      {/* ===== القسم 4: تاريخ المعاملات ===== */}
+      <section className="space-y-4">
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="font-cairo flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                تاريخ المعاملات | Transaction History
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {internalTransactions.map((tx) => (
-                <div 
-                  key={tx.id} 
-                  className="flex items-center justify-between p-3 bg-background/20 rounded-lg border border-white/10 hover:border-primary/30 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {tx.type === 'swap' ? (
-                      <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-blue-400" />
+            <CardDescription>
+              آخر المعاملات في محفظتك
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {internalTransactions.length === 0 ? (
+              <div className="text-center py-8">
+                <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-2">لا توجد معاملات بعد</p>
+                <p className="text-sm text-muted-foreground">
+                  ستظهر معاملاتك هنا عند بدء الاستخدام
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {internalTransactions.map((tx) => (
+                  <div 
+                    key={tx.id} 
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border hover:border-primary/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {tx.type === 'swap' ? (
+                        <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <TrendingUp className="w-5 h-5 text-blue-400" />
+                        </div>
+                      ) : tx.type === 'withdrawal' ? (
+                        <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                          <ArrowUpRight className="w-5 h-5 text-orange-400" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <ArrowDownLeft className="w-5 h-5 text-green-400" />
+                        </div>
+                      )}
+                      
+                      <div>
+                        <p className="font-cairo font-medium">
+                          {tx.type === 'swap' 
+                            ? `تبديل ${tx.from_token} إلى ${tx.to_token}`
+                            : tx.type === 'withdrawal'
+                            ? `سحب ${tx.from_token} إلى ${tx.to_token}`
+                            : `شحن ${tx.currency}`
+                          }
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {tx.date} | {tx.time}
+                        </p>
                       </div>
-                    ) : tx.type === 'withdrawal' ? (
-                      <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                        <ArrowUpRight className="w-5 h-5 text-orange-400" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                        <ArrowDownLeft className="w-5 h-5 text-green-400" />
-                      </div>
-                    )}
-                    
-                    <div>
-                      <p className="font-cairo font-medium text-white">
+                    </div>
+
+                    <div className="text-left">
+                      <p className="font-cairo font-medium">
                         {tx.type === 'swap' 
-                          ? `تبديل ${tx.from_token} إلى ${tx.to_token}`
+                          ? `${tx.to_amount} ${tx.to_token}`
                           : tx.type === 'withdrawal'
-                          ? `سحب ${tx.from_token} إلى ${tx.to_token}`
-                          : `شحن ${tx.currency}`
+                          ? `${tx.target_amount} ${tx.to_token}`
+                          : `${tx.amount} ${tx.currency}`
                         }
                       </p>
-                      <p className="text-sm text-white/60">
-                        {tx.date} | {tx.time}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-left">
-                    <p className="font-cairo font-medium text-white">
-                      {tx.type === 'swap' 
-                        ? `${tx.to_amount} ${tx.to_token}`
-                        : tx.type === 'withdrawal'
-                        ? `${tx.target_amount} ${tx.to_token}`
-                        : `${tx.amount} ${tx.currency}`
-                      }
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <Badge 
-                        variant={tx.status === 'completed' ? 'default' : tx.status === 'failed' ? 'destructive' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {tx.status === 'completed' ? 'مكتمل' : 
-                         tx.status === 'pending' || tx.status === 'processing' ? 'قيد المعالجة' : 'فشل'}
-                      </Badge>
-                      {tx.type === 'recharge' && (tx.status === 'pending' || tx.status === 'processing') && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                          onClick={() => checkPaymentStatus(tx.id)}
-                          disabled={checkingPayment === tx.id}
+                      <div className="flex items-center gap-1">
+                        <Badge 
+                          variant={tx.status === 'completed' ? 'default' : tx.status === 'failed' ? 'destructive' : 'secondary'}
+                          className="text-xs"
                         >
-                          {checkingPayment === tx.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-3 h-3" />
-                          )}
-                        </Button>
-                      )}
+                          {tx.status === 'completed' ? 'مكتمل' : 
+                           tx.status === 'pending' || tx.status === 'processing' ? 'قيد المعالجة' : 'فشل'}
+                        </Badge>
+                        {tx.type === 'recharge' && (tx.status === 'pending' || tx.status === 'processing') && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => checkPaymentStatus(tx.id)}
+                            disabled={checkingPayment === tx.id}
+                          >
+                            {checkingPayment === tx.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-3 h-3" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-    </>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+    </div>
   );
 };
 
@@ -493,7 +488,7 @@ const WalletContent = () => {
 const WalletPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <header className="text-center space-y-2">
           <div className="flex items-center justify-center gap-3 mb-2">
             <WalletIcon className="w-10 h-10 text-primary" />
@@ -501,13 +496,13 @@ const WalletPage = () => {
               Wallet
             </h1>
           </div>
-          <p className="font-cairo text-xl md:text-2xl text-white/90 mb-2">
+          <p className="font-cairo text-xl md:text-2xl text-foreground/90 mb-2">
             المحفظة
           </p>
           <p className="text-muted-foreground text-sm">
-            أدر عملاتك الداخلية، اشحن، حول، واسحب بسهولة
+            أدر عملاتك الداخلية والخارجية، اشحن، حول، واسحب بسهولة
             <br />
-            <span className="text-xs">Manage, Recharge, Convert & Withdraw Easily</span>
+            <span className="text-xs">Manage Internal & External Wallets, Recharge, Convert & Withdraw</span>
           </p>
         </header>
 
