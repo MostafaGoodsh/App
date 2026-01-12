@@ -31,10 +31,10 @@ export const EvmWalletConnectCard = () => {
         title: "تم الاتصال",
         description: "تم توصيل WalletConnect بنجاح",
       });
-    } catch (e) {
+    } catch (e: any) {
       toast({
         title: "خطأ",
-        description: "فشل الاتصال بـ WalletConnect",
+        description: e?.message || "فشل الاتصال بـ WalletConnect",
         variant: "destructive",
       });
     }

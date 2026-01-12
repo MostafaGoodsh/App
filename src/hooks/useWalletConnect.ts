@@ -39,8 +39,13 @@ export const useWalletConnect = () => {
   const connectWallet = useCallback(async () => {
     setIsConnecting(true);
     try {
+      const projectId = WALLETCONNECT_CONFIG.projectId;
+      if (!projectId) {
+        throw new Error('WalletConnect Project ID غير مُعد. يرجى إعادة تحميل الصفحة.');
+      }
+      
       const provider = await EthereumProvider.init({
-        projectId: WALLETCONNECT_CONFIG.projectId,
+        projectId,
         chains: [1], // Ethereum by default
         optionalChains: Object.values(SUPPORTED_NETWORKS).map(network => network.chainId),
         showQrModal: true,
