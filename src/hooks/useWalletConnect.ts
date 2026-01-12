@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
-import { WALLETCONNECT_CONFIG, SUPPORTED_NETWORKS } from '@/config/wallet';
+import { WALLETCONNECT_CONFIG, SUPPORTED_NETWORKS, getWalletConnectProjectId } from '@/config/wallet';
 
 export interface ConnectedWallet {
   id: string;
@@ -39,21 +39,21 @@ export const useWalletConnect = () => {
   const connectWallet = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const projectId = WALLETCONNECT_CONFIG.projectId;
+      const projectId = getWalletConnectProjectId() || WALLETCONNECT_CONFIG.projectId;
       if (!projectId) {
-        throw new Error('WalletConnect Project ID غير مُعد. يرجى إعادة تحميل الصفحة.');
+        throw new Error('WalletConnect Project ID غير مُعد. الرجاء إدخاله ثم إعادة المحاولة.');
       }
-      
+
       const provider = await EthereumProvider.init({
         projectId,
         chains: [1], // Ethereum by default
-        optionalChains: Object.values(SUPPORTED_NETWORKS).map(network => network.chainId),
+        optionalChains: Object.values(SUPPORTED_NETWORKS).map((network) => network.chainId),
         showQrModal: true,
-        metadata: WALLETCONNECT_CONFIG.metadata
+        metadata: WALLETCONNECT_CONFIG.metadata,
       });
 
       await provider.connect();
-      
+
       const accounts = provider.accounts;
       if (!accounts || accounts.length === 0) {
         throw new Error('فشل في الحصول على حسابات المحفظة');
@@ -61,11 +61,12 @@ export const useWalletConnect = () => {
 
       const chainIdHex = await provider.request({ method: 'eth_chainId' });
       const chainId = parseInt(chainIdHex as string, 16);
-      const currentNetwork = Object.values(SUPPORTED_NETWORKS).find(n => n.chainId === chainId) || SUPPORTED_NETWORKS.ethereum;
-      
+      const currentNetwork =
+        Object.values(SUPPORTED_NETWORKS).find((n) => n.chainId === chainId) || SUPPORTED_NETWORKS.ethereum;
+
       const address = accounts[0];
       const balance = await getBalance(address, provider);
-      
+
       const wallet: ConnectedWallet = {
         id: Date.now().toString(),
         type: 'WalletConnect',
@@ -75,14 +76,15 @@ export const useWalletConnect = () => {
         network: currentNetwork.name,
         chainId: currentNetwork.chainId,
         name: 'WalletConnect',
-        provider
+        provider,
       };
 
       setConnectedWallet(wallet);
-      localStorage.setItem('connectedWallet', JSON.stringify({...wallet, provider: undefined}));
+      localStorage.setItem('connectedWallet', JSON.stringify({ ...wallet, provider: undefined }));
       return wallet;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
+      if (error instanceof Error) throw error;
       throw new Error('فشل في الاتصال بـ WalletConnect');
     } finally {
       setIsConnecting(false);
