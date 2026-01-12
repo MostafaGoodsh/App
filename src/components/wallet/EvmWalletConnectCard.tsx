@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
+import { getWalletConnectProjectId, setWalletConnectProjectId } from "@/config/wallet";
 import { Copy, Link2, LogOut, RefreshCw, QrCode } from "lucide-react";
 
 const shortenAddress = (address: string) =>
@@ -14,6 +16,28 @@ export const EvmWalletConnectCard = () => {
   const { connectedWallet, connectWallet, disconnectWallet, refreshBalance, isConnecting } =
     useWalletConnect();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const [projectId, setProjectId] = useState(() => getWalletConnectProjectId());
+  const [projectIdDraft, setProjectIdDraft] = useState(projectId);
+
+  const handleSaveProjectId = () => {
+    const value = projectIdDraft.trim();
+    if (!value) {
+      toast({
+        title: "خطأ",
+        description: "من فضلك أدخل WalletConnect Project ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setWalletConnectProjectId(value);
+    setProjectId(value);
+    toast({
+      title: "تم الحفظ",
+      description: "تم حفظ Project ID بنجاح",
+    });
+  };
 
   const handleCopy = async () => {
     if (!connectedWallet?.address) return;
@@ -26,6 +50,15 @@ export const EvmWalletConnectCard = () => {
 
   const handleConnect = async () => {
     try {
+      if (!projectId) {
+        toast({
+          title: "Project ID مطلوب",
+          description: "أدخل WalletConnect Project ID ثم حاول مرة أخرى",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await connectWallet();
       toast({
         title: "تم الاتصال",
@@ -111,7 +144,36 @@ export const EvmWalletConnectCard = () => {
               </span>
             </div>
 
-            <Button onClick={handleConnect} disabled={isConnecting} className="w-full" size="lg">
+            {!projectId && (
+              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-cairo" dir="rtl">أدخل WalletConnect Project ID</p>
+                  <p className="text-xs text-muted-foreground font-playfair" dir="ltr">
+                    WalletConnect Project ID (public)
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    value={projectIdDraft}
+                    onChange={(e) => setProjectIdDraft(e.target.value)}
+                    placeholder="e.g. 123abc..."
+                    dir="ltr"
+                    className="font-mono"
+                  />
+                  <Button type="button" variant="secondary" onClick={handleSaveProjectId}>
+                    حفظ
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={handleConnect}
+              disabled={isConnecting || !projectId}
+              className="w-full"
+              size="lg"
+            >
               <QrCode className="w-4 h-4 ml-2" />
               {isConnecting ? "جاري الاتصال..." : "اتصال عبر WalletConnect"}
             </Button>

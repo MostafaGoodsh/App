@@ -1,13 +1,42 @@
 // WalletConnect Configuration - Multi-Chain Support
+
+// NOTE:
+// - WalletConnect Project ID is a **public** identifier.
+// - Lovable “Secrets” are not exposed to the Vite frontend at runtime.
+//   لذلك نوفر fallback عبر localStorage لإدخاله من الواجهة.
+
+export const WALLETCONNECT_PROJECT_ID_STORAGE_KEY = 'walletconnect_project_id';
+
+export const getWalletConnectProjectId = () => {
+  const fromEnv = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
+  if (fromEnv) return fromEnv;
+
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem(WALLETCONNECT_PROJECT_ID_STORAGE_KEY) || '';
+};
+
+export const setWalletConnectProjectId = (projectId: string) => {
+  if (typeof window === 'undefined') return;
+  const value = projectId.trim();
+
+  if (!value) {
+    localStorage.removeItem(WALLETCONNECT_PROJECT_ID_STORAGE_KEY);
+    return;
+  }
+
+  localStorage.setItem(WALLETCONNECT_PROJECT_ID_STORAGE_KEY, value);
+};
+
 export const WALLETCONNECT_CONFIG = {
-  // Uses the secret from Lovable Cloud; falls back to placeholder if missing
-  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '',
+  get projectId() {
+    return getWalletConnectProjectId();
+  },
   metadata: {
     name: 'المحافظ الرقمية',
     description: 'منصة إدارة المحافظ الرقمية متعددة الشبكات',
     url: typeof window !== 'undefined' ? window.location.origin : '',
-    icons: [typeof window !== 'undefined' ? window.location.origin + '/favicon.ico' : '']
-  }
+    icons: [typeof window !== 'undefined' ? window.location.origin + '/favicon.ico' : ''],
+  },
 };
 
 // Multi-Chain Network Support
