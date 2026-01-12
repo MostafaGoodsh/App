@@ -1,6 +1,7 @@
 // WalletConnect Configuration - Multi-Chain Support
 export const WALLETCONNECT_CONFIG = {
-  projectId: '5cbecfb58785fd00d9c6f1825f993060',
+  // Uses the secret from Lovable Cloud; falls back to placeholder if missing
+  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || '',
   metadata: {
     name: 'المحافظ الرقمية',
     description: 'منصة إدارة المحافظ الرقمية متعددة الشبكات',
