@@ -115,14 +115,15 @@ export const ModernWalletView = () => {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <h3 className="font-bold text-foreground">حوّل نقاطك إلى MS-RA</h3>
-              <p className="text-sm text-muted-foreground">ابدأ بتحويل نقاط XP إلى عملات MS-RA</p>
+              <p className="text-xs text-muted-foreground/70" dir="ltr">Convert XP to MS-RA</p>
             </div>
             <Button 
               size="sm" 
               className="bg-primary hover:bg-primary/90"
               onClick={() => setActiveBottomTab('swap')}
             >
-              تحويل
+              <span>تحويل</span>
+              <span className="text-[10px] mr-1 opacity-70">Convert</span>
             </Button>
           </CardContent>
         </Card>
@@ -136,7 +137,7 @@ export const ModernWalletView = () => {
               </div>
               <div>
                 <h3 className="font-bold text-foreground">سحب إلى محفظة خارجية</h3>
-                <p className="text-sm text-muted-foreground">اسحب عملاتك إلى Solana أو EVM</p>
+                <p className="text-xs text-muted-foreground/70" dir="ltr">Withdraw to External Wallet</p>
               </div>
             </div>
             <Button 
@@ -145,7 +146,8 @@ export const ModernWalletView = () => {
               className="border-primary/40 text-primary hover:bg-primary/10"
               onClick={() => setShowWithdrawDialog(true)}
             >
-              سحب
+              <span>سحب</span>
+              <span className="text-[10px] mr-1 opacity-70">Withdraw</span>
             </Button>
           </CardContent>
         </Card>
@@ -168,7 +170,10 @@ export const ModernWalletView = () => {
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-primary" />
-                <h3 className="font-bold">المحافظ الخارجية</h3>
+                <div>
+                  <h3 className="font-bold">المحافظ الخارجية</h3>
+                  <span className="text-xs text-muted-foreground/70" dir="ltr">External Wallets</span>
+                </div>
               </div>
               
               <div className="grid gap-4">
@@ -194,8 +199,10 @@ export const ModernWalletView = () => {
         {activeBottomTab === 'rewards' && (
           <div className="text-center py-12">
             <Gift className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-bold text-lg mb-2">المكافآت</h3>
+            <h3 className="font-bold text-lg mb-1">المكافآت</h3>
+            <p className="text-xs text-muted-foreground/70 mb-2" dir="ltr">Rewards</p>
             <p className="text-muted-foreground">قريباً ستتمكن من ربح مكافآت إضافية</p>
+            <p className="text-xs text-muted-foreground/70" dir="ltr">Coming Soon</p>
           </div>
         )}
       </div>
