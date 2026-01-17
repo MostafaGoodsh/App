@@ -58,14 +58,18 @@ export const HybridTokenSwap = () => {
     fromToken !== toToken;
 
   return (
-    <Card className="w-full max-w-full overflow-hidden">
+    <Card className="w-full max-w-full overflow-hidden border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-500" />
-          تبديل سريع
+          <div>
+            <span>تبديل سريع</span>
+            <span className="text-xs text-muted-foreground/70 block font-normal" dir="ltr">Quick Swap</span>
+          </div>
         </CardTitle>
         <CardDescription>
           تبديل فوري بين العملات الداخلية بدون رسوم
+          <span className="text-xs block opacity-70" dir="ltr">Instant swap between internal tokens - No fees</span>
         </CardDescription>
       </CardHeader>
 
@@ -180,12 +184,14 @@ export const HybridTokenSwap = () => {
           {isSwapping ? (
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              جاري التبديل...
+              <span>جاري التبديل...</span>
+              <span className="text-xs opacity-70">Swapping...</span>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4" />
-              تبديل فوري
+              <span>تبديل فوري</span>
+              <span className="text-xs opacity-70">Instant Swap</span>
             </div>
           )}
         </Button>
@@ -195,8 +201,12 @@ export const HybridTokenSwap = () => {
           <div className="flex items-center justify-center gap-1">
             <Zap className="w-3 h-3 text-yellow-500" />
             <span>تبديل فوري بدون رسوم</span>
+            <span className="opacity-70" dir="ltr">• Zero Fees</span>
           </div>
-          <div>تتم العملية داخل النظام بدون الحاجة لشبكة البلوك تشين</div>
+          <div>
+            تتم العملية داخل النظام بدون الحاجة لشبكة البلوك تشين
+            <span className="block opacity-70 text-[10px]" dir="ltr">Internal system - No blockchain required</span>
+          </div>
         </div>
       </CardContent>
     </Card>
