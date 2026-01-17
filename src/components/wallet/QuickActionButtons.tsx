@@ -72,22 +72,25 @@ export const QuickActionButtons = ({
   }
 
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3">
       {actions.map((action) => (
         <button
           key={action.labelEn}
           onClick={action.onClick}
           className={cn(
-            "flex flex-col items-center gap-2 p-4 rounded-xl",
+            "flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-xl",
             "bg-gradient-to-br border-2 transition-all duration-200",
             "hover:scale-105 hover:shadow-lg",
             action.color
           )}
         >
-          <div className="w-12 h-12 rounded-full bg-background/50 flex items-center justify-center">
-            <action.icon className="w-6 h-6" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background/50 flex items-center justify-center">
+            <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <span className="text-sm font-medium">{action.label}</span>
+          <div className="flex flex-col items-center">
+            <span className="text-xs sm:text-sm font-medium">{action.label}</span>
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground/70">{action.labelEn}</span>
+          </div>
         </button>
       ))}
     </div>
