@@ -88,7 +88,7 @@ export const ModernWalletView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-full">
       {/* Hero Section */}
       <WalletHeroSection
         totalBalance={totalUsdValue}
@@ -99,7 +99,7 @@ export const ModernWalletView = () => {
       />
 
       {/* Quick Actions */}
-      <div className="px-4 -mt-6 relative z-10 mb-6">
+      <div className="px-3 sm:px-4 -mt-6 relative z-10 mb-4 sm:mb-6">
         <QuickActionButtons
           onReceive={handleReceive}
           onSend={handleSend}
@@ -109,7 +109,7 @@ export const ModernWalletView = () => {
       </div>
 
       {/* Main Content */}
-      <div className="px-4 space-y-6">
+      <div className="px-3 sm:px-4 space-y-4 sm:space-y-6 overflow-x-hidden">
         {/* Promo Card */}
         <Card className="overflow-hidden bg-gradient-to-r from-primary/20 to-green-500/20 border-primary/30">
           <CardContent className="p-4 flex items-center justify-between">

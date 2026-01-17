@@ -92,7 +92,7 @@ export const RechargeSection = () => {
   };
 
   return (
-    <Card className="border-primary/20 relative overflow-hidden">
+    <Card className="border-primary/20 relative overflow-hidden w-full max-w-full">
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-10"
         style={{ backgroundImage: `url('/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png')` }}
@@ -163,7 +163,7 @@ export const RechargeSection = () => {
             <Label>
               طريقة الدفع | Payment Method ({paymentMethods.length})
             </Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {paymentMethods.map((method) => (
                 <button
                   key={method.id}

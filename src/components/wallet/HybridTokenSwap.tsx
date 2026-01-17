@@ -58,7 +58,7 @@ export const HybridTokenSwap = () => {
     fromToken !== toToken;
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-full overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-500" />
@@ -155,15 +155,15 @@ export const HybridTokenSwap = () => {
           </Select>
           
           {toToken && fromToken && (
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2 text-sm font-medium text-green-800 mb-1">
+            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-2 text-sm font-medium text-primary mb-1">
                 <Calculator className="w-4 h-4" />
                 التقدير
               </div>
-              <div className="text-lg font-bold text-green-700">
+              <div className="text-lg font-bold text-primary break-all">
                 {estimatedOutput} {toToken}
               </div>
-              <div className="text-xs text-green-600">
+              <div className="text-xs text-muted-foreground">
                 معدل التبديل: 1 {fromToken} = {exchangeRate.toFixed(4)} {toToken}
               </div>
             </div>
