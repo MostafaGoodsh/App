@@ -23,28 +23,28 @@ export const QuickActionButtons = ({
       labelEn: 'Receive',
       icon: ArrowDownLeft,
       onClick: onReceive,
-      color: 'from-green-500/20 to-green-600/20 border-green-500/30 text-green-600 dark:text-green-400'
+      color: 'from-primary/20 to-primary/30 border-primary/40 text-primary'
     },
     {
       label: 'إرسال',
       labelEn: 'Send',
       icon: Send,
       onClick: onSend,
-      color: 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-600 dark:text-blue-400'
+      color: 'from-primary/25 to-primary/35 border-primary/50 text-primary'
     },
     {
       label: 'اربح',
       labelEn: 'Earn',
       icon: Coins,
       onClick: onEarn,
-      color: 'from-amber-500/20 to-amber-600/20 border-amber-500/30 text-amber-600 dark:text-amber-400'
+      color: 'from-primary/30 to-primary/40 border-primary/60 text-primary'
     },
     {
       label: 'تبديل',
       labelEn: 'Swap',
       icon: ArrowRightLeft,
       onClick: onSwap,
-      color: 'from-purple-500/20 to-purple-600/20 border-purple-500/30 text-purple-600 dark:text-purple-400'
+      color: 'from-primary/20 to-primary/30 border-primary/40 text-primary'
     }
   ];
 
