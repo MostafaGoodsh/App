@@ -99,8 +99,17 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Safe area padding for mobile devices */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   /* Unified language and direction system */
