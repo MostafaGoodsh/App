@@ -1,24 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useInternalWallet } from "@/hooks/useInternalWallet";
-import { ArrowRight, Zap, Info } from "lucide-react";
+import { ArrowRight, Zap, Info, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ConversionSettings {
+  points_to_token_rate: number;
+  minimum_conversion_points: number;
+  maximum_conversion_points: number;
+  daily_conversion_limit: number;
+  token_symbol: string;
+  token_name: string;
+}
 
 export const XpToMsRaConverter = () => {
   const { toast } = useToast();
-  const { balances, swapTokens, isLoading, getTokenBalance } = useInternalWallet();
+  const { balances, swapTokens, isLoading: walletLoading, getTokenBalance, getExchangeRate } = useInternalWallet();
   const [xpAmount, setXpAmount] = useState("");
   const [isConverting, setIsConverting] = useState(false);
+  const [settings, setSettings] = useState<ConversionSettings | null>(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   const xpBalance = getTokenBalance('XP');
   const msraBalance = getTokenBalance('MSRA');
-  
-  // معدل التحويل: 1000 XP = 1 MSRA
-  const conversionRate = 1000;
+
+  // جلب الإعدادات من DB
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('conversion_settings')
+          .select('*')
+          .eq('is_active', true)
+          .single();
+
+        if (error) throw error;
+        setSettings(data);
+      } catch (err) {
+        console.error('Error fetching conversion settings:', err);
+        // Fallback: use exchange rate from internal_tokens
+        const rate = getExchangeRate('XP', 'MSRA');
+        setSettings({
+          points_to_token_rate: rate > 0 ? 1 / rate : 100,
+          minimum_conversion_points: 50,
+          maximum_conversion_points: 5000,
+          daily_conversion_limit: 2000,
+          token_symbol: 'MSRA',
+          token_name: 'Ms-Ra Token'
+        });
+      } finally {
+        setLoadingSettings(false);
+      }
+    };
+
+    fetchSettings();
+  }, [getExchangeRate]);
+
+  const conversionRate = settings?.points_to_token_rate || 100;
+  const minimumPoints = settings?.minimum_conversion_points || 50;
   const msraAmount = xpAmount ? (parseFloat(xpAmount) / conversionRate).toFixed(4) : "0";
 
   const handleConvert = async () => {
@@ -33,10 +77,10 @@ export const XpToMsRaConverter = () => {
       return;
     }
 
-    if (amount < conversionRate) {
+    if (amount < minimumPoints) {
       toast({
         title: "خطأ",
-        description: `الحد الأدنى للتحويل ${conversionRate} XP`,
+        description: `الحد الأدنى للتحويل ${minimumPoints} XP`,
         variant: "destructive"
       });
       return;
@@ -75,11 +119,21 @@ export const XpToMsRaConverter = () => {
 
   const setMaxAmount = () => {
     if (xpBalance > 0) {
-      // Round down to nearest 1000
+      // Round down to nearest conversionRate
       const maxConvertible = Math.floor(xpBalance / conversionRate) * conversionRate;
-      setXpAmount(maxConvertible.toString());
+      setXpAmount(Math.max(maxConvertible, 0).toString());
     }
   };
+
+  if (loadingSettings) {
+    return (
+      <Card className="border-primary/20 bg-card">
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-primary/20 bg-card relative overflow-hidden">
@@ -106,13 +160,13 @@ export const XpToMsRaConverter = () => {
           <Info className="h-4 w-4" />
           <AlertDescription className="space-y-1">
             <div className="font-cairo font-bold text-center" dir="ltr">
-              1000 XP = 1 $MS-RA :معدل التحويل
+              {conversionRate} XP = 1 $MS-RA :معدل التحويل
             </div>
             <div className="text-xs text-muted-foreground font-playfair text-center" dir="ltr">
               Conversion Rate
             </div>
             <div className="text-xs text-muted-foreground font-cairo text-center mt-2" dir="rtl">
-              الحد الأدنى: 1000 XP
+              الحد الأدنى: {minimumPoints} XP
             </div>
           </AlertDescription>
         </Alert>
@@ -148,15 +202,15 @@ export const XpToMsRaConverter = () => {
               placeholder="0"
               value={xpAmount}
               onChange={(e) => setXpAmount(e.target.value)}
-              min={conversionRate}
-              step={conversionRate}
-              disabled={isConverting || isLoading}
+              min={minimumPoints}
+              step={1}
+              disabled={isConverting || walletLoading}
               className="text-center text-base sm:text-lg"
             />
             <Button
               variant="outline"
               onClick={setMaxAmount}
-              disabled={isConverting || isLoading || xpBalance < conversionRate}
+              disabled={isConverting || walletLoading || xpBalance < minimumPoints}
               className="whitespace-nowrap px-3 sm:px-4"
             >
               <span className="hidden sm:inline font-cairo">الكل</span>
@@ -164,8 +218,8 @@ export const XpToMsRaConverter = () => {
             </Button>
           </div>
           <p className="text-xs text-center text-muted-foreground space-y-1">
-            <div className="font-cairo" dir="rtl">الرصيد المتاح: {xpBalance.toLocaleString()} XP</div>
-            <div className="font-playfair" dir="ltr">Available Balance</div>
+            <span className="font-cairo block" dir="rtl">الرصيد المتاح: {xpBalance.toLocaleString()} XP</span>
+            <span className="font-playfair block" dir="ltr">Available Balance</span>
           </p>
         </div>
 
@@ -187,7 +241,7 @@ export const XpToMsRaConverter = () => {
         {/* Convert Button */}
         <Button
           onClick={handleConvert}
-          disabled={isConverting || isLoading || !xpAmount || parseFloat(xpAmount) < conversionRate}
+          disabled={isConverting || walletLoading || !xpAmount || parseFloat(xpAmount) < minimumPoints}
           className="w-full text-sm sm:text-base font-cairo"
           size="lg"
         >
@@ -196,8 +250,8 @@ export const XpToMsRaConverter = () => {
         </Button>
 
         <p className="text-xs text-center text-muted-foreground space-y-1">
-          <div className="font-cairo" dir="rtl">التحويل فوري وبدون رسوم</div>
-          <div className="font-playfair" dir="ltr">Instant Conversion with No Fees</div>
+          <span className="font-cairo block" dir="rtl">التحويل فوري وبدون رسوم</span>
+          <span className="font-playfair block" dir="ltr">Instant Conversion with No Fees</span>
         </p>
       </CardContent>
     </Card>

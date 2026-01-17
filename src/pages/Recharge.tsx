@@ -218,10 +218,21 @@ const Recharge = () => {
     }
   };
 
+  // EGP to USD conversion rate (approximate)
+  // NOTE: في الإنتاج يجب جلب السعر الحقيقي من API أو DB
+  const EGP_TO_USD_RATE = 0.02; // 1 EGP ≈ 0.02 USD (50 EGP = 1 USD)
+
   const selectedTokenData = tokens.find(t => t.symbol === selectedToken);
+  
+  // Calculate: EGP → USD → XP
   const estimatedTokens = selectedTokenData && amount 
-    ? (parseFloat(amount) / selectedTokenData.exchange_rate_usd).toFixed(2)
+    ? Math.floor((parseFloat(amount) * EGP_TO_USD_RATE) / selectedTokenData.exchange_rate_usd).toString()
     : '0';
+  
+  // معدل التحويل المباشر (XP لكل EGP)
+  const xpPerEgp = selectedTokenData 
+    ? Math.floor(EGP_TO_USD_RATE / selectedTokenData.exchange_rate_usd) 
+    : 0;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl" dir="rtl">
@@ -432,7 +443,7 @@ const Recharge = () => {
                   </div>
                   {selectedTokenData && (
                     <div className="text-xs text-muted-foreground mt-1">
-                      {(1 / selectedTokenData.exchange_rate_usd).toFixed(0)} XP لكل جنيه
+                      {xpPerEgp} XP لكل جنيه (تقريباً)
                     </div>
                   )}
                 </div>
