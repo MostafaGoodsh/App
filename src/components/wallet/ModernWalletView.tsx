@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   Wallet, History, ArrowRightLeft, Gift, Link2, QrCode,
-  ArrowDownLeft, Send, RefreshCw
+  ArrowDownLeft, Send, RefreshCw, TrendingUp
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -110,8 +110,8 @@ export const ModernWalletView = () => {
 
       {/* Main Content */}
       <div className="px-3 sm:px-4 space-y-4 sm:space-y-6 overflow-x-hidden">
-        {/* Promo Card */}
-        <Card className="overflow-hidden bg-gradient-to-r from-primary/20 to-green-500/20 border-primary/30">
+        {/* Promo Card - Convert Points */}
+        <Card className="overflow-hidden bg-gradient-to-r from-primary/20 to-primary/10 border-primary/30">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <h3 className="font-bold text-foreground">حوّل نقاطك إلى MS-RA</h3>
@@ -123,6 +123,29 @@ export const ModernWalletView = () => {
               onClick={() => setActiveBottomTab('swap')}
             >
               تحويل
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Withdrawal Card */}
+        <Card className="overflow-hidden bg-gradient-to-r from-primary/10 to-card border-primary/20">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">سحب إلى محفظة خارجية</h3>
+                <p className="text-sm text-muted-foreground">اسحب عملاتك إلى Solana أو EVM</p>
+              </div>
+            </div>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="border-primary/40 text-primary hover:bg-primary/10"
+              onClick={() => setShowWithdrawDialog(true)}
+            >
+              سحب
             </Button>
           </CardContent>
         </Card>
