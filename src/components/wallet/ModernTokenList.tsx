@@ -55,13 +55,19 @@ export const ModernTokenList = ({
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="bg-muted/50">
             <TabsTrigger value="tokens" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Tokens
+              <div className="flex flex-col items-center">
+                <span>العملات</span>
+                <span className="text-[9px] opacity-70">Tokens</span>
+              </div>
             </TabsTrigger>
             <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               NFTs
             </TabsTrigger>
             <TabsTrigger value="earn" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Earn
+              <div className="flex flex-col items-center">
+                <span>ربح</span>
+                <span className="text-[9px] opacity-70">Earn</span>
+              </div>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -96,10 +102,13 @@ export const ModernTokenList = ({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                    LET'S GET STARTED
+                    لنبدأ الآن
                   </p>
                   <p className="font-medium text-foreground">
-                    Deposit crypto from another wallet or an exchange
+                    قم بإيداع عملات من محفظة أخرى أو منصة تداول
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 mt-1" dir="ltr">
+                    Deposit crypto from wallet or exchange
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -142,7 +151,8 @@ export const ModernTokenList = ({
               onClick={onAddToken}
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add token
+              <span>إضافة عملة</span>
+              <span className="text-xs opacity-70 mr-1">Add</span>
             </Button>
           </div>
         </div>
@@ -152,7 +162,7 @@ export const ModernTokenList = ({
       {activeTab === 'nfts' && (
         <div className="text-center py-12 text-muted-foreground">
           <p className="text-sm">لا توجد NFTs حالياً</p>
-          <p className="text-xs mt-1">ستظهر هنا عند امتلاك NFTs</p>
+          <p className="text-xs mt-1 opacity-70" dir="ltr">No NFTs found</p>
         </div>
       )}
 
@@ -160,7 +170,7 @@ export const ModernTokenList = ({
       {activeTab === 'earn' && (
         <div className="text-center py-12 text-muted-foreground">
           <p className="text-sm">فرص الربح قادمة قريباً</p>
-          <p className="text-xs mt-1">تابعنا للحصول على أحدث العروض</p>
+          <p className="text-xs mt-1 opacity-70" dir="ltr">Earning opportunities coming soon</p>
         </div>
       )}
     </div>
