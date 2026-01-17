@@ -21,11 +21,24 @@ export const RechargeSection = () => {
   const paymentMethods = getSupportedMethods();
   const quickAmounts = [50, 100, 200, 500, 1000];
 
-  // XP Token (fixed)
+  // XP Token (fixed) - exchange_rate_usd = 0.001 means 1 XP = 0.001 USD
   const xpToken = tokens.find(t => t.symbol === 'XP');
+  
+  // EGP to USD conversion rate (approximate)
+  // NOTE: في الإنتاج يجب جلب السعر الحقيقي من API أو DB
+  const EGP_TO_USD_RATE = 0.02; // 1 EGP ≈ 0.02 USD (50 EGP = 1 USD)
+  
+  // Calculate: EGP → USD → XP
+  // Amount in USD = EGP * EGP_TO_USD_RATE
+  // XP = USD / exchange_rate_usd
   const estimatedTokens = xpToken && amount 
-    ? (parseFloat(amount) / xpToken.exchange_rate_usd).toFixed(0)
+    ? Math.floor((parseFloat(amount) * EGP_TO_USD_RATE) / xpToken.exchange_rate_usd).toString()
     : '0';
+  
+  // معدل التحويل المباشر (XP لكل EGP)
+  const xpPerEgp = xpToken 
+    ? Math.floor(EGP_TO_USD_RATE / xpToken.exchange_rate_usd) 
+    : 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +152,7 @@ export const RechargeSection = () => {
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  معدل التحويل: 1 EGP = {(1 / xpToken.exchange_rate_usd).toFixed(0)} XP
+                  معدل التحويل: 1 EGP = {xpPerEgp} XP (تقريباً)
                 </div>
               </AlertDescription>
             </Alert>

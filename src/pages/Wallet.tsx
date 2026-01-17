@@ -229,11 +229,19 @@ const WalletContent = () => {
           </h2>
         </div>
         
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <WalletConnectButton variant="card" showBalance={true} />
-            <EvmWalletConnectCard />
-          </div>
-        </section>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Solana Wallet (Wallet Adapter Only - Phantom/Solflare) */}
+          <WalletConnectButton variant="card" showBalance={true} />
+          
+          {/* EVM Wallet via WalletConnect */}
+          <EvmWalletConnectCard />
+        </div>
+        
+        <p className="text-xs text-muted-foreground text-center font-cairo" dir="rtl">
+          للاتصال بـ Solana: اضغط على كارت "محفظة Solana" واختر Phantom أو Solflare. 
+          للاتصال بـ EVM (Ethereum/Polygon/BSC): استخدم WalletConnect.
+        </p>
+      </section>
 
       {/* ===== القسم 3: تبادل العملات ===== */}
       <section className="space-y-4">
