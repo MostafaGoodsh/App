@@ -39,6 +39,16 @@ export const EvmWalletConnectCard = () => {
     });
   };
 
+  const handleClearProjectId = () => {
+    setWalletConnectProjectId("");
+    setProjectId("");
+    setProjectIdDraft("");
+    toast({
+      title: "تم المسح",
+      description: "تم مسح Project ID — أدخله من جديد ثم حاول الاتصال.",
+    });
+  };
+
   const handleCopy = async () => {
     if (!connectedWallet?.address) return;
     await navigator.clipboard.writeText(connectedWallet.address);
@@ -59,15 +69,35 @@ export const EvmWalletConnectCard = () => {
         return;
       }
 
+      // Preflight: avoid opening a modal that will load forever (403 / Project not found)
+      const cfgUrl = `https://api.web3modal.org/appkit/v1/config?projectId=${encodeURIComponent(projectId)}&st=appkit&sv=html-core-1.7.8`;
+      const res = await fetch(cfgUrl);
+      if (!res.ok) {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        toast({
+          title: "WalletConnect غير جاهز",
+          description:
+            res.status === 403
+              ? `Forbidden (403). غالبًا Project ID غير صحيح أو الدومين غير مضاف في WalletConnect Cloud. الدومين الحالي: ${origin}`
+              : `تعذر التحقق من Project ID (HTTP ${res.status}).` ,
+          variant: "destructive",
+        });
+        return;
+      }
+
       await connectWallet();
       toast({
         title: "تم الاتصال",
         description: "تم توصيل WalletConnect بنجاح",
       });
     } catch (e: any) {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const msg = e?.message || "فشل الاتصال بـ WalletConnect";
       toast({
         title: "خطأ",
-        description: e?.message || "فشل الاتصال بـ WalletConnect",
+        description: msg.includes('403') || msg.toLowerCase().includes('project not found')
+          ? `${msg} (الدومين: ${origin})`
+          : msg,
         variant: "destructive",
       });
     }
@@ -144,29 +174,35 @@ export const EvmWalletConnectCard = () => {
               </span>
             </div>
 
-            {!projectId && (
-              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-cairo" dir="rtl">أدخل WalletConnect Project ID</p>
-                  <p className="text-xs text-muted-foreground font-playfair" dir="ltr">
-                    WalletConnect Project ID (public)
+            <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+              <div className="space-y-1">
+                <p className="text-sm font-cairo" dir="rtl">WalletConnect Project ID</p>
+                <p className="text-xs text-muted-foreground font-playfair" dir="ltr">
+                  Required (public). If you see infinite loading, update it here.
+                </p>
+                {projectId ? (
+                  <p className="text-xs text-muted-foreground font-mono" dir="ltr">
+                    Current: {projectId.slice(0, 6)}...{projectId.slice(-4)}
                   </p>
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    value={projectIdDraft}
-                    onChange={(e) => setProjectIdDraft(e.target.value)}
-                    placeholder="e.g. 123abc..."
-                    dir="ltr"
-                    className="font-mono"
-                  />
-                  <Button type="button" variant="secondary" onClick={handleSaveProjectId}>
-                    حفظ
-                  </Button>
-                </div>
+                ) : null}
               </div>
-            )}
+
+              <div className="flex gap-2">
+                <Input
+                  value={projectIdDraft}
+                  onChange={(e) => setProjectIdDraft(e.target.value)}
+                  placeholder="e.g. 123abc..."
+                  dir="ltr"
+                  className="font-mono"
+                />
+                <Button type="button" variant="secondary" onClick={handleSaveProjectId}>
+                  حفظ
+                </Button>
+                <Button type="button" variant="ghost" onClick={handleClearProjectId}>
+                  مسح
+                </Button>
+              </div>
+            </div>
 
             <Button
               onClick={handleConnect}

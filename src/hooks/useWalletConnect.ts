@@ -3,6 +3,50 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { ethers } from 'ethers';
 import { WALLETCONNECT_CONFIG, SUPPORTED_NETWORKS, getWalletConnectProjectId } from '@/config/wallet';
 
+// Singleton provider to avoid double-initialization (causes warnings + flaky modal behavior)
+let wcProvider: any | null = null;
+let wcProviderInitPromise: Promise<any> | null = null;
+let wcProjectIdInUse: string | null = null;
+
+const getOrInitProvider = async (projectId: string) => {
+  if (wcProvider && wcProjectIdInUse === projectId) return wcProvider;
+
+  // Project ID changed → reset
+  if (wcProvider && wcProjectIdInUse && wcProjectIdInUse !== projectId) {
+    try {
+      await wcProvider.disconnect();
+    } catch {
+      // ignore
+    }
+    wcProvider = null;
+    wcProjectIdInUse = null;
+  }
+
+  if (wcProviderInitPromise) return wcProviderInitPromise;
+
+  wcProjectIdInUse = projectId;
+  wcProviderInitPromise = EthereumProvider.init({
+    projectId,
+    chains: [1],
+    optionalChains: Object.values(SUPPORTED_NETWORKS).map((network) => network.chainId),
+    showQrModal: true,
+    metadata: WALLETCONNECT_CONFIG.metadata,
+  })
+    .then((provider) => {
+      wcProvider = provider;
+      wcProviderInitPromise = null;
+      return provider;
+    })
+    .catch((err) => {
+      wcProviderInitPromise = null;
+      wcProvider = null;
+      wcProjectIdInUse = null;
+      throw err;
+    });
+
+  return wcProviderInitPromise;
+};
+
 export interface ConnectedWallet {
   id: string;
   type: 'WalletConnect';
@@ -39,18 +83,12 @@ export const useWalletConnect = () => {
   const connectWallet = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const projectId = getWalletConnectProjectId() || WALLETCONNECT_CONFIG.projectId;
+      const projectId = getWalletConnectProjectId();
       if (!projectId) {
         throw new Error('WalletConnect Project ID غير مُعد. الرجاء إدخاله ثم إعادة المحاولة.');
       }
 
-      const provider = await EthereumProvider.init({
-        projectId,
-        chains: [1], // Ethereum by default
-        optionalChains: Object.values(SUPPORTED_NETWORKS).map((network) => network.chainId),
-        showQrModal: true,
-        metadata: WALLETCONNECT_CONFIG.metadata,
-      });
+      const provider = await getOrInitProvider(projectId);
 
       await provider.connect();
 
@@ -84,6 +122,14 @@ export const useWalletConnect = () => {
       return wallet;
     } catch (error) {
       console.error('WalletConnect connection error:', error);
+
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('403') || msg.toLowerCase().includes('forbidden') || msg.toLowerCase().includes('project not found')) {
+        throw new Error(
+          'فشل تحميل WalletConnect (403/Project not found). تأكد أن Project ID صحيح وأن الدومين الحالي مسموح به داخل WalletConnect Cloud، ثم جرّب مرة أخرى.'
+        );
+      }
+
       if (error instanceof Error) throw error;
       throw new Error('فشل في الاتصال بـ WalletConnect');
     } finally {
@@ -133,9 +179,19 @@ export const useWalletConnect = () => {
   }, [connectedWallet, getBalance]);
 
   const disconnectWallet = useCallback(() => {
-    if (connectedWallet?.provider) {
-      connectedWallet.provider.disconnect();
+    const provider = connectedWallet?.provider || wcProvider;
+    if (provider) {
+      try {
+        provider.disconnect();
+      } catch {
+        // ignore
+      }
     }
+
+    wcProvider = null;
+    wcProviderInitPromise = null;
+    wcProjectIdInUse = null;
+
     setConnectedWallet(null);
     localStorage.removeItem('connectedWallet');
     localStorage.removeItem('customTokens');
