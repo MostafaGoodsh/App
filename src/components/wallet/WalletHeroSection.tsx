@@ -79,7 +79,7 @@ export const WalletHeroSection = ({
           <div className="flex items-center justify-center gap-2 text-sm">
             <span className={cn(
               "font-medium",
-              isPositive ? "text-green-500" : "text-red-500"
+              isPositive ? "text-primary" : "text-destructive"
             )}>
               {isPositive ? '+' : ''}{percentageChange.toFixed(2)}%
             </span>
