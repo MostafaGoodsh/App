@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import msraTokenIcon from "@/assets/msra-token-icon.jpg";
 
 interface ModernTokenCardProps {
   symbol: string;
@@ -26,23 +27,34 @@ export const ModernTokenCard = ({
 }: ModernTokenCardProps) => {
   const isPositive = priceChange24h >= 0;
   
-  // Token logo colors for fallback
+  // Get special logo for MS-RA token
+  const getTokenLogo = (sym: string): string | null => {
+    if (sym.toUpperCase() === 'MSRA' || sym.toUpperCase() === 'MS-RA') {
+      return msraTokenIcon;
+    }
+    return logoUrl || null;
+  };
+
+  // Token logo colors for fallback - Black and Gold theme
   const getTokenColor = (sym: string) => {
     const colors: Record<string, string> = {
-      'SOL': 'bg-gradient-to-br from-purple-500 to-purple-700',
-      'TON': 'bg-gradient-to-br from-blue-400 to-blue-600',
-      'ETH': 'bg-gradient-to-br from-blue-500 to-indigo-600',
-      'USDC': 'bg-gradient-to-br from-blue-400 to-blue-500',
-      'USDT': 'bg-gradient-to-br from-green-400 to-green-600',
-      'BNB': 'bg-gradient-to-br from-yellow-400 to-yellow-600',
-      'NEAR': 'bg-gradient-to-br from-teal-400 to-teal-600',
-      'ATOM': 'bg-gradient-to-br from-indigo-400 to-purple-500',
-      'BONK': 'bg-gradient-to-br from-orange-400 to-orange-600',
-      'MSRA': 'bg-gradient-to-br from-amber-400 to-amber-600',
-      'XP': 'bg-gradient-to-br from-blue-400 to-cyan-500',
+      'SOL': 'bg-gradient-to-br from-amber-500 to-yellow-600',
+      'TON': 'bg-gradient-to-br from-amber-400 to-amber-600',
+      'ETH': 'bg-gradient-to-br from-gray-800 to-black',
+      'USDC': 'bg-gradient-to-br from-amber-500 to-yellow-500',
+      'USDT': 'bg-gradient-to-br from-amber-400 to-yellow-600',
+      'BNB': 'bg-gradient-to-br from-yellow-400 to-amber-600',
+      'NEAR': 'bg-gradient-to-br from-gray-900 to-black',
+      'ATOM': 'bg-gradient-to-br from-amber-500 to-yellow-600',
+      'BONK': 'bg-gradient-to-br from-amber-400 to-orange-500',
+      'MSRA': 'bg-gradient-to-br from-amber-500 to-yellow-700',
+      'MS-RA': 'bg-gradient-to-br from-amber-500 to-yellow-700',
+      'XP': 'bg-gradient-to-br from-cyan-400 to-blue-500',
     };
-    return colors[sym.toUpperCase()] || 'bg-gradient-to-br from-gray-400 to-gray-600';
+    return colors[sym.toUpperCase()] || 'bg-gradient-to-br from-gray-800 to-black';
   };
+
+  const tokenLogo = getTokenLogo(symbol);
 
   return (
     <div 
@@ -57,11 +69,11 @@ export const ModernTokenCard = ({
       <div className="flex items-center gap-3">
         {/* Token Logo */}
         <div className="relative">
-          {logoUrl ? (
+          {tokenLogo ? (
             <img 
-              src={logoUrl} 
+              src={tokenLogo} 
               alt={symbol}
-              className="w-11 h-11 rounded-full object-cover"
+              className="w-11 h-11 rounded-full object-cover border-2 border-amber-500/30"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -69,9 +81,9 @@ export const ModernTokenCard = ({
             />
           ) : null}
           <div className={cn(
-            "w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm",
+            "w-11 h-11 rounded-full flex items-center justify-center text-amber-400 font-bold text-sm border-2 border-amber-500/30",
             getTokenColor(symbol),
-            logoUrl ? 'hidden' : ''
+            tokenLogo ? 'hidden' : ''
           )}>
             {symbol.slice(0, 2)}
           </div>
