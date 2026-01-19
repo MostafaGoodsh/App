@@ -54,16 +54,22 @@ export const ModernWalletView = () => {
     loadUserXP();
   }, [user]);
 
-  // Convert internal balances to TokenData format
-  const tokenList: TokenData[] = balances.map((bal) => ({
-    symbol: bal.token?.symbol || 'Unknown',
-    name: bal.token?.name || 'Unknown Token',
-    balance: bal.balance,
-    usdValue: bal.balance * (bal.token?.exchange_rate_usd || 0),
-    price: bal.token?.exchange_rate_usd,
-    priceChange24h: Math.random() * 10 - 5, // Simulated change
-    isInternal: true
-  }));
+  // Convert internal balances to TokenData format - filter out subscription tokens
+  const tokenList: TokenData[] = balances
+    .filter((bal) => {
+      const symbol = bal.token?.symbol || '';
+      // Exclude subscription tokens (ANUBIS_*)
+      return !symbol.startsWith('ANUBIS_');
+    })
+    .map((bal) => ({
+      symbol: bal.token?.symbol || 'Unknown',
+      name: bal.token?.name || 'Unknown Token',
+      balance: bal.balance,
+      usdValue: bal.balance * (bal.token?.exchange_rate_usd || 0),
+      price: bal.token?.exchange_rate_usd,
+      priceChange24h: Math.random() * 10 - 5, // Simulated change
+      isInternal: true
+    }));
 
   // Add XP as a pseudo-token if user has points
   const xpBalance = balances.find(b => b.token?.symbol === 'XP');
@@ -90,7 +96,7 @@ export const ModernWalletView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto">
       {/* Hero Section */}
       <WalletHeroSection
         totalBalance={totalUsdValue}
