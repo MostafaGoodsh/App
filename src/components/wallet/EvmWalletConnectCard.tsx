@@ -5,17 +5,32 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useWalletConnect } from "@/hooks/useWalletConnect";
-import { getWalletConnectProjectId, setWalletConnectProjectId } from "@/config/wallet";
-import { Copy, Link2, LogOut, RefreshCw, QrCode } from "lucide-react";
+import { getWalletConnectProjectId, setWalletConnectProjectId, SUPPORTED_NETWORKS } from "@/config/wallet";
+import { Copy, Link2, LogOut, RefreshCw, QrCode, ChevronDown, Network } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const shortenAddress = (address: string) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`;
 
+const NETWORK_ICONS: Record<string, string> = {
+  ethereum: '⟠',
+  polygon: '⬟',
+  bsc: '◆',
+  arbitrum: '🔷',
+  solana: '◎'
+};
+
 export const EvmWalletConnectCard = () => {
   const { toast } = useToast();
-  const { connectedWallet, connectWallet, disconnectWallet, refreshBalance, isConnecting } =
+  const { connectedWallet, connectWallet, disconnectWallet, refreshBalance, switchNetwork, isConnecting } =
     useWalletConnect();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   const [projectId, setProjectId] = useState(() => getWalletConnectProjectId());
   const [projectIdDraft, setProjectIdDraft] = useState(projectId);
@@ -113,6 +128,31 @@ export const EvmWalletConnectCard = () => {
     }
   };
 
+  const handleSwitchNetwork = async (networkKey: keyof typeof SUPPORTED_NETWORKS) => {
+    if (!connectedWallet) return;
+    setIsSwitching(true);
+    try {
+      await switchNetwork(networkKey);
+      toast({
+        title: "تم تغيير الشبكة",
+        description: `تم التبديل إلى ${SUPPORTED_NETWORKS[networkKey].name}`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "خطأ",
+        description: e?.message || "فشل تغيير الشبكة",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSwitching(false);
+    }
+  };
+
+  // Get current network key
+  const currentNetworkKey = Object.entries(SUPPORTED_NETWORKS).find(
+    ([_, network]) => network.name === connectedWallet?.network
+  )?.[0] || 'ethereum';
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent rounded-t-lg border-b border-primary/20">
@@ -121,12 +161,12 @@ export const EvmWalletConnectCard = () => {
           <div className="space-y-1">
             <span className="font-cairo" dir="rtl">WalletConnect (EVM)</span>
             <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
-              External EVM Wallet
+              Multi-Chain Wallet
             </span>
           </div>
         </CardTitle>
         <CardDescription>
-          <span className="font-cairo" dir="rtl">اتصال بمحافظ EVM عبر QR</span>
+          <span className="font-cairo" dir="rtl">اتصال بمحافظ EVM متعددة الشبكات</span>
           <span className="block text-xs text-muted-foreground font-playfair" dir="ltr">Connect via QR code</span>
         </CardDescription>
       </CardHeader>
@@ -155,7 +195,37 @@ export const EvmWalletConnectCard = () => {
               <span className="text-sm font-mono" dir="ltr">
                 {shortenAddress(connectedWallet.address)}
               </span>
-              <Badge variant="secondary">{connectedWallet.network}</Badge>
+              
+              {/* Network Switcher */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1" disabled={isSwitching}>
+                    <Network className="w-3 h-3" />
+                    <span>{NETWORK_ICONS[currentNetworkKey] || '🔗'}</span>
+                    <span className="text-xs">{connectedWallet.network}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {Object.entries(SUPPORTED_NETWORKS)
+                    .filter(([key]) => key !== 'solana') // Solana handled separately
+                    .map(([key, network]) => (
+                      <DropdownMenuItem
+                        key={key}
+                        onClick={() => handleSwitchNetwork(key as keyof typeof SUPPORTED_NETWORKS)}
+                        className={connectedWallet.network === network.name ? "bg-primary/10" : ""}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="flex items-center gap-2">
+                            <span>{NETWORK_ICONS[key] || '🔗'}</span>
+                            <span>{network.name}</span>
+                          </span>
+                          <span className="text-xs text-muted-foreground">{network.currency}</span>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="p-4 bg-muted/30 rounded-lg border border-border">
@@ -164,21 +234,50 @@ export const EvmWalletConnectCard = () => {
                 {Number(connectedWallet.balance || 0).toFixed(4)} {connectedWallet.currency}
               </p>
             </div>
+
+            {/* Available Networks */}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">الشبكات المدعومة | Supported Networks</p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(SUPPORTED_NETWORKS)
+                  .filter(([key]) => key !== 'solana')
+                  .map(([key, network]) => (
+                    <Badge
+                      key={key}
+                      variant={connectedWallet.network === network.name ? "default" : "outline"}
+                      className="cursor-pointer hover:bg-primary/20"
+                      onClick={() => handleSwitchNetwork(key as keyof typeof SUPPORTED_NETWORKS)}
+                    >
+                      <span className="mr-1">{NETWORK_ICONS[key]}</span>
+                      {network.name}
+                    </Badge>
+                  ))}
+              </div>
+            </div>
           </>
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <Badge variant="secondary">غير متصل</Badge>
-              <span className="text-xs text-muted-foreground font-playfair" dir="ltr">
-                Ethereum / Polygon / BSC ...
-              </span>
+              <Badge variant="secondary">غير متصل | Disconnected</Badge>
+            </div>
+            
+            {/* Supported Networks Preview */}
+            <div className="flex flex-wrap gap-1.5">
+              {Object.entries(SUPPORTED_NETWORKS)
+                .filter(([key]) => key !== 'solana')
+                .map(([key, network]) => (
+                  <Badge key={key} variant="outline" className="text-xs">
+                    <span className="mr-1">{NETWORK_ICONS[key]}</span>
+                    {network.name}
+                  </Badge>
+                ))}
             </div>
 
             <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
               <div className="space-y-1">
                 <p className="text-sm font-cairo" dir="rtl">WalletConnect Project ID</p>
                 <p className="text-xs text-muted-foreground font-playfair" dir="ltr">
-                  Required (public). If you see infinite loading, update it here.
+                  Required (public). Get from cloud.walletconnect.com
                 </p>
                 {projectId ? (
                   <p className="text-xs text-muted-foreground font-mono" dir="ltr">

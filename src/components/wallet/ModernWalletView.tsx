@@ -8,7 +8,7 @@ import { XpToMsRaConverter } from "./XpToMsRaConverter";
 import { RechargeSection } from "./RechargeSection";
 import { WalletConnectButton } from "./WalletConnectButton";
 import { EvmWalletConnectCard } from "./EvmWalletConnectCard";
-import { TokenContractManager } from "./TokenContractManager";
+import { TonWalletConnectCard } from "./TonWalletConnectCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { useProfile } from "@/hooks/useProfile";
@@ -17,10 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   Wallet, History, ArrowRightLeft, Gift, Link2, QrCode,
-  ArrowDownLeft, Send, RefreshCw, TrendingUp, FileText, Coins
+  ArrowDownLeft, Send, RefreshCw, TrendingUp
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -174,40 +173,6 @@ export const ModernWalletView = () => {
               }}
             />
 
-            {/* Token Contracts Section */}
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-base">عقود العملات</CardTitle>
-                      <span className="text-xs text-muted-foreground/70" dir="ltr">Token Contracts</span>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="gap-1">
-                    <Coins className="w-3 h-3" />
-                    ERC-20 / SPL
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <p className="text-sm text-muted-foreground mb-3">
-                  أضف عقود عملات مخصصة لتتبع أرصدتك
-                </p>
-                <TokenContractManager 
-                  network="solana"
-                  onTokenAdded={(token) => {
-                    toast({ 
-                      title: "تمت إضافة العملة", 
-                      description: `${token.name} (${token.symbol})` 
-                    });
-                    refreshData();
-                  }}
-                />
-              </CardContent>
-            </Card>
-
             {/* External Wallets Section */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-2">
@@ -221,6 +186,7 @@ export const ModernWalletView = () => {
               <div className="grid gap-4">
                 <WalletConnectButton variant="card" showBalance={true} />
                 <EvmWalletConnectCard />
+                <TonWalletConnectCard />
               </div>
             </div>
           </>
@@ -252,34 +218,6 @@ export const ModernWalletView = () => {
             
             {/* Internal Token Swap */}
             <HybridTokenSwap />
-            
-            {/* Token Contract Manager for Swap */}
-            <Card className="border-primary/20">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <div>
-                    <CardTitle className="text-base">إضافة عقد عملة</CardTitle>
-                    <span className="text-xs text-muted-foreground/70" dir="ltr">Add Token Contract</span>
-                  </div>
-                </div>
-                <CardDescription>
-                  أضف عقود عملات جديدة للتداول
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TokenContractManager 
-                  network="solana"
-                  onTokenAdded={(token) => {
-                    toast({ 
-                      title: "تمت إضافة العملة", 
-                      description: `${token.name} (${token.symbol})` 
-                    });
-                    refreshData();
-                  }}
-                />
-              </CardContent>
-            </Card>
             
             {/* Recharge Section */}
             <RechargeSection />

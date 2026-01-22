@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { SolanaWalletProvider } from "./components/wallet/SolanaWalletProvider";
 import Index from "./pages/Index";
@@ -79,16 +80,19 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 const queryClient = new QueryClient();
 
 const App = () => {
+  const manifestUrl = `${window.location.origin}/tonconnect-manifest.json`;
+  
   return (
     <ErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <SolanaWalletProvider>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <Routes>
+          <TonConnectUIProvider manifestUrl={manifestUrl}>
+            <SolanaWalletProvider>
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<RequireAccess><Index /></RequireAccess>} />
                     <Route path="auth" element={<Auth />} />
@@ -153,12 +157,13 @@ const App = () => {
                     <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                     <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
                     <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
-                    <Route path="*" element={<NotFound />} />
-                  </Route>
-                </Routes>
-              </TooltipProvider>
-            </BrowserRouter>
-          </SolanaWalletProvider>
+                      <Route path="*" element={<NotFound />} />
+                    </Route>
+                  </Routes>
+                </TooltipProvider>
+              </BrowserRouter>
+            </SolanaWalletProvider>
+          </TonConnectUIProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ErrorBoundary>
