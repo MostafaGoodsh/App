@@ -15,7 +15,7 @@ const MainLayoutContent = () => {
   const { profile } = useProfile();
   
   return (
-    <div className="min-h-screen bg-background text-foreground flex w-full">
+    <div className="min-h-screen bg-background text-foreground flex w-full overflow-x-hidden">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <header 
@@ -61,7 +61,7 @@ const MainLayoutContent = () => {
             )}
           </div>
         </header>
-        <main className="flex-1">
+        <main className="flex-1 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import ErrorBoundary from "./components/ErrorBoundary";
+import ScrollToTop from "./components/ScrollToTop";
 import { SolanaWalletProvider } from "./components/wallet/SolanaWalletProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -92,6 +93,7 @@ const App = () => {
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
+                  <ScrollToTop />
                   <Routes>
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<RequireAccess><Index /></RequireAccess>} />
