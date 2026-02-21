@@ -44,7 +44,7 @@
     "@solana/wallet-adapter-phantom": "^0.9.28",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",
-    "@solana/wallet-adapter-wallets": "^0.19.37",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.98.4",
     "@supabase/supabase-js": "^2.55.0",
     "@tanstack/react-query": "^5.83.0",
@@ -79,6 +79,7 @@
     "stream-browserify": "^3.0.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "usb": "^2.14.0",
     "util": "^0.12.5",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"
