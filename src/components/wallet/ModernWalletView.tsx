@@ -53,20 +53,17 @@ export const ModernWalletView = () => {
     loadUserXP();
   }, [user]);
 
-  // Convert internal balances to TokenData format - filter out subscription tokens
+  // Convert internal balances to TokenData format - only XP and MS-RA
   const tokenList: TokenData[] = balances
     .filter((bal) => {
-      const symbol = bal.token?.symbol || '';
-      // Exclude subscription tokens (ANUBIS_*)
-      return !symbol.startsWith('ANUBIS_');
+      const symbol = (bal.token?.symbol || '').toUpperCase();
+      // Only show XP and MSRA tokens
+      return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA';
     })
     .map((bal) => ({
       symbol: bal.token?.symbol || 'Unknown',
       name: bal.token?.name || 'Unknown Token',
       balance: bal.balance,
-      usdValue: bal.balance * (bal.token?.exchange_rate_usd || 0),
-      price: bal.token?.exchange_rate_usd,
-      priceChange24h: Math.random() * 10 - 5, // Simulated change
       isInternal: true
     }));
 

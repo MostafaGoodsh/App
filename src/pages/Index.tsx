@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAppContent } from "@/hooks/useAppContent";
 import { MsRaCurrencyCard } from "@/components/wallet/MsRaCurrencyCard";
+import { TotalMiningDisplay } from "@/components/mining/TotalMiningDisplay";
+import { ReferralCard } from "@/components/referral/ReferralCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
@@ -220,8 +222,14 @@ const Index = () => {
         
         {/* Ms-Ra Currency Section */}
         <section className="py-16 px-4">
-          <div className="container mx-auto max-w-4xl">
+          <div className="container mx-auto max-w-4xl space-y-6">
             <MsRaCurrencyCard isVerified={isIdentityVerified} />
+            
+            {/* Total Mining Display */}
+            <TotalMiningDisplay />
+            
+            {/* Referral Card */}
+            <ReferralCard />
           </div>
         </section>
 

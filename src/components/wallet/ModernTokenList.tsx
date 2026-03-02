@@ -9,7 +9,7 @@ export interface TokenData {
   symbol: string;
   name: string;
   balance: number;
-  usdValue: number;
+  usdValue?: number;
   price?: number;
   priceChange24h?: number;
   logoUrl?: string;
@@ -134,9 +134,6 @@ export const ModernTokenList = ({
               symbol={token.symbol}
               name={token.name}
               balance={token.balance}
-              usdValue={token.usdValue}
-              price={token.price}
-              priceChange24h={token.priceChange24h}
               logoUrl={token.logoUrl}
               network={token.network}
               onClick={() => onTokenClick?.(token)}

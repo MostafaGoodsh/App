@@ -78,6 +78,7 @@ import LiveStreamViewer from "./pages/LiveStreamViewer";
 import MyLiveStreams from "./pages/MyLiveStreams";
 import ProfileCustomizationAdmin from "./pages/ProfileCustomizationAdmin";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import InternalTokensAdmin from "./pages/InternalTokensAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -159,6 +160,7 @@ const App = () => {
                     <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                     <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
                     <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
+                    <Route path="admin/internal-tokens" element={<RequireAdmin><InternalTokensAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
