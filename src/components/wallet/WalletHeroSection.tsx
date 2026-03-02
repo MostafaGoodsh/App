@@ -1,6 +1,5 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 interface WalletHeroSectionProps {
   totalBalance: number;
@@ -18,7 +17,6 @@ export const WalletHeroSection = ({
   points = 0
 }: WalletHeroSectionProps) => {
   const [showBalance, setShowBalance] = useState(true);
-  const isPositive = percentageChange >= 0;
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50">
@@ -51,14 +49,12 @@ export const WalletHeroSection = ({
           </div>
         )}
 
-        {/* Main Balance */}
+        {/* Main Balance - Token based, no USD */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               {showBalance ? (
-                <>
-                  ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </>
+                <span dir="ltr">المحفظة الداخلية</span>
               ) : (
                 '••••••'
               )}
@@ -75,18 +71,11 @@ export const WalletHeroSection = ({
             </button>
           </div>
           
-          {/* Change Indicator */}
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <span className={cn(
-              "font-medium",
-              isPositive ? "text-primary" : "text-destructive"
-            )}>
-              {isPositive ? '+' : ''}{percentageChange.toFixed(2)}%
-            </span>
-            <span className="text-muted-foreground">
-              ({isPositive ? '+' : ''}${Math.abs(changeAmount).toFixed(2)})
-            </span>
-          </div>
+          {points > 0 && showBalance && (
+            <p className="text-sm text-muted-foreground">
+              <span dir="ltr" className="text-primary font-bold">{points.toLocaleString()} XP</span>
+            </p>
+          )}
         </div>
       </div>
     </div>

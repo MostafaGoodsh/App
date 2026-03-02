@@ -1899,6 +1899,9 @@ export type Database = {
           linkedin_url: string | null
           phone: string | null
           preferred_language: string | null
+          referral_code: string | null
+          referral_count: number
+          referred_by: string | null
           solana_address: string | null
           twitter_url: string | null
           updated_at: string
@@ -1927,6 +1930,9 @@ export type Database = {
           linkedin_url?: string | null
           phone?: string | null
           preferred_language?: string | null
+          referral_code?: string | null
+          referral_count?: number
+          referred_by?: string | null
           solana_address?: string | null
           twitter_url?: string | null
           updated_at?: string
@@ -1955,6 +1961,9 @@ export type Database = {
           linkedin_url?: string | null
           phone?: string | null
           preferred_language?: string | null
+          referral_code?: string | null
+          referral_count?: number
+          referred_by?: string | null
           solana_address?: string | null
           twitter_url?: string | null
           updated_at?: string
@@ -2251,6 +2260,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          status: string
+          tokens_rewarded: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          status?: string
+          tokens_rewarded?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_id?: string
+          referrer_id?: string
+          status?: string
+          tokens_rewarded?: number
+        }
+        Relationships: []
       }
       roadmap_cards: {
         Row: {
@@ -3443,6 +3482,7 @@ export type Database = {
         Args: { p_wallet_id: string }
         Returns: Json
       }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_identity_verification_admin_view: {
         Args: never
         Returns: {
@@ -3497,6 +3537,7 @@ export type Database = {
           transaction_count: number
         }[]
       }
+      get_total_mining_stats: { Args: never; Returns: Json }
       get_wallet_security_with_logging: {
         Args: { p_wallet_id: string }
         Returns: {
@@ -3565,6 +3606,10 @@ export type Database = {
           p_type: string
         }
         Returns: number
+      }
+      process_referral: {
+        Args: { p_referral_code: string; p_referred_user_id: string }
+        Returns: Json
       }
       register_trusted_device: {
         Args: { p_device_fingerprint: string; p_device_name?: string }
