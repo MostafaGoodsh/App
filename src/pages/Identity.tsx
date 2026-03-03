@@ -333,8 +333,8 @@ const Identity = () => {
   return (
     <>
       <Helmet>
-        <title>تحقيق الهوية — Black & Gold Crypto</title>
-        <meta name="description" content="التحقق من الهوية (KYC) للامتثال للوائح ولضمان أمان المعاملات المالية." />
+        <title>توثيق الهوية — Identity Verification</title>
+        <meta name="description" content="توثيق الهوية (KYC) للامتثال للوائح ولضمان أمان المعاملات والحسابات." />
         <link rel="canonical" href={canonical} />
       </Helmet>
       
@@ -356,12 +356,22 @@ const Identity = () => {
                 <Shield className="h-8 w-8 text-primary" />
               </div>
             </div>
-            <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-4">
-              Vault | الخزانة الرقمية
+            <h1 className="font-cairo text-3xl md:text-5xl font-bold mb-4" dir="rtl">
+              توثيق الهوية | <span className="font-playfair">Identity Verification</span>
             </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-              الخزانة الرقمية الأكثر أمانًا في العالم الرقمي. نستخدم أحدث تقنيات التشفير والحماية لضمان خصوصيتك وأمان بياناتك. مع Vault، بياناتك في أيدٍ أمينة.
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-4 font-cairo" dir="rtl">
+              عملية التحقق من الهوية (KYC) تضمن أمان حسابك والامتثال للمعايير المطلوبة. يرجى تقديم بيانات دقيقة ومطابقة للوثائق الرسمية.
             </p>
+            
+            {/* تحذير مهم */}
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 max-w-2xl mx-auto text-right" dir="rtl">
+              <p className="text-sm font-cairo text-destructive font-semibold mb-2">⚠️ تحذير مهم</p>
+              <p className="text-xs font-cairo text-muted-foreground leading-relaxed">
+                يُرجى تحري الدقة الكاملة ومطابقة الواقع في جميع المعلومات المقدمة. أي معلومات مغلوطة أو غير مطابقة قد تؤدي إلى <span className="text-destructive font-medium">تعليق الحساب</span> حتى بدء دورة التحقق القادمة. 
+                كما أن محاولات التحايل على نظام التوثيق قد تؤدي إلى <span className="text-destructive font-medium">حظر الحساب نهائياً</span>. 
+                الكذب والتلاعب والتحايل هو بالضبط ما نسعى لرصده وفصله واستبعاده والتعريف بأنماطه.
+              </p>
+            </div>
           </div>
 
           {/* Current Status */}

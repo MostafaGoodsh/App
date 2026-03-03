@@ -113,12 +113,12 @@ const Auth = () => {
         }}
       >
         <div className="min-h-screen bg-background/90">
-          <section className="container mx-auto px-4 py-16 max-w-md">
-        <h1 className="font-playfair text-3xl md:text-5xl font-bold mb-6">
+          <section className="container mx-auto px-4 py-16 max-w-md" dir="rtl">
+        <h1 className="font-cairo text-3xl md:text-5xl font-bold mb-6 text-right">
           {mode === 'signin' ? 'تسجيل الدخول' : 'إنشاء حساب'}
         </h1>
 
-        <div className="mb-6 flex gap-3 bg-muted/50 p-1 rounded-lg">
+        <div className="mb-6 flex gap-3 bg-muted/50 p-1 rounded-lg font-cairo">
           <Button 
             variant={mode === 'signin' ? 'default' : 'ghost'} 
             onClick={() => setMode('signin')}
@@ -138,14 +138,14 @@ const Auth = () => {
         {mode === 'signin' ? (
           <form onSubmit={onSignIn} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Label htmlFor="email" className="font-cairo">البريد الإلكتروني</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required dir="ltr" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Label htmlFor="password" className="font-cairo">كلمة المرور</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required dir="ltr" />
             </div>
-            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full">
+            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full font-cairo">
               {isSubmitting ? 'جاري الدخول...' : 'دخول'}
             </Button>
             
@@ -164,7 +164,7 @@ const Auth = () => {
               size="lg" 
               onClick={onGoogleSignIn} 
               disabled={isSubmitting}
-              className="w-full"
+              className="w-full font-cairo"
             >
               <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -174,26 +174,78 @@ const Auth = () => {
               </svg>
               تسجيل الدخول بـ Google
             </Button>
+
+            {/* Telegram Login */}
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="lg" 
+              disabled={isSubmitting}
+              className="w-full font-cairo"
+              onClick={() => toast({ title: "قريباً", description: "تسجيل الدخول عبر تيليجرام سيكون متاحاً قريباً" })}
+            >
+              <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24" fill="#229ED9">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+              تسجيل الدخول عبر Telegram
+            </Button>
+
+            {/* Wallet Connect Options */}
+            <div className="space-y-2">
+              <p className="text-xs text-center text-muted-foreground font-cairo">أو الدخول بالمحفظة</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  disabled={isSubmitting}
+                  className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة Solana سيكون متاحاً قريباً" })}
+                >
+                  Solana
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  disabled={isSubmitting}
+                  className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة EVM سيكون متاحاً قريباً" })}
+                >
+                  EVM
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  disabled={isSubmitting}
+                  className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة TON سيكون متاحاً قريباً" })}
+                >
+                  TON
+                </Button>
+              </div>
+            </div>
           </form>
         ) : (
           <form onSubmit={onSignUp} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">الاسم الكامل</Label>
-              <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <div className="space-y-2">
+              <Label htmlFor="fullName" className="font-cairo">الاسم الكامل</Label>
+              <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} className="font-cairo" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">رقم الهاتف</Label>
-              <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+20 XXX XXX XXXX" />
+              <Label htmlFor="phone" className="font-cairo">رقم الهاتف</Label>
+              <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+20 XXX XXX XXXX" dir="ltr" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Label htmlFor="email" className="font-cairo">البريد الإلكتروني</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required dir="ltr" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Label htmlFor="password" className="font-cairo">كلمة المرور</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required dir="ltr" />
             </div>
-            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full">
+            <Button size="lg" type="submit" disabled={isSubmitting} className="w-full font-cairo">
               {isSubmitting ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
             </Button>
 
@@ -202,7 +254,7 @@ const Auth = () => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">أو</span>
+                <span className="bg-background px-2 text-muted-foreground font-cairo">أو</span>
               </div>
             </div>
 
@@ -212,7 +264,7 @@ const Auth = () => {
               size="lg" 
               onClick={onGoogleSignIn} 
               disabled={isSubmitting}
-              className="w-full"
+              className="w-full font-cairo"
             >
               <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -222,6 +274,40 @@ const Auth = () => {
               </svg>
               التسجيل بـ Google
             </Button>
+
+            {/* Telegram */}
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="lg" 
+              disabled={isSubmitting}
+              className="w-full font-cairo"
+              onClick={() => toast({ title: "قريباً", description: "التسجيل عبر تيليجرام سيكون متاحاً قريباً" })}
+            >
+              <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24" fill="#229ED9">
+                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              </svg>
+              التسجيل عبر Telegram
+            </Button>
+
+            {/* Wallet Connect */}
+            <div className="space-y-2">
+              <p className="text-xs text-center text-muted-foreground font-cairo">أو التسجيل بالمحفظة</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Button type="button" variant="outline" size="sm" disabled={isSubmitting} className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة Solana" })}>
+                  Solana
+                </Button>
+                <Button type="button" variant="outline" size="sm" disabled={isSubmitting} className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة EVM" })}>
+                  EVM
+                </Button>
+                <Button type="button" variant="outline" size="sm" disabled={isSubmitting} className="font-cairo text-xs"
+                  onClick={() => toast({ title: "قريباً", description: "ربط محفظة TON" })}>
+                  TON
+                </Button>
+              </div>
+            </div>
           </form>
         )}
           </section>

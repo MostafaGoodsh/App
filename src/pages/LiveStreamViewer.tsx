@@ -14,12 +14,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const GIFTS = [
-  { id: 'heart', emoji: '❤️', name: 'قلب', value: 1 },
-  { id: 'star', emoji: '⭐', name: 'نجمة', value: 5 },
-  { id: 'fire', emoji: '🔥', name: 'نار', value: 10 },
-  { id: 'diamond', emoji: '💎', name: 'ماسة', value: 50 },
-  { id: 'crown', emoji: '👑', name: 'تاج', value: 100 },
-  { id: 'rocket', emoji: '🚀', name: 'صاروخ', value: 200 },
+  { id: 'ankh', emoji: '☥', name: 'عنخ', value: 1 },
+  { id: 'eye_of_horus', emoji: '𓂀', name: 'عين حورس', value: 5 },
+  { id: 'was_scepter', emoji: '𓌀', name: 'صولجان واس', value: 10 },
+  { id: 'djed', emoji: '𓊽', name: 'عمود جد', value: 50 },
+  { id: 'scarab', emoji: '𓆣', name: 'جعران', value: 100 },
+  { id: 'pharaoh_crown', emoji: '𓋖', name: 'تاج فرعوني', value: 200 },
 ];
 
 // Format gift value with XP label

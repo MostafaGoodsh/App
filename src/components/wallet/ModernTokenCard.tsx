@@ -46,7 +46,7 @@ export const ModernTokenCard = ({
   };
 
   const getDisplaySymbol = (sym: string) => {
-    if (sym.toUpperCase() === 'MSRA') return '$MS-RA';
+    if (sym.toUpperCase() === 'MSRA') return '☥ $MS-RA';
     return sym;
   };
 
