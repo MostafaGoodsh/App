@@ -72,7 +72,7 @@ export const TotalMiningDisplay = () => {
         </div>
 
         <div className="mt-3 text-center">
-          <span className="text-[10px] text-primary/60 font-playfair" dir="ltr">$MS-RA</span>
+          <span className="text-[10px] text-primary/60 font-playfair" dir="ltr">☥ $MS-RA</span>
         </div>
       </CardContent>
     </Card>
