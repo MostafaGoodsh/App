@@ -395,6 +395,51 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          badge_color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          icon_emoji: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_en: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          badge_color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          icon_emoji?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_en?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          badge_color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          icon_emoji?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_en?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       callout_card_content: {
         Row: {
           contact_button_text: string | null
@@ -2702,6 +2747,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_daily_task_completions: {
         Row: {
