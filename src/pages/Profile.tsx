@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { 
   User, 
   Edit, 
@@ -12,11 +13,16 @@ import {
   Activity,
   Calendar,
   MapPin,
-  Languages
+  Languages,
+  Wallet,
+  Star,
+  ClipboardList,
+  ExternalLink
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import StreakDisplay from "@/components/engagement/StreakDisplay";
 import DailyTasksList from "@/components/engagement/DailyTasksList";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -47,6 +53,64 @@ export default function Profile() {
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
   const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
+  const [xpBalance, setXpBalance] = useState(0);
+  const [connectedWallets, setConnectedWallets] = useState<{solana?: string; ton?: string; evm?: string}>({});
+  const [totalPoints, setTotalPoints] = useState(0);
+
+  // Fetch extra profile data
+  useEffect(() => {
+    const targetUserId = viewUserId || user?.id;
+    if (!targetUserId) return;
+
+    // Fetch completed surveys
+    const fetchSurveys = async () => {
+      const { data } = await supabase
+        .from('survey_responses' as any)
+        .select('id, survey_id, created_at, surveys:survey_id(title)')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false });
+      if (data) setCompletedSurveys(data);
+    };
+
+    // Fetch XP / points
+    const fetchPoints = async () => {
+      const { data } = await supabase
+        .from('user_points_balance')
+        .select('total_points')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+      if (data) setTotalPoints(data.total_points || 0);
+
+      // Fetch internal XP balance
+      const { data: balData } = await supabase
+        .from('internal_wallet_balances')
+        .select('balance, internal_tokens!inner(symbol)')
+        .eq('user_id', targetUserId);
+      if (balData) {
+        const xp = balData.find((b: any) => b.internal_tokens?.symbol === 'XP');
+        if (xp) setXpBalance(xp.balance);
+      }
+    };
+
+    // Fetch connected wallets from profile
+    const fetchWallets = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('solana_address')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+      if (data) {
+        setConnectedWallets({
+          solana: data.solana_address || undefined,
+        });
+      }
+    };
+
+    fetchSurveys();
+    fetchPoints();
+    fetchWallets();
+  }, [viewUserId, user?.id]);
 
   if (loading || statsLoading) {
     return (
