@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home } from "lucide-react";
+import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff } from "lucide-react";
 
 interface HomePageCard {
   id: string;
@@ -257,54 +257,76 @@ export default function HomePageCardsManagement() {
     );
   }
 
+  const handleToggleVisibility = async (card: HomePageCard) => {
+    try {
+      const { error } = await supabase
+        .from('home_page_cards')
+        .update({ is_active: !card.is_active })
+        .eq('id', card.id);
+      
+      if (error) throw error;
+      
+      toast({ title: card.is_active ? "تم إخفاء البطاقة" : "تم إظهار البطاقة" });
+      await fetchCards();
+    } catch (error) {
+      toast({ title: "خطأ", description: "فشل في تحديث الحالة", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 font-cairo text-base sm:text-lg">
             <Home className="h-5 w-5" />
             إدارة بطاقات الصفحة الرئيسية
           </CardTitle>
-          <Button onClick={openCreateDialog}>
-            <Plus className="w-4 h-4 mr-2" />
-            إضافة بطاقة جديدة
+          <Button onClick={openCreateDialog} size="sm">
+            <Plus className="w-4 h-4 ml-1" />
+            إضافة بطاقة
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الترتيب</TableHead>
-                <TableHead>العنوان</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>الإجراءات</TableHead>
+                <TableHead className="text-xs">الترتيب</TableHead>
+                <TableHead className="text-xs">العنوان</TableHead>
+                <TableHead className="text-xs hidden sm:table-cell">النوع</TableHead>
+                <TableHead className="text-xs">الحالة</TableHead>
+                <TableHead className="text-xs">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {cards.map((card, index) => (
                 <TableRow key={card.id}>
-                  <TableCell>{card.display_order}</TableCell>
-                  <TableCell>{card.title}</TableCell>
-                  <TableCell>{card.card_type}</TableCell>
+                  <TableCell className="text-xs">{card.display_order}</TableCell>
+                  <TableCell className="text-xs font-cairo max-w-[120px] truncate">{card.title}</TableCell>
+                  <TableCell className="text-xs hidden sm:table-cell">{card.card_type}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${card.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                      {card.is_active ? 'نشط' : 'غير نشط'}
-                    </span>
+                    <Button
+                      size="sm"
+                      variant={card.is_active ? "default" : "secondary"}
+                      className="h-7 px-2 text-xs"
+                      onClick={() => handleToggleVisibility(card)}
+                    >
+                      {card.is_active ? <Eye className="h-3 w-3 ml-1" /> : <EyeOff className="h-3 w-3 ml-1" />}
+                      {card.is_active ? 'ظاهر' : 'مخفي'}
+                    </Button>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="ghost" onClick={() => handleMoveUp(card)} disabled={index === 0}>
-                        <ArrowUp className="h-4 w-4" />
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleMoveUp(card)} disabled={index === 0}>
+                        <ArrowUp className="h-3 w-3" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleMoveDown(card)} disabled={index === cards.length - 1}>
-                        <ArrowDown className="h-4 w-4" />
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleMoveDown(card)} disabled={index === cards.length - 1}>
+                        <ArrowDown className="h-3 w-3" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => openEditDialog(card)}>
-                        <Edit className="h-4 w-4" />
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEditDialog(card)}>
+                        <Edit className="h-3 w-3" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(card.id)}>
-                        <Trash2 className="h-4 w-4" />
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDelete(card.id)}>
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>
