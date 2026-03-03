@@ -208,4 +208,21 @@ All colors MUST be HSL.
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Admin tables mobile responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    table {
+      font-size: 0.8rem;
+    }
+    
+    table th,
+    table td {
+      padding: 0.5rem 0.35rem;
+    }
+  }
 }
