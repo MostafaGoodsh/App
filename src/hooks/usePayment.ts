@@ -132,6 +132,14 @@ export const usePayment = () => {
         icon: '💳',
         color: 'from-blue-500 to-blue-600',
         bgImage: cardImg
+      },
+      {
+        id: 'crypto',
+        name: 'عملات رقمية',
+        name_en: 'Cryptocurrency',
+        icon: '₿',
+        color: 'from-amber-500 to-yellow-600',
+        bgImage: '/lovable-uploads/egyptian-golden-snake-bg.jpg'
       }
     ];
   }, []);

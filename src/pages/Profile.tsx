@@ -57,6 +57,7 @@ export default function Profile() {
   const [xpBalance, setXpBalance] = useState(0);
   const [connectedWallets, setConnectedWallets] = useState<{solana?: string; ton?: string; evm?: string}>({});
   const [totalPoints, setTotalPoints] = useState(0);
+  const [userBadges, setUserBadges] = useState<any[]>([]);
 
   // Fetch extra profile data
   useEffect(() => {
@@ -107,9 +108,19 @@ export default function Profile() {
       }
     };
 
+    // Fetch user badges
+    const fetchBadges = async () => {
+      const { data } = await supabase
+        .from('user_badges')
+        .select('*, badges(name, icon_emoji, badge_color)')
+        .eq('user_id', targetUserId);
+      if (data) setUserBadges(data);
+    };
+
     fetchSurveys();
     fetchPoints();
     fetchWallets();
+    fetchBadges();
   }, [viewUserId, user?.id]);
 
   if (loading || statsLoading) {
