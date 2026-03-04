@@ -155,7 +155,7 @@ export default function BadgesAdmin() {
             <div className="flex justify-center py-8"><Loader2 className="animate-spin" /></div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[640px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-right font-cairo">الأيقونة</TableHead>
@@ -191,7 +191,7 @@ export default function BadgesAdmin() {
         <CardHeader><CardTitle className="font-cairo">البادجات الممنوحة</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right font-cairo">البادج</TableHead>
