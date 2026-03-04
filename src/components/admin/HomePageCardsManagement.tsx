@@ -191,7 +191,8 @@ export default function HomePageCardsManagement() {
         page_content_en: editingCard.page_content_en || null,
         external_widget_url: editingCard.external_widget_url || null,
         widget_type: editingCard.widget_type || null,
-        widget_config: editingCard.widget_config || {}
+        widget_config: editingCard.widget_config || {},
+        is_coming_soon: editingCard.is_coming_soon || false
       };
 
       if (isNewCard) {
