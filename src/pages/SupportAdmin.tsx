@@ -178,15 +178,8 @@ const SupportAdmin = () => {
         <meta name="description" content="إدارة رسائل الدعم والرد على المستخدمين" />
       </Helmet>
 
-      <div
-        className="min-h-screen overflow-x-hidden px-3 py-4 sm:px-4 sm:py-6"
-        style={{
-          backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        <div className="mx-auto w-full max-w-6xl space-y-6 rounded-none bg-background/90 p-3 sm:p-6">
+      <div className="w-full max-w-[100vw] overflow-x-hidden px-2 py-3 sm:px-4 sm:py-6">
+        <div className="mx-auto w-full max-w-6xl space-y-6 p-3 sm:p-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold lang-ar">إدارة رسائل الدعم</h1>
             <h2 className="text-2xl font-semibold lang-en">Support Messages Management</h2>
