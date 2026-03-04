@@ -80,7 +80,7 @@ export default function VerifiedAccountsAdmin() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 arabic-content">
+      <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-6 arabic-content">
         <Card>
           <CardContent className="pt-6">
             <p className="text-center arabic-text">جاري التحميل...</p>
@@ -92,16 +92,14 @@ export default function VerifiedAccountsAdmin() {
 
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen overflow-x-hidden px-3 py-4 sm:px-4 sm:py-6"
       style={{
         backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundPosition: 'center'
       }}
     >
-      <div className="min-h-screen bg-background/90">
-        <div className="container mx-auto p-6 arabic-content">
+      <div className="mx-auto w-full max-w-7xl rounded-none bg-background/90 p-3 sm:p-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 arabic-text">

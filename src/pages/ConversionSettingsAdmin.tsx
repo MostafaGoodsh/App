@@ -2,7 +2,7 @@ import { ConversionSettingsManagement } from "@/components/admin/ConversionSetti
 
 const ConversionSettingsAdmin = () => {
   return (
-    <div className="container mx-auto p-6">
+    <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">إدارة إعدادات التحويل</h1>
