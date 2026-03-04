@@ -630,7 +630,7 @@ const LiveStreamBroadcast = () => {
             {/* Control buttons */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
               <Button
-                onClick={isCameraOn ? stopCamera : startCamera}
+                onClick={isCameraOn ? stopCamera : () => startCamera()}
                 variant={isCameraOn ? "default" : "outline"}
                 disabled={isStreaming || isScreenSharing}
                 className="w-full"
