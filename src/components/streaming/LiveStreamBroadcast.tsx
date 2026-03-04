@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize, Copy, Heart, MessageSquare, Gift } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Monitor, MonitorOff, Play, Square, Users, Maximize, Minimize, Copy, Heart, MessageSquare, Gift, SwitchCamera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WebRTCBroadcaster } from "@/utils/webrtc";
@@ -46,6 +46,7 @@ const LiveStreamBroadcast = () => {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [streamTitle, setStreamTitle] = useState("");
   const [viewerCount, setViewerCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -254,13 +255,14 @@ const LiveStreamBroadcast = () => {
     }
   };
 
-  const startCamera = async () => {
+  const startCamera = async (mode?: 'user' | 'environment') => {
     try {
+      const currentMode = mode || facingMode;
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 1280 },
           height: { ideal: 720 },
-          facingMode: 'user'
+          facingMode: currentMode
         },
         audio: isMicOn
       });
@@ -295,6 +297,20 @@ const LiveStreamBroadcast = () => {
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
+  };
+
+  const switchCamera = async () => {
+    const newMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newMode);
+    if (isCameraOn) {
+      // Stop current camera
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      // Start with new facing mode
+      await startCamera(newMode);
+    }
   };
 
   const toggleMicrophone = async () => {
@@ -630,6 +646,16 @@ const LiveStreamBroadcast = () => {
               >
                 {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
                 {isMicOn ? "كتم" : "الصوت"}
+              </Button>
+
+              <Button
+                onClick={switchCamera}
+                variant="outline"
+                disabled={!isCameraOn || isStreaming}
+                className="w-full"
+              >
+                <SwitchCamera className="w-4 h-4 ml-2" />
+                {facingMode === 'user' ? "خلفية" : "أمامية"}
               </Button>
 
               <Button
