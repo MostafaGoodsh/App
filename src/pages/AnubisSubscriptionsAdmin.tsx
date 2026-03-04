@@ -113,7 +113,7 @@ export default function AnubisSubscriptionsAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -125,7 +125,7 @@ export default function AnubisSubscriptionsAdmin() {
         <title>إدارة اشتراكات أنوبيس - لوحة التحكم</title>
       </Helmet>
 
-      <div className="container mx-auto p-6 max-w-7xl">
+      <div className="w-full max-w-7xl mx-auto px-2 py-3 sm:px-4 sm:py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">إدارة اشتراكات أنوبيس</h1>
           <p className="text-muted-foreground mt-2">

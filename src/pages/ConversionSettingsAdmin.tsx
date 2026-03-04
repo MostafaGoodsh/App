@@ -1,8 +1,9 @@
 import { ConversionSettingsManagement } from "@/components/admin/ConversionSettingsManagement";
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 const ConversionSettingsAdmin = () => {
   return (
-    <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+    <AdminPageShell withContainer>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">إدارة إعدادات التحويل</h1>
@@ -10,10 +11,9 @@ const ConversionSettingsAdmin = () => {
             تكوين نظام تحويل النقاط إلى DevNet tokens
           </p>
         </div>
-        
         <ConversionSettingsManagement />
       </div>
-    </div>
+    </AdminPageShell>
   );
 };
 

@@ -148,11 +148,11 @@ const LiveStreamApprovalsAdmin = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
+    return <div className="flex justify-center items-center min-h-[50vh]">جاري التحميل...</div>;
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="w-full max-w-[100vw] overflow-x-hidden px-2 py-3 sm:px-4 sm:py-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-3xl font-cairo">إدارة طلبات البث المباشر</CardTitle>

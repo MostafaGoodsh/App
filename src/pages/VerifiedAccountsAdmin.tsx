@@ -7,6 +7,7 @@ import { BadgeCheck, X, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 interface Profile {
   id: string;
@@ -80,107 +81,98 @@ export default function VerifiedAccountsAdmin() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 sm:py-6 arabic-content">
+      <AdminPageShell withContainer>
         <Card>
           <CardContent className="pt-6">
             <p className="text-center arabic-text">جاري التحميل...</p>
           </CardContent>
         </Card>
-      </div>
+      </AdminPageShell>
     );
   }
 
   return (
-    <div 
-      className="min-h-screen overflow-x-hidden px-3 py-4 sm:px-4 sm:py-6"
-      style={{
-        backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
-      <div className="mx-auto w-full max-w-7xl rounded-none bg-background/90 p-3 sm:p-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 arabic-text">
-                <BadgeCheck className="w-6 h-6" />
-                إدارة الحسابات المعتمدة
-              </CardTitle>
-              <CardDescription className="arabic-text">
-                اعتماد أو إلغاء اعتماد حسابات المستخدمين
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {profiles.map((profile) => (
-                  <div
-                    key={profile.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={profile.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {profile.full_name?.charAt(0) || <User className="w-6 h-6" />}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold arabic-text">
-                            {profile.full_name || 'بدون اسم'}
-                          </h3>
-                          {profile.is_verified && (
-                            <Badge variant="default" className="flex items-center gap-1">
-                              <BadgeCheck className="w-3 h-3" />
-                              <span className="arabic-text">معتمد</span>
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{profile.email}</p>
-                        <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                          <span>المتابعون: {profile.followers_count || 0}</span>
-                          <span>يتابع: {profile.following_count || 0}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      {profile.is_verified ? (
-                        <Button
-                          onClick={() => unverifyProfile(profile.user_id)}
-                          variant="destructive"
-                          size="sm"
-                          className="arabic-text"
-                        >
-                          <X className="w-4 h-4 ml-2" />
-                          إلغاء الاعتماد
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => verifyProfile(profile.user_id)}
-                          variant="default"
-                          size="sm"
-                          className="arabic-text"
-                        >
-                          <BadgeCheck className="w-4 h-4 ml-2" />
-                          اعتماد الحساب
-                        </Button>
+    <AdminPageShell withContainer>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 arabic-text">
+            <BadgeCheck className="w-6 h-6" />
+            إدارة الحسابات المعتمدة
+          </CardTitle>
+          <CardDescription className="arabic-text">
+            اعتماد أو إلغاء اعتماد حسابات المستخدمين
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {profiles.map((profile) => (
+              <div
+                key={profile.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={profile.avatar_url || undefined} />
+                    <AvatarFallback>
+                      {profile.full_name?.charAt(0) || <User className="w-6 h-6" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold arabic-text">
+                        {profile.full_name || 'بدون اسم'}
+                      </h3>
+                      {profile.is_verified && (
+                        <Badge variant="default" className="flex items-center gap-1">
+                          <BadgeCheck className="w-3 h-3" />
+                          <span className="arabic-text">معتمد</span>
+                        </Badge>
                       )}
                     </div>
+                    <p className="text-sm text-muted-foreground break-all">{profile.email}</p>
+                    <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                      <span>المتابعون: {profile.followers_count || 0}</span>
+                      <span>يتابع: {profile.following_count || 0}</span>
+                    </div>
                   </div>
-                ))}
+                </div>
 
-                {profiles.length === 0 && (
-                  <div className="text-center py-12">
-                    <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground arabic-text">لا توجد حسابات</p>
-                  </div>
-                )}
+                <div className="flex gap-2 self-end sm:self-auto">
+                  {profile.is_verified ? (
+                    <Button
+                      onClick={() => unverifyProfile(profile.user_id)}
+                      variant="destructive"
+                      size="sm"
+                      className="arabic-text"
+                    >
+                      <X className="w-4 h-4 ml-2" />
+                      إلغاء الاعتماد
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => verifyProfile(profile.user_id)}
+                      variant="default"
+                      size="sm"
+                      className="arabic-text"
+                    >
+                      <BadgeCheck className="w-4 h-4 ml-2" />
+                      اعتماد الحساب
+                    </Button>
+                  )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-      </div>
-    </div>
+            ))}
+
+            {profiles.length === 0 && (
+              <div className="text-center py-12">
+                <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground arabic-text">لا توجد حسابات</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </AdminPageShell>
   );
 }

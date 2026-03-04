@@ -1,13 +1,11 @@
 import ActiveCalloutManagement from "@/components/admin/ActiveCalloutManagement";
-import RequireAdmin from "@/components/auth/RequireAdmin";
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 const ActiveCalloutAdmin = () => {
   return (
-    <RequireAdmin>
-      <div className="container mx-auto py-8 px-4">
-        <ActiveCalloutManagement />
-      </div>
-    </RequireAdmin>
+    <AdminPageShell withContainer>
+      <ActiveCalloutManagement />
+    </AdminPageShell>
   );
 };
 

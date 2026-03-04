@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Edit, Coins } from "lucide-react";
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 interface Token {
   id: string;
@@ -61,8 +62,6 @@ const InternalTokensAdmin = () => {
         toast({ title: 'تم التحديث' });
       } else {
         await supabase.from('internal_tokens').insert(tokenData);
-        
-        // If contract address provided, add to custom_tokens
         if (form.contract_address) {
           await supabase.from('custom_tokens').insert({
             contract_address: form.contract_address,
@@ -73,7 +72,6 @@ const InternalTokensAdmin = () => {
             is_verified: true,
           });
         }
-        
         toast({ title: 'تم الإضافة' });
       }
 
@@ -109,7 +107,7 @@ const InternalTokensAdmin = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <AdminPageShell withContainer containerClassName="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">إدارة العملات الداخلية</h1>
@@ -183,25 +181,23 @@ const InternalTokensAdmin = () => {
             </div>
             
             {!editToken && (
-              <>
-                <div className="border-t pt-4">
-                  <p className="text-sm font-medium mb-3">عقد العملة (اختياري)</p>
-                  <div>
-                    <Label>عنوان العقد</Label>
-                    <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
-                  </div>
-                  <div className="mt-2">
-                    <Label>الشبكة</Label>
-                    <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
-                      <option value="solana">Solana</option>
-                      <option value="ethereum">Ethereum</option>
-                      <option value="polygon">Polygon</option>
-                      <option value="bsc">BSC</option>
-                      <option value="ton">TON</option>
-                    </select>
-                  </div>
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium mb-3">عقد العملة (اختياري)</p>
+                <div>
+                  <Label>عنوان العقد</Label>
+                  <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
                 </div>
-              </>
+                <div className="mt-2">
+                  <Label>الشبكة</Label>
+                  <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
+                    <option value="solana">Solana</option>
+                    <option value="ethereum">Ethereum</option>
+                    <option value="polygon">Polygon</option>
+                    <option value="bsc">BSC</option>
+                    <option value="ton">TON</option>
+                  </select>
+                </div>
+              </div>
             )}
 
             <div className="flex items-center gap-4">
@@ -221,7 +217,7 @@ const InternalTokensAdmin = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </AdminPageShell>
   );
 };
 
