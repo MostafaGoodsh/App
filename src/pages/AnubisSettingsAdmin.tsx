@@ -81,7 +81,7 @@ export default function AnubisSettingsAdmin() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -93,7 +93,7 @@ export default function AnubisSettingsAdmin() {
         <title>إعدادات خزانة أنوبيس - لوحة التحكم</title>
       </Helmet>
 
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="w-full max-w-4xl mx-auto px-2 py-3 sm:px-4 sm:py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Settings className="h-8 w-8" />
