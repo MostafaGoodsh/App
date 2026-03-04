@@ -830,6 +830,7 @@ export type Database = {
           icon_url: string | null
           id: string
           is_active: boolean | null
+          is_coming_soon: boolean | null
           page_content: string | null
           page_content_en: string | null
           route_path: string | null
@@ -860,6 +861,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_coming_soon?: boolean | null
           page_content?: string | null
           page_content_en?: string | null
           route_path?: string | null
@@ -890,6 +892,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_coming_soon?: boolean | null
           page_content?: string | null
           page_content_en?: string | null
           route_path?: string | null
@@ -2353,6 +2356,7 @@ export type Database = {
           icon_url: string | null
           id: string
           is_active: boolean | null
+          is_coming_soon: boolean | null
           page_background: string | null
           page_content: string | null
           page_content_en: string | null
@@ -2385,6 +2389,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_coming_soon?: boolean | null
           page_background?: string | null
           page_content?: string | null
           page_content_en?: string | null
@@ -2417,6 +2422,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           is_active?: boolean | null
+          is_coming_soon?: boolean | null
           page_background?: string | null
           page_content?: string | null
           page_content_en?: string | null
