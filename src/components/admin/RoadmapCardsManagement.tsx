@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Save, X, Upload, ArrowUp, ArrowDown, Link, CreditCard, Settings2, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Upload, ArrowUp, ArrowDown, Link, CreditCard, Settings2, ExternalLink, Clock } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -94,6 +94,7 @@ interface RoadmapCard {
   external_widget_url?: string;
   widget_type?: string;
   widget_config?: WidgetConfig;
+  is_coming_soon?: boolean;
 }
 
 const RoadmapCardsManagement = () => {
@@ -1092,10 +1093,11 @@ const RoadmapCardsManagement = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>العنوان</TableHead>
+             <TableHead>العنوان</TableHead>
             <TableHead>Slug</TableHead>
             <TableHead>الترتيب</TableHead>
             <TableHead>الحالة</TableHead>
+            <TableHead>قريباً</TableHead>
             <TableHead className="text-left">الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
@@ -1119,6 +1121,29 @@ const RoadmapCardsManagement = () => {
                 ) : (
                   <span className="text-gray-500">غير نشط</span>
                 )}
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="sm"
+                  variant={card.is_coming_soon ? "destructive" : "outline"}
+                  className="h-7 px-2 text-xs"
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase
+                        .from('roadmap_cards')
+                        .update({ is_coming_soon: !card.is_coming_soon } as any)
+                        .eq('id', card.id);
+                      if (error) throw error;
+                      toast({ title: card.is_coming_soon ? "تم إلغاء التعليق" : "تم تعليق الكارت" });
+                      fetchCards();
+                    } catch (error) {
+                      toast({ title: "خطأ", description: "فشل في التحديث", variant: "destructive" });
+                    }
+                  }}
+                >
+                  <Clock className="h-3 w-3 ml-1" />
+                  {card.is_coming_soon ? 'معلّق' : '-'}
+                </Button>
               </TableCell>
               <TableCell className="text-left">
                 <div className="flex gap-2 justify-end">
