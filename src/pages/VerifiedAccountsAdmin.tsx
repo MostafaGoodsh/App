@@ -180,7 +180,6 @@ export default function VerifiedAccountsAdmin() {
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
     </div>
   );
