@@ -12,6 +12,7 @@ interface RoadmapCardData {
   background_gradient: string;
   slug: string;
   display_order: number;
+  is_coming_soon?: boolean;
 }
 
 const RoadmapCardsGrid = () => {
@@ -73,6 +74,7 @@ const RoadmapCardsGrid = () => {
             descriptionEn={card.description_en}
             gradient={card.background_gradient}
             slug={card.slug}
+            isComingSoon={card.is_coming_soon || false}
           />
         ))}
       </div>
