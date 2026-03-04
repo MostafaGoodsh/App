@@ -26,10 +26,10 @@ export default function AdminPageShell({
 
   return (
     <div
-      className="min-h-screen w-full overflow-x-hidden bg-cover bg-center md:bg-fixed"
+      className="min-h-[calc(100vh-4rem)] w-full max-w-[100vw] overflow-x-hidden bg-cover bg-center"
       style={{ backgroundImage: `url('${backgroundImage}')` }}
     >
-      <div className={cn("min-h-screen w-full overflow-x-hidden bg-background/90 px-3 py-4 sm:px-4 sm:py-6", innerClassName)}>
+      <div className={cn("min-h-[calc(100vh-4rem)] w-full max-w-[100vw] overflow-x-hidden bg-background/90 px-2 py-3 sm:px-4 sm:py-6", innerClassName)}>
         {content}
       </div>
     </div>

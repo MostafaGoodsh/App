@@ -1,12 +1,10 @@
-import RequireAdmin from "@/components/auth/RequireAdmin";
 import HomePageCardsManagement from "@/components/admin/HomePageCardsManagement";
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 export default function HomePageCardsAdmin() {
   return (
-    <RequireAdmin>
-      <div className="container mx-auto p-6">
-        <HomePageCardsManagement />
-      </div>
-    </RequireAdmin>
+    <AdminPageShell withContainer>
+      <HomePageCardsManagement />
+    </AdminPageShell>
   );
 }

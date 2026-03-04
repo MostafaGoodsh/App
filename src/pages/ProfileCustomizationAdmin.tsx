@@ -1,12 +1,10 @@
-import RequireAdmin from "@/components/auth/RequireAdmin";
 import ProfileCustomizationManagement from "@/components/admin/ProfileCustomizationManagement";
+import AdminPageShell from "@/components/admin/AdminPageShell";
 
 export default function ProfileCustomizationAdmin() {
   return (
-    <RequireAdmin>
-      <div className="container mx-auto p-6">
-        <ProfileCustomizationManagement />
-      </div>
-    </RequireAdmin>
+    <AdminPageShell withContainer>
+      <ProfileCustomizationManagement />
+    </AdminPageShell>
   );
 }
