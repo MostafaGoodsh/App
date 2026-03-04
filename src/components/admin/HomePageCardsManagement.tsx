@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff } from "lucide-react";
+import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff, Clock } from "lucide-react";
 
 interface HomePageCard {
   id: string;
@@ -38,6 +38,7 @@ interface HomePageCard {
   external_widget_url: string | null;
   widget_type: string | null;
   widget_config: any;
+  is_coming_soon: boolean;
 }
 
 export default function HomePageCardsManagement() {
@@ -137,7 +138,8 @@ export default function HomePageCardsManagement() {
       page_content_en: '',
       external_widget_url: '',
       widget_type: 'none',
-      widget_config: {}
+      widget_config: {},
+      is_coming_soon: false
     });
     setDialogOpen(true);
   };
@@ -294,6 +296,7 @@ export default function HomePageCardsManagement() {
                 <TableHead className="text-xs">العنوان</TableHead>
                 <TableHead className="text-xs hidden sm:table-cell">النوع</TableHead>
                 <TableHead className="text-xs">الحالة</TableHead>
+                <TableHead className="text-xs">قريباً</TableHead>
                 <TableHead className="text-xs">الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
@@ -312,6 +315,29 @@ export default function HomePageCardsManagement() {
                     >
                       {card.is_active ? <Eye className="h-3 w-3 ml-1" /> : <EyeOff className="h-3 w-3 ml-1" />}
                       {card.is_active ? 'ظاهر' : 'مخفي'}
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      size="sm"
+                      variant={card.is_coming_soon ? "destructive" : "outline"}
+                      className="h-7 px-2 text-xs"
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from('home_page_cards')
+                            .update({ is_coming_soon: !card.is_coming_soon })
+                            .eq('id', card.id);
+                          if (error) throw error;
+                          toast({ title: card.is_coming_soon ? "تم إلغاء التعليق" : "تم تعليق البطاقة" });
+                          await fetchCards();
+                        } catch (error) {
+                          toast({ title: "خطأ", description: "فشل في التحديث", variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Clock className="h-3 w-3 ml-1" />
+                      {card.is_coming_soon ? 'معلّق' : '-'}
                     </Button>
                   </TableCell>
                   <TableCell>
