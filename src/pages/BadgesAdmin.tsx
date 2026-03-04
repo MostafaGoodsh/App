@@ -131,17 +131,17 @@ export default function BadgesAdmin() {
   const EMOJI_OPTIONS = ['⭐', '🏆', '👑', '💎', '🔥', '⚡', '🎖️', '🛡️', '☥', '𓂀', '𓌀', '𓊽'];
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 space-y-6" dir="rtl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold font-cairo flex items-center gap-2">
-          <Award className="w-6 h-6 text-primary" />
+    <div className="container max-w-4xl mx-auto px-3 sm:px-4 py-4 space-y-6 overflow-x-hidden" dir="rtl">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold font-cairo flex items-center gap-2 leading-tight">
+          <Award className="w-6 h-6 text-primary shrink-0" />
           إدارة البادجات
         </h1>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowGrantDialog(true)} variant="outline" size="sm">
+        <div className="flex w-full sm:w-auto gap-2">
+          <Button onClick={() => setShowGrantDialog(true)} variant="outline" size="sm" className="flex-1 sm:flex-none">
             <UserPlus className="w-4 h-4 ml-1" /> منح بادج
           </Button>
-          <Button onClick={() => setShowCreateDialog(true)} size="sm">
+          <Button onClick={() => setShowCreateDialog(true)} size="sm" className="flex-1 sm:flex-none">
             <Plus className="w-4 h-4 ml-1" /> بادج جديد
           </Button>
         </div>
@@ -155,7 +155,7 @@ export default function BadgesAdmin() {
             <div className="flex justify-center py-8"><Loader2 className="animate-spin" /></div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[640px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-right font-cairo">الأيقونة</TableHead>
@@ -191,7 +191,7 @@ export default function BadgesAdmin() {
         <CardHeader><CardTitle className="font-cairo">البادجات الممنوحة</CardTitle></CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right font-cairo">البادج</TableHead>
