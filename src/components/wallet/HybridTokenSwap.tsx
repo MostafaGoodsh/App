@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
-import { ArrowUpDown, Zap, Calculator } from 'lucide-react';
+import { ArrowUpDown, Zap, Calculator, FileText } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { TokenContractManager } from './TokenContractManager';
+import msraIcon from '@/assets/msra-token-icon.jpg';
 
 export const HybridTokenSwap = () => {
   const { 
@@ -20,6 +22,13 @@ export const HybridTokenSwap = () => {
   const [toToken, setToToken] = useState('');
   const [amount, setAmount] = useState('');
   const [isSwapping, setIsSwapping] = useState(false);
+  const [showContractManager, setShowContractManager] = useState(false);
+
+  // Filter: only $MS-RA and network tokens (exclude XP and ANUBIS_ tokens)
+  const swappableTokens = tokens.filter(t => 
+    t.symbol === '$MS-RA' || 
+    (!t.symbol.startsWith('ANUBIS_') && t.symbol !== 'XP')
+  );
 
   const fromTokenBalance = getTokenBalance(fromToken);
   const exchangeRate = getExchangeRate(fromToken, toToken);
@@ -28,10 +37,7 @@ export const HybridTokenSwap = () => {
     : '0';
 
   const handleSwap = async () => {
-    if (!fromToken || !toToken || !amount || Number(amount) <= 0) {
-      return;
-    }
-
+    if (!fromToken || !toToken || !amount || Number(amount) <= 0) return;
     try {
       setIsSwapping(true);
       await swapTokens(fromToken, toToken, Number(amount));
@@ -43,7 +49,7 @@ export const HybridTokenSwap = () => {
     }
   };
 
-  const swapTokens_ui = () => {
+  const swapDirection = () => {
     const temp = fromToken;
     setFromToken(toToken);
     setToToken(temp);
@@ -57,40 +63,51 @@ export const HybridTokenSwap = () => {
     Number(amount) > 0 && Number(amount) <= fromTokenBalance &&
     fromToken !== toToken;
 
-  return (
-    <Card className="w-full max-w-full overflow-hidden border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-500" />
-          <div>
-            <span>تبديل سريع</span>
-            <span className="text-xs text-muted-foreground/70 block font-normal" dir="ltr">Quick Swap</span>
-          </div>
-        </CardTitle>
-        <CardDescription>
-          تبديل فوري بين العملات الداخلية بدون رسوم
-          <span className="text-xs block opacity-70" dir="ltr">Instant swap between internal tokens - No fees</span>
-        </CardDescription>
-      </CardHeader>
+  const getTokenIcon = (symbol: string) => {
+    if (symbol === '$MS-RA') {
+      return <img src={msraIcon} alt="$MS-RA" className="w-6 h-6 rounded-full object-cover" />;
+    }
+    return (
+      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-[10px] font-bold">
+        {symbol.replace('$', '').slice(0, 2)}
+      </div>
+    );
+  };
 
-      <CardContent className="space-y-6">
-        {/* العملة المرسلة */}
-        <div className="space-y-2">
-          <Label>من</Label>
+  return (
+    <div className="space-y-4" dir="rtl">
+      <Card className="w-full max-w-full overflow-hidden border-primary/20">
+        <CardHeader className="text-right">
+          <CardTitle className="flex items-center gap-2 font-cairo">
+            <Zap className="w-5 h-5 text-primary" />
+            <div>
+              <span className="font-cairo">تبديل سريع</span>
+              <span className="text-xs text-muted-foreground/70 block font-normal" dir="ltr">Quick Swap</span>
+            </div>
+          </CardTitle>
+          <CardDescription className="font-cairo text-right">
+            تبديل فوري بين عملة المنصة وعملات الشبكة
+            <span className="text-xs block opacity-70" dir="ltr">Swap platform token with network tokens</span>
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-5">
+          {/* من - From */}
           <div className="space-y-2">
+            <Label className="font-cairo text-sm">
+              من <span className="text-xs text-muted-foreground opacity-70">From</span>
+            </Label>
             <Select value={fromToken} onValueChange={setFromToken}>
-              <SelectTrigger>
-                <SelectValue placeholder="اختر العملة" />
+              <SelectTrigger className="font-cairo text-right" dir="rtl">
+                <SelectValue placeholder="اختر العملة | Select token" />
               </SelectTrigger>
-              <SelectContent>
-                {tokens.map((token) => (
+              <SelectContent dir="rtl">
+                {swappableTokens.map((token) => (
                   <SelectItem key={token.symbol} value={token.symbol}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
-                        {token.symbol.slice(0, 2)}
-                      </div>
+                    <div className="flex items-center gap-2 font-cairo">
+                      {getTokenIcon(token.symbol)}
                       <span>{token.name}</span>
-                      <span className="text-muted-foreground">({token.symbol})</span>
+                      <span className="text-muted-foreground text-xs" dir="ltr">({token.symbol})</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -103,112 +120,139 @@ export const HybridTokenSwap = () => {
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="pr-16"
+                className="text-left"
+                dir="ltr"
               />
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute left-2 top-1/2 -translate-y-1/2 h-6 px-2 text-xs"
+                className="absolute left-2 top-1/2 -translate-y-1/2 h-6 px-2 text-xs font-cairo"
                 onClick={setMaxAmount}
                 disabled={!fromToken}
               >
-                الكل
+                الكل <span className="text-[10px] opacity-70 mr-1">Max</span>
               </Button>
             </div>
             
             {fromToken && (
-              <div className="text-sm text-muted-foreground">
-                الرصيد المتاح: {fromTokenBalance.toLocaleString('ar-SA', { maximumFractionDigits: 4 })} {fromToken}
+              <div className="text-sm text-muted-foreground font-cairo text-right">
+                الرصيد <span className="text-[10px] opacity-70">Balance</span>: {' '}
+                <span dir="ltr" className="font-mono">
+                  {fromTokenBalance.toLocaleString('en', { maximumFractionDigits: 4 })}
+                </span>{' '}
+                <span dir="ltr">{fromToken}</span>
               </div>
             )}
           </div>
-        </div>
 
-        {/* زر تبديل الاتجاه */}
-        <div className="flex justify-center">
+          {/* زر تبديل الاتجاه */}
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full border-primary/30 hover:bg-primary/10"
+              onClick={swapDirection}
+            >
+              <ArrowUpDown className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* إلى - To */}
+          <div className="space-y-2">
+            <Label className="font-cairo text-sm">
+              إلى <span className="text-xs text-muted-foreground opacity-70">To</span>
+            </Label>
+            <Select value={toToken} onValueChange={setToToken}>
+              <SelectTrigger className="font-cairo text-right" dir="rtl">
+                <SelectValue placeholder="اختر العملة | Select token" />
+              </SelectTrigger>
+              <SelectContent dir="rtl">
+                {swappableTokens.filter(t => t.symbol !== fromToken).map((token) => (
+                  <SelectItem key={token.symbol} value={token.symbol}>
+                    <div className="flex items-center gap-2 font-cairo">
+                      {getTokenIcon(token.symbol)}
+                      <span>{token.name}</span>
+                      <span className="text-muted-foreground text-xs" dir="ltr">({token.symbol})</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {toToken && fromToken && (
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <div className="flex items-center gap-2 text-sm font-medium text-primary mb-1 font-cairo">
+                  <Calculator className="w-4 h-4" />
+                  التقدير <span className="text-[10px] opacity-70">Estimate</span>
+                </div>
+                <div className="text-lg font-bold text-primary break-all" dir="ltr">
+                  {estimatedOutput} {toToken}
+                </div>
+                <div className="text-xs text-muted-foreground font-cairo">
+                  معدل التبديل <span className="opacity-70">Rate</span>:{' '}
+                  <span dir="ltr">1 {fromToken} = {exchangeRate.toFixed(4)} {toToken}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* زر التبديل */}
+          <Button 
+            onClick={handleSwap}
+            disabled={!canSwap || isSwapping || isLoading}
+            className="w-full font-cairo"
+            size="lg"
+          >
+            {isSwapping ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <span className="font-cairo">جاري التبديل...</span>
+                <span className="text-xs opacity-70">Swapping</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                <span className="font-cairo">تبديل فوري</span>
+                <span className="text-xs opacity-70">Instant Swap</span>
+              </div>
+            )}
+          </Button>
+
+          {/* إضافة عقد */}
           <Button
             variant="outline"
-            size="icon"
-            className="rounded-full"
-            onClick={swapTokens_ui}
+            size="sm"
+            className="w-full font-cairo border-primary/20 hover:bg-primary/5"
+            onClick={() => setShowContractManager(!showContractManager)}
           >
-            <ArrowUpDown className="w-4 h-4" />
+            <FileText className="w-4 h-4 ml-2" />
+            إضافة عقد عملة <span className="text-xs opacity-70 mr-1">Add Contract</span>
           </Button>
-        </div>
 
-        {/* العملة المستلمة */}
-        <div className="space-y-2">
-          <Label>إلى</Label>
-          <Select value={toToken} onValueChange={setToToken}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر العملة" />
-            </SelectTrigger>
-            <SelectContent>
-              {tokens.filter(token => token.symbol !== fromToken).map((token) => (
-                <SelectItem key={token.symbol} value={token.symbol}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
-                      {token.symbol.slice(0, 2)}
-                    </div>
-                    <span>{token.name}</span>
-                    <span className="text-muted-foreground">({token.symbol})</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {toToken && fromToken && (
-            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-              <div className="flex items-center gap-2 text-sm font-medium text-primary mb-1">
-                <Calculator className="w-4 h-4" />
-                التقدير
-              </div>
-              <div className="text-lg font-bold text-primary break-all">
-                {estimatedOutput} {toToken}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                معدل التبديل: 1 {fromToken} = {exchangeRate.toFixed(4)} {toToken}
-              </div>
+          {/* معلومات إضافية */}
+          <div className="text-xs text-center text-muted-foreground space-y-1 font-cairo">
+            <div className="flex items-center justify-center gap-1">
+              <Zap className="w-3 h-3 text-primary" />
+              <span>تبديل فوري بدون رسوم</span>
+              <span className="opacity-70" dir="ltr">• Zero Fees</span>
             </div>
-          )}
-        </div>
-
-        {/* زر التبديل */}
-        <Button 
-          onClick={handleSwap}
-          disabled={!canSwap || isSwapping || isLoading}
-          className="w-full"
-          size="lg"
-        >
-          {isSwapping ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>جاري التبديل...</span>
-              <span className="text-xs opacity-70">Swapping...</span>
+            <div>
+              تتم العملية داخل النظام بدون الحاجة لشبكة البلوك تشين
+              <span className="block opacity-70 text-[10px]" dir="ltr">Internal system - No blockchain required</span>
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
-              <span>تبديل فوري</span>
-              <span className="text-xs opacity-70">Instant Swap</span>
-            </div>
-          )}
-        </Button>
-
-        {/* معلومات إضافية */}
-        <div className="text-xs text-center text-muted-foreground space-y-1">
-          <div className="flex items-center justify-center gap-1">
-            <Zap className="w-3 h-3 text-yellow-500" />
-            <span>تبديل فوري بدون رسوم</span>
-            <span className="opacity-70" dir="ltr">• Zero Fees</span>
           </div>
-          <div>
-            تتم العملية داخل النظام بدون الحاجة لشبكة البلوك تشين
-            <span className="block opacity-70 text-[10px]" dir="ltr">Internal system - No blockchain required</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Token Contract Manager */}
+      {showContractManager && (
+        <TokenContractManager 
+          network="solana"
+          onTokenAdded={() => {
+            setShowContractManager(false);
+          }}
+        />
+      )}
+    </div>
   );
 };
