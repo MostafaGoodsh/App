@@ -243,6 +243,7 @@ export class WebRTCViewer {
   private broadcasterId: string | null = null;
   private retryInterval: NodeJS.Timeout | null = null;
   private hasReceivedOffer = false;
+  private pendingCandidates: RTCIceCandidateInit[] = [];
 
   constructor(streamId: string, viewerId: string, onStream?: (stream: MediaStream) => void) {
     this.streamId = streamId;
