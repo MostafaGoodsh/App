@@ -133,30 +133,38 @@ const MiningDashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6" dir="rtl">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">لوحة التعدين</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">تتبع تقدم التعدين وقوة حسابك</p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-cairo">
+            لوحة التعدين
+            <span className="text-sm text-muted-foreground block font-normal" dir="ltr">Mining Dashboard</span>
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground font-cairo">
+            تتبع تقدم التعدين وقوة حسابك
+            <span className="text-xs block opacity-70" dir="ltr">Track your mining progress & account strength</span>
+          </p>
         </div>
         <Button
           onClick={handleToggleMining}
           variant={profile?.is_mining_active ? "destructive" : "default"}
           size="sm"
-          className="w-full sm:w-auto"
+          className="w-full sm:w-auto font-cairo"
         >
           {profile?.is_mining_active ? (
             <>
-              <Pause className="h-4 w-4 mr-2" />
+              <Pause className="h-4 w-4 ml-2" />
               <span className="hidden sm:inline">إيقاف التعدين</span>
               <span className="sm:hidden">إيقاف</span>
+              <span className="text-xs opacity-70 mr-1">Stop</span>
             </>
           ) : (
             <>
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4 ml-2" />
               <span className="hidden sm:inline">بدء التعدين</span>
               <span className="sm:hidden">بدء</span>
+              <span className="text-xs opacity-70 mr-1">Start</span>
             </>
           )}
         </Button>
@@ -167,9 +175,10 @@ const MiningDashboard = () => {
         {/* Total Mined */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
               <span className="hidden sm:inline">إجمالي التعدين</span>
               <span className="sm:hidden">التعدين</span>
+              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Total Mined</span>
             </CardTitle>
             <Coins className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
           </CardHeader>
@@ -184,9 +193,10 @@ const MiningDashboard = () => {
         {/* Mining Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
               <span className="hidden sm:inline">معدل التعدين</span>
               <span className="sm:hidden">المعدل</span>
+              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Mining Rate</span>
             </CardTitle>
             <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
@@ -201,9 +211,10 @@ const MiningDashboard = () => {
         {/* Account Strength */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
               <span className="hidden sm:inline">قوة الحساب</span>
               <span className="sm:hidden">القوة</span>
+              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Account Strength</span>
             </CardTitle>
             <Target className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
           </CardHeader>
@@ -211,16 +222,17 @@ const MiningDashboard = () => {
             <div className="text-lg sm:text-2xl font-bold">
               {profile?.account_strength || 0}
             </div>
-            <p className="text-xs text-muted-foreground">نقطة</p>
+            <p className="text-xs text-muted-foreground font-cairo">نقطة <span className="opacity-70" dir="ltr">Points</span></p>
           </CardContent>
         </Card>
 
         {/* Current Level */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
               <span className="hidden sm:inline">المستوى الحالي</span>
               <span className="sm:hidden">المستوى</span>
+              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Current Level</span>
             </CardTitle>
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
@@ -238,15 +250,16 @@ const MiningDashboard = () => {
       {/* Mining Status */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-cairo">
             <Clock className="h-5 w-5" />
             حالة التعدين
+            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Mining Status</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Badge variant={profile?.is_mining_active ? "default" : "secondary"}>
+              <Badge variant={profile?.is_mining_active ? "default" : "secondary"} className="font-cairo">
                 {profile?.is_mining_active ? "نشط" : "متوقف"}
               </Badge>
               {profile?.is_mining_active && (
@@ -261,18 +274,19 @@ const MiningDashboard = () => {
               variant="outline"
               size="sm"
             >
-              {isUpdating ? "جاري التحديث..." : "تحديث الآن"}
+              {isUpdating ? "جاري التحديث..." : <>تحديث الآن <span className="text-xs opacity-70">Update</span></>}
             </Button>
           </div>
 
           {profile?.is_mining_active && currentMined > 0 && (
             <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
-              <p className="text-sm font-medium">التعدين الحالي</p>
+              <p className="text-sm font-medium font-cairo">التعدين الحالي <span className="text-xs opacity-70" dir="ltr">Current Mining</span></p>
               <p className="text-lg font-bold text-primary" dir="ltr">
                 +{currentMined.toFixed(8)} $MS-RA
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground font-cairo">
                 سيتم إضافتها عند التحديث التالي
+                <span className="opacity-70" dir="ltr"> • Added on next update</span>
               </p>
             </div>
           )}
@@ -283,14 +297,15 @@ const MiningDashboard = () => {
         {/* Level Progress */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Gem className="h-5 w-5" />
-              تقدم المستوى
-            </CardTitle>
+          <CardTitle className="flex items-center gap-2 font-cairo">
+            <Gem className="h-5 w-5" />
+            تقدم المستوى
+            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Level Progress</span>
+          </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium font-cairo">
                 {currentLevel?.level_name} → {nextLevel?.level_name || 'الحد الأقصى'}
               </span>
               <span className="text-sm text-muted-foreground">
@@ -300,21 +315,21 @@ const MiningDashboard = () => {
             
             <Progress value={progressToNext} className="w-full" />
             
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-muted-foreground font-cairo">
               <span>
-                قوة الحساب: {profile?.account_strength || 0}
+                قوة الحساب <span className="opacity-70">Strength</span>: {profile?.account_strength || 0}
               </span>
               <span>
-                المطلوب: {nextLevel?.required_account_strength || 'مكتمل'}
+                المطلوب <span className="opacity-70">Required</span>: {nextLevel?.required_account_strength || 'مكتمل'}
               </span>
             </div>
 
             {nextLevel && (
               <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
-                <p className="text-sm font-medium">المستوى التالي</p>
-                <p className="text-lg font-bold">{nextLevel.level_name}</p>
-                <p className="text-xs text-muted-foreground">
-                  <span>معدل التعدين: </span>
+                <p className="text-sm font-medium font-cairo">المستوى التالي <span className="text-xs opacity-70" dir="ltr">Next Level</span></p>
+                <p className="text-lg font-bold font-cairo">{nextLevel.level_name}</p>
+                <p className="text-xs text-muted-foreground font-cairo">
+                  <span>معدل التعدين <span className="opacity-70">Rate</span>: </span>
                   <span dir="ltr">{nextLevel.mining_rate_per_hour} $MS-RA/ساعة</span>
                 </p>
               </div>
@@ -325,10 +340,11 @@ const MiningDashboard = () => {
         {/* Mining History Chart */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              التعدين خلال 24 ساعة
-            </CardTitle>
+          <CardTitle className="flex items-center gap-2 font-cairo">
+            <BarChart3 className="h-5 w-5" />
+            التعدين خلال 24 ساعة
+            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">24h Mining History</span>
+          </CardTitle>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (
@@ -359,7 +375,8 @@ const MiningDashboard = () => {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>لا توجد بيانات تعدين خلال الـ 24 ساعة الماضية</p>
+                <p className="font-cairo">لا توجد بيانات تعدين خلال الـ 24 ساعة الماضية</p>
+                <p className="text-xs opacity-70" dir="ltr">No mining data in the last 24 hours</p>
               </div>
             )}
           </CardContent>
@@ -369,9 +386,10 @@ const MiningDashboard = () => {
       {/* Mining Levels */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-cairo">
             <TrendingUp className="h-5 w-5" />
             مستويات التعدين
+            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Mining Levels</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -388,7 +406,7 @@ const MiningDashboard = () => {
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium">{level.level_name}</h3>
+                  <h3 className="font-medium font-cairo">{level.level_name}</h3>
                   <Badge
                     variant={
                       level.level_number === profile?.current_level
@@ -398,11 +416,11 @@ const MiningDashboard = () => {
                         : 'outline'
                     }
                   >
-                    المستوى {level.level_number}
+                    المستوى <span className="text-[10px] opacity-70">Lv.</span> {level.level_number}
                   </Badge>
                 </div>
                 <Separator className="my-2" />
-                <div className="space-y-1 text-sm">
+                <div className="space-y-1 text-sm font-cairo">
                   <p>
                     <span className="text-muted-foreground">القوة المطلوبة:</span>{' '}
                     <span className="font-medium">{level.required_account_strength}</span>
