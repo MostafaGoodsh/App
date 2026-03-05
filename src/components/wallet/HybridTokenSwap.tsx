@@ -91,14 +91,14 @@ export const HybridTokenSwap = () => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-4">
           {/* من - From */}
           <div className="space-y-2">
-            <Label className="font-cairo text-sm">
+            <Label className="font-cairo text-sm block text-right">
               من <span className="text-xs text-muted-foreground opacity-70">From</span>
             </Label>
             <Select value={fromToken} onValueChange={setFromToken}>
-              <SelectTrigger className="font-cairo text-right" dir="rtl">
+              <SelectTrigger className="font-cairo text-right w-full" dir="rtl">
                 <SelectValue placeholder="اختر العملة | Select token" />
               </SelectTrigger>
               <SelectContent dir="rtl">
@@ -114,19 +114,19 @@ export const HybridTokenSwap = () => {
               </SelectContent>
             </Select>
             
-            <div className="relative">
+            <div className="relative mt-2">
               <Input
                 type="number"
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="text-left"
+                className="text-left pr-3 pl-16"
                 dir="ltr"
               />
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute left-2 top-1/2 -translate-y-1/2 h-6 px-2 text-xs font-cairo"
+                className="absolute left-1 top-1/2 -translate-y-1/2 h-7 px-2 text-xs font-cairo"
                 onClick={setMaxAmount}
                 disabled={!fromToken}
               >
@@ -146,7 +146,7 @@ export const HybridTokenSwap = () => {
           </div>
 
           {/* زر تبديل الاتجاه */}
-          <div className="flex justify-center">
+          <div className="flex justify-center py-1">
             <Button
               variant="outline"
               size="icon"
@@ -159,11 +159,11 @@ export const HybridTokenSwap = () => {
 
           {/* إلى - To */}
           <div className="space-y-2">
-            <Label className="font-cairo text-sm">
+            <Label className="font-cairo text-sm block text-right">
               إلى <span className="text-xs text-muted-foreground opacity-70">To</span>
             </Label>
             <Select value={toToken} onValueChange={setToToken}>
-              <SelectTrigger className="font-cairo text-right" dir="rtl">
+              <SelectTrigger className="font-cairo text-right w-full" dir="rtl">
                 <SelectValue placeholder="اختر العملة | Select token" />
               </SelectTrigger>
               <SelectContent dir="rtl">
@@ -180,17 +180,18 @@ export const HybridTokenSwap = () => {
             </Select>
             
             {toToken && fromToken && (
-              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                <div className="flex items-center gap-2 text-sm font-medium text-primary mb-1 font-cairo">
-                  <Calculator className="w-4 h-4" />
-                  التقدير <span className="text-[10px] opacity-70">Estimate</span>
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20 mt-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-primary mb-2 font-cairo">
+                  <Calculator className="w-4 h-4 shrink-0" />
+                  <span>التقدير</span>
+                  <span className="text-[10px] opacity-70">Estimate</span>
                 </div>
                 <div className="text-lg font-bold text-primary break-all" dir="ltr">
                   {estimatedOutput} {toToken}
                 </div>
-                <div className="text-xs text-muted-foreground font-cairo">
+                <div className="text-xs text-muted-foreground font-cairo mt-1">
                   معدل التبديل <span className="opacity-70">Rate</span>:{' '}
-                  <span dir="ltr">1 {fromToken} = {exchangeRate.toFixed(4)} {toToken}</span>
+                  <span dir="ltr" className="inline-block">1 {fromToken} = {exchangeRate.toFixed(4)} {toToken}</span>
                 </div>
               </div>
             )}

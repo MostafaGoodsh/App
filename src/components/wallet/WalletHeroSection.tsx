@@ -19,7 +19,7 @@ export const WalletHeroSection = ({
   const [showBalance, setShowBalance] = useState(true);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir="rtl">
       {/* Background Decoration */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -52,9 +52,9 @@ export const WalletHeroSection = ({
         {/* Main Balance - Token based, no USD */}
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground font-cairo">
               {showBalance ? (
-                <span dir="ltr">المحفظة الداخلية</span>
+                <span>المحفظة الداخلية</span>
               ) : (
                 '••••••'
               )}
