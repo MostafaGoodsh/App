@@ -59,16 +59,43 @@ export const useAnubisAuth = () => {
     checkSession();
   }, []);
 
+  const extractFunctionErrorMessage = async (error: any, fallback: string) => {
+    if (!error) return fallback;
+
+    try {
+      const context = error?.context;
+      if (context && typeof context.json === 'function') {
+        const payload = await context.json();
+        if (payload?.error && typeof payload.error === 'string') return payload.error;
+        if (payload?.message && typeof payload.message === 'string') return payload.message;
+      }
+    } catch {
+      // ignore parsing errors and fallback below
+    }
+
+    if (typeof error?.message === 'string' && error.message.trim().length > 0) {
+      return error.message;
+    }
+
+    return fallback;
+  };
+
   const login = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('anubis-auth', {
         body: { action: 'login', email, password }
       });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+      if (error) {
+        const message = await extractFunctionErrorMessage(error, 'فشل تسجيل الدخول');
+        return { success: false, error: message };
+      }
 
-      if (data.requires_2fa) {
+      if (data?.error) {
+        return { success: false, error: data.error as string };
+      }
+
+      if (data?.requires_2fa) {
         return { success: true, requires_2fa: true, message: data.message };
       }
 
@@ -82,7 +109,8 @@ export const useAnubisAuth = () => {
       return { success: true };
     } catch (error: any) {
       console.error('Login error:', error);
-      return { success: false, error: error.message || 'فشل تسجيل الدخول' };
+      const message = await extractFunctionErrorMessage(error, 'فشل تسجيل الدخول');
+      return { success: false, error: message };
     }
   };
 
@@ -92,8 +120,14 @@ export const useAnubisAuth = () => {
         body: { action: 'verify_2fa', email, twofa_code }
       });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+      if (error) {
+        const message = await extractFunctionErrorMessage(error, 'فشل التحقق');
+        return { success: false, error: message };
+      }
+
+      if (data?.error) {
+        return { success: false, error: data.error as string };
+      }
 
       localStorage.setItem('anubis_session_token', data.session_token);
       setState({
@@ -105,7 +139,8 @@ export const useAnubisAuth = () => {
       return { success: true };
     } catch (error: any) {
       console.error('2FA verification error:', error);
-      return { success: false, error: error.message || 'فشل التحقق' };
+      const message = await extractFunctionErrorMessage(error, 'فشل التحقق');
+      return { success: false, error: message };
     }
   };
 
@@ -115,8 +150,14 @@ export const useAnubisAuth = () => {
         body: { action: 'register', email, password, full_name, phone }
       });
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+      if (error) {
+        const message = await extractFunctionErrorMessage(error, 'فشل التسجيل');
+        return { success: false, error: message };
+      }
+
+      if (data?.error) {
+        return { success: false, error: data.error as string };
+      }
 
       localStorage.setItem('anubis_session_token', data.session_token);
       setState({
@@ -128,7 +169,8 @@ export const useAnubisAuth = () => {
       return { success: true };
     } catch (error: any) {
       console.error('Registration error:', error);
-      return { success: false, error: error.message || 'فشل التسجيل' };
+      const message = await extractFunctionErrorMessage(error, 'فشل التسجيل');
+      return { success: false, error: message };
     }
   };
 
