@@ -222,7 +222,7 @@ const Index = () => {
         
         {/* Ms-Ra Currency Section */}
         <section className="py-16 px-4">
-          <div className="container mx-auto max-w-4xl space-y-6">
+          <div className="container mx-auto max-w-full px-2 sm:max-w-2xl md:max-w-4xl lg:max-w-5xl space-y-6">
             <MsRaCurrencyCard isVerified={isIdentityVerified} />
             
             {/* Total Mining Display */}
