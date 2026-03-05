@@ -378,9 +378,10 @@ const Identity = () => {
           {verification && (
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3">
+                <CardTitle className="flex items-center gap-3 font-cairo">
                   {getStatusIcon(verification.status)}
                   حالة التحقق الحالية
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Current Status</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -442,8 +443,8 @@ const Identity = () => {
                     ? 'bg-primary/5 border-primary/20' 
                     : 'bg-muted/50'
                 }`}>
-                  <h3 className="font-semibold">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <h3 className="font-semibold font-cairo">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground font-cairo">{step.description}</p>
                 </div>
               ))}
             </div>
@@ -453,18 +454,20 @@ const Identity = () => {
           {currentStep === 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-cairo">
                   <User className="h-5 w-5" />
                   المعلومات الشخصية
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Personal Information</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="font-cairo">
                   أدخل معلوماتك الشخصية الصحيحة والمطابقة للوثائق الرسمية
+                  <span className="text-xs block opacity-70" dir="ltr">Enter accurate personal details matching your official documents</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">الاسم الكامل *</Label>
+                    <Label htmlFor="fullName" className="font-cairo">الاسم الكامل * <span className="text-xs text-muted-foreground opacity-70">Full Name</span></Label>
                     <Input
                       id="fullName"
                       value={fullName}
