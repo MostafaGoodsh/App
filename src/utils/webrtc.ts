@@ -1,5 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  // Free TURN servers for NAT traversal on mobile networks
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+];
+
 export class WebRTCBroadcaster {
   private peerConnections = new Map<string, RTCPeerConnection>();
   private channel: ReturnType<typeof supabase.channel> | null = null;
@@ -128,11 +150,7 @@ export class WebRTCBroadcaster {
     }
 
     const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-      ],
+      iceServers: ICE_SERVERS,
     });
 
     this.peerConnections.set(viewerId, pc);
@@ -225,6 +243,7 @@ export class WebRTCViewer {
   private broadcasterId: string | null = null;
   private retryInterval: NodeJS.Timeout | null = null;
   private hasReceivedOffer = false;
+  private pendingCandidates: RTCIceCandidateInit[] = [];
 
   constructor(streamId: string, viewerId: string, onStream?: (stream: MediaStream) => void) {
     this.streamId = streamId;
@@ -267,16 +286,17 @@ export class WebRTCViewer {
       .on('broadcast', { event: 'ice-candidate-broadcaster' }, async (payload) => {
         const { viewerId, candidate } = payload.payload;
         // Only handle candidates meant for this viewer
-        if (viewerId === this.viewerId && this.pc && candidate) {
-          console.log('Adding ICE candidate from broadcaster');
-          try {
-            if (this.pc.remoteDescription) {
+        if (viewerId === this.viewerId && candidate) {
+          if (this.pc && this.pc.remoteDescription) {
+            console.log('Adding ICE candidate from broadcaster');
+            try {
               await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
-            } else {
-              console.log('Queuing ICE candidate - no remote description yet');
+            } catch (e) {
+              console.error('Error adding ICE candidate:', e);
             }
-          } catch (e) {
-            console.error('Error adding ICE candidate:', e);
+          } else {
+            console.log('Queuing ICE candidate - no remote description yet');
+            this.pendingCandidates.push(candidate);
           }
         }
       })
@@ -343,11 +363,7 @@ export class WebRTCViewer {
     console.log('Handling offer from broadcaster');
     
     this.pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-      ],
+      iceServers: ICE_SERVERS,
     });
 
     // Handle incoming stream
@@ -378,6 +394,15 @@ export class WebRTCViewer {
 
     this.pc.onconnectionstatechange = () => {
       console.log('Viewer connection state:', this.pc?.connectionState);
+      // Auto-reconnect on failure
+      if (this.pc?.connectionState === 'failed') {
+        console.log('Connection failed, attempting ICE restart...');
+        this.hasReceivedOffer = false;
+        this.pendingCandidates = [];
+        this.pc?.close();
+        this.pc = null;
+        this.startRetrying();
+      }
     };
 
     this.pc.oniceconnectionstatechange = () => {
@@ -386,6 +411,20 @@ export class WebRTCViewer {
 
     // Set remote description and create answer
     await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
+    
+    // Flush pending ICE candidates now that remote description is set
+    if (this.pendingCandidates.length > 0) {
+      console.log(`Flushing ${this.pendingCandidates.length} pending ICE candidates`);
+      for (const candidate of this.pendingCandidates) {
+        try {
+          await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (e) {
+          console.error('Error adding queued ICE candidate:', e);
+        }
+      }
+      this.pendingCandidates = [];
+    }
+    
     const answer = await this.pc.createAnswer();
     await this.pc.setLocalDescription(answer);
 
