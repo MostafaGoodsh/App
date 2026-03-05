@@ -454,8 +454,6 @@ export default function Anubis() {
           </div>
         </div>
       </div>
-        </div>
-      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
