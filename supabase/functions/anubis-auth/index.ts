@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import { hash as bcryptHash, compare as bcryptCompare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,7 +36,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { action, email, password, full_name, phone, twofa_code } = await req.json();
+    const { action, email, password, full_name, phone, twofa_code, session_token: logout_token } = await req.json();
 
     console.log('Anubis Auth Request:', { action, email: email ? '[REDACTED]' : undefined });
 
@@ -72,7 +72,7 @@ serve(async (req) => {
       }
 
       // Hash password with bcrypt (secure password hashing)
-      const password_hash = await bcrypt.hash(password);
+      const password_hash = bcryptHash(password);
 
       // إنشاء المستخدم
       const { data: newUser, error: createError } = await supabaseClient
@@ -157,7 +157,7 @@ serve(async (req) => {
       }
 
       // Verify password with bcrypt
-      const passwordValid = await bcrypt.compare(password, user.password_hash);
+      const passwordValid = bcryptCompare(password, user.password_hash);
       
       if (!passwordValid) {
         return new Response(
@@ -344,13 +344,11 @@ serve(async (req) => {
       );
 
     } else if (action === 'logout') {
-      const { session_token } = await req.json();
-      
-      if (session_token) {
+      if (logout_token) {
         await supabaseClient
           .from('anubis_sessions')
           .delete()
-          .eq('session_token', session_token);
+          .eq('session_token', logout_token);
       }
 
       return new Response(
