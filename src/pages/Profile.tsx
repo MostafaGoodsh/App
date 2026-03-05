@@ -57,6 +57,7 @@ export default function Profile() {
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
   const [xpBalance, setXpBalance] = useState(0);
   const [connectedWallets, setConnectedWallets] = useState<{solana?: string; ton?: string; evm?: string}>({});
+  const tonAddress = useTonAddress();
   const [totalPoints, setTotalPoints] = useState(0);
   const [userBadges, setUserBadges] = useState<any[]>([]);
 
