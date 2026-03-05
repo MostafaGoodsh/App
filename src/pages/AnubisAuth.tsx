@@ -33,13 +33,10 @@ const AnubisAuth = () => {
 
   const getErrorMessage = (error: string) => {
     // تحويل رسائل الخطأ التقنية إلى رسائل مفهومة
-    if (error.includes('non-2xx') || error.includes('Edge Function')) {
-      return 'خدمة المصادقة غير متاحة حالياً. يرجى المحاولة لاحقاً';
-    }
     if (error.includes('password') || error.includes('email') || error.includes('credentials')) {
       return 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
     }
-    if (error.includes('network') || error.includes('Network')) {
+    if (error.includes('network') || error.includes('Network') || error.includes('Failed to fetch')) {
       return 'مشكلة في الاتصال بالشبكة. تحقق من اتصالك بالإنترنت';
     }
     return error;
