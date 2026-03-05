@@ -72,7 +72,7 @@ serve(async (req) => {
       }
 
       // Hash password with bcrypt (secure password hashing)
-      const password_hash = bcryptHash(password);
+      const password_hash = bcrypt.hashSync(password, 10);
 
       // إنشاء المستخدم
       const { data: newUser, error: createError } = await supabaseClient
@@ -157,7 +157,7 @@ serve(async (req) => {
       }
 
       // Verify password with bcrypt
-      const passwordValid = bcryptCompare(password, user.password_hash);
+      const passwordValid = bcrypt.compareSync(password, user.password_hash);
       
       if (!passwordValid) {
         return new Response(
