@@ -286,16 +286,17 @@ export class WebRTCViewer {
       .on('broadcast', { event: 'ice-candidate-broadcaster' }, async (payload) => {
         const { viewerId, candidate } = payload.payload;
         // Only handle candidates meant for this viewer
-        if (viewerId === this.viewerId && this.pc && candidate) {
-          console.log('Adding ICE candidate from broadcaster');
-          try {
-            if (this.pc.remoteDescription) {
+        if (viewerId === this.viewerId && candidate) {
+          if (this.pc && this.pc.remoteDescription) {
+            console.log('Adding ICE candidate from broadcaster');
+            try {
               await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
-            } else {
-              console.log('Queuing ICE candidate - no remote description yet');
+            } catch (e) {
+              console.error('Error adding ICE candidate:', e);
             }
-          } catch (e) {
-            console.error('Error adding ICE candidate:', e);
+          } else {
+            console.log('Queuing ICE candidate - no remote description yet');
+            this.pendingCandidates.push(candidate);
           }
         }
       })
