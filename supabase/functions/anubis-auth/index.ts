@@ -36,7 +36,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { action, email, password, full_name, phone, twofa_code } = await req.json();
+    const { action, email, password, full_name, phone, twofa_code, session_token: logout_token } = await req.json();
 
     console.log('Anubis Auth Request:', { action, email: email ? '[REDACTED]' : undefined });
 
