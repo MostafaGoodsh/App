@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useTonAddress } from '@tonconnect/ui-react';
 import StreakDisplay from "@/components/engagement/StreakDisplay";
 import DailyTasksList from "@/components/engagement/DailyTasksList";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
@@ -56,6 +57,7 @@ export default function Profile() {
   const [completedSurveys, setCompletedSurveys] = useState<any[]>([]);
   const [xpBalance, setXpBalance] = useState(0);
   const [connectedWallets, setConnectedWallets] = useState<{solana?: string; ton?: string; evm?: string}>({});
+  const tonAddress = useTonAddress();
   const [totalPoints, setTotalPoints] = useState(0);
   const [userBadges, setUserBadges] = useState<any[]>([]);
 
@@ -101,11 +103,22 @@ export default function Profile() {
         .select('solana_address')
         .eq('user_id', targetUserId)
         .maybeSingle();
-      if (data) {
-        setConnectedWallets({
-          solana: data.solana_address || undefined,
-        });
-      }
+      
+      // Read EVM wallet from localStorage
+      let evmAddress: string | undefined;
+      try {
+        const savedWallet = localStorage.getItem('connectedWallet');
+        if (savedWallet) {
+          const parsed = JSON.parse(savedWallet);
+          evmAddress = parsed?.address;
+        }
+      } catch {}
+
+      setConnectedWallets({
+        solana: data?.solana_address || undefined,
+        evm: evmAddress,
+        ton: tonAddress || undefined,
+      });
     };
 
     // Fetch user badges
@@ -121,7 +134,7 @@ export default function Profile() {
     fetchPoints();
     fetchWallets();
     fetchBadges();
-  }, [viewUserId, user?.id]);
+  }, [viewUserId, user?.id, tonAddress]);
 
   if (loading || statsLoading) {
     return (
@@ -323,15 +336,31 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {connectedWallets.solana ? (
+               <div className="space-y-2">
+                {connectedWallets.solana && (
                   <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                     <Badge variant="outline" className="text-xs">Solana</Badge>
                     <span className="font-mono text-xs text-muted-foreground">
                       {connectedWallets.solana.slice(0, 6)}...{connectedWallets.solana.slice(-4)}
                     </span>
                   </div>
-                ) : null}
+                )}
+                {connectedWallets.evm && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <Badge variant="outline" className="text-xs">Ethereum</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {connectedWallets.evm.slice(0, 6)}...{connectedWallets.evm.slice(-4)}
+                    </span>
+                  </div>
+                )}
+                {connectedWallets.ton && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <Badge variant="outline" className="text-xs">TON</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {connectedWallets.ton.slice(0, 6)}...{connectedWallets.ton.slice(-4)}
+                    </span>
+                  </div>
+                )}
                 {!connectedWallets.solana && !connectedWallets.ton && !connectedWallets.evm && (
                   <p className="text-sm text-muted-foreground text-center font-cairo py-2">لا توجد محافظ مربوطة</p>
                 )}
