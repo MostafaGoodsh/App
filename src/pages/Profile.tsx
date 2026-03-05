@@ -23,6 +23,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useTonAddress } from '@tonconnect/ui-react';
 import StreakDisplay from "@/components/engagement/StreakDisplay";
 import DailyTasksList from "@/components/engagement/DailyTasksList";
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
