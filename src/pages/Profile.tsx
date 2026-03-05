@@ -103,11 +103,22 @@ export default function Profile() {
         .select('solana_address')
         .eq('user_id', targetUserId)
         .maybeSingle();
-      if (data) {
-        setConnectedWallets({
-          solana: data.solana_address || undefined,
-        });
-      }
+      
+      // Read EVM wallet from localStorage
+      let evmAddress: string | undefined;
+      try {
+        const savedWallet = localStorage.getItem('connectedWallet');
+        if (savedWallet) {
+          const parsed = JSON.parse(savedWallet);
+          evmAddress = parsed?.address;
+        }
+      } catch {}
+
+      setConnectedWallets({
+        solana: data?.solana_address || undefined,
+        evm: evmAddress,
+        ton: tonAddress || undefined,
+      });
     };
 
     // Fetch user badges
