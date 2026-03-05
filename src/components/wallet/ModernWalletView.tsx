@@ -92,7 +92,7 @@ export const ModernWalletView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir="rtl">
       {/* Hero Section */}
       <WalletHeroSection
         totalBalance={totalUsdValue}

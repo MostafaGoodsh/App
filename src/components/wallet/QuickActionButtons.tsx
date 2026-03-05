@@ -72,7 +72,7 @@ export const QuickActionButtons = ({
   }
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-3">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3 font-cairo" dir="rtl">
       {actions.map((action) => (
         <button
           key={action.labelEn}
@@ -88,7 +88,7 @@ export const QuickActionButtons = ({
             <action.icon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-xs sm:text-sm font-medium">{action.label}</span>
+            <span className="text-xs sm:text-sm font-medium font-cairo">{action.label}</span>
             <span className="text-[9px] sm:text-[10px] text-muted-foreground/70">{action.labelEn}</span>
           </div>
         </button>
