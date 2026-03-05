@@ -99,6 +99,15 @@ export const UnifiedPaymentGateway = ({
       return;
     }
 
+    // Crypto payment - handled client-side, no Paymob needed
+    if (selectedMethod === 'crypto') {
+      toast({
+        title: "الدفع بالكريبتو | Crypto Payment",
+        description: "قم بتحويل المبلغ إلى عنوان المحفظة المعروض ثم تواصل مع الدعم لتأكيد التحويل",
+      });
+      return;
+    }
+
     try {
       let formattedPhone = phoneNumber;
       if (phoneNumber && !phoneNumber.startsWith('+')) {
@@ -107,7 +116,7 @@ export const UnifiedPaymentGateway = ({
 
       const result = await processPayment({
         amount: parseFloat(amount),
-        payment_method: selectedMethod as any,
+        payment_method: selectedMethod as 'vodafone_cash' | 'orange_cash' | 'etisalat_cash' | 'fawry' | 'card',
         phone_number: formattedPhone || undefined,
         internal_token_symbol: tokenSymbol
       });
