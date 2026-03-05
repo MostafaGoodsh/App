@@ -441,7 +441,19 @@ export default function Anubis() {
                   </Button>
                 </CardContent>
               </Card>
+
+            {/* Payment Gateway */}
+            <UnifiedPaymentGateway
+              mode="inline"
+              purpose="subscription"
+              purposeLabel="شحن رصيد الخزانة"
+              purposeLabelEn="Vault Recharge"
+              tokenSymbol="XP"
+              showTestWarning={true}
+            />
           </div>
+        </div>
+      </div>
         </div>
       </div>
 
