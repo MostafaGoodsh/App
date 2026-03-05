@@ -527,18 +527,20 @@ const Identity = () => {
           {currentStep === 1 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-cairo">
                   <FileImage className="h-5 w-5" />
                   رفع الوثائق
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Upload Documents</span>
                 </CardTitle>
-                <CardDescription>
-                  اختر نوع الوثيقة وأدخل رقمها. سيتم طلب رفع صور الوثائق لاحقاً
+                <CardDescription className="font-cairo">
+                  اختر نوع الوثيقة وأدخل رقمها
+                  <span className="text-xs block opacity-70" dir="ltr">Select document type and enter its number</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="documentType">نوع الوثيقة *</Label>
+                    <Label htmlFor="documentType" className="font-cairo">نوع الوثيقة * <span className="text-xs text-muted-foreground opacity-70">Document Type</span></Label>
                     <Select value={documentType} onValueChange={setDocumentType}>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر نوع الوثيقة" />
@@ -556,7 +558,7 @@ const Identity = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="documentNumber">رقم الوثيقة *</Label>
+                    <Label htmlFor="documentNumber" className="font-cairo">رقم الوثيقة * <span className="text-xs text-muted-foreground opacity-70">Document Number</span></Label>
                     <Input
                       id="documentNumber"
                       value={documentNumber}
@@ -571,7 +573,7 @@ const Identity = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Front Document */}
                     <div className="space-y-2">
-                      <Label htmlFor="frontDocument">صورة الوثيقة - الوجه الأمامي *</Label>
+                      <Label htmlFor="frontDocument" className="font-cairo">صورة الوثيقة - الوجه الأمامي * <span className="text-xs text-muted-foreground opacity-70">Front</span></Label>
                       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center">
                         <input
                           id="frontDocument"
