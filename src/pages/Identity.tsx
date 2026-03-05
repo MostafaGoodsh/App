@@ -476,7 +476,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">تاريخ الميلاد *</Label>
+                    <Label htmlFor="dateOfBirth" className="font-cairo">تاريخ الميلاد * <span className="text-xs text-muted-foreground opacity-70">Date of Birth</span></Label>
                     <Input
                       id="dateOfBirth"
                       type="date"
@@ -485,7 +485,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nationality">الجنسية *</Label>
+                    <Label htmlFor="nationality" className="font-cairo">الجنسية * <span className="text-xs text-muted-foreground opacity-70">Nationality</span></Label>
                     <Input
                       id="nationality"
                       value={nationality}
@@ -494,7 +494,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">رقم الهاتف *</Label>
+                    <Label htmlFor="phoneNumber" className="font-cairo">رقم الهاتف * <span className="text-xs text-muted-foreground opacity-70">Phone</span></Label>
                     <Input
                       id="phoneNumber"
                       value={phoneNumber}
@@ -504,7 +504,7 @@ const Identity = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">العنوان الكامل *</Label>
+                  <Label htmlFor="address" className="font-cairo">العنوان الكامل * <span className="text-xs text-muted-foreground opacity-70">Address</span></Label>
                   <Textarea
                     id="address"
                     value={address}
@@ -516,9 +516,9 @@ const Identity = () => {
                 <Button 
                   onClick={submitPersonalInfo} 
                   disabled={submitting}
-                  className="w-full"
+                  className="w-full font-cairo"
                 >
-                  {submitting ? "جاري الحفظ..." : "حفظ والمتابعة"}
+                  {submitting ? "جاري الحفظ..." : <>حفظ والمتابعة <span className="text-xs opacity-70 mr-1">Save & Continue</span></>}
                 </Button>
               </CardContent>
             </Card>
