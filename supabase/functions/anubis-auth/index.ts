@@ -157,7 +157,7 @@ serve(async (req) => {
       }
 
       // Verify password with bcrypt
-      const passwordValid = await bcrypt.compare(password, user.password_hash);
+      const passwordValid = bcryptCompare(password, user.password_hash);
       
       if (!passwordValid) {
         return new Response(
