@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { hash as bcryptHash, compare as bcryptCompare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import bcrypt from "npm:bcryptjs@2.4.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -72,7 +72,7 @@ serve(async (req) => {
       }
 
       // Hash password with bcrypt (secure password hashing)
-      const password_hash = bcryptHash(password);
+      const password_hash = bcrypt.hashSync(password, 10);
 
       // إنشاء المستخدم
       const { data: newUser, error: createError } = await supabaseClient
@@ -157,7 +157,7 @@ serve(async (req) => {
       }
 
       // Verify password with bcrypt
-      const passwordValid = bcryptCompare(password, user.password_hash);
+      const passwordValid = bcrypt.compareSync(password, user.password_hash);
       
       if (!passwordValid) {
         return new Response(
