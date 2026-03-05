@@ -378,9 +378,10 @@ const Identity = () => {
           {verification && (
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3">
+                <CardTitle className="flex items-center gap-3 font-cairo">
                   {getStatusIcon(verification.status)}
                   حالة التحقق الحالية
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Current Status</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -442,8 +443,8 @@ const Identity = () => {
                     ? 'bg-primary/5 border-primary/20' 
                     : 'bg-muted/50'
                 }`}>
-                  <h3 className="font-semibold">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <h3 className="font-semibold font-cairo">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground font-cairo">{step.description}</p>
                 </div>
               ))}
             </div>
@@ -453,18 +454,20 @@ const Identity = () => {
           {currentStep === 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-cairo">
                   <User className="h-5 w-5" />
                   المعلومات الشخصية
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Personal Information</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="font-cairo">
                   أدخل معلوماتك الشخصية الصحيحة والمطابقة للوثائق الرسمية
+                  <span className="text-xs block opacity-70" dir="ltr">Enter accurate personal details matching your official documents</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">الاسم الكامل *</Label>
+                    <Label htmlFor="fullName" className="font-cairo">الاسم الكامل * <span className="text-xs text-muted-foreground opacity-70">Full Name</span></Label>
                     <Input
                       id="fullName"
                       value={fullName}
@@ -473,7 +476,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">تاريخ الميلاد *</Label>
+                    <Label htmlFor="dateOfBirth" className="font-cairo">تاريخ الميلاد * <span className="text-xs text-muted-foreground opacity-70">Date of Birth</span></Label>
                     <Input
                       id="dateOfBirth"
                       type="date"
@@ -482,7 +485,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nationality">الجنسية *</Label>
+                    <Label htmlFor="nationality" className="font-cairo">الجنسية * <span className="text-xs text-muted-foreground opacity-70">Nationality</span></Label>
                     <Input
                       id="nationality"
                       value={nationality}
@@ -491,7 +494,7 @@ const Identity = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">رقم الهاتف *</Label>
+                    <Label htmlFor="phoneNumber" className="font-cairo">رقم الهاتف * <span className="text-xs text-muted-foreground opacity-70">Phone</span></Label>
                     <Input
                       id="phoneNumber"
                       value={phoneNumber}
@@ -501,7 +504,7 @@ const Identity = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">العنوان الكامل *</Label>
+                  <Label htmlFor="address" className="font-cairo">العنوان الكامل * <span className="text-xs text-muted-foreground opacity-70">Address</span></Label>
                   <Textarea
                     id="address"
                     value={address}
@@ -513,9 +516,9 @@ const Identity = () => {
                 <Button 
                   onClick={submitPersonalInfo} 
                   disabled={submitting}
-                  className="w-full"
+                  className="w-full font-cairo"
                 >
-                  {submitting ? "جاري الحفظ..." : "حفظ والمتابعة"}
+                  {submitting ? "جاري الحفظ..." : <>حفظ والمتابعة <span className="text-xs opacity-70 mr-1">Save & Continue</span></>}
                 </Button>
               </CardContent>
             </Card>
@@ -524,18 +527,20 @@ const Identity = () => {
           {currentStep === 1 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-cairo">
                   <FileImage className="h-5 w-5" />
                   رفع الوثائق
+                  <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Upload Documents</span>
                 </CardTitle>
-                <CardDescription>
-                  اختر نوع الوثيقة وأدخل رقمها. سيتم طلب رفع صور الوثائق لاحقاً
+                <CardDescription className="font-cairo">
+                  اختر نوع الوثيقة وأدخل رقمها
+                  <span className="text-xs block opacity-70" dir="ltr">Select document type and enter its number</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="documentType">نوع الوثيقة *</Label>
+                    <Label htmlFor="documentType" className="font-cairo">نوع الوثيقة * <span className="text-xs text-muted-foreground opacity-70">Document Type</span></Label>
                     <Select value={documentType} onValueChange={setDocumentType}>
                       <SelectTrigger>
                         <SelectValue placeholder="اختر نوع الوثيقة" />
@@ -553,7 +558,7 @@ const Identity = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="documentNumber">رقم الوثيقة *</Label>
+                    <Label htmlFor="documentNumber" className="font-cairo">رقم الوثيقة * <span className="text-xs text-muted-foreground opacity-70">Document Number</span></Label>
                     <Input
                       id="documentNumber"
                       value={documentNumber}
@@ -568,7 +573,7 @@ const Identity = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     {/* Front Document */}
                     <div className="space-y-2">
-                      <Label htmlFor="frontDocument">صورة الوثيقة - الوجه الأمامي *</Label>
+                      <Label htmlFor="frontDocument" className="font-cairo">صورة الوثيقة - الوجه الأمامي * <span className="text-xs text-muted-foreground opacity-70">Front</span></Label>
                       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center">
                         <input
                           id="frontDocument"

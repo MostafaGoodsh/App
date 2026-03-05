@@ -517,17 +517,23 @@ const LiveStreamBroadcast = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" dir="rtl">
       <div className="lg:col-span-2 space-y-6">
         {/* Stream Settings */}
         <Card>
-          <CardHeader>
-            <CardTitle className="font-cairo">إعدادات البث المباشر</CardTitle>
-            <CardDescription>قم بإعداد بثك المباشر قبل البدء</CardDescription>
+          <CardHeader className="text-right">
+            <CardTitle className="font-cairo text-lg">
+              إعدادات البث المباشر
+              <span className="text-xs text-muted-foreground block font-normal" dir="ltr">Live Stream Settings</span>
+            </CardTitle>
+            <CardDescription className="font-cairo">
+              قم بإعداد بثك المباشر قبل البدء
+              <span className="text-xs block opacity-70" dir="ltr">Set up your broadcast before starting</span>
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="stream_title">عنوان البث *</Label>
+              <Label htmlFor="stream_title" className="font-cairo">عنوان البث * <span className="text-xs text-muted-foreground opacity-70">Stream Title</span></Label>
               <Input
                 id="stream_title"
                 value={streamTitle}
@@ -546,7 +552,7 @@ const LiveStreamBroadcast = () => {
                     <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
                       على الهواء
                     </Badge>
-                    <span>{viewerCount} مشاهد</span>
+                    <span className="font-cairo">{viewerCount} مشاهد <span className="text-xs opacity-70">Viewers</span></span>
                   </AlertDescription>
                 </Alert>
                 
@@ -563,7 +569,7 @@ const LiveStreamBroadcast = () => {
                   className="w-full"
                 >
                   <Copy className="w-4 h-4 ml-2" />
-                  نسخ رابط المشاهدة
+                  <span className="font-cairo">نسخ رابط المشاهدة <span className="text-xs opacity-70">Copy Link</span></span>
                 </Button>
               </>
             )}
@@ -573,7 +579,10 @@ const LiveStreamBroadcast = () => {
         {/* Video Preview */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-cairo">معاينة البث</CardTitle>
+            <CardTitle className="font-cairo">
+              معاينة البث
+              <span className="text-xs text-muted-foreground block font-normal" dir="ltr">Broadcast Preview</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div 
@@ -592,6 +601,7 @@ const LiveStreamBroadcast = () => {
                   <div className="text-center text-white">
                     <VideoOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
                     <p className="font-cairo">الكاميرا غير مفعلة</p>
+                    <p className="text-xs opacity-70" dir="ltr">Camera is off</p>
                   </div>
                 </div>
               )}
@@ -636,7 +646,7 @@ const LiveStreamBroadcast = () => {
                 className="w-full"
               >
                 {isCameraOn ? <Video className="w-4 h-4 ml-2" /> : <VideoOff className="w-4 h-4 ml-2" />}
-                {isCameraOn ? "إيقاف" : "الكاميرا"}
+                <span className="font-cairo">{isCameraOn ? "إيقاف" : "الكاميرا"}</span>
               </Button>
 
               <Button
@@ -645,7 +655,7 @@ const LiveStreamBroadcast = () => {
                 className="w-full"
               >
                 {isMicOn ? <Mic className="w-4 h-4 ml-2" /> : <MicOff className="w-4 h-4 ml-2" />}
-                {isMicOn ? "كتم" : "الصوت"}
+                <span className="font-cairo">{isMicOn ? "كتم" : "الصوت"}</span>
               </Button>
 
               <Button
@@ -655,7 +665,7 @@ const LiveStreamBroadcast = () => {
                 className="w-full"
               >
                 <SwitchCamera className="w-4 h-4 ml-2" />
-                {facingMode === 'user' ? "خلفية" : "أمامية"}
+                <span className="font-cairo">{facingMode === 'user' ? "خلفية" : "أمامية"}</span>
               </Button>
 
               <Button
@@ -665,7 +675,7 @@ const LiveStreamBroadcast = () => {
                 className="w-full"
               >
                 {isScreenSharing ? <Monitor className="w-4 h-4 ml-2" /> : <MonitorOff className="w-4 h-4 ml-2" />}
-                {isScreenSharing ? "إيقاف" : "الشاشة"}
+                <span className="font-cairo">{isScreenSharing ? "إيقاف" : "الشاشة"}</span>
               </Button>
 
               {!isStreaming ? (
@@ -674,7 +684,7 @@ const LiveStreamBroadcast = () => {
                   className="w-full bg-red-500 hover:bg-red-600 text-white"
                 >
                   <Play className="w-4 h-4 ml-2" />
-                  بدء البث
+                  <span className="font-cairo">بدء البث <span className="text-xs opacity-70">Go Live</span></span>
                 </Button>
               ) : (
                 <Button
@@ -683,7 +693,7 @@ const LiveStreamBroadcast = () => {
                   className="w-full"
                 >
                   <Square className="w-4 h-4 ml-2" />
-                  إيقاف
+                  <span className="font-cairo">إيقاف <span className="text-xs opacity-70">Stop</span></span>
                 </Button>
               )}
             </div>
@@ -694,14 +704,17 @@ const LiveStreamBroadcast = () => {
         {!isStreaming && (
           <Card>
             <CardHeader>
-              <CardTitle className="font-cairo text-lg">نصائح للبث المباشر</CardTitle>
+              <CardTitle className="font-cairo text-lg">
+                نصائح للبث المباشر
+                <span className="text-xs text-muted-foreground block font-normal" dir="ltr">Broadcasting Tips</span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4">
-                <li>تأكد من وجود إضاءة جيدة قبل البدء</li>
-                <li>اختبر الصوت والصورة قبل بدء البث</li>
-                <li>استخدم اتصال إنترنت مستقر</li>
-                <li>تفاعل مع المشاهدين في التعليقات</li>
+              <ul className="space-y-2 text-sm text-muted-foreground list-disc mr-4 font-cairo">
+                <li>تأكد من وجود إضاءة جيدة قبل البدء <span className="text-xs opacity-70" dir="ltr">• Good lighting</span></li>
+                <li>اختبر الصوت والصورة قبل بدء البث <span className="text-xs opacity-70" dir="ltr">• Test audio/video</span></li>
+                <li>استخدم اتصال إنترنت مستقر <span className="text-xs opacity-70" dir="ltr">• Stable internet</span></li>
+                <li>تفاعل مع المشاهدين في التعليقات <span className="text-xs opacity-70" dir="ltr">• Engage viewers</span></li>
               </ul>
             </CardContent>
           </Card>
@@ -713,7 +726,10 @@ const LiveStreamBroadcast = () => {
         {isStreaming && currentStreamIdRef.current && (
           <Card className="h-full flex flex-col">
             <CardHeader className="pb-3">
-              <CardTitle className="font-cairo text-lg">التفاعل المباشر</CardTitle>
+              <CardTitle className="font-cairo text-lg">
+                التفاعل المباشر
+                <span className="text-xs text-muted-foreground block font-normal" dir="ltr">Live Interactions</span>
+              </CardTitle>
               <div className="flex flex-wrap gap-2 mt-2">
                 <Badge variant="secondary" className="gap-1">
                   <Users className="w-3 h-3" />
@@ -739,7 +755,7 @@ const LiveStreamBroadcast = () => {
                   <div className="text-center py-8 text-muted-foreground">
                     <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p className="font-cairo">لا توجد تعليقات بعد</p>
-                    <p className="text-sm">سيظهر التفاعل هنا</p>
+                    <p className="text-sm font-cairo">سيظهر التفاعل هنا <span className="text-xs opacity-70" dir="ltr">No comments yet</span></p>
                   </div>
                 ) : (
                   <>
