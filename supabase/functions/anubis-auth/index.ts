@@ -344,13 +344,11 @@ serve(async (req) => {
       );
 
     } else if (action === 'logout') {
-      const { session_token } = await req.json();
-      
-      if (session_token) {
+      if (logout_token) {
         await supabaseClient
           .from('anubis_sessions')
           .delete()
-          .eq('session_token', session_token);
+          .eq('session_token', logout_token);
       }
 
       return new Response(
