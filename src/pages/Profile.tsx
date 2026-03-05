@@ -336,15 +336,31 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                {connectedWallets.solana ? (
+               <div className="space-y-2">
+                {connectedWallets.solana && (
                   <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                     <Badge variant="outline" className="text-xs">Solana</Badge>
                     <span className="font-mono text-xs text-muted-foreground">
                       {connectedWallets.solana.slice(0, 6)}...{connectedWallets.solana.slice(-4)}
                     </span>
                   </div>
-                ) : null}
+                )}
+                {connectedWallets.evm && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <Badge variant="outline" className="text-xs">Ethereum</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {connectedWallets.evm.slice(0, 6)}...{connectedWallets.evm.slice(-4)}
+                    </span>
+                  </div>
+                )}
+                {connectedWallets.ton && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <Badge variant="outline" className="text-xs">TON</Badge>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {connectedWallets.ton.slice(0, 6)}...{connectedWallets.ton.slice(-4)}
+                    </span>
+                  </div>
+                )}
                 {!connectedWallets.solana && !connectedWallets.ton && !connectedWallets.evm && (
                   <p className="text-sm text-muted-foreground text-center font-cairo py-2">لا توجد محافظ مربوطة</p>
                 )}
