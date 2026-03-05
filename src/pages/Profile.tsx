@@ -134,7 +134,7 @@ export default function Profile() {
     fetchPoints();
     fetchWallets();
     fetchBadges();
-  }, [viewUserId, user?.id]);
+  }, [viewUserId, user?.id, tonAddress]);
 
   if (loading || statsLoading) {
     return (
