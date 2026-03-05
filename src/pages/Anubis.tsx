@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, FileText, Image as ImageIcon, Shield, Download, Trash2, RefreshCw, Eye, Lock } from "lucide-react";
+import { Loader2, Upload, FileText, Image as ImageIcon, Shield, Download, Trash2, RefreshCw, Eye, Lock, CreditCard } from "lucide-react";
+import { UnifiedPaymentGateway } from "@/components/payment/UnifiedPaymentGateway";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
