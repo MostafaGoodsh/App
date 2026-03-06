@@ -349,7 +349,7 @@ const RoadmapDetail = () => {
         {renderPaymentGateway()}
 
         {/* Market Map for msr-market */}
-        {slug === "msr-market" && (
+        {slug && slug.toLowerCase().replace(/\s+/g, '-').includes("msr") && slug.toLowerCase().includes("market") && (
           <div className="mb-8">
             <Suspense fallback={<Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />}>
               <MarketMap />
