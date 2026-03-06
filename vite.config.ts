@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
       stream: 'stream-browserify',
       util: 'util'
     },
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   define: {
     global: 'globalThis',
