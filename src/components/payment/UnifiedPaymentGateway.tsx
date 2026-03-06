@@ -36,6 +36,8 @@ interface UnifiedPaymentGatewayProps {
   backgroundImage?: string;
   // Show test mode warning
   showTestWarning?: boolean;
+  // Show conversion rate display
+  showConversionRate?: boolean;
 }
 
 export const UnifiedPaymentGateway = ({
@@ -50,6 +52,7 @@ export const UnifiedPaymentGateway = ({
   tokenSymbol = 'XP',
   backgroundImage = '/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png',
   showTestWarning = true,
+  showConversionRate = true,
 }: UnifiedPaymentGatewayProps) => {
   const { toast } = useToast();
   const { processPayment, loading, getSupportedMethods } = usePayment();
@@ -173,7 +176,7 @@ export const UnifiedPaymentGateway = ({
       </div>
 
       {/* Conversion Rate Display */}
-      {amount && selectedToken && (
+      {showConversionRate && amount && selectedToken && (
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
