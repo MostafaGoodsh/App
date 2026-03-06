@@ -100,26 +100,7 @@ const RequireAnubisAccess = ({ children }: RequireAnubisAccessProps) => {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {user && (
-        <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
-            <div>
-              <p className="font-semibold text-green-900 dark:text-green-100">
-                مرحباً {user.full_name || user.email}
-              </p>
-              <p className="text-sm text-green-800 dark:text-green-200">
-                نوع الاشتراك: {user.subscription_type}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 };
 
 export default RequireAnubisAccess;

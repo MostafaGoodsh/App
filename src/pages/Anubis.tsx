@@ -287,7 +287,7 @@ export default function Anubis() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
-          <div className="absolute bottom-0 left-0 right-0 p-8">
+          <div className="absolute bottom-0 left-0 right-0 p-8 text-center">
             <h1 className="font-cairo text-4xl md:text-5xl text-primary font-bold">
               الخزانة الرقمية
             </h1>
@@ -301,11 +301,8 @@ export default function Anubis() {
                 <div className="mx-auto w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
                   <Shield className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="font-cairo text-3xl font-bold text-primary mb-2">
-                  {title}
-                </CardTitle>
-                <CardDescription className="text-lg whitespace-pre-line">
-                  {introduction}
+                <CardDescription className="text-base font-cairo leading-relaxed whitespace-pre-line text-muted-foreground" dir="rtl">
+                  سوف يتم تعيين سعر الاشتراك في الخزانة مع تطور المفاوضات مع الجهات الرسمية والمعنية بما يضمن توفير أفضل بنية تحتية لأمن المعلومات في العالم... مما يضمن اتصال آلي بين المستخدم ووحدة التخزين دون المرور أو اطلاع أي عنصر بشري.. مما يتيح التخزين الآمن والاستعادة وقت الكوارث البيئية أو الحروب وبنظام مقاوم للتدخل البشري مقاوم للمتفجرات مقاوم للانهيار
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -446,10 +443,11 @@ export default function Anubis() {
             <UnifiedPaymentGateway
               mode="inline"
               purpose="subscription"
-              purposeLabel="شحن رصيد الخزانة"
-              purposeLabelEn="Vault Recharge"
+              purposeLabel="الاشتراك في الخزانة الرقمية"
+              purposeLabelEn="Digital Vault Subscription"
               tokenSymbol="XP"
               showTestWarning={true}
+              showConversionRate={false}
             />
           </div>
         </div>
