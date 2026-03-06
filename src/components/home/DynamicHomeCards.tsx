@@ -32,15 +32,20 @@ const SpecialCardComponents: Record<string, React.FC> = {
   live_stream: LiveStreamCard,
 };
 
-const LinkCard = ({ card }: { card: HomePageCard }) => (
+const LinkCard = ({ card }: { card: HomePageCard }) => {
+  const [imgError, setImgError] = useState(false);
+  const hasValidImage = card.background_image && !card.background_image.includes('placeholder') && !imgError;
+
+  return (
   <Link to={card.route_path || `/${card.slug}`} className="group">
     <article className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm">
-      {card.background_image && (
+      {hasValidImage && (
         <img
-          src={card.background_image}
+          src={card.background_image!}
           alt={card.title}
           className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
           loading="lazy"
+          onError={() => setImgError(true)}
         />
       )}
       <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end bg-gradient-to-t from-background/90 via-background/60 to-transparent">
@@ -61,7 +66,8 @@ const LinkCard = ({ card }: { card: HomePageCard }) => (
       </div>
     </article>
   </Link>
-);
+  );
+};
 
 const DynamicHomeCards = () => {
   const [cards, setCards] = useState<HomePageCard[]>([]);
