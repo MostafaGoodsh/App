@@ -58,7 +58,19 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) =
   return null;
 }
 
-const MarketMap = () => {
+interface MarketMapProps {
+  title?: string;
+  titleEn?: string;
+  intro?: string;
+  introEn?: string;
+}
+
+const MarketMap = ({
+  title = "خريطة المتعاونين",
+  titleEn = "Partners Map",
+  intro = "اضغط على الخريطة لإضافة موقع جديد (يحتاج موافقة الإدارة)",
+  introEn,
+}: MarketMapProps) => {
   const { user } = useAuth();
   const [locations, setLocations] = useState<MarketLocation[]>([]);
   const [loading, setLoading] = useState(true);

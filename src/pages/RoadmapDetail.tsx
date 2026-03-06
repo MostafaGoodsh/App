@@ -62,6 +62,10 @@ interface RoadmapData {
     payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
     payment_title?: string;
     payment_description?: string;
+    map_title?: string;
+    map_title_en?: string;
+    map_intro?: string;
+    map_intro_en?: string;
   };
 }
 
@@ -352,7 +356,12 @@ const RoadmapDetail = () => {
         {slug && slug.toLowerCase().replace(/\s+/g, '-').includes("msr") && slug.toLowerCase().includes("market") && (
           <div className="mb-8">
             <Suspense fallback={<Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />}>
-              <MarketMap />
+              <MarketMap
+                title={data.widget_config?.map_title}
+                titleEn={data.widget_config?.map_title_en}
+                intro={data.widget_config?.map_intro}
+                introEn={data.widget_config?.map_intro_en}
+              />
             </Suspense>
           </div>
         )}
