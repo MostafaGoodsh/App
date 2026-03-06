@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
@@ -9,6 +9,8 @@ import { ArrowLeft, Loader2, ExternalLink, CheckCircle, Circle } from "lucide-re
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { RoadmapPaymentGateway } from "@/components/roadmap/RoadmapPaymentGateway";
+
+const MarketMap = lazy(() => import("@/components/market/MarketMap"));
 // Configure DOMPurify to allow safe HTML elements for content
 const sanitizeHTML = (dirty: string) => {
   return DOMPurify.sanitize(dirty, {
@@ -345,6 +347,15 @@ const RoadmapDetail = () => {
 
         {/* Payment Gateway Section */}
         {renderPaymentGateway()}
+
+        {/* Market Map for msr-market */}
+        {slug === "msr-market" && (
+          <div className="mb-8">
+            <Suspense fallback={<Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />}>
+              <MarketMap />
+            </Suspense>
+          </div>
+        )}
 
         {/* Widget Section */}
         {renderWidget()}
