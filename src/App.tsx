@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,81 +9,91 @@ import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ScrollToTop from "./components/ScrollToTop";
 import { SolanaWalletProvider } from "./components/wallet/SolanaWalletProvider";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
 import MainLayout from "./layouts/MainLayout";
-import Wallet from "./pages/Wallet";
-import EarlyAccess from "./pages/EarlyAccess";
-import Identity from "./pages/Identity";
-import Learning from "./pages/Learning";
-import Surveys from "./pages/Surveys";
-import Mining from "./pages/Mining";
-import Auth from "./pages/Auth";
-import KYCAdmin from "./pages/KYCAdmin";
-import SurveysAdmin from "./pages/SurveysAdmin";
-import LearningAdmin from "./pages/LearningAdmin";
-import ContentAdmin from "./pages/ContentAdmin";
-import UsersAdmin from "./pages/UsersAdmin";
-import Support from "./pages/Support";
-import SupportAdmin from "./pages/SupportAdmin";
 import RequireAuth from "./components/auth/RequireAuth";
 import RequireAdmin from "./components/auth/RequireAdmin";
 import RequireAccess from "./components/auth/RequireAccess";
 import RequireAnubisAccess from "./components/auth/RequireAnubisAccess";
-import Updates from "./pages/Updates";
-import StableCoin from "./pages/StableCoin";
-import RWA from "./pages/RWA";
-import CallOut from "./pages/CallOut";
-import MiningLevelsAdmin from "./pages/MiningLevelsAdmin";
-import CalloutPersonalitiesAdmin from "./pages/CalloutPersonalitiesAdmin";
-import CalloutCardAdmin from "./pages/CalloutCardAdmin";
-import UpdatesAdmin from "./pages/UpdatesAdmin";
-import Profile from "./pages/Profile";
-import EngagementStatsAdmin from "./pages/EngagementStatsAdmin";
-import DailyTasksAdmin from "./pages/DailyTasksAdmin";
-import DailyTasks from "./pages/DailyTasks";
-import SurveyResponsesAdmin from "./pages/SurveyResponsesAdmin";
-import MediaContentAdmin from "./pages/MediaContentAdmin";
-import PersonalityTasksAdmin from "./pages/PersonalityTasksAdmin";
-import TaskIntroductionsAdmin from "./pages/TaskIntroductionsAdmin";
-import AnubisCardAdmin from "./pages/AnubisCardAdmin";
-import AnubisAuth from "./pages/AnubisAuth";
-import ConversionSettingsAdmin from "./pages/ConversionSettingsAdmin";
-import Reels from "./pages/Reels";
-import ReelsCardAdmin from "./pages/ReelsCardAdmin";
-import ReelsCategoriesAdmin from "./pages/ReelsCategoriesAdmin";
-import ReelsCategories from "./pages/ReelsCategories";
-import ContentApprovalAdmin from "./pages/ContentApprovalAdmin";
-import ActiveCalloutAdmin from "./pages/ActiveCalloutAdmin";
-import VerifiedAccountsAdmin from "./pages/VerifiedAccountsAdmin";
-import Recharge from "./pages/Recharge";
-import PaymentDemo from "./pages/PaymentDemo";
-import PiPayment from "./pages/PiPayment";
-import QuranPagesAdmin from "./pages/QuranPagesAdmin";
-import DailyTasksCardAdmin from "./pages/DailyTasksCardAdmin";
-import TodoIntroductionAdmin from "./pages/TodoIntroductionAdmin";
-import RoadmapCardsAdmin from "./pages/RoadmapCardsAdmin";
-import RoadmapDetail from "./pages/RoadmapDetail";
-import Anubis from "./pages/Anubis";
-import AnubisSubscription from "./pages/AnubisSubscription";
-import HomePageCardsAdmin from "./pages/HomePageCardsAdmin";
-import AnubisSubscriptionsAdmin from "./pages/AnubisSubscriptionsAdmin";
-import ProfileSettingsAdmin from "./pages/ProfileSettingsAdmin";
-import EarlyAccessAdmin from "./pages/EarlyAccessAdmin";
-import Documents from "./pages/Documents";
-import AnubisSettingsAdmin from "./pages/AnubisSettingsAdmin";
-import LiveStream from "./pages/LiveStream";
-import LiveStreamApprovalsAdmin from "./pages/LiveStreamApprovalsAdmin";
-import LiveStreamsGallery from "./pages/LiveStreamsGallery";
-import LiveStreamViewer from "./pages/LiveStreamViewer";
-import MyLiveStreams from "./pages/MyLiveStreams";
-import ProfileCustomizationAdmin from "./pages/ProfileCustomizationAdmin";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import InternalTokensAdmin from "./pages/InternalTokensAdmin";
-import BadgesAdmin from "./pages/BadgesAdmin";
-import AnnouncementsAdmin from "./pages/AnnouncementsAdmin";
-import MarketLocationsAdmin from "./pages/MarketLocationsAdmin";
+import { Loader2 } from "lucide-react";
+
+// Lazy-loaded pages
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Wallet = lazy(() => import("./pages/Wallet"));
+const EarlyAccess = lazy(() => import("./pages/EarlyAccess"));
+const Identity = lazy(() => import("./pages/Identity"));
+const Learning = lazy(() => import("./pages/Learning"));
+const Surveys = lazy(() => import("./pages/Surveys"));
+const Mining = lazy(() => import("./pages/Mining"));
+const Auth = lazy(() => import("./pages/Auth"));
+const KYCAdmin = lazy(() => import("./pages/KYCAdmin"));
+const SurveysAdmin = lazy(() => import("./pages/SurveysAdmin"));
+const LearningAdmin = lazy(() => import("./pages/LearningAdmin"));
+const ContentAdmin = lazy(() => import("./pages/ContentAdmin"));
+const UsersAdmin = lazy(() => import("./pages/UsersAdmin"));
+const Support = lazy(() => import("./pages/Support"));
+const SupportAdmin = lazy(() => import("./pages/SupportAdmin"));
+const Updates = lazy(() => import("./pages/Updates"));
+const StableCoin = lazy(() => import("./pages/StableCoin"));
+const RWA = lazy(() => import("./pages/RWA"));
+const CallOut = lazy(() => import("./pages/CallOut"));
+const MiningLevelsAdmin = lazy(() => import("./pages/MiningLevelsAdmin"));
+const CalloutPersonalitiesAdmin = lazy(() => import("./pages/CalloutPersonalitiesAdmin"));
+const CalloutCardAdmin = lazy(() => import("./pages/CalloutCardAdmin"));
+const UpdatesAdmin = lazy(() => import("./pages/UpdatesAdmin"));
+const Profile = lazy(() => import("./pages/Profile"));
+const EngagementStatsAdmin = lazy(() => import("./pages/EngagementStatsAdmin"));
+const DailyTasksAdmin = lazy(() => import("./pages/DailyTasksAdmin"));
+const DailyTasks = lazy(() => import("./pages/DailyTasks"));
+const SurveyResponsesAdmin = lazy(() => import("./pages/SurveyResponsesAdmin"));
+const MediaContentAdmin = lazy(() => import("./pages/MediaContentAdmin"));
+const PersonalityTasksAdmin = lazy(() => import("./pages/PersonalityTasksAdmin"));
+const TaskIntroductionsAdmin = lazy(() => import("./pages/TaskIntroductionsAdmin"));
+const AnubisCardAdmin = lazy(() => import("./pages/AnubisCardAdmin"));
+const AnubisAuth = lazy(() => import("./pages/AnubisAuth"));
+const ConversionSettingsAdmin = lazy(() => import("./pages/ConversionSettingsAdmin"));
+const Reels = lazy(() => import("./pages/Reels"));
+const ReelsCardAdmin = lazy(() => import("./pages/ReelsCardAdmin"));
+const ReelsCategoriesAdmin = lazy(() => import("./pages/ReelsCategoriesAdmin"));
+const ReelsCategories = lazy(() => import("./pages/ReelsCategories"));
+const ContentApprovalAdmin = lazy(() => import("./pages/ContentApprovalAdmin"));
+const ActiveCalloutAdmin = lazy(() => import("./pages/ActiveCalloutAdmin"));
+const VerifiedAccountsAdmin = lazy(() => import("./pages/VerifiedAccountsAdmin"));
+const Recharge = lazy(() => import("./pages/Recharge"));
+const PaymentDemo = lazy(() => import("./pages/PaymentDemo"));
+const PiPayment = lazy(() => import("./pages/PiPayment"));
+const QuranPagesAdmin = lazy(() => import("./pages/QuranPagesAdmin"));
+const DailyTasksCardAdmin = lazy(() => import("./pages/DailyTasksCardAdmin"));
+const TodoIntroductionAdmin = lazy(() => import("./pages/TodoIntroductionAdmin"));
+const RoadmapCardsAdmin = lazy(() => import("./pages/RoadmapCardsAdmin"));
+const RoadmapDetail = lazy(() => import("./pages/RoadmapDetail"));
+const Anubis = lazy(() => import("./pages/Anubis"));
+const AnubisSubscription = lazy(() => import("./pages/AnubisSubscription"));
+const HomePageCardsAdmin = lazy(() => import("./pages/HomePageCardsAdmin"));
+const AnubisSubscriptionsAdmin = lazy(() => import("./pages/AnubisSubscriptionsAdmin"));
+const ProfileSettingsAdmin = lazy(() => import("./pages/ProfileSettingsAdmin"));
+const EarlyAccessAdmin = lazy(() => import("./pages/EarlyAccessAdmin"));
+const Documents = lazy(() => import("./pages/Documents"));
+const AnubisSettingsAdmin = lazy(() => import("./pages/AnubisSettingsAdmin"));
+const LiveStream = lazy(() => import("./pages/LiveStream"));
+const LiveStreamApprovalsAdmin = lazy(() => import("./pages/LiveStreamApprovalsAdmin"));
+const LiveStreamsGallery = lazy(() => import("./pages/LiveStreamsGallery"));
+const LiveStreamViewer = lazy(() => import("./pages/LiveStreamViewer"));
+const MyLiveStreams = lazy(() => import("./pages/MyLiveStreams"));
+const ProfileCustomizationAdmin = lazy(() => import("./pages/ProfileCustomizationAdmin"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const InternalTokensAdmin = lazy(() => import("./pages/InternalTokensAdmin"));
+const BadgesAdmin = lazy(() => import("./pages/BadgesAdmin"));
+const AnnouncementsAdmin = lazy(() => import("./pages/AnnouncementsAdmin"));
+const MarketLocationsAdmin = lazy(() => import("./pages/MarketLocationsAdmin"));
+
 const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 
 const App = () => {
   const manifestUrl = `${window.location.origin}/tonconnect-manifest.json`;
@@ -98,6 +109,7 @@ const App = () => {
                   <Toaster />
                   <Sonner />
                   <ScrollToTop />
+                  <Suspense fallback={<PageLoader />}>
                   <Routes>
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<RequireAccess><Index /></RequireAccess>} />
@@ -162,7 +174,6 @@ const App = () => {
                     <Route path="admin/anubis-settings" element={<RequireAdmin><AnubisSettingsAdmin /></RequireAdmin>} />
                     <Route path="admin/profile-settings" element={<RequireAuth><ProfileSettingsAdmin /></RequireAuth>} />
                     <Route path="admin/early-access" element={<RequireAdmin><EarlyAccessAdmin /></RequireAdmin>} />
-                    <Route path="admin/live-stream-approvals" element={<RequireAdmin><LiveStreamApprovalsAdmin /></RequireAdmin>} />
                     <Route path="admin/internal-tokens" element={<RequireAdmin><InternalTokensAdmin /></RequireAdmin>} />
                     <Route path="admin/badges" element={<RequireAdmin><BadgesAdmin /></RequireAdmin>} />
                     <Route path="admin/announcements" element={<RequireAdmin><AnnouncementsAdmin /></RequireAdmin>} />
@@ -170,6 +181,7 @@ const App = () => {
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
+                  </Suspense>
                 </TooltipProvider>
               </BrowserRouter>
             </SolanaWalletProvider>
