@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff, Clock } from "lucide-react";
+import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff, Clock, Upload, Loader2, ImageIcon } from "lucide-react";
+
+const SPECIAL_CARD_TYPES = ['tasks', 'anubis', 'reels', 'live_stream'];
+
+const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas not supported'));
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => blob ? resolve(blob) : reject(new Error('Compression failed')),
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
 
 interface HomePageCard {
   id: string;
@@ -47,7 +76,52 @@ export default function HomePageCardsManagement() {
   const [saving, setSaving] = useState(false);
   const [editingCard, setEditingCard] = useState<HomePageCard | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+
+  const isImageRequired = useCallback((card: HomePageCard | null) => {
+    if (!card) return false;
+    return !SPECIAL_CARD_TYPES.includes(card.card_type);
+  }, []);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !editingCard) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "خطأ", description: "يجب اختيار ملف صورة", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "خطأ", description: "حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      const fileName = `home-card-${Date.now()}.jpg`;
+      const filePath = `home-cards/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('content-backgrounds')
+        .upload(filePath, compressed, { cacheControl: '3600', upsert: true, contentType: 'image/jpeg' });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-backgrounds')
+        .getPublicUrl(filePath);
+
+      setEditingCard({ ...editingCard, background_image: publicUrl });
+      toast({ title: "تم رفع الصورة بنجاح" });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: "خطأ", description: error.message || "فشل في رفع الصورة", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const fetchCards = async () => {
     try {
@@ -438,8 +512,43 @@ export default function HomePageCardsManagement() {
 
               <TabsContent value="styling" className="space-y-4">
                 <div className="space-y-2">
-                  <Label>صورة الخلفية (URL)</Label>
-                  <Input value={editingCard.background_image || ''} onChange={(e) => setEditingCard({...editingCard, background_image: e.target.value})} />
+                  <Label className="flex items-center gap-1">
+                    <ImageIcon className="h-4 w-4" />
+                    صورة الخلفية {isImageRequired(editingCard) && <span className="text-destructive">*</span>}
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 cursor-pointer">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="cursor-pointer"
+                      />
+                    </label>
+                    {uploading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                  </div>
+                  {editingCard.background_image && (
+                    <div className="mt-2 flex items-center gap-3">
+                      <img
+                        src={editingCard.background_image}
+                        alt="معاينة"
+                        className="w-24 h-16 object-cover rounded border"
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs text-destructive"
+                        onClick={() => setEditingCard({...editingCard, background_image: ''})}
+                      >
+                        <Trash2 className="h-3 w-3 ml-1" />
+                        حذف
+                      </Button>
+                    </div>
+                  )}
+                  {isImageRequired(editingCard) && !editingCard.background_image && (
+                    <p className="text-xs text-destructive">صورة الخلفية مطلوبة لهذا النوع من البطاقات</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -541,7 +650,7 @@ export default function HomePageCardsManagement() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving || uploading || (isImageRequired(editingCard) && !editingCard?.background_image)}>
               {saving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               حفظ
             </Button>
