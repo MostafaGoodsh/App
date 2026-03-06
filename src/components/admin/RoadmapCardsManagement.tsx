@@ -66,6 +66,10 @@ interface WidgetConfig {
   payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
   payment_title?: string;
   payment_description?: string;
+  map_title?: string;
+  map_title_en?: string;
+  map_intro?: string;
+  map_intro_en?: string;
 }
 
 interface RoadmapCard {
