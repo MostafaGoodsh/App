@@ -58,7 +58,19 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) =
   return null;
 }
 
-const MarketMap = () => {
+interface MarketMapProps {
+  title?: string;
+  titleEn?: string;
+  intro?: string;
+  introEn?: string;
+}
+
+const MarketMap = ({
+  title = "خريطة المتعاونين",
+  titleEn = "Partners Map",
+  intro = "اضغط على الخريطة لإضافة موقع جديد (يحتاج موافقة الإدارة)",
+  introEn,
+}: MarketMapProps) => {
   const { user } = useAuth();
   const [locations, setLocations] = useState<MarketLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,14 +113,18 @@ const MarketMap = () => {
   return (
     <div className="space-y-4">
       <Card className="bg-black/60 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+        <CardHeader dir="rtl" className="text-right">
+          <CardTitle className="text-white flex flex-row-reverse items-center justify-end gap-2 text-right">
             <MapPin className="w-5 h-5 text-primary" />
-            خريطة المتعاونين | Partners Map
+            <div>
+              <span className="block">{title}</span>
+              {titleEn && <span className="block text-sm font-normal text-white/70">{titleEn}</span>}
+            </div>
           </CardTitle>
           {user && (
-            <p className="text-white/60 text-sm">
-              اضغط على الخريطة لإضافة موقع جديد (يحتاج موافقة الإدارة)
+            <p className="text-white/60 text-sm text-right">
+              {intro}
+              {introEn && <span className="block text-white/50">{introEn}</span>}
             </p>
           )}
         </CardHeader>
@@ -157,7 +173,7 @@ const MarketMap = () => {
       </Card>
 
       {!user && (
-        <p className="text-white/50 text-center text-sm">سجّل دخولك لإضافة موقع متعاون جديد</p>
+        <p dir="rtl" className="text-white/50 text-right text-sm">سجّل دخولك لإضافة موقع متعاون جديد</p>
       )}
 
       {showForm && selectedCoords && (

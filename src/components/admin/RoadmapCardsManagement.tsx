@@ -66,6 +66,10 @@ interface WidgetConfig {
   payment_type?: 'presale' | 'liquidity' | 'services' | 'vault';
   payment_title?: string;
   payment_description?: string;
+  map_title?: string;
+  map_title_en?: string;
+  map_intro?: string;
+  map_intro_en?: string;
 }
 
 interface RoadmapCard {
@@ -527,6 +531,81 @@ const RoadmapCardsManagement = () => {
 
               {/* Actions & Payment Tab */}
               <TabsContent value="actions" className="space-y-6">
+                {/* Partners Map Section */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings2 className="h-5 w-5" />
+                      إعدادات خريطة المتعاونين | Partners Map
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>عنوان الخريطة (عربي)</Label>
+                        <Input
+                          value={editingCard?.widget_config?.map_title || ''}
+                          onChange={(e) => setEditingCard({
+                            ...editingCard,
+                            widget_config: {
+                              ...editingCard?.widget_config,
+                              map_title: e.target.value
+                            }
+                          })}
+                          placeholder="خريطة المتعاونين"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Map Title (English)</Label>
+                        <Input
+                          value={editingCard?.widget_config?.map_title_en || ''}
+                          onChange={(e) => setEditingCard({
+                            ...editingCard,
+                            widget_config: {
+                              ...editingCard?.widget_config,
+                              map_title_en: e.target.value
+                            }
+                          })}
+                          placeholder="Partners Map"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>مقدمة الخريطة (عربي)</Label>
+                        <Textarea
+                          value={editingCard?.widget_config?.map_intro || ''}
+                          onChange={(e) => setEditingCard({
+                            ...editingCard,
+                            widget_config: {
+                              ...editingCard?.widget_config,
+                              map_intro: e.target.value
+                            }
+                          })}
+                          placeholder="اضغط على الخريطة لإضافة موقع جديد"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Map Intro (English)</Label>
+                        <Textarea
+                          value={editingCard?.widget_config?.map_intro_en || ''}
+                          onChange={(e) => setEditingCard({
+                            ...editingCard,
+                            widget_config: {
+                              ...editingCard?.widget_config,
+                              map_intro_en: e.target.value
+                            }
+                          })}
+                          placeholder="Tap the map to add a new location"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Payment Gateway Section */}
                 <Card>
                   <CardHeader className="pb-3">
