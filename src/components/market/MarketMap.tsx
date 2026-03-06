@@ -1,0 +1,167 @@
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MapPin, Store, Phone, Globe } from "lucide-react";
+import { MarketLocationForm } from "./MarketLocationForm";
+import { useAuth } from "@/hooks/useAuth";
+
+// Custom marker icon using app logo
+const appIcon = new L.Icon({
+  iconUrl: "/lovable-uploads/73294275-1418-4174-b109-0f587abab976.png",
+  iconSize: [36, 36],
+  iconAnchor: [18, 36],
+  popupAnchor: [0, -36],
+  className: "rounded-full shadow-lg border-2 border-primary",
+});
+
+interface MarketLocation {
+  id: string;
+  name: string;
+  name_en: string | null;
+  description: string | null;
+  location_type: string;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  phone: string | null;
+  website: string | null;
+  logo_url: string | null;
+}
+
+const LocationTypeLabels: Record<string, string> = {
+  store: "متجر",
+  market: "سوق",
+  shop: "محل",
+  restaurant: "مطعم",
+  service: "خدمات",
+  other: "أخرى",
+};
+
+function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+const MarketMap = () => {
+  const { user } = useAuth();
+  const [locations, setLocations] = useState<MarketLocation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
+  const fetchLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("market_locations")
+        .select("id, name, name_en, description, location_type, latitude, longitude, address, phone, website, logo_url")
+        .eq("status", "approved");
+
+      if (error) throw error;
+      setLocations(data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    if (user) {
+      setSelectedCoords({ lat, lng });
+      setShowForm(true);
+    }
+  };
+
+  const handleFormSuccess = () => {
+    setShowForm(false);
+    setSelectedCoords(null);
+    fetchLocations();
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card className="bg-black/60 backdrop-blur-sm border-white/20">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            خريطة المتعاونين | Partners Map
+          </CardTitle>
+          {user && (
+            <p className="text-white/60 text-sm">
+              اضغط على الخريطة لإضافة موقع جديد (يحتاج موافقة الإدارة)
+            </p>
+          )}
+        </CardHeader>
+        <CardContent className="p-0 overflow-hidden rounded-b-lg">
+          {!loading && (
+            <MapContainer
+              center={[26.8206, 30.8025]}
+              zoom={6}
+              style={{ height: "450px", width: "100%" }}
+              className="z-0"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {user && <ClickHandler onMapClick={handleMapClick} />}
+              {locations.map((loc) => (
+                <Marker key={loc.id} position={[loc.latitude, loc.longitude]} icon={appIcon}>
+                  <Popup>
+                    <div className="text-sm space-y-1 min-w-[180px]" dir="rtl">
+                      <h3 className="font-bold text-base">{loc.name}</h3>
+                      {loc.name_en && <p className="text-muted-foreground text-xs">{loc.name_en}</p>}
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Store className="w-3 h-3" />
+                        {LocationTypeLabels[loc.location_type] || loc.location_type}
+                      </div>
+                      {loc.description && <p className="text-xs">{loc.description}</p>}
+                      {loc.address && <p className="text-xs">📍 {loc.address}</p>}
+                      {loc.phone && (
+                        <a href={`tel:${loc.phone}`} className="flex items-center gap-1 text-xs text-primary">
+                          <Phone className="w-3 h-3" /> {loc.phone}
+                        </a>
+                      )}
+                      {loc.website && (
+                        <a href={loc.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary">
+                          <Globe className="w-3 h-3" /> الموقع
+                        </a>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {!user && (
+        <p className="text-white/50 text-center text-sm">سجّل دخولك لإضافة موقع متعاون جديد</p>
+      )}
+
+      {showForm && selectedCoords && (
+        <MarketLocationForm
+          latitude={selectedCoords.lat}
+          longitude={selectedCoords.lng}
+          onSuccess={handleFormSuccess}
+          onCancel={() => { setShowForm(false); setSelectedCoords(null); }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default MarketMap;
