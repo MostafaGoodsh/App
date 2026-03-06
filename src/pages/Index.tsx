@@ -8,13 +8,8 @@ import { ReferralCard } from "@/components/referral/ReferralCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
-import DailyTasksCard from "@/components/engagement/DailyTasksCard";
-import AnubisCard from "@/components/AnubisCard";
-import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
-import LiveStreamCard from "@/components/engagement/LiveStreamCard";
-import sphinxBg from "@/assets/sphinx-bg.jpg";
-import pharaohStatueBg from "@/assets/pharaoh-statue-bg.jpg";
+import DynamicHomeCards from "@/components/home/DynamicHomeCards";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
