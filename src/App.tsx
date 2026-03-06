@@ -81,6 +81,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import InternalTokensAdmin from "./pages/InternalTokensAdmin";
 import BadgesAdmin from "./pages/BadgesAdmin";
 import AnnouncementsAdmin from "./pages/AnnouncementsAdmin";
+import MarketLocationsAdmin from "./pages/MarketLocationsAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -165,6 +166,7 @@ const App = () => {
                     <Route path="admin/internal-tokens" element={<RequireAdmin><InternalTokensAdmin /></RequireAdmin>} />
                     <Route path="admin/badges" element={<RequireAdmin><BadgesAdmin /></RequireAdmin>} />
                     <Route path="admin/announcements" element={<RequireAdmin><AnnouncementsAdmin /></RequireAdmin>} />
+                    <Route path="admin/market-locations" element={<RequireAdmin><MarketLocationsAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
