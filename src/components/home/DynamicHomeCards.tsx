@@ -92,19 +92,7 @@ const DynamicHomeCards = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "home_page_cards" }, fetchCards)
       .subscribe();
 
-    const intervalId = window.setInterval(fetchCards, 15000);
-    const handleFocus = () => fetchCards();
-    const handleVisibility = () => {
-      if (!document.hidden) fetchCards();
-    };
-
-    window.addEventListener("focus", handleFocus);
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", handleFocus);
-      document.removeEventListener("visibilitychange", handleVisibility);
       supabase.removeChannel(channel);
     };
   }, [fetchCards]);
