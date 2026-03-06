@@ -173,7 +173,7 @@ const MarketMap = ({
       </Card>
 
       {!user && (
-        <p className="text-white/50 text-center text-sm">سجّل دخولك لإضافة موقع متعاون جديد</p>
+        <p dir="rtl" className="text-white/50 text-right text-sm">سجّل دخولك لإضافة موقع متعاون جديد</p>
       )}
 
       {showForm && selectedCoords && (
