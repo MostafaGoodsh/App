@@ -113,14 +113,18 @@ const MarketMap = ({
   return (
     <div className="space-y-4">
       <Card className="bg-black/60 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+        <CardHeader dir="rtl" className="text-right">
+          <CardTitle className="text-white flex flex-row-reverse items-center justify-end gap-2 text-right">
             <MapPin className="w-5 h-5 text-primary" />
-            خريطة المتعاونين | Partners Map
+            <div>
+              <span className="block">{title}</span>
+              {titleEn && <span className="block text-sm font-normal text-white/70">{titleEn}</span>}
+            </div>
           </CardTitle>
           {user && (
-            <p className="text-white/60 text-sm">
-              اضغط على الخريطة لإضافة موقع جديد (يحتاج موافقة الإدارة)
+            <p className="text-white/60 text-sm text-right">
+              {intro}
+              {introEn && <span className="block text-white/50">{introEn}</span>}
             </p>
           )}
         </CardHeader>
