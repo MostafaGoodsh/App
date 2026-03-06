@@ -196,26 +196,32 @@ export default function HomePageCardsManagement() {
       };
 
       if (isNewCard) {
-        // إنشاء بطاقة جديدة
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('home_page_cards')
-          .insert([cardData]);
+          .insert([cardData])
+          .select();
         
         if (error) {
           console.error('Insert error:', error);
           throw error;
         }
+        console.log('Inserted card:', data);
       } else {
-        // تحديث بطاقة موجودة
-        const { error } = await supabase
+        const { data, error, count } = await supabase
           .from('home_page_cards')
           .update(cardData)
-          .eq('id', editingCard.id);
+          .eq('id', editingCard.id)
+          .select();
         
         if (error) {
           console.error('Update error:', error);
           throw error;
         }
+        
+        if (!data || data.length === 0) {
+          throw new Error('لم يتم تحديث أي بطاقة - تحقق من صلاحيات الإدارة');
+        }
+        console.log('Updated card:', data);
       }
 
       toast({ title: "تم الحفظ", description: "تم حفظ البطاقة بنجاح" });
