@@ -7,6 +7,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
 
 const MainLayoutContent = () => {
   const { getContent } = useAppContent();
@@ -64,6 +65,7 @@ const MainLayoutContent = () => {
         <main className="flex-1 overflow-x-hidden">
           <Outlet />
         </main>
+        <AnnouncementDialog />
       </div>
     </div>
   );
