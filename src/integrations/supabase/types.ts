@@ -1521,6 +1521,69 @@ export type Database = {
         }
         Relationships: []
       }
+      market_locations: {
+        Row: {
+          address: string | null
+          admin_notes: string | null
+          created_at: string
+          description: string | null
+          id: string
+          latitude: number
+          location_type: string
+          logo_url: string | null
+          longitude: number
+          name: string
+          name_en: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude: number
+          location_type?: string
+          logo_url?: string | null
+          longitude: number
+          name: string
+          name_en?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number
+          location_type?: string
+          logo_url?: string | null
+          longitude?: number
+          name?: string
+          name_en?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       mfa_sessions: {
         Row: {
           challenge_code: string
