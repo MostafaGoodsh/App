@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+// leaflet CSS loaded via CDN in index.html for reliability
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Store, Phone, Globe } from "lucide-react";
 import { MarketLocationForm } from "./MarketLocationForm";
 import { useAuth } from "@/hooks/useAuth";
+
+// Fix default Leaflet marker icon issue with bundlers
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
 
 // Custom marker icon using app logo
 const appIcon = new L.Icon({
