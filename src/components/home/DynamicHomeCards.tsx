@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DailyTasksCard from "@/components/engagement/DailyTasksCard";
@@ -67,37 +67,47 @@ const DynamicHomeCards = () => {
   const [cards, setCards] = useState<HomePageCard[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchCards = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("home_page_cards")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      setCards(data || []);
+    } catch (error) {
+      console.error("Error fetching home page cards:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("home_page_cards")
-          .select("*")
-          .eq("is_active", true)
-          .order("display_order", { ascending: true });
-
-        if (error) throw error;
-        setCards(data || []);
-      } catch (error) {
-        console.error("Error fetching home page cards:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCards();
 
-    const subscription = supabase
+    const channel = supabase
       .channel("home_page_cards_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "home_page_cards" }, () => {
-        fetchCards();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "home_page_cards" }, fetchCards)
       .subscribe();
 
-    return () => {
-      subscription.unsubscribe();
+    const intervalId = window.setInterval(fetchCards, 15000);
+    const handleFocus = () => fetchCards();
+    const handleVisibility = () => {
+      if (!document.hidden) fetchCards();
     };
-  }, []);
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      supabase.removeChannel(channel);
+    };
+  }, [fetchCards]);
 
   if (loading) {
     return (
@@ -123,3 +133,4 @@ const DynamicHomeCards = () => {
 };
 
 export default DynamicHomeCards;
+
