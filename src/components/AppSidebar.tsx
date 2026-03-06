@@ -63,6 +63,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة العملات الداخلية", url: "/admin/internal-tokens", icon: Coins },
   { title: "إدارة البادجات", url: "/admin/badges", icon: Award },
   { title: "إدارة الإعلانات", url: "/admin/announcements", icon: Megaphone },
+  { title: "إدارة مواقع المتعاونين", url: "/admin/market-locations", icon: Map },
 ];
 
 export function AppSidebar() {
