@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import QuranBulkImport from "./QuranBulkImport";
 import {
   Dialog,
   DialogContent,
@@ -240,13 +241,15 @@ const QuranPagesManagement = () => {
               قائمة الصفحات
             </CardTitle>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="shadow-lg hover:shadow-xl transition-all">
-                <Plus className="h-5 w-5 ml-2" />
-                إضافة صفحة جديدة
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3 flex-wrap">
+            <QuranBulkImport onImportComplete={fetchPages} />
+            <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
+              <DialogTrigger asChild>
+                <Button size="lg" className="shadow-lg hover:shadow-xl transition-all">
+                  <Plus className="h-5 w-5 ml-2" />
+                  إضافة صفحة جديدة
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
               <DialogHeader className="border-b pb-4">
                 <DialogTitle className="text-2xl font-bold flex items-center gap-3">
@@ -418,6 +421,7 @@ const QuranPagesManagement = () => {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
