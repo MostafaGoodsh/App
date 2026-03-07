@@ -162,13 +162,16 @@ const MarketMap = ({
               center={[26.8206, 30.8025]}
               zoom={6}
               style={{ height: "450px", width: "100%" }}
-              className="z-0"
+              className="z-0 relative"
+              tap={true}
+              tapTolerance={30}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {user && <ClickHandler onMapClick={handleMapClick} />}
+              {user && <MapCenterButton onAdd={handleMapClick} />}
               {locations.map((loc) => (
                 <Marker key={loc.id} position={[loc.latitude, loc.longitude]} icon={appIcon}>
                   <Popup>
