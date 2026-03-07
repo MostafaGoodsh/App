@@ -195,12 +195,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("app_language", lang);
   };
 
-  const dir = language === "en" || language === "fr" || language === "es" || language === "de" || language === "pt" ? "ltr" : language === "both" ? "rtl" : "rtl";
+  // Always keep RTL direction since the app is designed RTL-first
+  const dir = "rtl" as const;
 
   useEffect(() => {
-    document.documentElement.dir = dir;
+    document.documentElement.dir = "rtl";
     document.documentElement.lang = language === "both" ? "ar" : language;
-  }, [language, dir]);
+  }, [language]);
 
   const t = (arabicText: string, englishText?: string): string => {
     if (language === "both") {
