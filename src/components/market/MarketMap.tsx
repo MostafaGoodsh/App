@@ -5,9 +5,10 @@ import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Phone, Globe } from "lucide-react";
+import { MapPin, Store, Phone, Globe, ExternalLink } from "lucide-react";
 import { MarketLocationForm } from "./MarketLocationForm";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 // Fix default Leaflet marker icon issue with bundlers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -163,6 +164,9 @@ const MarketMap = ({
                           <Globe className="w-3 h-3" /> الموقع
                         </a>
                       )}
+                      <Link to={`/market/${loc.id}`} className="flex items-center gap-1 text-xs text-primary font-semibold mt-1">
+                        <ExternalLink className="w-3 h-3" /> عرض الصفحة
+                      </Link>
                     </div>
                   </Popup>
                 </Marker>

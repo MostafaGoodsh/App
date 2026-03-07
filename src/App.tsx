@@ -86,6 +86,7 @@ const InternalTokensAdmin = lazy(() => import("./pages/InternalTokensAdmin"));
 const BadgesAdmin = lazy(() => import("./pages/BadgesAdmin"));
 const AnnouncementsAdmin = lazy(() => import("./pages/AnnouncementsAdmin"));
 const MarketLocationsAdmin = lazy(() => import("./pages/MarketLocationsAdmin"));
+const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile"));
 
 const queryClient = new QueryClient();
 
@@ -177,6 +178,7 @@ const App = () => {
                     <Route path="admin/internal-tokens" element={<RequireAdmin><InternalTokensAdmin /></RequireAdmin>} />
                     <Route path="admin/badges" element={<RequireAdmin><BadgesAdmin /></RequireAdmin>} />
                     <Route path="admin/announcements" element={<RequireAdmin><AnnouncementsAdmin /></RequireAdmin>} />
+                    <Route path="market/:id" element={<MarketLocationProfile />} />
                     <Route path="admin/market-locations" element={<RequireAdmin><MarketLocationsAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
