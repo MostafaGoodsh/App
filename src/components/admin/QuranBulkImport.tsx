@@ -275,25 +275,57 @@ const QuranBulkImport = ({ onImportComplete }: QuranBulkImportProps) => {
         </DialogHeader>
 
         <form onSubmit={handleBulkImport} className="space-y-5 pt-4">
+          {/* Mode Selector */}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant={importMode === "pattern" ? "default" : "outline"}
+              onClick={() => setImportMode("pattern")}
+              className="flex-1"
+              size="sm"
+            >
+              🔗 روابط صور منفصلة
+            </Button>
+            <Button
+              type="button"
+              variant={importMode === "pdf" ? "default" : "outline"}
+              onClick={() => setImportMode("pdf")}
+              className="flex-1"
+              size="sm"
+            >
+              📄 رابط ملف PDF
+            </Button>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-base font-semibold">
-              نمط الرابط (URL Pattern)
+              {importMode === "pdf" ? "رابط ملف PDF" : "نمط الرابط (URL Pattern)"}
             </Label>
             <Input
               value={urlPattern}
               onChange={(e) => setUrlPattern(e.target.value)}
-              placeholder="https://example.com/quran/page_{page}.jpg"
+              placeholder={importMode === "pdf" 
+                ? "https://archive.org/download/WARSHMADINAHE/WARSH__MADINAH.pdf" 
+                : "https://example.com/quran/page_{page}.jpg"}
               dir="ltr"
               required
               className="font-mono text-sm"
             />
             <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold mb-1">استخدم <code className="bg-muted px-1 rounded">{"{page}"}</code> كعنصر نائب لرقم الصفحة</p>
-                <p>مثال: <code className="bg-muted px-1 rounded">https://quran-images.com/page_{"{page}"}.png</code></p>
-                <p>سيتم استبدال <code className="bg-muted px-1 rounded">{"{page}"}</code> بأرقام الصفحات تلقائياً</p>
-              </div>
+              {importMode === "pdf" ? (
+                <div>
+                  <p className="font-semibold mb-1">الصق رابط ملف PDF مباشرة</p>
+                  <p>سيتم تخزين الرابط مع رقم كل صفحة تلقائياً</p>
+                  <p>مثال: <code className="bg-muted px-1 rounded text-[10px]">https://archive.org/.../WARSH.pdf</code></p>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-semibold mb-1">استخدم <code className="bg-muted px-1 rounded">{"{page}"}</code> كعنصر نائب لرقم الصفحة</p>
+                  <p>مثال: <code className="bg-muted px-1 rounded">https://quran-images.com/page_{"{page}"}.png</code></p>
+                  <p>سيتم استبدال <code className="bg-muted px-1 rounded">{"{page}"}</code> بأرقام الصفحات تلقائياً</p>
+                </div>
+              )}
             </div>
           </div>
 
