@@ -12,11 +12,14 @@ import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useProfile } from "@/hooks/useProfile";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Header = () => {
   const { user } = useAuth();
   const { getContent } = useAppContent();
   const { profile } = useProfile();
+  const { t } = useLanguage();
   
   console.log("Header rendered, NotificationBell should render");
   
@@ -83,7 +86,8 @@ const Header = () => {
             </NavigationMenuList>
           </NavigationMenu>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <NotificationBell />
           {user ? (
             <>
