@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { useEffect, useState, useRef } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 // leaflet CSS loaded via CDN in index.html for reliability
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Phone, Globe, ExternalLink } from "lucide-react";
+import { MapPin, Store, Phone, Globe, ExternalLink, Plus, Crosshair } from "lucide-react";
 import { MarketLocationForm } from "./MarketLocationForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -57,6 +57,33 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) =
     },
   });
   return null;
+}
+
+function MapCenterButton({ onAdd }: { onAdd: (lat: number, lng: number) => void }) {
+  const map = useMap();
+  const [center, setCenter] = useState(map.getCenter());
+
+  useMapEvents({
+    moveend() {
+      setCenter(map.getCenter());
+    },
+  });
+
+  return (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-2">
+      <div className="w-6 h-6 pointer-events-none absolute -top-[calc(50vh-120px)]">
+        <Crosshair className="w-6 h-6 text-primary drop-shadow-lg" />
+      </div>
+      <Button
+        size="sm"
+        onClick={() => onAdd(center.lat, center.lng)}
+        className="shadow-lg gap-1"
+      >
+        <Plus className="w-4 h-4" />
+        إضافة موقع هنا
+      </Button>
+    </div>
+  );
 }
 
 interface MarketMapProps {
@@ -135,13 +162,14 @@ const MarketMap = ({
               center={[26.8206, 30.8025]}
               zoom={6}
               style={{ height: "450px", width: "100%" }}
-              className="z-0"
+              className="z-0 relative"
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               {user && <ClickHandler onMapClick={handleMapClick} />}
+              {user && <MapCenterButton onAdd={handleMapClick} />}
               {locations.map((loc) => (
                 <Marker key={loc.id} position={[loc.latitude, loc.longitude]} icon={appIcon}>
                   <Popup>
