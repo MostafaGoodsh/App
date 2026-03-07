@@ -159,6 +159,7 @@ interface QuranBulkImportProps {
 const QuranBulkImport = ({ onImportComplete }: QuranBulkImportProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [urlPattern, setUrlPattern] = useState("");
+  const [importMode, setImportMode] = useState<"pattern" | "pdf">("pattern");
   const [startPage, setStartPage] = useState("1");
   const [endPage, setEndPage] = useState("604");
   const [pointsReward, setPointsReward] = useState("10");
@@ -169,8 +170,13 @@ const QuranBulkImport = ({ onImportComplete }: QuranBulkImportProps) => {
   const handleBulkImport = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!urlPattern.includes("{page}")) {
+    if (importMode === "pattern" && !urlPattern.includes("{page}")) {
       toast.error("يجب أن يحتوي الرابط على {page} كعنصر نائب لرقم الصفحة");
+      return;
+    }
+
+    if (importMode === "pdf" && !urlPattern.trim()) {
+      toast.error("يرجى إدخال رابط ملف PDF");
       return;
     }
 
