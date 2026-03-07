@@ -100,20 +100,20 @@ export default function HomePageCardsManagement() {
     setUploading(true);
     try {
       const compressed = await compressImage(file);
-      const fileName = `home-card-${Date.now()}.jpg`;
-      const filePath = `home-cards/${fileName}`;
+      const compressedFile = new File([compressed], "home-card.jpg", { type: "image/jpeg" });
+      const formData = new FormData();
+      formData.append("file", compressedFile);
 
-      const { error: uploadError } = await supabase.storage
-        .from('content-backgrounds')
-        .upload(filePath, compressed, { cacheControl: '3600', upsert: true, contentType: 'image/jpeg' });
+      const { data, error: uploadError } = await supabase.functions.invoke("upload-content-background", {
+        body: formData,
+      });
 
       if (uploadError) throw uploadError;
+      if (!data?.success || !data?.url) {
+        throw new Error(data?.error || "فشل في رفع الصورة");
+      }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('content-backgrounds')
-        .getPublicUrl(filePath);
-
-      setEditingCard({ ...editingCard, background_image: publicUrl });
+      setEditingCard({ ...editingCard, background_image: data.url });
       toast({ title: "تم رفع الصورة بنجاح" });
     } catch (error: any) {
       console.error('Upload error:', error);
