@@ -59,6 +59,33 @@ function ClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) =
   return null;
 }
 
+function MapCenterButton({ onAdd }: { onAdd: (lat: number, lng: number) => void }) {
+  const map = useMap();
+  const [center, setCenter] = useState(map.getCenter());
+
+  useMapEvents({
+    moveend() {
+      setCenter(map.getCenter());
+    },
+  });
+
+  return (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-2">
+      <div className="w-6 h-6 pointer-events-none absolute -top-[calc(50vh-120px)]">
+        <Crosshair className="w-6 h-6 text-primary drop-shadow-lg" />
+      </div>
+      <Button
+        size="sm"
+        onClick={() => onAdd(center.lat, center.lng)}
+        className="shadow-lg gap-1"
+      >
+        <Plus className="w-4 h-4" />
+        إضافة موقع هنا
+      </Button>
+    </div>
+  );
+}
+
 interface MarketMapProps {
   title?: string;
   titleEn?: string;
