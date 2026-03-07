@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import QuranBulkImport from "./QuranBulkImport";
 import {
   Dialog,
   DialogContent,
