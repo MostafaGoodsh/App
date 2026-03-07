@@ -1525,6 +1525,8 @@ export type Database = {
         Row: {
           address: string | null
           admin_notes: string | null
+          bio: string | null
+          cover_image_url: string | null
           created_at: string
           description: string | null
           id: string
@@ -1545,6 +1547,8 @@ export type Database = {
         Insert: {
           address?: string | null
           admin_notes?: string | null
+          bio?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1565,6 +1569,8 @@ export type Database = {
         Update: {
           address?: string | null
           admin_notes?: string | null
+          bio?: string | null
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1583,6 +1589,59 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      market_products: {
+        Row: {
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          location_id: string
+          name: string
+          name_en: string | null
+          price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          location_id: string
+          name: string
+          name_en?: string | null
+          price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          location_id?: string
+          name?: string
+          name_en?: string | null
+          price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_products_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "market_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mfa_sessions: {
         Row: {
