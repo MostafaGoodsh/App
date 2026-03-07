@@ -5,7 +5,7 @@ import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Phone, Globe, ExternalLink } from "lucide-react";
+import { MapPin, Store, Phone, Globe, ExternalLink, Plus, Crosshair } from "lucide-react";
 import { MarketLocationForm } from "./MarketLocationForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
