@@ -163,8 +163,6 @@ const MarketMap = ({
               zoom={6}
               style={{ height: "450px", width: "100%" }}
               className="z-0 relative"
-              tap={true}
-              tapTolerance={30}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
