@@ -29,27 +29,7 @@ const MainLayoutContent = () => {
             backgroundColor: 'hsl(var(--background) / 0.85)'
           }}
         >
-          <div className="flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10"
-              onClick={toggleSidebar}
-            >
-              <span className="text-2xl text-primary font-bold">𓋹</span>
-              <span className="sr-only">Toggle Sidebar</span>
-            </Button>
-            <div className="flex flex-col justify-center leading-none">
-              <div className="font-playfair text-xs text-muted-foreground -mb-1">
-                Crypto-MSR
-              </div>
-              <div className="font-cairo text-base font-bold">
-                {getContent("app_name", "منصة مصر الرقمية")}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-0">
-            <NotificationBell />
+          <div className="flex items-center gap-1">
             {user && (
               <Link to="/profile">
                 <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-primary/50 hover:ring-primary transition-all">
@@ -60,6 +40,26 @@ const MainLayoutContent = () => {
                 </Avatar>
               </Link>
             )}
+            <NotificationBell />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <div className="flex flex-col justify-center leading-none text-left">
+              <div className="font-playfair text-xs text-muted-foreground -mb-1">
+                Crypto-MSR
+              </div>
+              <div className="font-cairo text-base font-bold">
+                {getContent("app_name", "منصة مصر الرقمية")}
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10"
+              onClick={toggleSidebar}
+            >
+              <span className="text-2xl text-primary font-bold">𓋹</span>
+              <span className="sr-only">Toggle Sidebar</span>
+            </Button>
           </div>
         </header>
         <main className="flex-1 overflow-x-hidden">
