@@ -39,16 +39,15 @@ const EarlyAccess = () => {
         <meta name="description" content="شكراً لتسجيلك في منصة مصر. سيتم إشعارك فور إتاحة الوصول الكامل." />
       </Helmet>
       <div 
-        className="min-h-screen flex items-center justify-center p-4"
+        className="min-h-[100dvh] flex items-center justify-center p-4"
         style={{
           backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
         }}
       >
-        <div className="min-h-screen bg-background/90 flex items-center justify-center w-full">
-          <Card className="w-full max-w-md mx-4">
+        <div className="absolute inset-0 bg-background/90" />
+        <Card className="w-full max-w-md mx-4 relative z-10">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-primary" />
@@ -74,7 +73,6 @@ const EarlyAccess = () => {
               </Button>
             </CardContent>
           </Card>
-        </div>
       </div>
     </>
   );

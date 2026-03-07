@@ -192,7 +192,7 @@ export const RoadmapPaymentGateway = ({
           </div>
 
           {/* Conversion Rate Display */}
-          {amount && targetToken && (
+          {amount && targetToken && paymentType !== 'liquidity' && (
             <Alert className="bg-black/40 border-primary/30">
               <Info className="h-4 w-4 text-primary" />
               <AlertDescription className="text-white">
@@ -201,9 +201,6 @@ export const RoadmapPaymentGateway = ({
                   <span className="text-lg font-bold text-primary">
                     {estimatedTokens} {config.tokenSymbol}
                   </span>
-                </div>
-                <div className="text-xs text-white/60 mt-1">
-                  معدل التحويل: 1 EGP = {(1 / targetToken.exchange_rate_usd).toFixed(0)} {config.tokenSymbol}
                 </div>
               </AlertDescription>
             </Alert>
