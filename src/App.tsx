@@ -15,6 +15,7 @@ import RequireAdmin from "./components/auth/RequireAdmin";
 import RequireAccess from "./components/auth/RequireAccess";
 import RequireAnubisAccess from "./components/auth/RequireAnubisAccess";
 import { Loader2 } from "lucide-react";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
@@ -103,6 +104,7 @@ const App = () => {
     <ErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
+          <LanguageProvider>
           <TonConnectUIProvider manifestUrl={manifestUrl}>
             <SolanaWalletProvider>
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -188,6 +190,7 @@ const App = () => {
               </BrowserRouter>
             </SolanaWalletProvider>
           </TonConnectUIProvider>
+          </LanguageProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </ErrorBoundary>

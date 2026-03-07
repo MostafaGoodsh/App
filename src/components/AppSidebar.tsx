@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const useMenuItems = (getContent: (key: string, fallback?: string) => string) => [
   { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
@@ -151,7 +152,10 @@ export function AppSidebar() {
           )}
         </SidebarContent>
 
-        <SidebarFooter className="p-4">
+        <SidebarFooter className="p-4 space-y-2">
+          <div className="flex items-center justify-center">
+            <LanguageSwitcher variant={open || isMobile ? "full" : "icon"} />
+          </div>
           {user ? (
             <Button 
               variant="outline" 
