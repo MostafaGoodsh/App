@@ -421,6 +421,7 @@ const QuranPagesManagement = () => {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
