@@ -211,7 +211,9 @@ const QuranBulkImport = ({ onImportComplete }: QuranBulkImportProps) => {
           continue;
         }
 
-        const imageUrl = urlPattern.replace(/\{page\}/g, j.toString());
+        const imageUrl = importMode === "pdf" 
+          ? `${urlPattern.trim()}#page=${j}` 
+          : urlPattern.replace(/\{page\}/g, j.toString());
         const surahInfo = getSurahForPage(j);
         const juzNumber = getJuzForPage(j);
 
