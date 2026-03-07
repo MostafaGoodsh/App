@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, ExternalLink, CheckCircle, Circle } from "lucide-re
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { RoadmapPaymentGateway } from "@/components/roadmap/RoadmapPaymentGateway";
+import { LiquidityPoolDashboard } from "@/components/roadmap/LiquidityPoolDashboard";
 
 const MarketMap = lazy(() => import("@/components/market/MarketMap"));
 // Configure DOMPurify to allow safe HTML elements for content
@@ -275,6 +276,16 @@ const RoadmapDetail = () => {
     if (!data.widget_config?.show_payment_gateway) return null;
 
     const paymentType = (data.widget_config?.payment_type || 'presale') as 'presale' | 'liquidity' | 'services' | 'vault';
+
+    // Render liquidity pool dashboard instead of payment gateway for liquidity type
+    if (paymentType === 'liquidity') {
+      return (
+        <LiquidityPoolDashboard
+          title={data.widget_config?.payment_title}
+          description={data.widget_config?.payment_description}
+        />
+      );
+    }
 
     return (
       <RoadmapPaymentGateway 
