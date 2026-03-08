@@ -65,6 +65,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة البادجات", url: "/admin/badges", icon: Award },
   { title: "إدارة الإعلانات", url: "/admin/announcements", icon: Megaphone },
   { title: "إدارة مواقع المتعاونين", url: "/admin/market-locations", icon: Map },
+  { title: "إدارة الخطوط والمحاذاة", url: "/admin/typography", icon: Type },
 ];
 
 export function AppSidebar() {

@@ -270,7 +270,9 @@ export default function HomePageCardsManagement() {
         external_widget_url: editingCard.external_widget_url || null,
         widget_type: editingCard.widget_type || null,
         widget_config: editingCard.widget_config || {},
-        is_coming_soon: editingCard.is_coming_soon || false
+        is_coming_soon: editingCard.is_coming_soon || false,
+        title_text_align: editingCard.title_text_align || 'center',
+        description_text_align: editingCard.description_text_align || 'center'
       };
 
       if (isNewCard) {

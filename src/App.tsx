@@ -183,6 +183,7 @@ const App = () => {
                     <Route path="admin/announcements" element={<RequireAdmin><AnnouncementsAdmin /></RequireAdmin>} />
                     <Route path="market/:id" element={<MarketLocationProfile />} />
                     <Route path="admin/market-locations" element={<RequireAdmin><MarketLocationsAdmin /></RequireAdmin>} />
+                    <Route path="admin/typography" element={<RequireAdmin><TypographyAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
