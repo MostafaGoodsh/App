@@ -424,6 +424,72 @@ export type Database = {
         }
         Relationships: []
       }
+      app_typography_settings: {
+        Row: {
+          created_at: string | null
+          font_family: string | null
+          font_size: string | null
+          font_weight: string | null
+          id: string
+          is_active: boolean | null
+          letter_spacing: string | null
+          line_height: string | null
+          section_key: string
+          section_label: string
+          section_label_en: string | null
+          text_align: string | null
+          text_color: string | null
+          title_font_family: string | null
+          title_font_size: string | null
+          title_font_weight: string | null
+          title_text_align: string | null
+          title_text_color: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          id?: string
+          is_active?: boolean | null
+          letter_spacing?: string | null
+          line_height?: string | null
+          section_key: string
+          section_label: string
+          section_label_en?: string | null
+          text_align?: string | null
+          text_color?: string | null
+          title_font_family?: string | null
+          title_font_size?: string | null
+          title_font_weight?: string | null
+          title_text_align?: string | null
+          title_text_color?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          id?: string
+          is_active?: boolean | null
+          letter_spacing?: string | null
+          line_height?: string | null
+          section_key?: string
+          section_label?: string
+          section_label_en?: string | null
+          text_align?: string | null
+          text_color?: string | null
+          title_font_family?: string | null
+          title_font_size?: string | null
+          title_font_weight?: string | null
+          title_text_align?: string | null
+          title_text_color?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           badge_color: string | null
@@ -851,6 +917,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           description_en: string | null
+          description_text_align: string | null
           display_order: number | null
           external_widget_url: string | null
           font_family: string | null
@@ -868,6 +935,7 @@ export type Database = {
           title: string
           title_en: string | null
           title_font_size: string | null
+          title_text_align: string | null
           updated_at: string
           widget_config: Json | null
           widget_type: string | null
@@ -882,6 +950,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           description_en?: string | null
+          description_text_align?: string | null
           display_order?: number | null
           external_widget_url?: string | null
           font_family?: string | null
@@ -899,6 +968,7 @@ export type Database = {
           title: string
           title_en?: string | null
           title_font_size?: string | null
+          title_text_align?: string | null
           updated_at?: string
           widget_config?: Json | null
           widget_type?: string | null
@@ -913,6 +983,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           description_en?: string | null
+          description_text_align?: string | null
           display_order?: number | null
           external_widget_url?: string | null
           font_family?: string | null
@@ -930,6 +1001,7 @@ export type Database = {
           title?: string
           title_en?: string | null
           title_font_size?: string | null
+          title_text_align?: string | null
           updated_at?: string
           widget_config?: Json | null
           widget_type?: string | null

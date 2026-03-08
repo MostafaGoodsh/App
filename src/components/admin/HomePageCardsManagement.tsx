@@ -68,6 +68,8 @@ interface HomePageCard {
   widget_type: string | null;
   widget_config: any;
   is_coming_soon: boolean;
+  title_text_align: string;
+  description_text_align: string;
 }
 
 export default function HomePageCardsManagement() {
@@ -213,7 +215,9 @@ export default function HomePageCardsManagement() {
       external_widget_url: '',
       widget_type: 'none',
       widget_config: {},
-      is_coming_soon: false
+      is_coming_soon: false,
+      title_text_align: 'center',
+      description_text_align: 'center'
     });
     setDialogOpen(true);
   };
@@ -266,7 +270,9 @@ export default function HomePageCardsManagement() {
         external_widget_url: editingCard.external_widget_url || null,
         widget_type: editingCard.widget_type || null,
         widget_config: editingCard.widget_config || {},
-        is_coming_soon: editingCard.is_coming_soon || false
+        is_coming_soon: editingCard.is_coming_soon || false,
+        title_text_align: editingCard.title_text_align || 'center',
+        description_text_align: editingCard.description_text_align || 'center'
       };
 
       if (isNewCard) {
@@ -569,6 +575,36 @@ export default function HomePageCardsManagement() {
               </TabsContent>
 
               <TabsContent value="fonts" className="space-y-4">
+                {/* Text Alignment */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>محاذاة العنوان | Title Align</Label>
+                    <Select value={editingCard.title_text_align || 'center'} onValueChange={(value) => setEditingCard({...editingCard, title_text_align: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">يمين (Right)</SelectItem>
+                        <SelectItem value="center">وسط (Center)</SelectItem>
+                        <SelectItem value="left">يسار (Left)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>محاذاة الوصف | Description Align</Label>
+                    <Select value={editingCard.description_text_align || 'center'} onValueChange={(value) => setEditingCard({...editingCard, description_text_align: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">يمين (Right)</SelectItem>
+                        <SelectItem value="center">وسط (Center)</SelectItem>
+                        <SelectItem value="left">يسار (Left)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>نوع الخط</Label>

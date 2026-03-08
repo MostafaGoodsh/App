@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -65,6 +65,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة البادجات", url: "/admin/badges", icon: Award },
   { title: "إدارة الإعلانات", url: "/admin/announcements", icon: Megaphone },
   { title: "إدارة مواقع المتعاونين", url: "/admin/market-locations", icon: Map },
+  { title: "إدارة الخطوط والمحاذاة", url: "/admin/typography", icon: Type },
 ];
 
 export function AppSidebar() {
