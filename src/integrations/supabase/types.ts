@@ -1288,6 +1288,209 @@ export type Database = {
           },
         ]
       }
+      liquidity_pools: {
+        Row: {
+          apy_percentage: number
+          created_at: string
+          description: string | null
+          description_en: string | null
+          fee_percentage: number
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          max_deposit: number | null
+          min_deposit: number
+          name: string
+          name_en: string | null
+          pool_type: string
+          providers_count: number
+          slug: string
+          token_a_symbol: string | null
+          token_b_symbol: string | null
+          total_value_locked: number
+          total_volume_24h: number
+          updated_at: string
+        }
+        Insert: {
+          apy_percentage?: number
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          fee_percentage?: number
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          max_deposit?: number | null
+          min_deposit?: number
+          name: string
+          name_en?: string | null
+          pool_type?: string
+          providers_count?: number
+          slug: string
+          token_a_symbol?: string | null
+          token_b_symbol?: string | null
+          total_value_locked?: number
+          total_volume_24h?: number
+          updated_at?: string
+        }
+        Update: {
+          apy_percentage?: number
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          fee_percentage?: number
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          max_deposit?: number | null
+          min_deposit?: number
+          name?: string
+          name_en?: string | null
+          pool_type?: string
+          providers_count?: number
+          slug?: string
+          token_a_symbol?: string | null
+          token_b_symbol?: string | null
+          total_value_locked?: number
+          total_volume_24h?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      liquidity_positions: {
+        Row: {
+          auto_compound_enabled: boolean
+          created_at: string
+          current_value: number
+          deposited_amount: number
+          earned_rewards: number
+          id: string
+          is_staked: boolean
+          lp_tokens: number
+          pool_id: string
+          stake_unlock_at: string | null
+          staked_at: string | null
+          staking_plan_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_compound_enabled?: boolean
+          created_at?: string
+          current_value?: number
+          deposited_amount?: number
+          earned_rewards?: number
+          id?: string
+          is_staked?: boolean
+          lp_tokens?: number
+          pool_id: string
+          stake_unlock_at?: string | null
+          staked_at?: string | null
+          staking_plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_compound_enabled?: boolean
+          created_at?: string
+          current_value?: number
+          deposited_amount?: number
+          earned_rewards?: number
+          id?: string
+          is_staked?: boolean
+          lp_tokens?: number
+          pool_id?: string
+          stake_unlock_at?: string | null
+          staked_at?: string | null
+          staking_plan_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidity_positions_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      liquidity_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          fee_amount: number
+          id: string
+          limit_status: string | null
+          notes: string | null
+          pool_id: string
+          position_id: string | null
+          price_impact: number | null
+          slippage_tolerance: number | null
+          source_reference: string | null
+          source_type: string | null
+          status: string
+          transaction_type: string
+          trigger_price: number | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          fee_amount?: number
+          id?: string
+          limit_status?: string | null
+          notes?: string | null
+          pool_id: string
+          position_id?: string | null
+          price_impact?: number | null
+          slippage_tolerance?: number | null
+          source_reference?: string | null
+          source_type?: string | null
+          status?: string
+          transaction_type: string
+          trigger_price?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          fee_amount?: number
+          id?: string
+          limit_status?: string | null
+          notes?: string | null
+          pool_id?: string
+          position_id?: string | null
+          price_impact?: number | null
+          slippage_tolerance?: number | null
+          source_reference?: string | null
+          source_type?: string | null
+          status?: string
+          transaction_type?: string
+          trigger_price?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidity_transactions_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_pools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "liquidity_transactions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_stream_approvals: {
         Row: {
           created_at: string
@@ -2034,6 +2237,153 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pool_auto_routing: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          pool_id: string
+          routing_percentage: number
+          source_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          pool_id: string
+          routing_percentage?: number
+          source_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          pool_id?: string
+          routing_percentage?: number
+          source_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_auto_routing_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_charity_programs: {
+        Row: {
+          allocation_percentage: number
+          beneficiaries_count: number
+          created_at: string
+          description: string | null
+          description_en: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_en: string | null
+          pool_id: string
+          total_distributed: number
+          updated_at: string
+        }
+        Insert: {
+          allocation_percentage?: number
+          beneficiaries_count?: number
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_en?: string | null
+          pool_id: string
+          total_distributed?: number
+          updated_at?: string
+        }
+        Update: {
+          allocation_percentage?: number
+          beneficiaries_count?: number
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_en?: string | null
+          pool_id?: string
+          total_distributed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_charity_programs_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_staking_plans: {
+        Row: {
+          apy_bonus: number
+          created_at: string
+          duration_days: number
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          min_amount: number
+          name: string
+          name_en: string | null
+          pool_id: string
+          updated_at: string
+        }
+        Insert: {
+          apy_bonus?: number
+          created_at?: string
+          duration_days: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name: string
+          name_en?: string | null
+          pool_id: string
+          updated_at?: string
+        }
+        Update: {
+          apy_bonus?: number
+          created_at?: string
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          name?: string
+          name_en?: string | null
+          pool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_staking_plans_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "liquidity_pools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_customization: {
         Row: {
