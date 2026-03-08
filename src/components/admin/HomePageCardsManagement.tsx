@@ -68,6 +68,8 @@ interface HomePageCard {
   widget_type: string | null;
   widget_config: any;
   is_coming_soon: boolean;
+  title_text_align: string;
+  description_text_align: string;
 }
 
 export default function HomePageCardsManagement() {
