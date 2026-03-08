@@ -32,7 +32,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
   }
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4 mb-8 w-full max-w-[100vw] overflow-x-hidden">
       {/* Pool Selector */}
       {pool.pools.length > 1 && (
         <PoolSelector pools={pool.pools} activePool={pool.activePool} onSelect={pool.setActivePool} />
