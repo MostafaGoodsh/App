@@ -569,6 +569,36 @@ export default function HomePageCardsManagement() {
               </TabsContent>
 
               <TabsContent value="fonts" className="space-y-4">
+                {/* Text Alignment */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>محاذاة العنوان | Title Align</Label>
+                    <Select value={editingCard.title_text_align || 'center'} onValueChange={(value) => setEditingCard({...editingCard, title_text_align: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">يمين (Right)</SelectItem>
+                        <SelectItem value="center">وسط (Center)</SelectItem>
+                        <SelectItem value="left">يسار (Left)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>محاذاة الوصف | Description Align</Label>
+                    <Select value={editingCard.description_text_align || 'center'} onValueChange={(value) => setEditingCard({...editingCard, description_text_align: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">يمين (Right)</SelectItem>
+                        <SelectItem value="center">وسط (Center)</SelectItem>
+                        <SelectItem value="left">يسار (Left)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>نوع الخط</Label>
