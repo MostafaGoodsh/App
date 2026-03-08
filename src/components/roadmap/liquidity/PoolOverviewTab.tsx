@@ -105,8 +105,8 @@ export const PoolOverviewTab = ({ pool }: { pool: PoolHook }) => {
             <span className="font-cairo">مخطط TVL - {ap.name}</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-2">
-          <div className="h-[240px]">
+        <CardContent className="p-1 sm:p-2">
+          <div className="h-[200px] sm:h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <defs>

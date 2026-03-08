@@ -6,6 +6,7 @@ import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTypography, getTypographyStyles } from "@/hooks/useTypography";
 
 interface HomePageCard {
   id: string;
@@ -23,6 +24,14 @@ interface HomePageCard {
   icon_url: string | null;
   route_path: string | null;
   is_coming_soon: boolean;
+  title_text_align: string | null;
+  description_text_align: string | null;
+  font_family: string | null;
+  font_size: string | null;
+  font_weight: string | null;
+  text_color: string | null;
+  title_font_size: string | null;
+  content_font_size: string | null;
 }
 
 const SpecialCardComponents: Record<string, React.FC> = {
@@ -34,11 +43,26 @@ const SpecialCardComponents: Record<string, React.FC> = {
 
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
+  const { getSetting } = useTypography();
+  const homeSetting = getSetting('home');
+  
   const hasValidImage = card.background_image && !card.background_image.includes('placeholder') && !imgError;
 
   const gradientStyle = !hasValidImage && card.background_gradient 
     ? { background: card.background_gradient } 
     : undefined;
+
+  // Apply card-level overrides, then fall back to typography settings
+  const titleStyle: React.CSSProperties = {
+    textAlign: (card.title_text_align || homeSetting?.title_text_align || 'center') as any,
+    fontFamily: card.font_family ? `'${card.font_family}', sans-serif` : homeSetting ? `'${homeSetting.title_font_family}', sans-serif` : undefined,
+    color: card.text_color || homeSetting?.title_text_color || undefined,
+  };
+
+  const descStyle: React.CSSProperties = {
+    textAlign: (card.description_text_align || homeSetting?.text_align || 'center') as any,
+    fontFamily: card.font_family ? `'${card.font_family}', sans-serif` : homeSetting ? `'${homeSetting.font_family}', sans-serif` : undefined,
+  };
 
   return (
   <Link to={card.route_path || `/${card.slug}`} className="group">
@@ -55,12 +79,18 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
           onError={() => setImgError(true)}
         />
       )}
-      <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end items-center text-center bg-gradient-to-t from-background/90 via-background/60 to-transparent">
-        <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
+      <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end items-center bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+        <h2 
+          className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold w-full"
+          style={titleStyle}
+        >
           {card.title}
         </h2>
         {card.description && (
-          <p className="font-cairo text-sm md:text-base text-white/90 leading-relaxed">
+          <p 
+            className="font-cairo text-sm md:text-base text-white/90 leading-relaxed w-full"
+            style={descStyle}
+          >
             {card.description}
           </p>
         )}
@@ -134,4 +164,3 @@ const DynamicHomeCards = () => {
 };
 
 export default DynamicHomeCards;
-
