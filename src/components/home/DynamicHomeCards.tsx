@@ -55,7 +55,7 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
           onError={() => setImgError(true)}
         />
       )}
-        <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end items-end text-lefg-gradient-to-t from-background/90 via-background/60 to-transparent">
+        <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end items-end text-left bg-gradient-to-t from-background/90 via-background/60 to-transparent">
           <h2 className="font-cairo text-2xl md:text-3xl mb-3 text-primary transition-colors duration-300 font-bold">
             {card.title}
           </h2>
