@@ -88,6 +88,7 @@ const BadgesAdmin = lazy(() => import("./pages/BadgesAdmin"));
 const AnnouncementsAdmin = lazy(() => import("./pages/AnnouncementsAdmin"));
 const MarketLocationsAdmin = lazy(() => import("./pages/MarketLocationsAdmin"));
 const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile"));
+const TypographyAdmin = lazy(() => import("./pages/TypographyAdmin"));
 
 const queryClient = new QueryClient();
 
