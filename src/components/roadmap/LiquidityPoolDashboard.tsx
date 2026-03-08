@@ -40,7 +40,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 bg-muted/50 p-1">
+        <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6-3 sm:grid-cols-6 h-auto gap-1 bg-muted/50 p-1">
           {[
             { value: 'overview', label: 'نظرة عامة', icon: BarChart3 },
             { value: 'add', label: 'إضافة', icon: ArrowDownCircle },
@@ -51,7 +51,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
           ].map(tab => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="flex-1 min-w-[70px] text-[10px] sm:text-xs gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger key={tab.value} value={tab.vmin-w-0ex-1 min-w-[70px] text-[10px] sm:text-xs gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="font-cairo">{tab.label}</span>
               </TabsTrigger>
