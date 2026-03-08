@@ -215,7 +215,9 @@ export default function HomePageCardsManagement() {
       external_widget_url: '',
       widget_type: 'none',
       widget_config: {},
-      is_coming_soon: false
+      is_coming_soon: false,
+      title_text_align: 'center',
+      description_text_align: 'center'
     });
     setDialogOpen(true);
   };
