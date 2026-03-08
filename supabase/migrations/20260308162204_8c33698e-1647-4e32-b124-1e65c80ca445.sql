@@ -1,0 +1,1 @@
+UPDATE roadmap_cards SET widget_config = '{"show_payment_gateway": true, "payment_type": "liquidity", "payment_title": "مجمع السيولة", "payment_description": "أضف سيولة واحصل على عوائد مستمرة"}'::jsonb WHERE slug = 'money-house-pool';
