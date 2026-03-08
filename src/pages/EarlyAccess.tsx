@@ -39,7 +39,7 @@ const EarlyAccess = () => {
         <meta name="description" content="شكراً لتسجيلك في منصة مصر. سيتم إشعارك فور إتاحة الوصول الكامل." />
       </Helmet>
       <div 
-        className="min-h-[100dvh] flex items-center justify-center p-4 relative"
+        className="min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden flex items-center justify-center p-4 relative"
         style={{
           backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`,
           backgroundSize: 'cover',
@@ -47,7 +47,7 @@ const EarlyAccess = () => {
         }}
       >
         <div className="absolute inset-0 bg-background/90" />
-        <Card className="w-full max-w-md mx-4 relative z-10">
+        <Card className="w-full max-w-sm sm:max-w-md relative z-10">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-primary" />

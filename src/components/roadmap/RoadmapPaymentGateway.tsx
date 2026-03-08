@@ -28,9 +28,9 @@ const paymentTypeConfig: Record<PaymentType, {
   presale: {
     icon: CreditCard,
     title: { ar: 'البيع المسبق', en: 'Presale' },
-    description: { ar: 'احصل على عملات XP بأسعار تفضيلية قبل الإطلاق', en: 'Get XP tokens at preferential prices before launch' },
+    description: { ar: 'احصل على عملات $MS-RA بأسعار تفضيلية قبل الإطلاق', en: 'Get $MS-RA tokens at preferential prices before launch' },
     color: 'from-primary/30 to-primary/10',
-    tokenSymbol: 'XP'
+    tokenSymbol: '$MS-RA'
   },
   liquidity: {
     icon: Droplets,
