@@ -44,7 +44,7 @@ const SpecialCardComponents: Record<string, React.FC> = {
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
   const { getSetting } = useTypography();
-  const homeSetting = getSetting('home');
+  const homeSetting = getSetting('home_cards');
   
   const hasValidImage = card.background_image && !card.background_image.includes('placeholder') && !imgError;
 
