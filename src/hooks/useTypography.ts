@@ -73,52 +73,61 @@ export function getTypographyStyles(setting: TypographySetting | null | undefine
   };
 }
 
+// Use a shared listeners pattern so all hook instances get updates
 let cachedSettings: TypographySetting[] | null = null;
+let listeners: Set<(s: TypographySetting[]) => void> = new Set();
+let channelSetup = false;
+
+function setupRealtimeChannel() {
+  if (channelSetup) return;
+  channelSetup = true;
+  
+  const channel = supabase
+    .channel('typography_changes_global')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_typography_settings' }, async () => {
+      const { data } = await supabase.from('app_typography_settings').select('*').eq('is_active', true);
+      if (data) {
+        cachedSettings = data as unknown as TypographySetting[];
+        listeners.forEach(fn => fn(cachedSettings!));
+      }
+    })
+    .subscribe();
+}
 
 export function useTypography(sectionKey?: string) {
   const [settings, setSettings] = useState<TypographySetting[]>(cachedSettings || []);
   const [loading, setLoading] = useState(!cachedSettings);
 
   useEffect(() => {
+    // Register this component as a listener
+    listeners.add(setSettings);
+    setupRealtimeChannel();
+
     if (cachedSettings) {
       setSettings(cachedSettings);
       setLoading(false);
-      return;
+    } else {
+      const fetchData = async () => {
+        try {
+          const { data } = await supabase
+            .from('app_typography_settings')
+            .select('*')
+            .eq('is_active', true);
+          
+          if (data) {
+            cachedSettings = data as unknown as TypographySetting[];
+            listeners.forEach(fn => fn(cachedSettings!));
+          }
+        } catch (e) {
+          console.error('Error fetching typography:', e);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
     }
 
-    const fetch = async () => {
-      try {
-        const { data } = await supabase
-          .from('app_typography_settings')
-          .select('*')
-          .eq('is_active', true);
-        
-        if (data) {
-          cachedSettings = data as unknown as TypographySetting[];
-          setSettings(cachedSettings);
-        }
-      } catch (e) {
-        console.error('Error fetching typography:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetch();
-
-    // Listen for realtime changes
-    const channel = supabase
-      .channel('typography_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_typography_settings' }, async () => {
-        const { data } = await supabase.from('app_typography_settings').select('*').eq('is_active', true);
-        if (data) {
-          cachedSettings = data as unknown as TypographySetting[];
-          setSettings(cachedSettings);
-        }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
+    return () => { listeners.delete(setSettings); };
   }, []);
 
   const getSetting = (key: string) => settings.find(s => s.section_key === key) || null;
