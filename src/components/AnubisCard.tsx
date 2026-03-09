@@ -15,7 +15,7 @@ const AnubisCard = ({ card }: { card?: HomePageCard }) => {
   const [registering, setRegistering] = useState(false);
 
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "anubis")) || getSetting("home_cards") || getSetting("general");
 
   if (loading && !card) {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80" />;
