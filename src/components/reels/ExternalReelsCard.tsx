@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContent } from "@/hooks/useAppContent";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
-import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
 import type { HomePageCard } from "@/types/homeCards";
 
 interface ReelsCardContent {
@@ -19,7 +19,7 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
   const [loading, setLoading] = useState(!card);
   const { getContent, getAltText } = useAppContent();
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "reels")) || getSetting("home_cards") || getSetting("general");
 
   useEffect(() => {
     if (card) return;
@@ -64,23 +64,7 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
 
-  const titleStyle: React.CSSProperties = {
-    ...baseTitleStyle,
-    textAlign: (card?.title_text_align || (baseTitleStyle.textAlign as any) || "center") as any,
-    fontFamily: card?.font_family ? `'${card.font_family}', sans-serif` : baseTitleStyle.fontFamily,
-    color: card?.text_color || (baseTitleStyle.color as any) || undefined,
-    fontSize: resolveFontSize(card?.title_font_size, baseTitleStyle.fontSize as any),
-    fontWeight: resolveFontWeight(card?.font_weight, baseTitleStyle.fontWeight as any),
-  };
-
-  const descStyle: React.CSSProperties = {
-    ...baseContentStyle,
-    textAlign: (card?.description_text_align || (baseContentStyle.textAlign as any) || "center") as any,
-    fontFamily: card?.font_family ? `'${card.font_family}', sans-serif` : baseContentStyle.fontFamily,
-    color: card?.text_color || (baseContentStyle.color as any) || undefined,
-    fontSize: resolveFontSize(card?.content_font_size || card?.font_size, baseContentStyle.fontSize as any),
-    fontWeight: resolveFontWeight(card?.font_weight, baseContentStyle.fontWeight as any),
-  };
+  const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   const href = card?.route_path || "/reels-categories";
 

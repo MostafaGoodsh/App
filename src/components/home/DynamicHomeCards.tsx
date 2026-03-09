@@ -7,7 +7,7 @@ import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
-import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
 import type { HomePageCard } from "@/types/homeCards";
 
 const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePageCard }>> = {
@@ -20,7 +20,8 @@ const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePag
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const sectionKey = getCardTypographySectionKey(card.card_type);
+  const sectionSetting = getSetting(sectionKey) || getSetting("home_cards") || getSetting("general");
 
   const hasValidImage =
     card.background_image && !card.background_image.includes("placeholder") && !imgError;
@@ -32,27 +33,9 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
         ? ({ backgroundColor: card.background_color } as React.CSSProperties)
         : undefined;
 
-  const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
-  const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
-
-  // Apply card-level overrides, then fall back to typography settings
-  const titleStyle: React.CSSProperties = {
-    ...baseTitleStyle,
-    textAlign: (card.title_text_align || (baseTitleStyle.textAlign as any) || "center") as any,
-    fontFamily: card.font_family ? `'${card.font_family}', sans-serif` : baseTitleStyle.fontFamily,
-    color: card.text_color || (baseTitleStyle.color as any) || undefined,
-    fontSize: resolveFontSize(card.title_font_size, baseTitleStyle.fontSize as any),
-    fontWeight: resolveFontWeight(card.font_weight, baseTitleStyle.fontWeight as any),
-  };
-
-  const descStyle: React.CSSProperties = {
-    ...baseContentStyle,
-    textAlign: (card.description_text_align || (baseContentStyle.textAlign as any) || "center") as any,
-    fontFamily: card.font_family ? `'${card.font_family}', sans-serif` : baseContentStyle.fontFamily,
-    color: card.text_color || (baseContentStyle.color as any) || undefined,
-    fontSize: resolveFontSize(card.content_font_size || card.font_size, baseContentStyle.fontSize as any),
-    fontWeight: resolveFontWeight(card.font_weight, baseContentStyle.fontWeight as any),
-  };
+  const baseTitleStyle = getTypographyStyles(sectionSetting, "title") as React.CSSProperties;
+  const baseContentStyle = getTypographyStyles(sectionSetting, "content") as React.CSSProperties;
+  const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   return (
     <Link to={card.route_path || `/${card.slug}`} className="group">
