@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAppContent } from "@/hooks/useAppContent";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import type { HomePageCard } from "@/types/homeCards";
 
 interface ReelsCardContent {
   id: string;
@@ -13,25 +14,7 @@ interface ReelsCardContent {
   is_active: boolean;
 }
 
-type HomeCardOverride = {
-  title?: string;
-  description?: string | null;
-  background_image?: string | null;
-  background_color?: string | null;
-  background_gradient?: string | null;
-  route_path?: string | null;
-  slug?: string;
-  title_text_align?: string | null;
-  description_text_align?: string | null;
-  font_family?: string | null;
-  font_size?: string | null;
-  font_weight?: string | null;
-  text_color?: string | null;
-  title_font_size?: string | null;
-  content_font_size?: string | null;
-};
-
-export const ExternalReelsCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
+export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
   const [cardContent, setCardContent] = useState<ReelsCardContent | null>(null);
   const [loading, setLoading] = useState(!card);
   const { getContent, getAltText } = useAppContent();
@@ -66,12 +49,10 @@ export const ExternalReelsCard: React.FC<{ card?: HomeCardOverride }> = ({ card 
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80" />;
   }
 
-  const displayTitle =
-    card?.title || cardContent?.title || getContent("reels_card_title", "Reels | فيديو قصير");
+  const displayTitle = card?.title || cardContent?.title || getContent("reels_card_title", "Reels | فيديو قصير");
   const displayDescription =
     card?.description ??
-    cardContent?.description ||
-    getContent("reels_card_description", "شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة");
+    (cardContent?.description || getContent("reels_card_description", "شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة"));
 
   const fallbackImage = "/lovable-uploads/egyptian-ankh-reels-bg.jpg";
   const backgroundImage =

@@ -5,26 +5,9 @@ import { useAnubisSubscription } from "@/hooks/useAnubisSubscription";
 import { useState } from "react";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import type { HomePageCard } from "@/types/homeCards";
 
-type HomeCardOverride = {
-  title?: string;
-  description?: string | null;
-  background_image?: string | null;
-  background_color?: string | null;
-  background_gradient?: string | null;
-  route_path?: string | null;
-  slug?: string;
-  title_text_align?: string | null;
-  description_text_align?: string | null;
-  font_family?: string | null;
-  font_size?: string | null;
-  font_weight?: string | null;
-  text_color?: string | null;
-  title_font_size?: string | null;
-  content_font_size?: string | null;
-};
-
-const AnubisCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
+const AnubisCard = ({ card }: { card?: HomePageCard }) => {
   const { getContent, getAltText, loading } = useAppContent();
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +29,7 @@ const AnubisCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
   );
 
   const displayTitle = card?.title || titleFromContent || "أنوبيس - حامي الأسرار";
-  const displayDescription = card?.description ?? descriptionFromContent || "اضغط لاكتشاف أسرار أنوبيس القديمة";
+  const displayDescription = card?.description ?? (descriptionFromContent || "اضغط لاكتشاف أسرار أنوبيس القديمة");
   const backgroundImage = card?.background_image || backgroundFromContent;
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
@@ -99,9 +82,7 @@ const AnubisCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
     // Otherwise, create subscription first
     try {
       setRegistering(true);
-      await createSubscription.mutateAsync({
-        subscription_type: "free_trial",
-      });
+      await createSubscription.mutateAsync({ subscription_type: "free_trial" });
       navigate("/anubis");
     } catch (error) {
       console.error("Error registering:", error);

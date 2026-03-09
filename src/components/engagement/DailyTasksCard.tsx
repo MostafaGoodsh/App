@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import type { HomePageCard } from "@/types/homeCards";
 
 interface DailyTasksCardContent {
   id: string;
@@ -12,25 +13,7 @@ interface DailyTasksCardContent {
   is_active: boolean;
 }
 
-type HomeCardOverride = {
-  title?: string;
-  description?: string | null;
-  background_image?: string | null;
-  background_color?: string | null;
-  background_gradient?: string | null;
-  route_path?: string | null;
-  slug?: string;
-  title_text_align?: string | null;
-  description_text_align?: string | null;
-  font_family?: string | null;
-  font_size?: string | null;
-  font_weight?: string | null;
-  text_color?: string | null;
-  title_font_size?: string | null;
-  content_font_size?: string | null;
-};
-
-const DailyTasksCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
+const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
   const [content, setContent] = useState<DailyTasksCardContent | null>(null);
   const [loading, setLoading] = useState(!card);
   const { getSetting } = useTypography();
@@ -64,10 +47,11 @@ const DailyTasksCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
   }
 
   const displayTitle = card?.title || content?.title || "Tasks | المهام";
-  const displayDescription =
-    card?.description ?? content?.description || "أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي";
+  const displayDescription = card?.description ?? (content?.description || "أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي");
   const backgroundImage =
-    card?.background_image || content?.background_image_url || "/lovable-uploads/70f695e0-7133-47ea-82e8-7cca2196e7f4.png";
+    card?.background_image ||
+    content?.background_image_url ||
+    "/lovable-uploads/70f695e0-7133-47ea-82e8-7cca2196e7f4.png";
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
@@ -109,7 +93,7 @@ const DailyTasksCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
         {hasValidImage && (
           <img
             src={backgroundImage}
-            alt="أهرامات مصر عند الغروب - خلفية المهام اليومية"
+            alt={displayTitle}
             className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
             loading="lazy"
           />

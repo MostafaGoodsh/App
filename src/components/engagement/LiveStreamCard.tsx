@@ -1,26 +1,9 @@
 import { Link } from "react-router-dom";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import type { HomePageCard } from "@/types/homeCards";
 
-type HomeCardOverride = {
-  title?: string;
-  description?: string | null;
-  background_image?: string | null;
-  background_color?: string | null;
-  background_gradient?: string | null;
-  route_path?: string | null;
-  slug?: string;
-  title_text_align?: string | null;
-  description_text_align?: string | null;
-  font_family?: string | null;
-  font_size?: string | null;
-  font_weight?: string | null;
-  text_color?: string | null;
-  title_font_size?: string | null;
-  content_font_size?: string | null;
-};
-
-const LiveStreamCard: React.FC<{ card?: HomeCardOverride }> = ({ card }) => {
+const LiveStreamCard = ({ card }: { card?: HomePageCard }) => {
   const { getSetting } = useTypography();
   const homeSetting = getSetting("home_cards");
 
