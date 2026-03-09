@@ -5,7 +5,7 @@ import type { HomePageCard } from "@/types/homeCards";
 
 const LiveStreamCard = ({ card }: { card?: HomePageCard }) => {
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "live_stream")) || getSetting("home_cards") || getSetting("general");
 
   const title = card?.title || "Live | البث المباشر";
   const desc = card?.description ?? "للأعضاء المعتمدين والمؤثرين";
