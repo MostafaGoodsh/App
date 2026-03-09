@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
-import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
 import type { HomePageCard } from "@/types/homeCards";
 
 interface DailyTasksCardContent {

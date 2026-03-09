@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAnubisSubscription } from "@/hooks/useAnubisSubscription";
 import { useState } from "react";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
-import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
 import type { HomePageCard } from "@/types/homeCards";
 
 const AnubisCard = ({ card }: { card?: HomePageCard }) => {

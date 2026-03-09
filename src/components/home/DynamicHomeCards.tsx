@@ -7,7 +7,7 @@ import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
-import { resolveFontSize, resolveFontWeight } from "@/utils/typography";
+import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
 import type { HomePageCard } from "@/types/homeCards";
 
 const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePageCard }>> = {
