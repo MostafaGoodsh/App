@@ -19,7 +19,7 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
   const [loading, setLoading] = useState(!card);
   const { getContent, getAltText } = useAppContent();
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "reels")) || getSetting("home_cards") || getSetting("general");
 
   useEffect(() => {
     if (card) return;
