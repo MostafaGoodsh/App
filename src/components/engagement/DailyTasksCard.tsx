@@ -17,7 +17,7 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
   const [content, setContent] = useState<DailyTasksCardContent | null>(null);
   const [loading, setLoading] = useState(!card);
   const { getSetting } = useTypography();
-  const homeSetting = getSetting("home_cards");
+  const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "tasks")) || getSetting("home_cards") || getSetting("general");
 
   useEffect(() => {
     if (card) return;
