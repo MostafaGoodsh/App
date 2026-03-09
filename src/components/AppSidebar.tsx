@@ -81,7 +81,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className={`${!open && !isMobile ? "w-16" : "w-64"}`} 
+      className={`${!open && !isMobile ? "w-12" : "w-56"}`} 
       collapsible="icon"
     >
         <SidebarHeader className="p-4">

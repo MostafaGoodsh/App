@@ -95,6 +95,26 @@ const Index = () => {
         {/* Ms-Ra Currency Section */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-full px-2 sm:max-w-2xl md:max-w-4xl lg:max-w-5xl space-y-6">
+            {/* رسالة المنصة - Platform Message */}
+            <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card/80 to-primary/10 backdrop-blur-sm p-6 md:p-8">
+              <div className="absolute inset-0 bg-cover bg-center opacity-5" style={{ backgroundImage: `url('/lovable-uploads/egyptian-hieroglyphs-blue-gold.jpg')` }} />
+              <div className="relative z-10 text-center space-y-3">
+                <h2 className="font-cairo text-xl md:text-2xl font-bold text-primary">
+                  {getContent('platform_message_title', 'رسالة المنصة')}
+                </h2>
+                <p className="font-playfair text-sm md:text-base text-muted-foreground italic" dir="ltr">
+                  {getContent('platform_message_title_en', 'Platform Message')}
+                </p>
+                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto" />
+                <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed max-w-2xl mx-auto" dir="rtl">
+                  {getContent('platform_message_body', 'نسعى لبناء منصة رقمية مصرية تحقق الاستقلال المالي والتقني، مستلهمين من حضارة مصر العريقة لنصنع مستقبلاً رقمياً يليق بها.')}
+                </p>
+                <p className="font-playfair text-xs md:text-sm text-muted-foreground italic leading-relaxed max-w-2xl mx-auto" dir="ltr">
+                  {getContent('platform_message_body_en', 'We strive to build an Egyptian digital platform achieving financial and technical independence, inspired by Egypt\'s great civilization to create a worthy digital future.')}
+                </p>
+              </div>
+            </div>
+
             <MsRaCurrencyCard isVerified={isIdentityVerified} />
             
             {/* Total Mining Display */}

@@ -105,9 +105,12 @@ export const UnifiedPaymentGateway = ({
     // Crypto payment - handled client-side, no Paymob needed
     if (selectedMethod === 'crypto') {
       toast({
-        title: "الدفع بالكريبتو | Crypto Payment",
-        description: "قم بتحويل المبلغ إلى عنوان المحفظة المعروض ثم تواصل مع الدعم لتأكيد التحويل",
+        title: "💰 الدفع بالكريبتو | Crypto Payment",
+        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
       });
+      if (onPaymentSuccess) {
+        onPaymentSuccess('crypto-pending-' + Date.now(), parseFloat(amount));
+      }
       return;
     }
 
