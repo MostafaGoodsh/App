@@ -185,6 +185,7 @@ const App = () => {
                     <Route path="market/:id" element={<MarketLocationProfile />} />
                     <Route path="admin/market-locations" element={<RequireAdmin><MarketLocationsAdmin /></RequireAdmin>} />
                     <Route path="admin/typography" element={<RequireAdmin><TypographyAdmin /></RequireAdmin>} />
+                    <Route path="admin/liquidity-pools" element={<RequireAdmin><LiquidityPoolAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
