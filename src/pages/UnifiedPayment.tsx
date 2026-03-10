@@ -1,4 +1,3 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnifiedPaymentGateway } from "@/components/payment/UnifiedPaymentGateway";
 
 const UnifiedPayment = () => {
@@ -6,9 +5,9 @@ const UnifiedPayment = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="font-cairo text-2xl font-bold mb-6 text-center">بوابة الدفع الموحدة</h1>
       <UnifiedPaymentGateway
-        amount={0}
-        currency="EGP"
-        itemName="دفع عام"
+        mode="inline"
+        purpose="general"
+        purposeLabel="دفع عام"
         onPaymentSuccess={(ref) => console.log('Payment success:', ref)}
       />
     </div>
