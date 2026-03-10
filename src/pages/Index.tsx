@@ -17,11 +17,9 @@ const Index = () => {
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const { getContent, getAltText, loading } = useAppContent();
 
-  // Check identity verification status
   useEffect(() => {
     const checkVerificationStatus = async () => {
       if (!user) return;
-      
       try {
         const { data } = await supabase
           .from('identity_verification')
@@ -29,17 +27,14 @@ const Index = () => {
           .eq('user_id', user.id)
           .eq('status', 'approved')
           .single();
-        
         setIsIdentityVerified(!!data);
       } catch (error) {
         console.error('Error checking verification status:', error);
       }
     };
-
     checkVerificationStatus();
   }, [user]);
 
-  
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
   }
@@ -48,14 +43,14 @@ const Index = () => {
     <>
       <Helmet>
         <title>{getContent('app_name', 'Crypto-MSR')} | محفظة العملات الرقمية</title>
-        <meta name="description" content={getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية | Simple crypto platform with secure wallet and identity verification')} />
+        <meta name="description" content={getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية')} />
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
         <section className="relative min-h-[85vh] flex items-end justify-center bg-background">
           <img
-            src={getContent('hero_background', '/lovable-uploads/7c40a16a-fee6-43dd-8d4e-c418b98c2022.png')}
-            alt={getAltText('hero_background', 'هرم مصري عند الغروب - خلفية أسود وذهبي')}
+            src={getContent('hero_background', '/lovable-uploads/horus-statue-bg.jpg')}
+            alt={getAltText('hero_background', 'تمثال حورس الذهبي - خلفية المنصة')}
             className="absolute inset-0 w-full h-full object-cover opacity-60"
             loading="eager"
           />
@@ -78,49 +73,19 @@ const Index = () => {
         </section>
 
         <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
-          {/* Dynamic Home Page Cards */}
           <DynamicHomeCards />
-
-          {/* Action Buttons Section */}
           <div className="flex flex-col items-center justify-center gap-4 mt-8">
             <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
               <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
             </Button>
           </div>
-
-          {/* Roadmap Cards Section */}
           <RoadmapCardsGrid />
         </section>
         
-        {/* Ms-Ra Currency Section */}
         <section className="py-16 px-4">
           <div className="container mx-auto max-w-full px-2 sm:max-w-2xl md:max-w-4xl lg:max-w-5xl space-y-6">
-            {/* رسالة المنصة - Platform Message */}
-            <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card/80 to-primary/10 backdrop-blur-sm p-6 md:p-8">
-              <div className="absolute inset-0 bg-cover bg-center opacity-5" style={{ backgroundImage: `url('/lovable-uploads/egyptian-hieroglyphs-blue-gold.jpg')` }} />
-              <div className="relative z-10 text-center space-y-3">
-                <h2 className="font-cairo text-xl md:text-2xl font-bold text-primary">
-                  {getContent('platform_message_title', 'رسالة المنصة')}
-                </h2>
-                <p className="font-playfair text-sm md:text-base text-muted-foreground italic" dir="ltr">
-                  {getContent('platform_message_title_en', 'Platform Message')}
-                </p>
-                <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto" />
-                <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed max-w-2xl mx-auto" dir="rtl">
-                  {getContent('platform_message_body', 'نسعى لبناء منصة رقمية مصرية تحقق الاستقلال المالي والتقني، مستلهمين من حضارة مصر العريقة لنصنع مستقبلاً رقمياً يليق بها.')}
-                </p>
-                <p className="font-playfair text-xs md:text-sm text-muted-foreground italic leading-relaxed max-w-2xl mx-auto" dir="ltr">
-                  {getContent('platform_message_body_en', 'We strive to build an Egyptian digital platform achieving financial and technical independence, inspired by Egypt\'s great civilization to create a worthy digital future.')}
-                </p>
-              </div>
-            </div>
-
             <MsRaCurrencyCard isVerified={isIdentityVerified} />
-            
-            {/* Total Mining Display */}
             <TotalMiningDisplay />
-            
-            {/* Referral Card */}
             <ReferralCard />
           </div>
         </section>

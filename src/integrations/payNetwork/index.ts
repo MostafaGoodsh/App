@@ -1,8 +1,6 @@
-// Import necessary modules
-import { PayNetworkClient } from 'pay-network-client';
+// Pay Network integration barrel export
+import { PayNetworkClient } from './client';
+import type { CreatePaymentRequest, CreatePaymentResponse, GetPaymentStatusRequest, GetPaymentStatusResponse } from './types';
 
-// Configuration constants
-const API_KEY = process.env.PAY_NETWORK_API_KEY;
-
-// Create and export Pay Network client
-export const payNetworkClient = new PayNetworkClient({ apiKey: API_KEY });
+export { PayNetworkClient };
+export type { CreatePaymentRequest, CreatePaymentResponse, GetPaymentStatusRequest, GetPaymentStatusResponse };

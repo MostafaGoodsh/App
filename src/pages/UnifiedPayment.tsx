@@ -1,27 +1,17 @@
-import React from 'react';
-import { Tabs, Tab } from 'react-bootstrap';
+import { UnifiedPaymentGateway } from "@/components/payment/UnifiedPaymentGateway";
 
 const UnifiedPayment = () => {
-    return (
-        <Tabs defaultActiveKey="pay-network" id="uncontrolled-tab-example" className="mb-3">
-            <Tab eventKey="pay-network" title="Pay Network">
-                <h2>Pay Network Payment Methods</h2>
-                {/* Add Pay Network payment methods here */}
-            </Tab>
-            <Tab eventKey="pi-network" title="Pi Network">
-                <h2>Pi Network Payment Methods</h2>
-                {/* Add Pi Network payment methods here */}
-            </Tab>
-            <Tab eventKey="wallet" title="Wallet">
-                <h2>Wallet Payment Methods</h2>
-                {/* Add Wallet payment methods here */}
-            </Tab>
-            <Tab eventKey="local" title="Local">
-                <h2>Local Payment Methods</h2>
-                {/* Add Local payment methods here */}
-            </Tab>
-        </Tabs>
-    );
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="font-cairo text-2xl font-bold mb-6 text-center">بوابة الدفع الموحدة</h1>
+      <UnifiedPaymentGateway
+        mode="inline"
+        purpose="general"
+        purposeLabel="دفع عام"
+        onPaymentSuccess={(ref) => console.log('Payment success:', ref)}
+      />
+    </div>
+  );
 };
 
 export default UnifiedPayment;
