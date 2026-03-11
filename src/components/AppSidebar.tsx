@@ -67,6 +67,8 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إدارة الخطوط والمحاذاة", url: "/admin/typography", icon: Type },
   { title: "إدارة مجمع السيولة", url: "/admin/liquidity-pools", icon: Droplets },
   { title: "إدارة عجلة الحظ", url: "/admin/wheel", icon: Disc },
+  { title: "إدارة طلبات العائلة", url: "/admin/family", icon: Users },
+  { title: "إدارة رسالة المنصة", url: "/admin/platform-message", icon: MessageSquare },
 ];
 
 export function AppSidebar() {
