@@ -48,6 +48,7 @@ const useAdminMenuItems = (getContent: (key: string, fallback?: string) => strin
   { title: "إحصائيات التفاعل", url: "/admin/engagement-stats", icon: TrendingUp },
   { title: "المهام اليومية", url: "/admin/daily-tasks", icon: Calendar },
   
+  { title: "إدارة صفحات القرآن", url: "/admin/quran-pages", icon: BookOpen },
   { title: "إدارة الوسائط", url: "/admin/media-content", icon: BookOpen },
   { title: "مهام تطوير الشخصية", url: "/admin/personality-tasks", icon: User },
   { title: "إدارة مقدمات المهام", url: "/admin/task-introductions", icon: Settings },
