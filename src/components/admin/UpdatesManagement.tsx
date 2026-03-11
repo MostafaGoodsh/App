@@ -241,13 +241,11 @@ export default function UpdatesManagement() {
 
               <div>
                 <Label htmlFor="text_content">المحتوى</Label>
-                <Textarea
-                  id="text_content"
+                <RichContentEditor
                   value={formData.text_content}
-                  onChange={(e) => setFormData({...formData, text_content: e.target.value})}
+                  onChange={(v) => setFormData({...formData, text_content: v})}
                   placeholder="اكتب محتوى التحديث هنا..."
                   rows={4}
-                  required
                 />
               </div>
 
