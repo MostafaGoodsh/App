@@ -157,6 +157,17 @@ const MarketLocationProfile = () => {
                     يقبل <span dir="ltr" className="font-bold">$MS-RA</span>
                   </Badge>
                 )}
+              </div>
+            </div>
+
+            {location.accepts_msra && location.cooperation_note && (
+              <Card className="bg-amber-500/10 border-amber-500/20">
+                <CardContent className="p-3 flex items-start gap-2">
+                  <Coins className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <p className="text-amber-200/80 text-sm">{location.cooperation_note}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {(location.bio || location.description) && (
               <p className="text-white/80 text-sm leading-relaxed">{location.bio || location.description}</p>
