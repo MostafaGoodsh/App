@@ -31,8 +31,8 @@ interface QuranPage {
   surah_name: string;
   juz_number: number;
   arabic_text: string;
-  image_url?: string;
-  audio_url?: string;
+  arabic_image_url?: string;
+  translation_image_url?: string;
   is_active: boolean;
 }
 
@@ -46,8 +46,8 @@ const QuranPagesManagement = () => {
     surah_name: "",
     juz_number: "",
     arabic_text: "",
-    image_url: "",
-    audio_url: "",
+    arabic_image_url: "",
+    translation_image_url: "",
   });
 
   useEffect(() => {
@@ -79,8 +79,8 @@ const QuranPagesManagement = () => {
         surah_name: formData.surah_name,
         juz_number: parseInt(formData.juz_number),
         arabic_text: formData.arabic_text,
-        image_url: formData.image_url || null,
-        audio_url: formData.audio_url || null,
+        arabic_image_url: formData.arabic_image_url || null,
+        translation_image_url: formData.translation_image_url || null,
       };
 
       if (editingPage) {
@@ -114,8 +114,8 @@ const QuranPagesManagement = () => {
       surah_name: page.surah_name,
       juz_number: String(page.juz_number),
       arabic_text: page.arabic_text,
-      image_url: page.image_url || "",
-      audio_url: page.audio_url || "",
+      arabic_image_url: page.arabic_image_url || "",
+      translation_image_url: page.translation_image_url || "",
     });
     setDialogOpen(true);
   };
@@ -143,8 +143,8 @@ const QuranPagesManagement = () => {
       surah_name: "",
       juz_number: "",
       arabic_text: "",
-      image_url: "",
-      audio_url: "",
+      arabic_image_url: "",
+      translation_image_url: "",
     });
   };
 
@@ -218,12 +218,12 @@ const QuranPagesManagement = () => {
                   <Textarea value={formData.arabic_text} onChange={(e) => setFormData({...formData, arabic_text: e.target.value})} dir="rtl" rows={4} />
                 </div>
                 <div>
-                  <Label>رابط الصورة</Label>
-                  <Input value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} dir="ltr" />
+                  <Label>رابط صورة المصحف</Label>
+                  <Input value={formData.arabic_image_url} onChange={(e) => setFormData({...formData, arabic_image_url: e.target.value})} dir="ltr" />
                 </div>
                 <div>
-                  <Label>رابط الصوت</Label>
-                  <Input value={formData.audio_url} onChange={(e) => setFormData({...formData, audio_url: e.target.value})} dir="ltr" />
+                  <Label>رابط صورة الترجمة</Label>
+                  <Input value={formData.translation_image_url} onChange={(e) => setFormData({...formData, translation_image_url: e.target.value})} dir="ltr" />
                 </div>
               </div>
               <DialogFooter>
@@ -243,6 +243,7 @@ const QuranPagesManagement = () => {
                   <TableHead>الصفحة</TableHead>
                   <TableHead>السورة</TableHead>
                   <TableHead>الجزء</TableHead>
+                  <TableHead>صورة</TableHead>
                   <TableHead>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
@@ -252,6 +253,7 @@ const QuranPagesManagement = () => {
                     <TableCell>{page.page_number}</TableCell>
                     <TableCell>{page.surah_name}</TableCell>
                     <TableCell>{page.juz_number}</TableCell>
+                    <TableCell>{page.arabic_image_url ? '✅' : '❌'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleEdit(page)}>
