@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets, Disc } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
