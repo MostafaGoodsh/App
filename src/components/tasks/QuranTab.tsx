@@ -199,13 +199,22 @@ const QuranTab = () => {
   return (
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
           {selectedImage && (
-            <img 
-              src={selectedImage} 
-              alt="Quran Page Full Screen" 
-              className="w-full h-full object-contain"
-            />
+            isPdfUrl(selectedImage) ? (
+              <iframe
+                src={getPdfViewerUrl(selectedImage)}
+                title="Quran Page Full Screen"
+                className="w-full h-[90vh]"
+              />
+            ) : (
+              <img
+                src={selectedImage}
+                alt="Quran Page Full Screen"
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            )
           )}
         </DialogContent>
       </Dialog>
