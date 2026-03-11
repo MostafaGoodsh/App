@@ -62,6 +62,9 @@ const DailyTasks = () => {
               </div>
             </div>
 
+            {/* Wheel of Fortune */}
+            <WheelOfFortune />
+
             {/* Tasks Tabs */}
             <Card className="w-full overflow-hidden">
               <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
