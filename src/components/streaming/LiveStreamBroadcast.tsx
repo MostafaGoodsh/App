@@ -587,8 +587,8 @@ const LiveStreamBroadcast = () => {
           <CardContent>
             <div 
               ref={videoContainerRef}
-              className="relative bg-black rounded-lg overflow-hidden group"
-              style={{ minHeight: '400px', aspectRatio: '4/3' }}
+              className="relative bg-black rounded-lg overflow-hidden group w-full"
+              style={{ minHeight: '280px', maxHeight: '70vh', aspectRatio: '4/3' }}
             >
               <video
                 ref={videoRef}

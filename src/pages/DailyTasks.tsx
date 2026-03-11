@@ -104,6 +104,9 @@ const DailyTasks = () => {
                 </Tabs>
               </CardContent>
             </Card>
+
+            {/* Wheel of Fortune - Below Tasks */}
+            <WheelOfFortune />
           </div>
         </div>
       </div>
