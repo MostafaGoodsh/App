@@ -17,7 +17,8 @@ import {
   Wallet,
   Star,
   ClipboardList,
-  ExternalLink
+  ExternalLink,
+  Users
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
