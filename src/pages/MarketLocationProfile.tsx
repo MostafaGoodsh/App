@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Store, Phone, Globe, MapPin, ArrowRight, Plus, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Store, Phone, Globe, MapPin, ArrowRight, Plus, Trash2, Pencil, Loader2, Coins } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface MarketLocation {
