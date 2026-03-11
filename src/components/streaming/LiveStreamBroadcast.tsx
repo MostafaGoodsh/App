@@ -639,7 +639,7 @@ const LiveStreamBroadcast = () => {
             </div>
 
             {/* Control buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mt-4">
               <Button
                 onClick={isCameraOn ? stopCamera : () => startCamera()}
                 variant={isCameraOn ? "default" : "outline"}
