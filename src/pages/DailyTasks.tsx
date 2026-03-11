@@ -67,11 +67,8 @@ const DailyTasks = () => {
                 <CardTitle className="text-center arabic-text text-base sm:text-lg">مهامك اليومية</CardTitle>
               </CardHeader>
               <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
-                <Tabs defaultValue="quran" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-9 sm:h-10">
-                    <TabsTrigger value="quran" className="arabic-text text-[11px] sm:text-sm px-1 sm:px-3">
-                      📖 قرآن
-                    </TabsTrigger>
+                <Tabs defaultValue="personality" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-9 sm:h-10">
                     <TabsTrigger value="personality" className="arabic-text text-[11px] sm:text-sm px-1 sm:px-3">
                       شخصية
                     </TabsTrigger>
@@ -79,11 +76,6 @@ const DailyTasks = () => {
                       يومية
                     </TabsTrigger>
                   </TabsList>
-                  
-                  <TabsContent value="quran" className="space-y-3 sm:space-y-4">
-                    <SectionIntroduction sectionType="quran_reading" />
-                    <QuranTab />
-                  </TabsContent>
                   
                   <TabsContent value="personality" className="space-y-3 sm:space-y-4">
                     <SectionIntroduction sectionType="personality_tasks" />
