@@ -59,7 +59,7 @@ const MarketMap = ({
     try {
       const { data, error } = await supabase
         .from("market_locations")
-        .select("id, name, name_en, description, location_type, latitude, longitude, address, phone, website, logo_url")
+        .select("id, name, name_en, description, location_type, latitude, longitude, address, phone, website, logo_url, accepts_msra")
         .eq("status", "approved");
       if (error) throw error;
       setLocations(data || []);
