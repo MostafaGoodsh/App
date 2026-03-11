@@ -63,7 +63,7 @@ const VerifiedAccountsAdmin = lazy(() => import("./pages/VerifiedAccountsAdmin")
 const Recharge = lazy(() => import("./pages/Recharge"));
 const PaymentDemo = lazy(() => import("./pages/PaymentDemo"));
 const PiPayment = lazy(() => import("./pages/PiPayment"));
-const QuranPagesAdmin = lazy(() => import("./pages/QuranPagesAdmin"));
+
 const DailyTasksCardAdmin = lazy(() => import("./pages/DailyTasksCardAdmin"));
 const TodoIntroductionAdmin = lazy(() => import("./pages/TodoIntroductionAdmin"));
 const RoadmapCardsAdmin = lazy(() => import("./pages/RoadmapCardsAdmin"));
