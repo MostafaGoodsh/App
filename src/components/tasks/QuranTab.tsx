@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock, ZoomIn, ExternalLink } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import SectionIntroduction from "./SectionIntroduction";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
