@@ -36,6 +36,15 @@ const formatQuranText = (text: string) => {
   return { basmala: extractedBasmala, text: formattedText };
 };
 
+const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
+
+const getPdfViewerUrl = (url: string) => {
+  if (!isPdfUrl(url)) return url;
+  return url.includes("#")
+    ? `${url}&toolbar=0&navpanes=0&scrollbar=0&view=FitH`
+    : `${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+};
+
 const QuranTab = () => {
   const { user } = useAuth();
   const [quranPages, setQuranPages] = useState<QuranPage[]>([]);
