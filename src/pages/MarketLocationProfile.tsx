@@ -74,7 +74,7 @@ const MarketLocationProfile = () => {
   const fetchLocation = async () => {
     const { data, error } = await supabase
       .from("market_locations")
-      .select("id, name, name_en, description, bio, location_type, latitude, longitude, address, phone, website, logo_url, cover_image_url, user_id")
+      .select("id, name, name_en, description, bio, location_type, latitude, longitude, address, phone, website, logo_url, cover_image_url, user_id, accepts_msra, cooperation_note")
       .eq("id", id!)
       .eq("status", "approved")
       .single();
