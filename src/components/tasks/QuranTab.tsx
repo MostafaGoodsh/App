@@ -128,10 +128,11 @@ const QuranTab = () => {
       
       const { error } = await supabase
         .from('user_quran_completions')
-        .insert({
+        .insert([{
           user_id: user.id,
           page_id: pageId,
-        });
+          reading_time_seconds: Math.floor((Date.now() - readingStartTime) / 1000),
+        }]);
 
       if (error) throw error;
       toast.success('تم إكمال القراءة بنجاح! 🎉');
