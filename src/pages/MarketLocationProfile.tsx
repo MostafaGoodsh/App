@@ -151,8 +151,12 @@ const MarketLocationProfile = () => {
                   <Store className="w-3 h-3 ml-1" />
                   {LocationTypeLabels[location.location_type] || location.location_type}
                 </Badge>
-              </div>
-            </div>
+                {location.accepts_msra && (
+                  <Badge className="mt-2 mr-2 bg-amber-500/20 text-amber-400 border-amber-500/30">
+                    <Coins className="w-3 h-3 ml-1" />
+                    يقبل <span dir="ltr" className="font-bold">$MS-RA</span>
+                  </Badge>
+                )}
 
             {(location.bio || location.description) && (
               <p className="text-white/80 text-sm leading-relaxed">{location.bio || location.description}</p>
