@@ -19,6 +19,7 @@ interface MarketLocation {
   phone: string | null;
   website: string | null;
   logo_url: string | null;
+  accepts_msra: boolean;
 }
 
 const LocationTypeLabels: Record<string, string> = {
