@@ -1,0 +1,2 @@
+INSERT INTO app_content (content_key, content_type, text_content, is_active, position_order)
+VALUES ('رسالة المنصة', 'platform_message', 'مرحباً بكم في منصتنا التعليمية - نسعى لتقديم أفضل المحتويات لمجتمعنا', true, 1);

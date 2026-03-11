@@ -22,16 +22,18 @@ const PiPayment = () => {
   const [amount, setAmount] = useState<number>(1);
   const [memo, setMemo] = useState<string>('MS-RA Token Purchase');
 
-  // Auto-authenticate when in Pi Browser (with delay for SDK to initialize)
+  // Auto-authenticate when in Pi Browser (only once on mount)
+  const [hasAttemptedAuth, setHasAttemptedAuth] = useState(false);
+  
   useEffect(() => {
-    if (isPiBrowser && !isAuthenticated && !isInitializing) {
-      // Small delay to ensure SDK is fully ready
+    if (isPiBrowser && !isAuthenticated && !isInitializing && !hasAttemptedAuth) {
+      setHasAttemptedAuth(true);
       const timer = setTimeout(() => {
         authenticate();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isPiBrowser, isAuthenticated, isInitializing, authenticate]);
+  }, [isPiBrowser, isAuthenticated, isInitializing, hasAttemptedAuth, authenticate]);
 
   const handlePayment = async () => {
     if (amount <= 0) {
