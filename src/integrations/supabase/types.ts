@@ -4058,6 +4058,143 @@ export type Database = {
         }
         Relationships: []
       }
+      wheel_segments: {
+        Row: {
+          color: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          label: string
+          label_en: string | null
+          probability: number
+          reward_description: string | null
+          reward_type: string
+          reward_value: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label: string
+          label_en?: string | null
+          probability?: number
+          reward_description?: string | null
+          reward_type?: string
+          reward_value?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          label_en?: string | null
+          probability?: number
+          reward_description?: string | null
+          reward_type?: string
+          reward_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wheel_settings: {
+        Row: {
+          background_color: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          free_spins_per_day: number
+          id: string
+          intro_text: string | null
+          intro_text_en: string | null
+          is_active: boolean
+          is_visible: boolean
+          spin_cost_xp: number
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          free_spins_per_day?: number
+          id?: string
+          intro_text?: string | null
+          intro_text_en?: string | null
+          is_active?: boolean
+          is_visible?: boolean
+          spin_cost_xp?: number
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          free_spins_per_day?: number
+          id?: string
+          intro_text?: string | null
+          intro_text_en?: string | null
+          is_active?: boolean
+          is_visible?: boolean
+          spin_cost_xp?: number
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wheel_spin_history: {
+        Row: {
+          created_at: string
+          id: string
+          reward_type: string
+          reward_value: number
+          segment_id: string | null
+          spin_date: string
+          user_id: string
+          xp_cost: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reward_type: string
+          reward_value?: number
+          segment_id?: string | null
+          spin_date?: string
+          user_id: string
+          xp_cost?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reward_type?: string
+          reward_value?: number
+          segment_id?: string | null
+          spin_date?: string
+          user_id?: string
+          xp_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wheel_spin_history_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "wheel_segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       withdrawal_requests: {
         Row: {
           created_at: string

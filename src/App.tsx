@@ -90,6 +90,7 @@ const MarketLocationsAdmin = lazy(() => import("./pages/MarketLocationsAdmin"));
 const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile"));
 const TypographyAdmin = lazy(() => import("./pages/TypographyAdmin"));
 const LiquidityPoolAdmin = lazy(() => import("./pages/LiquidityPoolAdmin"));
+const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
 
 const queryClient = new QueryClient();
 
@@ -186,6 +187,7 @@ const App = () => {
                     <Route path="admin/market-locations" element={<RequireAdmin><MarketLocationsAdmin /></RequireAdmin>} />
                     <Route path="admin/typography" element={<RequireAdmin><TypographyAdmin /></RequireAdmin>} />
                     <Route path="admin/liquidity-pools" element={<RequireAdmin><LiquidityPoolAdmin /></RequireAdmin>} />
+                    <Route path="admin/wheel" element={<RequireAdmin><WheelAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>

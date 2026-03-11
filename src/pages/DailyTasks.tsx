@@ -6,6 +6,7 @@ import QuranTab from "@/components/tasks/QuranTab";
 import PersonalityTab from "@/components/tasks/PersonalityTab";
 import DailyTasksTab from "@/components/tasks/DailyTasksTab";
 import SectionIntroduction from "@/components/tasks/SectionIntroduction";
+import WheelOfFortune from "@/components/tasks/WheelOfFortune";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { Target, Flame, Clock } from "lucide-react";
 
@@ -60,6 +61,9 @@ const DailyTasks = () => {
                 <span className="font-bold text-sm sm:text-base">{stats?.total_sessions || 0}</span>
               </div>
             </div>
+
+            {/* Wheel of Fortune */}
+            <WheelOfFortune />
 
             {/* Tasks Tabs */}
             <Card className="w-full overflow-hidden">
