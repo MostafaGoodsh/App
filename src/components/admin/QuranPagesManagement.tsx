@@ -148,6 +148,23 @@ const QuranPagesManagement = () => {
     });
   };
 
+  const handleDeleteAll = async () => {
+    if (!confirm('هل أنت متأكد من حذف جميع الصفحات؟ لا يمكن التراجع عن هذا الإجراء!')) return;
+    if (!confirm('تأكيد نهائي: سيتم حذف جميع صفحات القرآن المستوردة')) return;
+    try {
+      const { error } = await supabase
+        .from('quran_pages')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+      toast.success('تم حذف جميع الصفحات');
+      fetchPages();
+    } catch (error) {
+      console.error('Error deleting all pages:', error);
+      toast.error('خطأ في حذف الصفحات');
+    }
+  };
+
   const handleDialogOpenChange = (open: boolean) => {
     setDialogOpen(open);
     if (!open) resetForm();
@@ -164,6 +181,12 @@ const QuranPagesManagement = () => {
       <CardContent className="space-y-4">
         <div className="flex gap-3 flex-wrap">
           <QuranBulkImport onImportComplete={fetchPages} />
+          {pages.length > 0 && (
+            <Button variant="destructive" onClick={handleDeleteAll} className="gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              حذف جميع الصفحات ({pages.length})
+            </Button>
+          )}
           <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
               <Button className="gap-2">
