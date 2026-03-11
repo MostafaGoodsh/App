@@ -414,6 +414,10 @@ export default function Profile() {
           )}
         </TabsContent>
 
+        <TabsContent value="family">
+          <FamilyManagement />
+        </TabsContent>
+
         <TabsContent value="edit">
           <ProfileEditForm profile={profile} />
         </TabsContent>
