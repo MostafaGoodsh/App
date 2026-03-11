@@ -36,6 +36,7 @@ import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
 import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
 import { FollowStats } from '@/components/profile/FollowStats';
 import { TodoList } from '@/components/profile/TodoList';
+import FamilyManagement from '@/components/family/FamilyManagement';
 
 export default function Profile() {
   const [searchParams] = useSearchParams();
