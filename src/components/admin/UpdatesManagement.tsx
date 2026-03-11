@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Pencil, Plus, Calendar, Bell, X, Trash2, Eye, EyeOff } from "lucide-react";
+import { RichContentEditor } from "@/components/admin/RichContentEditor";
 
 interface UpdateContent {
   id: string;
