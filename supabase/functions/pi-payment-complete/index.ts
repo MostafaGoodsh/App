@@ -3,16 +3,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.55.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const PI_API_URL = 'https://api.minepi.com';
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
@@ -61,13 +60,11 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get payment metadata to determine token amount and user
     const piAmount = result.amount || 0;
     const tokenAmount = piAmount * 100; // 1 Pi = 100 MS-RA
     const userId = result.metadata?.userId;
 
     if (userId && tokenAmount > 0) {
-      // Get MS-RA token ID
       const { data: token } = await supabase
         .from('internal_tokens')
         .select('id')
@@ -75,7 +72,6 @@ serve(async (req) => {
         .single();
 
       if (token) {
-        // Update or create balance
         const { data: existingBalance } = await supabase
           .from('internal_wallet_balances')
           .select('id, balance')
@@ -101,7 +97,6 @@ serve(async (req) => {
             });
         }
 
-        // Record the transaction
         await supabase
           .from('payment_transactions')
           .insert({

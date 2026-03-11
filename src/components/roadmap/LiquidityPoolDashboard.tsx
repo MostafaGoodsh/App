@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLiquidityPool } from '@/hooks/useLiquidityPool';
 import { PoolOverviewTab } from './liquidity/PoolOverviewTab';
 import { AddLiquidityTab } from './liquidity/AddLiquidityTab';
@@ -9,8 +8,11 @@ import { CharityTab } from './liquidity/CharityTab';
 import { TransactionsTab } from './liquidity/TransactionsTab';
 import { PoolSelector } from './liquidity/PoolSelector';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
-  BarChart3, ArrowDownCircle, ArrowUpCircle, Lock, Heart, History,
+  ArrowDownCircle, ArrowUpCircle, Lock, Heart, History,
+  Plus, Minus, Zap, BarChart3,
 } from 'lucide-react';
 
 interface LiquidityPoolDashboardProps {
@@ -18,15 +20,59 @@ interface LiquidityPoolDashboardProps {
   description?: string;
 }
 
+type ActiveView = 'overview' | 'add' | 'remove' | 'staking' | 'charity' | 'history';
+
 export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDashboardProps) => {
   const pool = useLiquidityPool();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeView, setActiveView] = useState<ActiveView>('overview');
 
   if (pool.loading) {
     return (
       <div className="space-y-4 mb-8">
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  const inputActions = [
+    { key: 'add' as ActiveView, label: 'إضافة سيولة', icon: Plus, desc: 'إيداع في المجمع' },
+    { key: 'staking' as ActiveView, label: 'Staking', icon: Lock, desc: 'قفل وكسب عائد' },
+  ];
+
+  const outputActions = [
+    { key: 'remove' as ActiveView, label: 'سحب سيولة', icon: Minus, desc: 'سحب من المجمع' },
+    { key: 'charity' as ActiveView, label: 'تبرعات', icon: Heart, desc: 'برامج المساعدات' },
+  ];
+
+  // If a sub-view is active, show it with a back button
+  if (activeView !== 'overview') {
+    const viewTitles: Record<ActiveView, string> = {
+      overview: '',
+      add: 'إضافة سيولة',
+      remove: 'سحب سيولة',
+      staking: 'Staking',
+      charity: 'تبرعات ومساعدات',
+      history: 'سجل العمليات',
+    };
+
+    return (
+      <div className="space-y-4 mb-8 w-full max-w-[100vw] overflow-x-hidden">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setActiveView('overview')}
+          className="font-cairo gap-2"
+        >
+          <BarChart3 className="w-4 h-4" />
+          ← العودة للنظرة العامة
+        </Button>
+        <h2 className="font-cairo text-lg font-bold">{viewTitles[activeView]}</h2>
+        {activeView === 'add' && <AddLiquidityTab pool={pool} />}
+        {activeView === 'remove' && <RemoveLiquidityTab pool={pool} />}
+        {activeView === 'staking' && <StakingTab pool={pool} />}
+        {activeView === 'charity' && <CharityTab pool={pool} />}
+        {activeView === 'history' && <TransactionsTab pool={pool} />}
       </div>
     );
   }
@@ -38,46 +84,72 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
         <PoolSelector pools={pool.pools} activePool={pool.activePool} onSelect={pool.setActivePool} />
       )}
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 bg-muted/50 p-1">
-          {[
-            { value: 'overview', label: 'نظرة عامة', icon: BarChart3 },
-            { value: 'add', label: 'إضافة', icon: ArrowDownCircle },
-            { value: 'remove', label: 'سحب', icon: ArrowUpCircle },
-            { value: 'staking', label: 'Staking', icon: Lock },
-            { value: 'charity', label: 'تبرعات', icon: Heart },
-            { value: 'history', label: 'السجل', icon: History },
-          ].map(tab => {
-            const Icon = tab.icon;
+      {/* Overview Stats */}
+      <PoolOverviewTab pool={pool} />
+
+      {/* المدخلات - Inputs */}
+      <Card className="bg-card/80 backdrop-blur-sm border-green-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2 font-cairo">
+            <ArrowDownCircle className="w-4 h-4 text-green-400" />
+            المدخلات
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-2">
+          {inputActions.map(action => {
+            const Icon = action.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="min-w-0 text-[10px] sm:text-xs gap-1 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="font-cairo">{tab.label}</span>
-              </TabsTrigger>
+              <Button
+                key={action.key}
+                variant="outline"
+                className="h-auto py-3 flex flex-col items-center gap-1 border-green-500/20 hover:bg-green-500/10 hover:border-green-500/40"
+                onClick={() => setActiveView(action.key)}
+              >
+                <Icon className="w-5 h-5 text-green-400" />
+                <span className="font-cairo text-xs font-bold">{action.label}</span>
+                <span className="text-[9px] text-muted-foreground">{action.desc}</span>
+              </Button>
             );
           })}
-        </TabsList>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="overview">
-          <PoolOverviewTab pool={pool} />
-        </TabsContent>
-        <TabsContent value="add">
-          <AddLiquidityTab pool={pool} />
-        </TabsContent>
-        <TabsContent value="remove">
-          <RemoveLiquidityTab pool={pool} />
-        </TabsContent>
-        <TabsContent value="staking">
-          <StakingTab pool={pool} />
-        </TabsContent>
-        <TabsContent value="charity">
-          <CharityTab pool={pool} />
-        </TabsContent>
-        <TabsContent value="history">
-          <TransactionsTab pool={pool} />
-        </TabsContent>
-      </Tabs>
+      {/* المخرجات - Outputs */}
+      <Card className="bg-card/80 backdrop-blur-sm border-red-500/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2 font-cairo">
+            <ArrowUpCircle className="w-4 h-4 text-red-400" />
+            المخرجات
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-2">
+          {outputActions.map(action => {
+            const Icon = action.icon;
+            return (
+              <Button
+                key={action.key}
+                variant="outline"
+                className="h-auto py-3 flex flex-col items-center gap-1 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40"
+                onClick={() => setActiveView(action.key)}
+              >
+                <Icon className="w-5 h-5 text-red-400" />
+                <span className="font-cairo text-xs font-bold">{action.label}</span>
+                <span className="text-[9px] text-muted-foreground">{action.desc}</span>
+              </Button>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* سجل العمليات */}
+      <Button
+        variant="outline"
+        className="w-full gap-2 font-cairo border-primary/20 hover:bg-primary/10"
+        onClick={() => setActiveView('history')}
+      >
+        <History className="w-4 h-4" />
+        سجل العمليات
+      </Button>
     </div>
   );
 };
