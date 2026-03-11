@@ -517,7 +517,7 @@ const LiveStreamBroadcast = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" dir="rtl">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-[100vw] overflow-x-hidden" dir="rtl">
       <div className="lg:col-span-2 space-y-6">
         {/* Stream Settings */}
         <Card>
@@ -587,8 +587,8 @@ const LiveStreamBroadcast = () => {
           <CardContent>
             <div 
               ref={videoContainerRef}
-              className="relative bg-black rounded-lg overflow-hidden group"
-              style={{ minHeight: '400px', aspectRatio: '4/3' }}
+              className="relative bg-black rounded-lg overflow-hidden group w-full"
+              style={{ minHeight: '280px', maxHeight: '70vh', aspectRatio: '4/3' }}
             >
               <video
                 ref={videoRef}
@@ -639,7 +639,7 @@ const LiveStreamBroadcast = () => {
             </div>
 
             {/* Control buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mt-4">
               <Button
                 onClick={isCameraOn ? stopCamera : () => startCamera()}
                 variant={isCameraOn ? "default" : "outline"}
