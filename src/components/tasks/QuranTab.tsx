@@ -40,9 +40,9 @@ const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
 
 const getPdfViewerUrl = (url: string) => {
   if (!isPdfUrl(url)) return url;
-  return url.includes("#")
-    ? `${url}&toolbar=0&navpanes=0&scrollbar=0&view=FitH`
-    : `${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+  // Use Google Docs Viewer for reliable cross-browser/mobile PDF rendering
+  const encodedUrl = encodeURIComponent(url);
+  return `https://docs.google.com/gview?embedded=true&url=${encodedUrl}`;
 };
 
 const QuranTab = () => {
