@@ -2,13 +2,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Gift, Sparkles } from "lucide-react";
+import { Loader2, Gift } from "lucide-react";
 import { toast } from "sonner";
 
-// Egyptian symbols for decoration
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
-// Bonus wheel segments for $MS-RA prizes
 const BONUS_SEGMENTS = [
   { label: '1 $MS-RA', value: 1, color: '#D4AF37' },
   { label: '2 $MS-RA', value: 2, color: '#1a1a2e' },
@@ -20,184 +18,204 @@ const BONUS_SEGMENTS = [
   { label: '7 $MS-RA', value: 7, color: '#1f1f35' },
 ];
 
-const drawEgyptianWheel = (
+const drawDualRingWheel = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
-  segments: Array<{ label: string; color: string; reward_type?: string }>,
-  rotation: number,
-  isBonus: boolean = false
+  outerSegments: Array<{ label: string; color: string; reward_type?: string }>,
+  bonusSegments: Array<{ label: string; color: string }>,
+  outerRotation: number,
+  innerRotation: number,
 ) => {
   const size = canvas.width;
   const center = size / 2;
-  const radius = center - 10;
-  const segAngle = (2 * Math.PI) / segments.length;
+  const outerRadius = center - 12;
+  const innerRadius = outerRadius * 0.48;
+  const dividerRadius = outerRadius * 0.52;
 
   ctx.clearRect(0, 0, size, size);
 
-  // Outer decorative ring
+  // === Outer decorative ring ===
   ctx.beginPath();
-  ctx.arc(center, center, radius + 6, 0, 2 * Math.PI);
+  ctx.arc(center, center, outerRadius + 6, 0, 2 * Math.PI);
   ctx.strokeStyle = '#D4AF37';
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  // Egyptian pattern outer ring
-  const patternRadius = radius + 2;
-  for (let i = 0; i < 24; i++) {
-    const angle = (i / 24) * Math.PI * 2;
-    const x = center + Math.cos(angle) * patternRadius;
-    const y = center + Math.sin(angle) * patternRadius;
+  // Diamond pattern
+  for (let i = 0; i < 28; i++) {
+    const angle = (i / 28) * Math.PI * 2;
+    const x = center + Math.cos(angle) * (outerRadius + 3);
+    const y = center + Math.sin(angle) * (outerRadius + 3);
     ctx.fillStyle = i % 2 === 0 ? '#D4AF37' : '#B8860B';
-    ctx.font = '8px serif';
+    ctx.font = '7px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('◆', x, y);
   }
 
-  // Draw segments
-  segments.forEach((seg, i) => {
-    const startAngle = i * segAngle + rotation;
-    const endAngle = startAngle + segAngle;
+  // === Draw outer ring segments ===
+  const outerSegAngle = (2 * Math.PI) / outerSegments.length;
+  outerSegments.forEach((seg, i) => {
+    const startAngle = i * outerSegAngle + outerRotation;
+    const endAngle = startAngle + outerSegAngle;
 
-    // Segment fill
     ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, radius, startAngle, endAngle);
+    ctx.arc(center, center, outerRadius, startAngle, endAngle);
+    ctx.arc(center, center, dividerRadius, endAngle, startAngle, true);
     ctx.closePath();
 
-    // For bonus segments or empty/"nothing" segments, add special styling
-    const isBonusTrigger = !isBonus && seg.reward_type === 'nothing';
-
+    const isBonusTrigger = seg.reward_type === 'nothing';
     if (isBonusTrigger) {
-      // Golden gradient for bonus trigger segments
-      const grad = ctx.createRadialGradient(center, center, 0, center, center, radius);
-      grad.addColorStop(0, '#D4AF37');
-      grad.addColorStop(1, '#B8860B');
+      const grad = ctx.createRadialGradient(center, center, dividerRadius, center, center, outerRadius);
+      grad.addColorStop(0, '#C5A028');
+      grad.addColorStop(1, '#8B6914');
       ctx.fillStyle = grad;
     } else {
       ctx.fillStyle = seg.color;
     }
     ctx.fill();
 
-    // Segment border with gold accent
     ctx.strokeStyle = '#D4AF37';
     ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Inner decorative line
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, radius, startAngle, endAngle);
-    ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-    ctx.lineWidth = 0.5;
     ctx.stroke();
 
     // Text
     ctx.save();
     ctx.translate(center, center);
-    ctx.rotate(startAngle + segAngle / 2);
-    ctx.textAlign = 'right';
+    ctx.rotate(startAngle + outerSegAngle / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 280 ? 10 : 12}px sans-serif`;
-    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.font = `bold ${size < 340 ? 10 : 12}px sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
     ctx.shadowBlur = 4;
 
+    const textR = dividerRadius + (outerRadius - dividerRadius) / 2;
     if (isBonusTrigger) {
-      // Show Egyptian symbol + "بونص" for bonus trigger
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 280 ? 11 : 13}px sans-serif`;
-      ctx.fillText('☥ بونص', radius - 14, 4);
+      ctx.font = `bold ${size < 340 ? 11 : 13}px sans-serif`;
+      ctx.fillText('☥ بونص', textR, 0);
     } else {
-      ctx.fillText(seg.label, radius - 14, 4);
+      ctx.fillText(seg.label, textR, 0);
     }
+    ctx.shadowBlur = 0;
     ctx.restore();
 
-    // Egyptian symbol decoration between segments
-    if (!isBonus) {
-      ctx.save();
-      ctx.translate(center, center);
-      ctx.rotate(startAngle + segAngle / 2);
-      ctx.fillStyle = 'rgba(212, 175, 55, 0.6)';
-      ctx.font = '10px serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(EGYPTIAN_SYMBOLS[i % EGYPTIAN_SYMBOLS.length], radius * 0.45, 0);
-      ctx.restore();
-    }
+    // Egyptian symbol at segment boundary
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(startAngle);
+    ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
+    ctx.font = '9px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(EGYPTIAN_SYMBOLS[i % EGYPTIAN_SYMBOLS.length], outerRadius - 8, 0);
+    ctx.restore();
   });
 
-  // Inner decorative ring
+  // === Divider ring ===
   ctx.beginPath();
-  ctx.arc(center, center, 32, 0, 2 * Math.PI);
+  ctx.arc(center, center, dividerRadius, 0, 2 * Math.PI);
   ctx.strokeStyle = '#D4AF37';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // Center circle with Egyptian styling
-  const centerGrad = ctx.createRadialGradient(center, center, 0, center, center, 28);
+  // Ankh symbols on divider
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const x = center + Math.cos(angle) * dividerRadius;
+    const y = center + Math.sin(angle) * dividerRadius;
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = 'bold 8px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('☥', x, y);
+  }
+
+  // === Draw inner ring segments ($MS-RA) ===
+  const innerCenterRadius = 24;
+  const innerSegAngle = (2 * Math.PI) / bonusSegments.length;
+  bonusSegments.forEach((seg, i) => {
+    const startAngle = i * innerSegAngle + innerRotation;
+    const endAngle = startAngle + innerSegAngle;
+
+    ctx.beginPath();
+    ctx.arc(center, center, innerRadius, startAngle, endAngle);
+    ctx.arc(center, center, innerCenterRadius, endAngle, startAngle, true);
+    ctx.closePath();
+
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.translate(center, center);
+    ctx.rotate(startAngle + innerSegAngle / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${size < 340 ? 7 : 9}px sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 3;
+    const innerTextR = innerCenterRadius + (innerRadius - innerCenterRadius) / 2;
+    ctx.fillText(seg.label, innerTextR, 0);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+
+  // === Center circle ===
+  const centerGrad = ctx.createRadialGradient(center, center, 0, center, center, innerCenterRadius);
   centerGrad.addColorStop(0, '#D4AF37');
   centerGrad.addColorStop(0.7, '#B8860B');
   centerGrad.addColorStop(1, '#8B6914');
   ctx.beginPath();
-  ctx.arc(center, center, 26, 0, 2 * Math.PI);
+  ctx.arc(center, center, innerCenterRadius, 0, 2 * Math.PI);
   ctx.fillStyle = centerGrad;
   ctx.fill();
-
-  // Center border
-  ctx.beginPath();
-  ctx.arc(center, center, 26, 0, 2 * Math.PI);
   ctx.strokeStyle = '#1a1a2e';
   ctx.lineWidth = 2;
   ctx.stroke();
 
   // Center symbol
   ctx.fillStyle = '#1a1a2e';
-  ctx.font = 'bold 18px serif';
+  ctx.font = 'bold 16px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(212, 175, 55, 0.5)';
   ctx.shadowBlur = 6;
-  ctx.fillText(isBonus ? '☥' : '𓂀', center, center);
+  ctx.fillText('𓂀', center, center);
   ctx.shadowBlur = 0;
 };
 
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel } = useWheelOfFortune();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const bonusCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [rotation, setRotation] = useState(0);
-  const [bonusRotation, setBonusRotation] = useState(0);
+  const [outerRotation, setOuterRotation] = useState(0);
+  const [innerRotation, setInnerRotation] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isBonusAnimating, setIsBonusAnimating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [showBonus, setShowBonus] = useState(false);
   const [bonusResult, setBonusResult] = useState<string | null>(null);
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
 
-  // Draw main wheel
+  // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || segments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawEgyptianWheel(ctx, canvas, segments, rotation, false);
-  }, [segments, rotation]);
+    drawDualRingWheel(ctx, canvas, segments, BONUS_SEGMENTS, outerRotation, innerRotation);
+  }, [segments, outerRotation, innerRotation]);
 
-  // Draw bonus wheel
-  useEffect(() => {
-    const canvas = bonusCanvasRef.current;
-    if (!canvas || !showBonus) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    drawEgyptianWheel(ctx, canvas, BONUS_SEGMENTS, bonusRotation, true);
-  }, [showBonus, bonusRotation]);
-
-  const spinBonusWheel = useCallback(() => {
+  const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    // Weighted random - lower values more likely
     const weights = BONUS_SEGMENTS.map(s => 1 / (s.value + 0.1));
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
@@ -210,17 +228,17 @@ const WheelOfFortune = () => {
     const winner = BONUS_SEGMENTS[winnerIdx];
     const segAngle = (2 * Math.PI) / BONUS_SEGMENTS.length;
     const targetAngle = -(winnerIdx * segAngle + segAngle / 2) - Math.PI / 2;
-    const totalRot = targetAngle + Math.PI * 2 * (5 + Math.random() * 3);
+    const totalRot = targetAngle + Math.PI * 2 * (6 + Math.random() * 3);
 
     const startTime = Date.now();
     const duration = 3500;
-    const startRot = bonusRotation;
+    const startRot = innerRotation;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
-      setBonusRotation(startRot + totalRot * ease);
+      setInnerRotation(startRot + totalRot * ease);
 
       if (progress < 1) {
         bonusAnimRef.current = requestAnimationFrame(animate);
@@ -234,14 +252,13 @@ const WheelOfFortune = () => {
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [bonusRotation]);
+  }, [innerRotation]);
 
   const handleSpin = async () => {
     if (isAnimating || isBonusAnimating || !canSpin()) return;
 
     setResult(null);
     setBonusResult(null);
-    setShowBonus(false);
     setIsAnimating(true);
 
     const winner = await spinWheel();
@@ -257,30 +274,29 @@ const WheelOfFortune = () => {
 
     const startTime = Date.now();
     const duration = 4000;
-    const startRotation = rotation;
+    const startRotation = outerRotation;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
-      const currentRotation = startRotation + totalRotation * ease;
-      setRotation(currentRotation);
+      setOuterRotation(startRotation + totalRotation * ease);
 
       if (progress < 1) {
         animRef.current = requestAnimationFrame(animate);
       } else {
         setIsAnimating(false);
-        setResult(winner.label);
 
         if (winner.reward_type === "nothing") {
-          // Trigger bonus wheel!
-          toast("☥ بونص! عجلة $MS-RA الذهبية!", {
-            description: "وقف السهم على البونص - لف عجلة الجوائز الذهبية!",
+          setResult("☥ بونص! الحلقة الداخلية تدور...");
+          toast("☥ بونص! الحلقة الداخلية لـ $MS-RA تدور الآن!", {
+            description: "وقف السهم على البونص - الحلقة الداخلية تدور تلقائياً!",
           });
           setTimeout(() => {
-            setShowBonus(true);
+            spinBonusRing();
           }, 800);
         } else {
+          setResult(winner.label);
           toast.success(`🎉 مبروك! ربحت ${winner.label}`, {
             description: winner.reward_description || `+${winner.reward_value} ${winner.reward_type.toUpperCase()}`,
           });
@@ -331,90 +347,68 @@ const WheelOfFortune = () => {
           <p className="text-xs text-amber-500/50 arabic-text mt-1">{settings.intro_text}</p>
         )}
       </CardHeader>
+
       <CardContent className="flex flex-col items-center gap-4 pb-6">
-        {/* Main Wheel */}
-        {!showBonus && (
-          <div className="relative animate-in fade-in duration-300">
-            {/* Pointer with Egyptian styling */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
-              <div className="relative">
-                <div className="w-0 h-0 border-l-[11px] border-r-[11px] border-t-[20px] border-l-transparent border-r-transparent border-t-amber-500 drop-shadow-lg" />
-                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[16px] border-l-transparent border-r-transparent border-t-amber-600 absolute top-[1px] left-1/2 -translate-x-1/2" />
-              </div>
+        {/* Dual-ring wheel */}
+        <div className="relative">
+          {/* Pointer */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
+            <div className="relative">
+              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent border-t-amber-500 drop-shadow-lg" />
+              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent border-t-amber-600 absolute top-[1px] left-1/2 -translate-x-1/2" />
             </div>
-
-            {/* Hieroglyphic border symbols rotating */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {EGYPTIAN_SYMBOLS.slice(0, 4).map((sym, i) => {
-                const angle = (i / 4) * Math.PI * 2 - Math.PI / 4;
-                const r = 145;
-                return (
-                  <span
-                    key={i}
-                    className="absolute text-amber-500/30 text-sm select-none"
-                    style={{
-                      transform: `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px)`,
-                    }}
-                  >
-                    {sym}
-                  </span>
-                );
-              })}
-            </div>
-
-            <canvas
-              ref={canvasRef}
-              width={270}
-              height={270}
-              className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50"
-            />
           </div>
-        )}
 
-        {/* Bonus Wheel */}
-        {showBonus && (
-          <div className="relative animate-in fade-in zoom-in duration-500">
-            <div className="text-center mb-3">
-              <p className="text-amber-400 font-bold arabic-text text-sm">☥ عجلة $MS-RA الذهبية ☥</p>
-              <p className="text-amber-500/60 text-xs arabic-text">لف العجلة لربح جوائز $MS-RA</p>
-            </div>
-
-            {/* Pointer */}
-            <div className="absolute top-[calc(0px+2.5rem)] left-1/2 -translate-x-1/2 -translate-y-1 z-10">
-              <div className="relative">
-                <div className="w-0 h-0 border-l-[11px] border-r-[11px] border-t-[20px] border-l-transparent border-r-transparent border-t-amber-400 drop-shadow-lg" />
-              </div>
-            </div>
-
-            <canvas
-              ref={bonusCanvasRef}
-              width={270}
-              height={270}
-              className="rounded-full shadow-2xl shadow-amber-400/30 border-[3px] border-amber-400/60"
-            />
-
-            {!isBonusAnimating && !bonusResult && (
-              <div className="mt-3 text-center">
-                <Button
-                  onClick={spinBonusWheel}
-                  className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-bold gap-2"
-                  size="lg"
+          {/* Hieroglyphic border symbols */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {EGYPTIAN_SYMBOLS.slice(0, 4).map((sym, i) => {
+              const angle = (i / 4) * Math.PI * 2 - Math.PI / 4;
+              const r = 170;
+              return (
+                <span
+                  key={i}
+                  className="absolute text-amber-500/25 text-sm select-none"
+                  style={{
+                    transform: `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px)`,
+                  }}
                 >
-                  ☥ لف عجلة البونص!
-                </Button>
-              </div>
-            )}
-
-            {isBonusAnimating && (
-              <div className="mt-3 text-center">
-                <p className="text-amber-400 text-sm animate-pulse arabic-text">𓂀 جاري تدوير عجلة البونص...</p>
-              </div>
-            )}
+                  {sym}
+                </span>
+              );
+            })}
           </div>
-        )}
+
+          <canvas
+            ref={canvasRef}
+            width={320}
+            height={320}
+            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50"
+          />
+
+          {/* Inner ring label */}
+          {isBonusAnimating && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
+                <span className="text-amber-400 text-[10px] font-bold">$MS-RA 🎰</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Ring labels */}
+        <div className="flex items-center justify-center gap-4 text-[10px]">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-amber-700" />
+            <span className="text-amber-500/60 arabic-text">الحلقة الخارجية: XP</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="text-amber-500/60 arabic-text">الحلقة الداخلية: $MS-RA</span>
+          </div>
+        </div>
 
         {/* Results */}
-        {result && !showBonus && (
+        {result && !isBonusAnimating && (
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="flex items-center gap-2 justify-center">
               <Gift className="w-5 h-5 text-amber-400" />
@@ -424,50 +418,40 @@ const WheelOfFortune = () => {
         )}
 
         {bonusResult && (
-          <div className="text-center animate-in fade-in zoom-in duration-500 mt-2">
+          <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
               <p className="text-amber-400 font-bold text-lg">☥ {bonusResult}</p>
-              <p className="text-amber-500/70 text-xs arabic-text">تمت إضافة الجائزة لحسابك</p>
+              <p className="text-amber-500/70 text-xs arabic-text">تمت إضافة جائزة $MS-RA لحسابك</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
-              onClick={() => { setShowBonus(false); setBonusResult(null); }}
-            >
-              العودة للعجلة الرئيسية
-            </Button>
           </div>
         )}
 
-        {/* Spin Button & Info (only show for main wheel) */}
-        {!showBonus && (
-          <div className="text-center space-y-2 w-full">
-            <Button
-              onClick={handleSpin}
-              disabled={isAnimating || isBonusAnimating || !canSpin()}
-              size="lg"
-              className="w-full max-w-[220px] gap-2 font-bold bg-gradient-to-r from-amber-700 to-amber-500 hover:from-amber-600 hover:to-amber-400 text-black border border-amber-400/30"
-            >
-              {isAnimating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="arabic-text">جاري التدوير...</span>
-                </>
-              ) : (
-                <>
-                  <span>☥</span>
-                  <span className="arabic-text">{isFree() ? "لف مجاناً!" : `لف (${settings?.spin_cost_xp} XP)`}</span>
-                </>
-              )}
-            </Button>
-            <div className="flex items-center justify-center gap-3 text-[11px] text-amber-500/60">
-              <span>𓆣</span>
-              <span className="arabic-text">لفات اليوم: {todaySpins} / {settings?.free_spins_per_day || 0} مجانية</span>
-              <span>𓆣</span>
-            </div>
+        {/* Spin Button & Info */}
+        <div className="text-center space-y-2 w-full">
+          <Button
+            onClick={handleSpin}
+            disabled={isAnimating || isBonusAnimating || !canSpin()}
+            size="lg"
+            className="w-full max-w-[220px] gap-2 font-bold bg-gradient-to-r from-amber-700 to-amber-500 hover:from-amber-600 hover:to-amber-400 text-black border border-amber-400/30"
+          >
+            {isAnimating || isBonusAnimating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="arabic-text">{isBonusAnimating ? 'الحلقة الداخلية تدور...' : 'جاري التدوير...'}</span>
+              </>
+            ) : (
+              <>
+                <span>☥</span>
+                <span className="arabic-text">{isFree() ? "لف مجاناً!" : `لف (${settings?.spin_cost_xp} XP)`}</span>
+              </>
+            )}
+          </Button>
+          <div className="flex items-center justify-center gap-3 text-[11px] text-amber-500/60">
+            <span>𓆣</span>
+            <span className="arabic-text">لفات اليوم: {todaySpins} / {settings?.free_spins_per_day || 0} مجانية</span>
+            <span>𓆣</span>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
