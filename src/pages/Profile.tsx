@@ -179,11 +179,16 @@ export default function Profile() {
       <ProfileHeader profile={profile} />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           <TabsTrigger value="overview" className="flex-col py-2 gap-1 text-xs">
             <User className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="arabic-text hidden sm:inline">نظرة عامة</span>
             <span className="arabic-text sm:hidden">عامة</span>
+          </TabsTrigger>
+          <TabsTrigger value="family" className="flex-col py-2 gap-1 text-xs">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="arabic-text hidden sm:inline">العائلة</span>
+            <span className="arabic-text sm:hidden">عائلة</span>
           </TabsTrigger>
           <TabsTrigger value="edit" className="flex-col py-2 gap-1 text-xs">
             <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
