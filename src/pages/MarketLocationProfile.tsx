@@ -28,6 +28,8 @@ interface MarketLocation {
   logo_url: string | null;
   cover_image_url: string | null;
   user_id: string | null;
+  accepts_msra: boolean;
+  cooperation_note: string | null;
 }
 
 interface MarketProduct {
