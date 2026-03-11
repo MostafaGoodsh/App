@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock, ZoomIn, ExternalLink } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import SectionIntroduction from "./SectionIntroduction";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -34,6 +34,15 @@ const formatQuranText = (text: string) => {
   }
 
   return { basmala: extractedBasmala, text: formattedText };
+};
+
+const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
+
+const getPdfViewerUrl = (url: string) => {
+  if (!isPdfUrl(url)) return url;
+  return url.includes("#")
+    ? `${url}&toolbar=0&navpanes=0&scrollbar=0&view=FitH`
+    : `${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
 };
 
 const QuranTab = () => {
@@ -190,13 +199,22 @@ const QuranTab = () => {
   return (
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
           {selectedImage && (
-            <img 
-              src={selectedImage} 
-              alt="Quran Page Full Screen" 
-              className="w-full h-full object-contain"
-            />
+            isPdfUrl(selectedImage) ? (
+              <iframe
+                src={getPdfViewerUrl(selectedImage)}
+                title="Quran Page Full Screen"
+                className="w-full h-[90vh]"
+              />
+            ) : (
+              <img
+                src={selectedImage}
+                alt="Quran Page Full Screen"
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            )
           )}
         </DialogContent>
       </Dialog>
@@ -241,17 +259,31 @@ const QuranTab = () => {
               </div>
 
               {currentPage.arabic_image_url && (
-                <div 
+                <div
                   className="relative cursor-pointer group"
                   onClick={() => setSelectedImage(currentPage.arabic_image_url!)}
                 >
-                  <img 
-                    src={currentPage.arabic_image_url} 
-                    alt={`صفحة ${currentPage.page_number}`}
-                    className="w-full rounded-lg border border-border"
-                  />
+                  {isPdfUrl(currentPage.arabic_image_url) ? (
+                    <div className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                      <iframe
+                        src={getPdfViewerUrl(currentPage.arabic_image_url)}
+                        title={`صفحة ${currentPage.page_number}`}
+                        className="w-full h-[420px]"
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={currentPage.arabic_image_url}
+                      alt={`صفحة ${currentPage.page_number}`}
+                      className="w-full rounded-lg border border-border"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-8 w-8" />
+                      {isPdfUrl(currentPage.arabic_image_url) && <ExternalLink className="h-5 w-5" />}
+                    </div>
                   </div>
                 </div>
               )}
