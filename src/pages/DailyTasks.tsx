@@ -2,7 +2,6 @@ import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StreakDisplay from "@/components/engagement/StreakDisplay";
-import QuranTab from "@/components/tasks/QuranTab";
 import PersonalityTab from "@/components/tasks/PersonalityTab";
 import DailyTasksTab from "@/components/tasks/DailyTasksTab";
 import SectionIntroduction from "@/components/tasks/SectionIntroduction";
