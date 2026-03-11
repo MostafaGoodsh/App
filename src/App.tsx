@@ -63,7 +63,7 @@ const VerifiedAccountsAdmin = lazy(() => import("./pages/VerifiedAccountsAdmin")
 const Recharge = lazy(() => import("./pages/Recharge"));
 const PaymentDemo = lazy(() => import("./pages/PaymentDemo"));
 const PiPayment = lazy(() => import("./pages/PiPayment"));
-
+const QuranPagesAdmin = lazy(() => import("./pages/QuranPagesAdmin"));
 const DailyTasksCardAdmin = lazy(() => import("./pages/DailyTasksCardAdmin"));
 const TodoIntroductionAdmin = lazy(() => import("./pages/TodoIntroductionAdmin"));
 const RoadmapCardsAdmin = lazy(() => import("./pages/RoadmapCardsAdmin"));
@@ -166,7 +166,7 @@ const App = () => {
                     <Route path="admin/engagement-stats" element={<RequireAdmin><EngagementStatsAdmin /></RequireAdmin>} />
                     <Route path="admin/daily-tasks" element={<RequireAdmin><DailyTasksAdmin /></RequireAdmin>} />
                     <Route path="admin/media-content" element={<RequireAdmin><MediaContentAdmin /></RequireAdmin>} />
-                    
+                    <Route path="admin/quran-pages" element={<RequireAdmin><QuranPagesAdmin /></RequireAdmin>} />
                     <Route path="admin/personality-tasks" element={<RequireAdmin><PersonalityTasksAdmin /></RequireAdmin>} />
                     <Route path="admin/task-introductions" element={<RequireAdmin><TaskIntroductionsAdmin /></RequireAdmin>} />
                     <Route path="admin/conversion-settings" element={<RequireAdmin><ConversionSettingsAdmin /></RequireAdmin>} />
