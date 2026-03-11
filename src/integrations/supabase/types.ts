@@ -906,6 +906,60 @@ export type Database = {
         }
         Relationships: []
       }
+      family_members: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          document_back_url: string | null
+          document_front_url: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          national_id: string | null
+          relationship: string
+          updated_at: string
+          user_id: string
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          document_back_url?: string | null
+          document_front_url?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          national_id?: string | null
+          relationship: string
+          updated_at?: string
+          user_id: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          document_back_url?: string | null
+          document_front_url?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          national_id?: string | null
+          relationship?: string
+          updated_at?: string
+          user_id?: string
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       home_page_cards: {
         Row: {
           background_color: string | null

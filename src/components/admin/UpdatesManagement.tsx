@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Pencil, Plus, Calendar, Bell, X, Trash2, Eye, EyeOff } from "lucide-react";
+import { RichContentEditor } from "@/components/admin/RichContentEditor";
 
 interface UpdateContent {
   id: string;
@@ -240,13 +241,11 @@ export default function UpdatesManagement() {
 
               <div>
                 <Label htmlFor="text_content">المحتوى</Label>
-                <Textarea
-                  id="text_content"
+                <RichContentEditor
                   value={formData.text_content}
-                  onChange={(e) => setFormData({...formData, text_content: e.target.value})}
+                  onChange={(v) => setFormData({...formData, text_content: v})}
                   placeholder="اكتب محتوى التحديث هنا..."
                   rows={4}
-                  required
                 />
               </div>
 

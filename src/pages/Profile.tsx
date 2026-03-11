@@ -17,7 +17,8 @@ import {
   Wallet,
   Star,
   ClipboardList,
-  ExternalLink
+  ExternalLink,
+  Users
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
@@ -35,6 +36,7 @@ import { AccountStatsCard } from '@/components/profile/AccountStatsCard';
 import { EngagementStatsCard } from '@/components/profile/EngagementStatsCard';
 import { FollowStats } from '@/components/profile/FollowStats';
 import { TodoList } from '@/components/profile/TodoList';
+import FamilyManagement from '@/components/family/FamilyManagement';
 
 export default function Profile() {
   const [searchParams] = useSearchParams();
@@ -177,11 +179,16 @@ export default function Profile() {
       <ProfileHeader profile={profile} />
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-5 h-auto p-1">
           <TabsTrigger value="overview" className="flex-col py-2 gap-1 text-xs">
             <User className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="arabic-text hidden sm:inline">نظرة عامة</span>
             <span className="arabic-text sm:hidden">عامة</span>
+          </TabsTrigger>
+          <TabsTrigger value="family" className="flex-col py-2 gap-1 text-xs">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="arabic-text hidden sm:inline">العائلة</span>
+            <span className="arabic-text sm:hidden">عائلة</span>
           </TabsTrigger>
           <TabsTrigger value="edit" className="flex-col py-2 gap-1 text-xs">
             <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -405,6 +412,10 @@ export default function Profile() {
               {profile.user_id && <FollowStats userId={profile.user_id} />}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="family">
+          <FamilyManagement />
         </TabsContent>
 
         <TabsContent value="edit">
