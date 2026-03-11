@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, Coins } from "lucide-react";
 
 interface MarketLocationFormProps {
   latitude: number;
@@ -28,6 +29,8 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
     address: "",
     phone: "",
     website: "",
+    accepts_msra: true,
+    cooperation_note: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,10 +51,12 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
         phone: form.phone.trim() || null,
         website: form.website.trim() || null,
         status: "pending",
+        accepts_msra: form.accepts_msra,
+        cooperation_note: form.cooperation_note.trim() || null,
       });
 
       if (error) throw error;
-      toast.success("تم إرسال الطلب بنجاح! سيتم مراجعته من الإدارة");
+      toast.success("تم إرسال طلب التعاون بنجاح! سيتم مراجعته من الإدارة");
       onSuccess();
     } catch (error) {
       console.error("Error submitting location:", error);
@@ -66,14 +71,45 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-white flex items-center gap-2 text-lg">
           <MapPin className="w-5 h-5 text-primary" />
-          إضافة موقع متعاون
+          إنشاء تعاون جديد
         </CardTitle>
         <Button variant="ghost" size="icon" onClick={onCancel}>
           <X className="w-4 h-4 text-white" />
         </Button>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" dir="rtl">
+          {/* Cooperation Toggle */}
+          <Card className="bg-primary/10 border-primary/30">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-white font-semibold text-sm">قبول التعامل بـ <span dir="ltr" className="text-primary">$MS-RA</span></p>
+                    <p className="text-white/50 text-xs">اقبل الدفع بالعملة الرقمية في متجرك</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={form.accepts_msra}
+                  onCheckedChange={(v) => setForm({ ...form, accepts_msra: v })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {form.accepts_msra && (
+            <div className="space-y-2">
+              <Label className="text-white">ملاحظات التعاون (اختياري)</Label>
+              <Textarea
+                value={form.cooperation_note}
+                onChange={(e) => setForm({ ...form, cooperation_note: e.target.value })}
+                placeholder="مثال: نقبل الدفع بـ $MS-RA على جميع المنتجات بخصم 10%"
+                rows={2}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-white">الاسم *</Label>
@@ -82,7 +118,6 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="اسم المتجر / المحل"
                 required
-                dir="rtl"
               />
             </div>
             <div className="space-y-2">
@@ -116,7 +151,6 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="وصف قصير للنشاط"
-              dir="rtl"
               rows={2}
             />
           </div>
@@ -127,7 +161,6 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               placeholder="العنوان التفصيلي"
-              dir="rtl"
             />
           </div>
 
@@ -156,7 +189,7 @@ export const MarketLocationForm = ({ latitude, longitude, onSuccess, onCancel }:
 
           <div className="flex gap-3">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? "جاري الإرسال..." : "إرسال للمراجعة"}
+              {loading ? "جاري الإرسال..." : "إرسال طلب التعاون"}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               إلغاء

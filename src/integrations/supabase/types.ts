@@ -1798,9 +1798,11 @@ export type Database = {
       }
       market_locations: {
         Row: {
+          accepts_msra: boolean
           address: string | null
           admin_notes: string | null
           bio: string | null
+          cooperation_note: string | null
           cover_image_url: string | null
           created_at: string
           description: string | null
@@ -1820,9 +1822,11 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          accepts_msra?: boolean
           address?: string | null
           admin_notes?: string | null
           bio?: string | null
+          cooperation_note?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null
@@ -1842,9 +1846,11 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          accepts_msra?: boolean
           address?: string | null
           admin_notes?: string | null
           bio?: string | null
+          cooperation_note?: string | null
           cover_image_url?: string | null
           created_at?: string
           description?: string | null

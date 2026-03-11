@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Phone, Globe, ExternalLink, Plus, Navigation } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Store, Phone, Globe, ExternalLink, Plus, Navigation, Coins } from "lucide-react";
 import { MarketLocationForm } from "./MarketLocationForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -19,6 +20,7 @@ interface MarketLocation {
   phone: string | null;
   website: string | null;
   logo_url: string | null;
+  accepts_msra: boolean;
 }
 
 const LocationTypeLabels: Record<string, string> = {
@@ -57,7 +59,7 @@ const MarketMap = ({
     try {
       const { data, error } = await supabase
         .from("market_locations")
-        .select("id, name, name_en, description, location_type, latitude, longitude, address, phone, website, logo_url")
+        .select("id, name, name_en, description, location_type, latitude, longitude, address, phone, website, logo_url, accepts_msra")
         .eq("status", "approved");
       if (error) throw error;
       setLocations(data || []);
@@ -167,9 +169,17 @@ const MarketMap = ({
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-bold text-white text-sm truncate">{loc.name}</h3>
-                      <span className="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded-full shrink-0">
-                        {LocationTypeLabels[loc.location_type] || loc.location_type}
-                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {loc.accepts_msra && (
+                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px] px-1.5 py-0 gap-0.5">
+                            <Coins className="w-2.5 h-2.5" />
+                            <span dir="ltr">$MS-RA</span>
+                          </Badge>
+                        )}
+                        <span className="text-[10px] text-white/50 bg-white/10 px-2 py-0.5 rounded-full">
+                          {LocationTypeLabels[loc.location_type] || loc.location_type}
+                        </span>
+                      </div>
                     </div>
                     {loc.name_en && <p className="text-white/50 text-xs">{loc.name_en}</p>}
                     {loc.description && <p className="text-white/60 text-xs line-clamp-2">{loc.description}</p>}

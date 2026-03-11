@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Store, Phone, Globe, MapPin, ArrowRight, Plus, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Store, Phone, Globe, MapPin, ArrowRight, Plus, Trash2, Pencil, Loader2, Coins } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface MarketLocation {
@@ -28,6 +28,8 @@ interface MarketLocation {
   logo_url: string | null;
   cover_image_url: string | null;
   user_id: string | null;
+  accepts_msra: boolean;
+  cooperation_note: string | null;
 }
 
 interface MarketProduct {
@@ -72,7 +74,7 @@ const MarketLocationProfile = () => {
   const fetchLocation = async () => {
     const { data, error } = await supabase
       .from("market_locations")
-      .select("id, name, name_en, description, bio, location_type, latitude, longitude, address, phone, website, logo_url, cover_image_url, user_id")
+      .select("id, name, name_en, description, bio, location_type, latitude, longitude, address, phone, website, logo_url, cover_image_url, user_id, accepts_msra, cooperation_note")
       .eq("id", id!)
       .eq("status", "approved")
       .single();
@@ -149,8 +151,23 @@ const MarketLocationProfile = () => {
                   <Store className="w-3 h-3 ml-1" />
                   {LocationTypeLabels[location.location_type] || location.location_type}
                 </Badge>
+                {location.accepts_msra && (
+                  <Badge className="mt-2 mr-2 bg-amber-500/20 text-amber-400 border-amber-500/30">
+                    <Coins className="w-3 h-3 ml-1" />
+                    يقبل <span dir="ltr" className="font-bold">$MS-RA</span>
+                  </Badge>
+                )}
               </div>
             </div>
+
+            {location.accepts_msra && location.cooperation_note && (
+              <Card className="bg-amber-500/10 border-amber-500/20">
+                <CardContent className="p-3 flex items-start gap-2">
+                  <Coins className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                  <p className="text-amber-200/80 text-sm">{location.cooperation_note}</p>
+                </CardContent>
+              </Card>
+            )}
 
             {(location.bio || location.description) && (
               <p className="text-white/80 text-sm leading-relaxed">{location.bio || location.description}</p>
