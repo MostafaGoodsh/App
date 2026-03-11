@@ -15,8 +15,8 @@ interface QuranPage {
   surah_name: string;
   juz_number: number;
   arabic_text: string;
-  image_url?: string;
-  audio_url?: string;
+  arabic_image_url?: string;
+  translation_image_url?: string;
 }
 
 const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
@@ -218,7 +218,7 @@ const QuranTab = () => {
           <div className="text-center">
             <div className="text-xs text-muted-foreground mb-1">الصفحة</div>
             <div className="text-lg sm:text-2xl font-bold text-primary">
-              {currentPageIndex + 1} / {quranPages.length}
+              {currentPage?.page_number || (currentPageIndex + 1)} / {quranPages.length}
             </div>
           </div>
           
@@ -240,13 +240,13 @@ const QuranTab = () => {
                 <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
               </div>
 
-              {currentPage.image_url && (
+              {currentPage.arabic_image_url && (
                 <div 
                   className="relative cursor-pointer group"
-                  onClick={() => setSelectedImage(currentPage.image_url!)}
+                  onClick={() => setSelectedImage(currentPage.arabic_image_url!)}
                 >
                   <img 
-                    src={currentPage.image_url} 
+                    src={currentPage.arabic_image_url} 
                     alt={`صفحة ${currentPage.page_number}`}
                     className="w-full rounded-lg border border-border"
                   />
@@ -262,11 +262,13 @@ const QuranTab = () => {
                 </p>
               )}
 
-              <div className="bg-muted/30 rounded-lg p-4">
-                <p className="font-arabic text-base sm:text-lg leading-loose text-foreground whitespace-pre-wrap">
-                  {formattedText.text}
-                </p>
-              </div>
+              {formattedText.text && (
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <p className="font-arabic text-base sm:text-lg leading-loose text-foreground whitespace-pre-wrap">
+                    {formattedText.text}
+                  </p>
+                </div>
+              )}
 
               {isReading && (
                 <div className="space-y-2">
