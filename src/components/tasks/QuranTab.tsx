@@ -259,17 +259,31 @@ const QuranTab = () => {
               </div>
 
               {currentPage.arabic_image_url && (
-                <div 
+                <div
                   className="relative cursor-pointer group"
                   onClick={() => setSelectedImage(currentPage.arabic_image_url!)}
                 >
-                  <img 
-                    src={currentPage.arabic_image_url} 
-                    alt={`صفحة ${currentPage.page_number}`}
-                    className="w-full rounded-lg border border-border"
-                  />
+                  {isPdfUrl(currentPage.arabic_image_url) ? (
+                    <div className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                      <iframe
+                        src={getPdfViewerUrl(currentPage.arabic_image_url)}
+                        title={`صفحة ${currentPage.page_number}`}
+                        className="w-full h-[420px]"
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={currentPage.arabic_image_url}
+                      alt={`صفحة ${currentPage.page_number}`}
+                      className="w-full rounded-lg border border-border"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex items-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ZoomIn className="h-8 w-8" />
+                      {isPdfUrl(currentPage.arabic_image_url) && <ExternalLink className="h-5 w-5" />}
+                    </div>
                   </div>
                 </div>
               )}
