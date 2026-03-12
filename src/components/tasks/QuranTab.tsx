@@ -38,11 +38,64 @@ const formatQuranText = (text: string) => {
 
 const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
 
+const getPdfBaseAndPage = (url: string) => {
+  const [baseUrl, hash = ""] = url.split("#");
+  const pageMatch = hash.match(/page=(\d+)/i);
+  return { baseUrl, pageNumber: pageMatch ? Number(pageMatch[1]) : null };
+};
+
+const getArchiveIdentifier = (pdfUrl: string) => {
+  try {
+    const parsedUrl = new URL(pdfUrl);
+    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+
+    const itemsIndex = pathParts.indexOf("items");
+    if (itemsIndex !== -1 && pathParts[itemsIndex + 1]) {
+      return pathParts[itemsIndex + 1];
+    }
+
+    const downloadIndex = pathParts.indexOf("download");
+    if (downloadIndex !== -1 && pathParts[downloadIndex + 1]) {
+      return pathParts[downloadIndex + 1];
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const getArchivePageImageUrl = (pdfUrl: string, pageNumber: number | null) => {
+  if (!pageNumber) return null;
+  const identifier = getArchiveIdentifier(pdfUrl);
+  if (!identifier) return null;
+  return `https://archive.org/download/${identifier}/page/n${pageNumber}.jpg`;
+};
+
 const getPdfViewerUrl = (url: string) => {
   if (!isPdfUrl(url)) return url;
-  // Use Google Docs Viewer for reliable cross-browser/mobile PDF rendering
-  const encodedUrl = encodeURIComponent(url);
-  return `https://docs.google.com/gview?embedded=true&url=${encodedUrl}`;
+  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
+  return pageNumber ? `${baseUrl}#page=${pageNumber}` : baseUrl;
+};
+
+const getBestQuranDisplay = (url: string) => {
+  if (!isPdfUrl(url)) {
+    return { displayUrl: url, openUrl: url, isPdf: false, useIframe: false };
+  }
+
+  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
+  const archiveImageUrl = getArchivePageImageUrl(baseUrl, pageNumber);
+
+  if (archiveImageUrl) {
+    return { displayUrl: archiveImageUrl, openUrl: url, isPdf: true, useIframe: false };
+  }
+
+  return {
+    displayUrl: getPdfViewerUrl(url),
+    openUrl: url,
+    isPdf: true,
+    useIframe: true,
+  };
 };
 
 const QuranTab = () => {
@@ -158,6 +211,8 @@ const QuranTab = () => {
   const isReading = currentPage ? readingPageId === currentPage.id : false;
   const minReadingTime = currentPage ? getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length) : 0;
   const formattedText = currentPage ? formatQuranText(currentPage.arabic_text) : { basmala: null, text: "" };
+  const selectedMedia = selectedImage ? getBestQuranDisplay(selectedImage) : null;
+  const currentPageMedia = currentPage?.arabic_image_url ? getBestQuranDisplay(currentPage.arabic_image_url) : null;
 
   const handleNextPage = () => {
     if (currentPageIndex < quranPages.length - 1) {
@@ -200,16 +255,16 @@ const QuranTab = () => {
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
-          {selectedImage && (
-            isPdfUrl(selectedImage) ? (
+          {selectedMedia && (
+            selectedMedia.useIframe ? (
               <iframe
-                src={getPdfViewerUrl(selectedImage)}
+                src={selectedMedia.displayUrl}
                 title="Quran Page Full Screen"
                 className="w-full h-[90vh]"
               />
             ) : (
               <img
-                src={selectedImage}
+                src={selectedMedia.displayUrl}
                 alt="Quran Page Full Screen"
                 className="w-full h-full object-contain"
                 loading="lazy"
@@ -258,22 +313,22 @@ const QuranTab = () => {
                 <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
               </div>
 
-              {currentPage.arabic_image_url && (
+              {currentPage.arabic_image_url && currentPageMedia && (
                 <div
                   className="relative cursor-pointer group"
                   onClick={() => setSelectedImage(currentPage.arabic_image_url!)}
                 >
-                  {isPdfUrl(currentPage.arabic_image_url) ? (
+                  {currentPageMedia.useIframe ? (
                     <div className="rounded-lg border border-border overflow-hidden bg-muted/20">
                       <iframe
-                        src={getPdfViewerUrl(currentPage.arabic_image_url)}
+                        src={currentPageMedia.displayUrl}
                         title={`صفحة ${currentPage.page_number}`}
                         className="w-full h-[420px]"
                       />
                     </div>
                   ) : (
                     <img
-                      src={currentPage.arabic_image_url}
+                      src={currentPageMedia.displayUrl}
                       alt={`صفحة ${currentPage.page_number}`}
                       className="w-full rounded-lg border border-border"
                       loading="lazy"
@@ -282,9 +337,23 @@ const QuranTab = () => {
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="flex items-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                       <ZoomIn className="h-8 w-8" />
-                      {isPdfUrl(currentPage.arabic_image_url) && <ExternalLink className="h-5 w-5" />}
+                      {currentPageMedia.isPdf && <ExternalLink className="h-5 w-5" />}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {currentPageMedia?.isPdf && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => window.open(currentPageMedia.openUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    فتح الصفحة الأصلية
+                  </Button>
                 </div>
               )}
 
