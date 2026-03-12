@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
-import { Plus, FileText, MessageCircle } from "lucide-react";
+import { Plus, FileText, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface PlatformMessage {
   id: string;
@@ -21,6 +22,8 @@ export default function Learning() {
   const { user } = useAuth();
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [messages, setMessages] = useState<PlatformMessage[]>([]);
+  const [showMessages, setShowMessages] = useState(false);
+  const [currentMsgIndex, setCurrentMsgIndex] = useState(0);
 
   useEffect(() => {
     fetchMessages();
@@ -44,6 +47,8 @@ export default function Learning() {
       })));
     }
   };
+
+  const currentMsg = messages[currentMsgIndex];
 
   return (
     <>
@@ -84,28 +89,70 @@ export default function Learning() {
               </div>
             </div>
 
-            {/* رسالة المنصة - Platform Messages */}
+            {/* رسالة المنصة - زر عريض */}
             {messages.length > 0 && (
               <div className="container mx-auto px-4 mb-8">
-                <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-r from-primary/10 via-card/80 to-primary/10 backdrop-blur-sm p-6 md:p-8">
-                  <div className="absolute inset-0 bg-cover bg-center opacity-5" style={{ backgroundImage: `url('/lovable-uploads/egyptian-hieroglyphs-blue-gold.jpg')` }} />
-                  <div className="relative z-10 space-y-4">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <MessageCircle className="w-5 h-5 text-primary" />
-                      <h2 className="font-cairo text-xl md:text-2xl font-bold text-primary">رسالة المنصة</h2>
-                    </div>
-                    <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto" />
-                    {messages.map((msg) => (
-                      <div key={msg.id} className="text-center space-y-2 py-2">
-                        <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed max-w-2xl mx-auto" dir="rtl">
-                          {msg.content}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <Button
+                  onClick={() => { setCurrentMsgIndex(0); setShowMessages(true); }}
+                  variant="outline"
+                  className="w-full h-14 text-base font-cairo border-primary/30 bg-gradient-to-r from-primary/10 via-card/80 to-primary/10 hover:from-primary/20 hover:to-primary/20 gap-3"
+                >
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                  <span className="text-primary font-bold">رسالة المنصة</span>
+                  <span className="text-muted-foreground text-sm">({messages.length})</span>
+                </Button>
               </div>
             )}
+
+            {/* Dialog لعرض الرسائل بالتتابع */}
+            <Dialog open={showMessages} onOpenChange={setShowMessages}>
+              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="font-cairo flex items-center justify-center gap-2 text-primary">
+                    <MessageCircle className="w-5 h-5" />
+                    رسالة المنصة ({currentMsgIndex + 1}/{messages.length})
+                  </DialogTitle>
+                </DialogHeader>
+                {currentMsg && (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="font-cairo font-bold text-lg text-primary mb-2">{currentMsg.title}</h3>
+                      <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mb-4" />
+                    </div>
+                    <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed whitespace-pre-wrap" dir="rtl">
+                      {currentMsg.content}
+                    </p>
+                    
+                    {/* أزرار التنقل */}
+                    {messages.length > 1 && (
+                      <div className="flex items-center justify-between pt-4 border-t border-border">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentMsgIndex(prev => prev - 1)}
+                          disabled={currentMsgIndex === 0}
+                        >
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                          السابقة
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {currentMsgIndex + 1} / {messages.length}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentMsgIndex(prev => prev + 1)}
+                          disabled={currentMsgIndex === messages.length - 1}
+                        >
+                          التالية
+                          <ChevronLeft className="w-4 h-4 mr-1" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
             
             <div className="container mx-auto px-4">
               <Tabs defaultValue="crypto" className="w-full">
