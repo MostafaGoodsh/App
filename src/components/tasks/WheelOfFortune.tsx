@@ -18,19 +18,37 @@ const BONUS_SEGMENTS = [
   { label: '7 $MS-RA', value: 7, color: '#1f1f35' },
 ];
 
+const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+  const parts = text.split(' ');
+  const lines: string[] = [];
+  let current = '';
+  for (const part of parts) {
+    const test = current ? `${current} ${part}` : part;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = part;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+};
+
 const drawDualRingWheel = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
-  outerSegments: Array<{ label: string; color: string; reward_type?: string }>,
-  bonusSegments: Array<{ label: string; color: string }>,
+  xpSegments: Array<{ label: string; color: string; reward_type?: string }>,
+  msraSegments: Array<{ label: string; color: string }>,
   outerRotation: number,
   innerRotation: number,
 ) => {
   const size = canvas.width;
   const center = size / 2;
   const outerRadius = center - 12;
-  const innerRadius = outerRadius * 0.48;
-  const dividerRadius = outerRadius * 0.52;
+  const innerRadius = outerRadius * 0.58; // bigger inner ring
+  const dividerRadius = outerRadius * 0.62;
+  const innerCenterRadius = 28;
 
   ctx.clearRect(0, 0, size, size);
 
@@ -53,9 +71,9 @@ const drawDualRingWheel = (
     ctx.fillText('◆', x, y);
   }
 
-  // === Draw outer ring segments ===
-  const outerSegAngle = (2 * Math.PI) / outerSegments.length;
-  outerSegments.forEach((seg, i) => {
+  // === OUTER RING: $MS-RA tokens ===
+  const outerSegAngle = (2 * Math.PI) / msraSegments.length;
+  msraSegments.forEach((seg, i) => {
     const startAngle = i * outerSegAngle + outerRotation;
     const endAngle = startAngle + outerSegAngle;
 
@@ -64,40 +82,36 @@ const drawDualRingWheel = (
     ctx.arc(center, center, dividerRadius, endAngle, startAngle, true);
     ctx.closePath();
 
-    const isBonusTrigger = seg.reward_type === 'nothing';
-    if (isBonusTrigger) {
-      const grad = ctx.createRadialGradient(center, center, dividerRadius, center, center, outerRadius);
-      grad.addColorStop(0, '#C5A028');
-      grad.addColorStop(1, '#8B6914');
-      ctx.fillStyle = grad;
-    } else {
-      ctx.fillStyle = seg.color;
-    }
+    ctx.fillStyle = seg.color;
     ctx.fill();
 
     ctx.strokeStyle = '#D4AF37';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Text
+    // Horizontal text for $MS-RA
+    const midAngle = startAngle + outerSegAngle / 2;
+    const textR = dividerRadius + (outerRadius - dividerRadius) / 2;
+    const tx = center + Math.cos(midAngle) * textR;
+    const ty = center + Math.sin(midAngle) * textR;
+
     ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(startAngle + outerSegAngle / 2);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 340 ? 10 : 12}px sans-serif`;
-    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.font = `bold ${size < 340 ? 8 : 10}px sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
     ctx.shadowBlur = 4;
 
-    const textR = dividerRadius + (outerRadius - dividerRadius) / 2;
-    if (isBonusTrigger) {
-      ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 340 ? 11 : 13}px sans-serif`;
-      ctx.fillText('☥ بونص', textR, 0);
-    } else {
-      ctx.fillText(seg.label, textR, 0);
-    }
+    // Write horizontally (no rotation)
+    const maxW = (outerRadius - dividerRadius) * 0.85;
+    const lines = wrapText(ctx, seg.label, maxW);
+    const lineH = size < 340 ? 10 : 12;
+    const startY = ty - ((lines.length - 1) * lineH) / 2;
+    lines.forEach((line, li) => {
+      ctx.fillText(line, tx, startY + li * lineH);
+    });
+
     ctx.shadowBlur = 0;
     ctx.restore();
 
@@ -132,10 +146,9 @@ const drawDualRingWheel = (
     ctx.fillText('☥', x, y);
   }
 
-  // === Draw inner ring segments ($MS-RA) ===
-  const innerCenterRadius = 24;
-  const innerSegAngle = (2 * Math.PI) / bonusSegments.length;
-  bonusSegments.forEach((seg, i) => {
+  // === INNER RING: XP segments ===
+  const innerSegAngle = (2 * Math.PI) / xpSegments.length;
+  xpSegments.forEach((seg, i) => {
     const startAngle = i * innerSegAngle + innerRotation;
     const endAngle = startAngle + innerSegAngle;
 
@@ -144,25 +157,48 @@ const drawDualRingWheel = (
     ctx.arc(center, center, innerCenterRadius, endAngle, startAngle, true);
     ctx.closePath();
 
-    ctx.fillStyle = seg.color;
+    const isBonusTrigger = seg.reward_type === 'nothing';
+    if (isBonusTrigger) {
+      const grad = ctx.createRadialGradient(center, center, innerCenterRadius, center, center, innerRadius);
+      grad.addColorStop(0, '#C5A028');
+      grad.addColorStop(1, '#8B6914');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = seg.color;
+    }
     ctx.fill();
 
     ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Text
+    // Horizontal text for XP / Bonus
+    const midAngle = startAngle + innerSegAngle / 2;
+    const innerTextR = innerCenterRadius + (innerRadius - innerCenterRadius) / 2;
+    const tx = center + Math.cos(midAngle) * innerTextR;
+    const ty = center + Math.sin(midAngle) * innerTextR;
+
     ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(startAngle + innerSegAngle / 2);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 340 ? 7 : 9}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.8)';
     ctx.shadowBlur = 3;
-    const innerTextR = innerCenterRadius + (innerRadius - innerCenterRadius) / 2;
-    ctx.fillText(seg.label, innerTextR, 0);
+
+    if (isBonusTrigger) {
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = `bold ${size < 340 ? 9 : 11}px sans-serif`;
+      ctx.fillText('☥ بونص', tx, ty);
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size < 340 ? 8 : 10}px sans-serif`;
+      const maxW = (innerRadius - innerCenterRadius) * 0.8;
+      const lines = wrapText(ctx, seg.label, maxW);
+      const lineH = size < 340 ? 9 : 11;
+      const startY = ty - ((lines.length - 1) * lineH) / 2;
+      lines.forEach((line, li) => {
+        ctx.fillText(line, tx, startY + li * lineH);
+      });
+    }
     ctx.shadowBlur = 0;
     ctx.restore();
   });
@@ -182,7 +218,7 @@ const drawDualRingWheel = (
 
   // Center symbol
   ctx.fillStyle = '#1a1a2e';
-  ctx.font = 'bold 16px serif';
+  ctx.font = 'bold 18px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(212, 175, 55, 0.5)';
@@ -203,7 +239,7 @@ const WheelOfFortune = () => {
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
 
-  // Draw combined wheel
+  // Draw combined wheel: outer=$MS-RA, inner=XP
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || segments.length === 0) return;
@@ -212,6 +248,7 @@ const WheelOfFortune = () => {
     drawDualRingWheel(ctx, canvas, segments, BONUS_SEGMENTS, outerRotation, innerRotation);
   }, [segments, outerRotation, innerRotation]);
 
+  // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
@@ -232,13 +269,13 @@ const WheelOfFortune = () => {
 
     const startTime = Date.now();
     const duration = 3500;
-    const startRot = innerRotation;
+    const startRot = outerRotation;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
-      setInnerRotation(startRot + totalRot * ease);
+      setOuterRotation(startRot + totalRot * ease);
 
       if (progress < 1) {
         bonusAnimRef.current = requestAnimationFrame(animate);
@@ -252,8 +289,9 @@ const WheelOfFortune = () => {
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [innerRotation]);
+  }, [outerRotation]);
 
+  // Spin the INNER ring (XP)
   const handleSpin = async () => {
     if (isAnimating || isBonusAnimating || !canSpin()) return;
 
@@ -274,13 +312,13 @@ const WheelOfFortune = () => {
 
     const startTime = Date.now();
     const duration = 4000;
-    const startRotation = outerRotation;
+    const startRotation = innerRotation;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
-      setOuterRotation(startRotation + totalRotation * ease);
+      setInnerRotation(startRotation + totalRotation * ease);
 
       if (progress < 1) {
         animRef.current = requestAnimationFrame(animate);
@@ -288,9 +326,9 @@ const WheelOfFortune = () => {
         setIsAnimating(false);
 
         if (winner.reward_type === "nothing") {
-          setResult("☥ بونص! الحلقة الداخلية تدور...");
-          toast("☥ بونص! الحلقة الداخلية لـ $MS-RA تدور الآن!", {
-            description: "وقف السهم على البونص - الحلقة الداخلية تدور تلقائياً!",
+          setResult("☥ بونص! الحلقة الخارجية تدور...");
+          toast("☥ بونص! الحلقة الخارجية لـ $MS-RA تدور الآن!", {
+            description: "وقف السهم على البونص - الحلقة الخارجية تدور تلقائياً!",
           });
           setTimeout(() => {
             spinBonusRing();
@@ -380,12 +418,12 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={320}
-            height={320}
+            width={340}
+            height={340}
             className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50"
           />
 
-          {/* Inner ring label */}
+          {/* Bonus indicator */}
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
@@ -398,12 +436,12 @@ const WheelOfFortune = () => {
         {/* Ring labels */}
         <div className="flex items-center justify-center gap-4 text-[10px]">
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-700" />
-            <span className="text-amber-500/60 arabic-text">الحلقة الخارجية: XP</span>
+            <div className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="text-amber-500/60 arabic-text" dir="ltr">الحلقة الخارجية: $MS-RA</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-amber-500/60 arabic-text">الحلقة الداخلية: $MS-RA</span>
+            <div className="w-2 h-2 rounded-full bg-amber-700" />
+            <span className="text-amber-500/60 arabic-text">الحلقة الداخلية: XP</span>
           </div>
         </div>
 
@@ -437,7 +475,7 @@ const WheelOfFortune = () => {
             {isAnimating || isBonusAnimating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="arabic-text">{isBonusAnimating ? 'الحلقة الداخلية تدور...' : 'جاري التدوير...'}</span>
+                <span className="arabic-text">{isBonusAnimating ? 'الحلقة الخارجية تدور...' : 'جاري التدوير...'}</span>
               </>
             ) : (
               <>
