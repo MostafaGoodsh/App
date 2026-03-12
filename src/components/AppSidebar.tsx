@@ -23,6 +23,7 @@ const useMenuItems = (getContent: (key: string, fallback?: string) => string) =>
   { title: getContent("sidebar_profile", "البروفايل"), url: "/profile", icon: User, requireAuth: true },
   { title: getContent("sidebar_home", "الرئيسية"), url: "/", icon: Home },
   { title: getContent("sidebar_wallet", "المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
+  { title: "الدفع بـ Pi", url: "/pi-payment", icon: Coins },
   { title: getContent("sidebar_learning", "التعلم"), url: "/learning", icon: BookOpen },
   { title: "البث المباشر", url: "/live-streams", icon: Video },
   { title: getContent("sidebar_surveys", "الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
