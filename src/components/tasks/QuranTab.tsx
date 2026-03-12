@@ -38,11 +38,64 @@ const formatQuranText = (text: string) => {
 
 const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
 
+const getPdfBaseAndPage = (url: string) => {
+  const [baseUrl, hash = ""] = url.split("#");
+  const pageMatch = hash.match(/page=(\d+)/i);
+  return { baseUrl, pageNumber: pageMatch ? Number(pageMatch[1]) : null };
+};
+
+const getArchiveIdentifier = (pdfUrl: string) => {
+  try {
+    const parsedUrl = new URL(pdfUrl);
+    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+
+    const itemsIndex = pathParts.indexOf("items");
+    if (itemsIndex !== -1 && pathParts[itemsIndex + 1]) {
+      return pathParts[itemsIndex + 1];
+    }
+
+    const downloadIndex = pathParts.indexOf("download");
+    if (downloadIndex !== -1 && pathParts[downloadIndex + 1]) {
+      return pathParts[downloadIndex + 1];
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const getArchivePageImageUrl = (pdfUrl: string, pageNumber: number | null) => {
+  if (!pageNumber) return null;
+  const identifier = getArchiveIdentifier(pdfUrl);
+  if (!identifier) return null;
+  return `https://archive.org/download/${identifier}/page/n${pageNumber}.jpg`;
+};
+
 const getPdfViewerUrl = (url: string) => {
   if (!isPdfUrl(url)) return url;
-  // Use Google Docs Viewer for reliable cross-browser/mobile PDF rendering
-  const encodedUrl = encodeURIComponent(url);
-  return `https://docs.google.com/gview?embedded=true&url=${encodedUrl}`;
+  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
+  return pageNumber ? `${baseUrl}#page=${pageNumber}` : baseUrl;
+};
+
+const getBestQuranDisplay = (url: string) => {
+  if (!isPdfUrl(url)) {
+    return { displayUrl: url, openUrl: url, isPdf: false, useIframe: false };
+  }
+
+  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
+  const archiveImageUrl = getArchivePageImageUrl(baseUrl, pageNumber);
+
+  if (archiveImageUrl) {
+    return { displayUrl: archiveImageUrl, openUrl: url, isPdf: true, useIframe: false };
+  }
+
+  return {
+    displayUrl: getPdfViewerUrl(url),
+    openUrl: url,
+    isPdf: true,
+    useIframe: true,
+  };
 };
 
 const QuranTab = () => {
