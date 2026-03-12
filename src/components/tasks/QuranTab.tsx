@@ -255,16 +255,16 @@ const QuranTab = () => {
     <>
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
-          {selectedImage && (
-            isPdfUrl(selectedImage) ? (
+          {selectedMedia && (
+            selectedMedia.useIframe ? (
               <iframe
-                src={getPdfViewerUrl(selectedImage)}
+                src={selectedMedia.displayUrl}
                 title="Quran Page Full Screen"
                 className="w-full h-[90vh]"
               />
             ) : (
               <img
-                src={selectedImage}
+                src={selectedMedia.displayUrl}
                 alt="Quran Page Full Screen"
                 className="w-full h-full object-contain"
                 loading="lazy"
@@ -313,22 +313,22 @@ const QuranTab = () => {
                 <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
               </div>
 
-              {currentPage.arabic_image_url && (
+              {currentPage.arabic_image_url && currentPageMedia && (
                 <div
                   className="relative cursor-pointer group"
                   onClick={() => setSelectedImage(currentPage.arabic_image_url!)}
                 >
-                  {isPdfUrl(currentPage.arabic_image_url) ? (
+                  {currentPageMedia.useIframe ? (
                     <div className="rounded-lg border border-border overflow-hidden bg-muted/20">
                       <iframe
-                        src={getPdfViewerUrl(currentPage.arabic_image_url)}
+                        src={currentPageMedia.displayUrl}
                         title={`صفحة ${currentPage.page_number}`}
                         className="w-full h-[420px]"
                       />
                     </div>
                   ) : (
                     <img
-                      src={currentPage.arabic_image_url}
+                      src={currentPageMedia.displayUrl}
                       alt={`صفحة ${currentPage.page_number}`}
                       className="w-full rounded-lg border border-border"
                       loading="lazy"
@@ -337,9 +337,23 @@ const QuranTab = () => {
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="flex items-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                       <ZoomIn className="h-8 w-8" />
-                      {isPdfUrl(currentPage.arabic_image_url) && <ExternalLink className="h-5 w-5" />}
+                      {currentPageMedia.isPdf && <ExternalLink className="h-5 w-5" />}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {currentPageMedia?.isPdf && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => window.open(currentPageMedia.openUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    فتح الصفحة الأصلية
+                  </Button>
                 </div>
               )}
 
