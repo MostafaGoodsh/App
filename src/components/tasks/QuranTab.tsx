@@ -211,6 +211,8 @@ const QuranTab = () => {
   const isReading = currentPage ? readingPageId === currentPage.id : false;
   const minReadingTime = currentPage ? getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length) : 0;
   const formattedText = currentPage ? formatQuranText(currentPage.arabic_text) : { basmala: null, text: "" };
+  const selectedMedia = selectedImage ? getBestQuranDisplay(selectedImage) : null;
+  const currentPageMedia = currentPage?.arabic_image_url ? getBestQuranDisplay(currentPage.arabic_image_url) : null;
 
   const handleNextPage = () => {
     if (currentPageIndex < quranPages.length - 1) {
