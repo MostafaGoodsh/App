@@ -47,7 +47,7 @@ const drawDualRingWheel = (
   const size = canvas.width;
   const center = size / 2;
   const outerRadius = center - 12;
-  const innerRadius = outerRadius * 0.58; // bigger inner ring
+  const innerRadius = outerRadius * 0.58;
   const dividerRadius = outerRadius * 0.62;
   const innerCenterRadius = 28;
 
@@ -60,7 +60,6 @@ const drawDualRingWheel = (
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  // Diamond pattern
   for (let i = 0; i < 28; i++) {
     const angle = (i / 28) * Math.PI * 2;
     const x = center + Math.cos(angle) * (outerRadius + 3);
@@ -85,12 +84,10 @@ const drawDualRingWheel = (
 
     ctx.fillStyle = seg.color;
     ctx.fill();
-
     ctx.strokeStyle = '#D4AF37';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Horizontal text for $MS-RA
     const midAngle = startAngle + outerSegAngle / 2;
     const textR = dividerRadius + (outerRadius - dividerRadius) / 2;
     const tx = center + Math.cos(midAngle) * textR;
@@ -104,7 +101,6 @@ const drawDualRingWheel = (
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
     ctx.shadowBlur = 4;
 
-    // Write horizontally (no rotation)
     const maxW = (outerRadius - dividerRadius) * 0.85;
     const lines = wrapText(ctx, seg.label, maxW);
     const lineH = size < 340 ? 10 : 12;
@@ -116,7 +112,6 @@ const drawDualRingWheel = (
     ctx.shadowBlur = 0;
     ctx.restore();
 
-    // Egyptian symbol at segment boundary
     ctx.save();
     ctx.translate(center, center);
     ctx.rotate(startAngle);
@@ -135,7 +130,6 @@ const drawDualRingWheel = (
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // Ankh symbols on divider
   for (let i = 0; i < 8; i++) {
     const angle = (i / 8) * Math.PI * 2;
     const x = center + Math.cos(angle) * dividerRadius;
@@ -168,12 +162,10 @@ const drawDualRingWheel = (
       ctx.fillStyle = seg.color;
     }
     ctx.fill();
-
     ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Horizontal text for XP / Bonus
     const midAngle = startAngle + innerSegAngle / 2;
     const innerTextR = innerCenterRadius + (innerRadius - innerCenterRadius) / 2;
     const tx = center + Math.cos(midAngle) * innerTextR;
@@ -193,11 +185,11 @@ const drawDualRingWheel = (
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${size < 340 ? 8 : 10}px sans-serif`;
       const maxW = (innerRadius - innerCenterRadius) * 0.8;
-      const lines = wrapText(ctx, seg.label, maxW);
+      const txtLines = wrapText(ctx, seg.label, maxW);
       const lineH = size < 340 ? 9 : 11;
-      const startY = ty - ((lines.length - 1) * lineH) / 2;
-      lines.forEach((line, li) => {
-        ctx.fillText(line, tx, startY + li * lineH);
+      const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
+      txtLines.forEach((line, li) => {
+        ctx.fillText(line, tx, startTxtY + li * lineH);
       });
     }
     ctx.shadowBlur = 0;
@@ -217,7 +209,6 @@ const drawDualRingWheel = (
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Center symbol
   ctx.fillStyle = '#1a1a2e';
   ctx.font = 'bold 18px serif';
   ctx.textAlign = 'center';
@@ -228,8 +219,11 @@ const drawDualRingWheel = (
   ctx.shadowBlur = 0;
 };
 
+/** Normalize angle to [0, 2π) */
+const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
 const WheelOfFortune = () => {
-  const { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel } = useWheelOfFortune();
+  const { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [outerRotation, setOuterRotation] = useState(0);
   const [innerRotation, setInnerRotation] = useState(0);
@@ -240,6 +234,7 @@ const WheelOfFortune = () => {
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
   const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
+  const [lastSpinCost, setLastSpinCost] = useState(0);
 
   // Fetch outer segments from DB
   useEffect(() => {
@@ -251,7 +246,7 @@ const WheelOfFortune = () => {
       });
   }, []);
 
-  // Draw combined wheel: outer=$MS-RA, inner=XP
+  // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || segments.length === 0) return;
@@ -265,6 +260,7 @@ const WheelOfFortune = () => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
+    // Weighted random (lower value = higher chance)
     const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
@@ -276,12 +272,17 @@ const WheelOfFortune = () => {
 
     const winner = bonusSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / bonusSegments.length;
-    const targetAngle = -(winnerIdx * segAngle + segAngle / 2) - Math.PI / 2;
-    const totalRot = targetAngle + Math.PI * 2 * (6 + Math.random() * 3);
+
+    // Calculate precise target: segment center at top (pointer = -π/2)
+    const desiredFinal = -Math.PI / 2 - winnerIdx * segAngle - segAngle / 2;
+    const currentRot = outerRotation;
+    let delta = desiredFinal - currentRot;
+    delta = normalizeAngle(delta);
+    const totalRot = delta + Math.PI * 2 * (6 + Math.floor(Math.random() * 3));
 
     const startTime = Date.now();
     const duration = 3500;
-    const startRot = outerRotation;
+    const startRot = currentRot;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -293,15 +294,21 @@ const WheelOfFortune = () => {
         bonusAnimRef.current = requestAnimationFrame(animate);
       } else {
         setIsBonusAnimating(false);
-        setBonusResult(winner.label);
-        toast.success(`☥ مبروك! ربحت ${winner.label}`, {
-          description: `جائزة البونص: +${winner.value} $MS-RA`,
+        const userAmount = (winner.value * 0.8).toFixed(2);
+        const poolAmount = (winner.value * 0.2).toFixed(2);
+        setBonusResult(`${userAmount} $MS-RA`);
+        
+        // Process bonus reward (80% to user, 20% to pool)
+        processBonusReward(winner.value);
+        
+        toast.success(`☥ مبروك! ربحت ${userAmount} $MS-RA`, {
+          description: `إجمالي: ${winner.value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)`,
         });
       }
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [outerRotation, bonusSegments]);
+  }, [outerRotation, bonusSegments, processBonusReward]);
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
@@ -311,6 +318,9 @@ const WheelOfFortune = () => {
     setBonusResult(null);
     setIsAnimating(true);
 
+    const costXp = isFree() ? 0 : (settings?.spin_cost_xp || 0);
+    setLastSpinCost(costXp);
+
     const winner = await spinWheel();
     if (!winner) {
       setIsAnimating(false);
@@ -319,12 +329,16 @@ const WheelOfFortune = () => {
 
     const winnerIndex = segments.findIndex((s) => s.id === winner.id);
     const segAngle = (2 * Math.PI) / segments.length;
-    const targetAngle = -(winnerIndex * segAngle + segAngle / 2) - Math.PI / 2;
-    const totalRotation = targetAngle + Math.PI * 2 * (6 + Math.random() * 2);
+
+    // Calculate precise target: segment center at top (pointer = -π/2)
+    const desiredFinal = -Math.PI / 2 - winnerIndex * segAngle - segAngle / 2;
+    const startRotation = innerRotation;
+    let delta = desiredFinal - startRotation;
+    delta = normalizeAngle(delta);
+    const totalRotation = delta + Math.PI * 2 * (6 + Math.floor(Math.random() * 2));
 
     const startTime = Date.now();
     const duration = 4000;
-    const startRotation = innerRotation;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -339,16 +353,22 @@ const WheelOfFortune = () => {
 
         if (winner.reward_type === "nothing") {
           setResult("☥ بونص! الحلقة الخارجية تدور...");
-          toast("☥ بونص! الحلقة الخارجية لـ $MS-RA تدور الآن!", {
-            description: "وقف السهم على البونص - الحلقة الخارجية تدور تلقائياً!",
-          });
+          if (costXp > 0) {
+            toast("☥ بونص! تم تحويل " + costXp + " XP للمجمع", {
+              description: "الحلقة الخارجية لـ $MS-RA تدور الآن!",
+            });
+          } else {
+            toast("☥ بونص! الحلقة الخارجية لـ $MS-RA تدور الآن!");
+          }
           setTimeout(() => {
             spinBonusRing();
           }, 800);
         } else {
-          setResult(winner.label);
-          toast.success(`🎉 مبروك! ربحت ${winner.label}`, {
-            description: winner.reward_description || `+${winner.reward_value} ${winner.reward_type.toUpperCase()}`,
+          const userAmount = (winner.reward_value * 0.8).toFixed(1);
+          const poolAmount = (winner.reward_value * 0.2).toFixed(1);
+          setResult(`${userAmount} ${winner.reward_type.toUpperCase()}`);
+          toast.success(`🎉 مبروك! ربحت ${userAmount} ${winner.reward_type.toUpperCase()}`, {
+            description: `إجمالي: ${winner.reward_value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)`,
           });
         }
       }
@@ -401,7 +421,7 @@ const WheelOfFortune = () => {
       <CardContent className="flex flex-col items-center gap-4 pb-6">
         {/* Dual-ring wheel */}
         <div className="relative">
-          {/* Pointer */}
+          {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
               <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent border-t-amber-500 drop-shadow-lg" />
@@ -435,7 +455,6 @@ const WheelOfFortune = () => {
             className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50"
           />
 
-          {/* Bonus indicator */}
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
@@ -457,6 +476,11 @@ const WheelOfFortune = () => {
           </div>
         </div>
 
+        {/* Distribution info */}
+        <div className="text-[9px] text-amber-500/40 text-center arabic-text">
+          ⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة
+        </div>
+
         {/* Results */}
         {result && !isBonusAnimating && (
           <div className="text-center animate-in fade-in zoom-in duration-500">
@@ -471,7 +495,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
               <p className="text-amber-400 font-bold text-lg">☥ {bonusResult}</p>
-              <p className="text-amber-500/70 text-xs arabic-text">تمت إضافة جائزة $MS-RA لحسابك</p>
+              <p className="text-amber-500/70 text-xs arabic-text">80% لمحفظتك | 20% لمجمع السيولة</p>
             </div>
           </div>
         )}

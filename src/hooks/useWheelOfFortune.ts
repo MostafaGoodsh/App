@@ -47,7 +47,6 @@ export function useWheelOfFortune() {
       if (segRes.data) setSegments(segRes.data);
       if (setRes.data) setSettings(setRes.data as unknown as WheelSettings);
 
-      // Count today's spins
       if (user) {
         const today = new Date().toISOString().split("T")[0];
         const { count } = await supabase
@@ -72,7 +71,6 @@ export function useWheelOfFortune() {
     if (!settings || !user) return false;
     if (!settings.is_active) return false;
     if (todaySpins < settings.free_spins_per_day) return true;
-    // Can spin with XP cost
     return settings.spin_cost_xp > 0;
   }, [settings, user, todaySpins]);
 
@@ -100,7 +98,7 @@ export function useWheelOfFortune() {
 
       const costXp = isFree() ? 0 : settings.spin_cost_xp;
 
-      // Record spin
+      // Record spin in history
       const { error } = await supabase.from("wheel_spin_history").insert({
         user_id: user.id,
         segment_id: winner.id,
@@ -111,8 +109,21 @@ export function useWheelOfFortune() {
 
       if (error) throw error;
 
+      // Process reward distribution (80/20 split + liquidity pool)
+      const { data: rewardResult, error: rewardError } = await supabase.rpc('process_wheel_reward', {
+        p_user_id: user.id,
+        p_reward_type: winner.reward_type,
+        p_reward_value: winner.reward_value,
+        p_spin_cost: costXp,
+        p_is_bonus: false,
+      });
+
+      if (rewardError) {
+        console.error('Reward processing error:', rewardError);
+      }
+
       setTodaySpins((p) => p + 1);
-      return winner;
+      return { ...winner, _rewardResult: rewardResult } as any;
     } catch (e: any) {
       toast.error("حدث خطأ أثناء تدوير العجلة");
       console.error(e);
@@ -122,5 +133,27 @@ export function useWheelOfFortune() {
     }
   }, [user, settings, segments, spinning, isFree]);
 
-  return { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel, refetch: fetchData };
+  // Process bonus ring MS-RA reward
+  const processBonusReward = useCallback(async (msraValue: number) => {
+    if (!user) return null;
+    try {
+      const { data, error } = await supabase.rpc('process_wheel_reward', {
+        p_user_id: user.id,
+        p_reward_type: 'msra',
+        p_reward_value: msraValue,
+        p_spin_cost: 0,
+        p_is_bonus: true,
+      });
+      if (error) {
+        console.error('Bonus reward error:', error);
+        return null;
+      }
+      return data;
+    } catch (e) {
+      console.error('Bonus reward error:', e);
+      return null;
+    }
+  }, [user]);
+
+  return { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward, refetch: fetchData };
 }
