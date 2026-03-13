@@ -234,7 +234,8 @@ const WheelOfFortune = () => {
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
   const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
-  const [lastSpinCost, setLastSpinCost] = useState(0);
+const [lastSpinCost, setLastSpinCost] = useState(0);
+  const [setTodaySpinsOverride, _] = useState<null>(null); // placeholder
 
   // Fetch outer segments from DB
   useEffect(() => {

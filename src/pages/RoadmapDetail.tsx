@@ -196,23 +196,27 @@ const RoadmapDetail = () => {
     return (
       <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
         <CardHeader>
-          <CardTitle className="text-white">روابط سريعة | Quick Links</CardTitle>
+          <CardTitle className="text-white text-center">الروابط | Links</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-4">
             {buttons.map((button: ActionButton, index: number) => (
-              <Button
-                key={index}
-                variant={button.variant || 'default'}
-                className="gap-2"
-                asChild
-              >
-                <a href={button.url} target="_blank" rel="noopener noreferrer">
-                  {button.label}
-                  {button.label_en && <span className="text-xs opacity-70">({button.label_en})</span>}
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </Button>
+              <div key={index} className="flex flex-col gap-1">
+                <Button
+                  variant={button.variant || 'outline'}
+                  className="w-full gap-2 justify-center border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+                  asChild
+                >
+                  <a href={button.url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4" />
+                    {button.label}
+                    {button.label_en && <span className="text-xs opacity-70">({button.label_en})</span>}
+                  </a>
+                </Button>
+                {button.description && (
+                  <p className="text-xs text-white/50 text-center arabic-text px-2">{button.description}</p>
+                )}
+              </div>
             ))}
           </div>
         </CardContent>
