@@ -265,7 +265,7 @@ const WheelOfFortune = () => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    const weights = BONUS_SEGMENTS.map(s => 1 / (s.value + 0.1));
+    const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
     let winnerIdx = 0;
