@@ -274,8 +274,8 @@ const WheelOfFortune = () => {
       if (rand <= 0) { winnerIdx = i; break; }
     }
 
-    const winner = BONUS_SEGMENTS[winnerIdx];
-    const segAngle = (2 * Math.PI) / BONUS_SEGMENTS.length;
+    const winner = bonusSegments[winnerIdx];
+    const segAngle = (2 * Math.PI) / bonusSegments.length;
     const targetAngle = -(winnerIdx * segAngle + segAngle / 2) - Math.PI / 2;
     const totalRot = targetAngle + Math.PI * 2 * (6 + Math.random() * 3);
 
