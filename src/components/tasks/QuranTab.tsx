@@ -343,7 +343,12 @@ const QuranTab = () => {
             <CardContent className="p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-primary">{currentPage.surah_name}</span>
-                <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">
+                    +{currentPage.points_reward || 5} XP
+                  </span>
+                  <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
+                </div>
               </div>
 
               {currentPage.arabic_image_url && currentPageMedia && (
