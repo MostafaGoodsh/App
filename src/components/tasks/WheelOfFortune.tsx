@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift } from "lucide-react";
@@ -7,7 +8,7 @@ import { toast } from "sonner";
 
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
-const BONUS_SEGMENTS = [
+const FALLBACK_BONUS_SEGMENTS = [
   { label: '1 $MS-RA', value: 1, color: '#D4AF37' },
   { label: '2 $MS-RA', value: 2, color: '#1a1a2e' },
   { label: '5 $MS-RA', value: 5, color: '#B8860B' },
@@ -238,6 +239,17 @@ const WheelOfFortune = () => {
   const [bonusResult, setBonusResult] = useState<string | null>(null);
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
+  const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
+
+  // Fetch outer segments from DB
+  useEffect(() => {
+    supabase.from("wheel_outer_segments").select("*").eq("is_active", true).order("display_order")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
+        }
+      });
+  }, []);
 
   // Draw combined wheel: outer=$MS-RA, inner=XP
   useEffect(() => {
@@ -245,15 +257,15 @@ const WheelOfFortune = () => {
     if (!canvas || segments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawDualRingWheel(ctx, canvas, segments, BONUS_SEGMENTS, outerRotation, innerRotation);
-  }, [segments, outerRotation, innerRotation]);
+    drawDualRingWheel(ctx, canvas, segments, bonusSegments, outerRotation, innerRotation);
+  }, [segments, bonusSegments, outerRotation, innerRotation]);
 
   // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    const weights = BONUS_SEGMENTS.map(s => 1 / (s.value + 0.1));
+    const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
     let winnerIdx = 0;
@@ -262,8 +274,8 @@ const WheelOfFortune = () => {
       if (rand <= 0) { winnerIdx = i; break; }
     }
 
-    const winner = BONUS_SEGMENTS[winnerIdx];
-    const segAngle = (2 * Math.PI) / BONUS_SEGMENTS.length;
+    const winner = bonusSegments[winnerIdx];
+    const segAngle = (2 * Math.PI) / bonusSegments.length;
     const targetAngle = -(winnerIdx * segAngle + segAngle / 2) - Math.PI / 2;
     const totalRot = targetAngle + Math.PI * 2 * (6 + Math.random() * 3);
 
@@ -289,7 +301,7 @@ const WheelOfFortune = () => {
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [outerRotation]);
+  }, [outerRotation, bonusSegments]);
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
