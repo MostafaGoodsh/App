@@ -239,6 +239,17 @@ const WheelOfFortune = () => {
   const [bonusResult, setBonusResult] = useState<string | null>(null);
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
+  const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
+
+  // Fetch outer segments from DB
+  useEffect(() => {
+    supabase.from("wheel_outer_segments").select("*").eq("is_active", true).order("display_order")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
+        }
+      });
+  }, []);
 
   // Draw combined wheel: outer=$MS-RA, inner=XP
   useEffect(() => {
@@ -246,8 +257,8 @@ const WheelOfFortune = () => {
     if (!canvas || segments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawDualRingWheel(ctx, canvas, segments, BONUS_SEGMENTS, outerRotation, innerRotation);
-  }, [segments, outerRotation, innerRotation]);
+    drawDualRingWheel(ctx, canvas, segments, bonusSegments, outerRotation, innerRotation);
+  }, [segments, bonusSegments, outerRotation, innerRotation]);
 
   // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
