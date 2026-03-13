@@ -301,7 +301,7 @@ const WheelOfFortune = () => {
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [outerRotation]);
+  }, [outerRotation, bonusSegments]);
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
