@@ -194,6 +194,15 @@ const Recharge = () => {
       return;
     }
 
+    // Crypto payment - handled client-side, no Paymob needed
+    if (selectedMethod === 'crypto') {
+      toast({
+        title: "💰 الدفع بالكريبتو | Crypto Payment",
+        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
+      });
+      return;
+    }
+
     try {
       // Format phone number with country code
       let formattedPhone = phoneNumber;
@@ -204,7 +213,7 @@ const Recharge = () => {
 
       const result = await processPayment({
         amount: parseFloat(amount),
-        payment_method: selectedMethod as any,
+        payment_method: selectedMethod as 'vodafone_cash' | 'orange_cash' | 'etisalat_cash' | 'fawry' | 'card',
         phone_number: formattedPhone || undefined,
         internal_token_symbol: selectedToken
       });
