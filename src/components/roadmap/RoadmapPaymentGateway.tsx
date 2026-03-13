@@ -100,6 +100,14 @@ export const RoadmapPaymentGateway = ({
       return;
     }
 
+    if (selectedMethod === 'crypto') {
+      toast({
+        title: "💰 الدفع بالكريبتو | Crypto Payment",
+        description: `المبلغ: ${amount} EGP — حوّل المبلغ إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد العملية يدويًا`,
+      });
+      return;
+    }
+
     const needsPhone = ['vodafone_cash', 'orange_cash', 'etisalat_cash'].includes(selectedMethod);
     if (needsPhone && !phoneNumber) {
       toast({
@@ -118,7 +126,7 @@ export const RoadmapPaymentGateway = ({
 
       const result = await processPayment({
         amount: parseFloat(amount),
-        payment_method: selectedMethod as any,
+        payment_method: selectedMethod as 'vodafone_cash' | 'orange_cash' | 'etisalat_cash' | 'fawry' | 'card',
         phone_number: formattedPhone || undefined,
         internal_token_symbol: 'XP'
       });
