@@ -155,5 +155,5 @@ export function useWheelOfFortune() {
     }
   }, [user]);
 
-  return { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward, refetch: fetchData };
+  return { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward, refetch: fetchData };
 }

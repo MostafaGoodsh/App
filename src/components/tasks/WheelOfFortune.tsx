@@ -223,7 +223,7 @@ const drawDualRingWheel = (
 const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
 const WheelOfFortune = () => {
-  const { segments, settings, todaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
+  const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [outerRotation, setOuterRotation] = useState(0);
   const [innerRotation, setInnerRotation] = useState(0);
