@@ -26,6 +26,7 @@ interface ActionButton {
   url: string;
   variant?: 'default' | 'secondary' | 'outline' | 'ghost';
   icon?: string;
+  description?: string;
 }
 
 interface ServiceOption {
