@@ -198,7 +198,39 @@ const QuranTab = () => {
         }]);
 
       if (error) throw error;
-      toast.success('تم إكمال القراءة بنجاح! 🎉');
+
+      // Award points if configured
+      const pointsReward = currentPage.points_reward || 5;
+      // Add XP to user's internal wallet
+      const { data: xpToken } = await supabase
+        .from('internal_tokens')
+        .select('id')
+        .eq('symbol', 'XP')
+        .eq('is_active', true)
+        .single();
+
+      if (xpToken) {
+        await supabase
+          .from('internal_wallet_balances')
+          .upsert({
+            user_id: user.id,
+            token_id: xpToken.id,
+            balance: pointsReward,
+          }, {
+            onConflict: 'user_id,token_id',
+          });
+
+        // Update existing balance by adding points
+        await supabase.rpc('process_wheel_reward', {
+          p_user_id: user.id,
+          p_reward_type: 'xp',
+          p_reward_value: pointsReward,
+          p_spin_cost: 0,
+          p_is_bonus: false,
+        });
+      }
+
+      toast.success(`تم إكمال القراءة! +${pointsReward} XP 🎉`);
       setReadingProgress(0);
     } catch (error) {
       console.error('Error completing quran page:', error);
