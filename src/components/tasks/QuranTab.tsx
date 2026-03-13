@@ -17,6 +17,7 @@ interface QuranPage {
   arabic_text: string;
   arabic_image_url?: string;
   translation_image_url?: string;
+  points_reward?: number | null;
 }
 
 const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
@@ -197,7 +198,39 @@ const QuranTab = () => {
         }]);
 
       if (error) throw error;
-      toast.success('تم إكمال القراءة بنجاح! 🎉');
+
+      // Award XP points for completing the page
+      const pointsReward = currentPage.points_reward || 5;
+      const { data: xpToken } = await supabase
+        .from('internal_tokens')
+        .select('id')
+        .eq('symbol', 'XP')
+        .eq('is_active', true)
+        .single();
+
+      if (xpToken) {
+        // Upsert: insert or increment balance
+        const { data: existing } = await supabase
+          .from('internal_wallet_balances')
+          .select('balance')
+          .eq('user_id', user.id)
+          .eq('token_id', xpToken.id)
+          .single();
+
+        if (existing) {
+          await supabase
+            .from('internal_wallet_balances')
+            .update({ balance: existing.balance + pointsReward, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id)
+            .eq('token_id', xpToken.id);
+        } else {
+          await supabase
+            .from('internal_wallet_balances')
+            .insert({ user_id: user.id, token_id: xpToken.id, balance: pointsReward });
+        }
+      }
+
+      toast.success(`تم إكمال القراءة! +${pointsReward} XP 🎉`);
       setReadingProgress(0);
     } catch (error) {
       console.error('Error completing quran page:', error);
@@ -310,7 +343,12 @@ const QuranTab = () => {
             <CardContent className="p-4 sm:p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-primary">{currentPage.surah_name}</span>
-                <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">
+                    +{currentPage.points_reward || 5} XP
+                  </span>
+                  <span className="text-xs text-muted-foreground">الجزء {currentPage.juz_number}</span>
+                </div>
               </div>
 
               {currentPage.arabic_image_url && currentPageMedia && (
