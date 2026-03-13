@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
-const BONUS_SEGMENTS = [
+const FALLBACK_BONUS_SEGMENTS = [
   { label: '1 $MS-RA', value: 1, color: '#D4AF37' },
   { label: '2 $MS-RA', value: 2, color: '#1a1a2e' },
   { label: '5 $MS-RA', value: 5, color: '#B8860B' },
