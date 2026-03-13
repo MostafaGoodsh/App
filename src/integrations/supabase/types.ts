@@ -4539,6 +4539,16 @@ export type Database = {
         Args: { p_referral_code: string; p_referred_user_id: string }
         Returns: Json
       }
+      process_wheel_reward: {
+        Args: {
+          p_is_bonus?: boolean
+          p_reward_type: string
+          p_reward_value: number
+          p_spin_cost?: number
+          p_user_id: string
+        }
+        Returns: Json
+      }
       register_trusted_device: {
         Args: { p_device_fingerprint: string; p_device_name?: string }
         Returns: Json
