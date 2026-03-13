@@ -199,9 +199,8 @@ const QuranTab = () => {
 
       if (error) throw error;
 
-      // Award points if configured
+      // Award XP points for completing the page
       const pointsReward = currentPage.points_reward || 5;
-      // Add XP to user's internal wallet
       const { data: xpToken } = await supabase
         .from('internal_tokens')
         .select('id')
@@ -210,24 +209,25 @@ const QuranTab = () => {
         .single();
 
       if (xpToken) {
-        await supabase
+        // Upsert: insert or increment balance
+        const { data: existing } = await supabase
           .from('internal_wallet_balances')
-          .upsert({
-            user_id: user.id,
-            token_id: xpToken.id,
-            balance: pointsReward,
-          }, {
-            onConflict: 'user_id,token_id',
-          });
+          .select('balance')
+          .eq('user_id', user.id)
+          .eq('token_id', xpToken.id)
+          .single();
 
-        // Update existing balance by adding points
-        await supabase.rpc('process_wheel_reward', {
-          p_user_id: user.id,
-          p_reward_type: 'xp',
-          p_reward_value: pointsReward,
-          p_spin_cost: 0,
-          p_is_bonus: false,
-        });
+        if (existing) {
+          await supabase
+            .from('internal_wallet_balances')
+            .update({ balance: existing.balance + pointsReward, updated_at: new Date().toISOString() })
+            .eq('user_id', user.id)
+            .eq('token_id', xpToken.id);
+        } else {
+          await supabase
+            .from('internal_wallet_balances')
+            .insert({ user_id: user.id, token_id: xpToken.id, balance: pointsReward });
+        }
       }
 
       toast.success(`تم إكمال القراءة! +${pointsReward} XP 🎉`);
