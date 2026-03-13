@@ -363,6 +363,12 @@ const WheelOfFortune = () => {
           setTimeout(() => {
             spinBonusRing();
           }, 800);
+        } else if (winner.reward_type === "free_spin") {
+          // Extra free spins reward
+          const extraSpins = Math.floor(winner.reward_value);
+          setResult(`🎰 ${extraSpins} لفات إضافية!`);
+          setTodaySpins(prev => Math.max(0, prev - extraSpins));
+          toast.success(`🎰 مبروك! حصلت على ${extraSpins} لفات إضافية مجانية!`);
         } else {
           const userAmount = (winner.reward_value * 0.8).toFixed(1);
           const poolAmount = (winner.reward_value * 0.2).toFixed(1);
