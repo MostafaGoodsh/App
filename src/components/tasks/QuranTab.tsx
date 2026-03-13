@@ -17,6 +17,7 @@ interface QuranPage {
   arabic_text: string;
   arabic_image_url?: string;
   translation_image_url?: string;
+  points_reward?: number | null;
 }
 
 const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
