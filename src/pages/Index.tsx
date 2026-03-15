@@ -10,14 +10,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
 import DynamicHomeCards from "@/components/home/DynamicHomeCards";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const canonical = typeof window !== "undefined" ? window.location.href : "/";
   const { user } = useAuth();
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);
   const { getContent, getAltText, loading } = useAppContent();
-  const { t } = useLanguage();
 
   useEffect(() => {
     const checkVerificationStatus = async () => {
@@ -38,7 +36,7 @@ const Index = () => {
   }, [user]);
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">{t("جاري التحميل...")}</div>;
+    return <div className="flex justify-center items-center min-h-screen">جاري التحميل...</div>;
   }
 
   return (
