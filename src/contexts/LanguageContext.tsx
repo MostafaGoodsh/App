@@ -123,7 +123,6 @@ const translations: Translations = {
 
     // ---- Wallet ----
     "الرصيد": "Balance",
-    "إرسال": "Send",
     "استقبال": "Receive",
     "تاريخ المعاملات": "Transaction History",
     "المعاملة": "Transaction",
