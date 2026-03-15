@@ -94,18 +94,7 @@ const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
 const FamilyAdmin = lazy(() => import("./pages/FamilyAdmin"));
 const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,   // 5 دقائق قبل إعادة الجلب
-      retry: 1,                    // محاولة واحدة فقط عند الفشل
-      refetchOnWindowFocus: false, // لا إعادة جلب عند العودة للتبويب
-    },
-    mutations: {
-      retry: 0, // لا إعادة محاولة للـ mutations
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">

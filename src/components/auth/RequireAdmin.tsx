@@ -1,24 +1,66 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RequireAdminProps {
   children: ReactNode;
 }
 
-// يستخدم isAdmin و adminLoading من useAuth مباشرةً بدلاً من استدعاء Supabase مرة ثانية
 const RequireAdmin = ({ children }: RequireAdminProps) => {
-  const { user, loading, isAdmin, adminLoading } = useAuth();
-  const { t } = useLanguage();
+  const { user, loading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  if (loading || adminLoading) {
+  useEffect(() => {
+    let mounted = true;
+
+    const checkAdminStatus = async () => {
+      if (!user?.id) {
+        if (mounted) {
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+        }
+        return;
+      }
+
+      if (mounted) {
+        setCheckingAdmin(true);
+      }
+
+      try {
+        const { data, error } = await supabase.rpc("is_admin", {
+          _user_id: user.id,
+        });
+
+        if (mounted) {
+          if (error) {
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(data);
+          }
+          setCheckingAdmin(false);
+        }
+      } catch (error) {
+        if (mounted) {
+          setIsAdmin(false);
+          setCheckingAdmin(false);
+        }
+      }
+    };
+
+    checkAdminStatus();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  if (loading || checkingAdmin) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          <p>{t("جاري التحقق من الصلاحيات...")}</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        جاري التحقق من الصلاحيات...
       </div>
     );
   }
@@ -30,8 +72,8 @@ const RequireAdmin = ({ children }: RequireAdminProps) => {
   if (!isAdmin) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-destructive mb-4">{t("غير مصرح")}</h1>
-        <p className="text-muted-foreground">{t("ليس لديك صلاحية للوصول إلى هذه الصفحة")}</p>
+        <h1 className="text-2xl font-bold text-destructive mb-4">غير مصرح</h1>
+        <p className="text-muted-foreground">ليس لديك صلاحية للوصول إلى هذه الصفحة</p>
       </div>
     );
   }

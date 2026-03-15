@@ -2,7 +2,6 @@ import { ReactNode, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RequireAccessProps {
   children: ReactNode;
@@ -10,7 +9,6 @@ interface RequireAccessProps {
 
 const RequireAccess = ({ children }: RequireAccessProps) => {
   const { user, loading, isAdmin, adminLoading } = useAuth();
-  const { t } = useLanguage();
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [checkingAccess, setCheckingAccess] = useState(false);
 
@@ -18,6 +16,7 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
     let mounted = true;
 
     const checkEarlyAccess = async () => {
+      // Wait for user to be loaded
       if (!user?.id) {
         if (mounted) {
           setHasAccess(false);
@@ -26,7 +25,9 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         return;
       }
 
-      if (mounted) setCheckingAccess(true);
+      if (mounted) {
+        setCheckingAccess(true);
+      }
 
       try {
         const { data, error } = await supabase.rpc("check_early_access", {
@@ -34,10 +35,14 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
         });
 
         if (mounted) {
-          setHasAccess(error ? false : data === true);
+          if (error) {
+            setHasAccess(false);
+          } else {
+            setHasAccess(data === true);
+          }
           setCheckingAccess(false);
         }
-      } catch {
+      } catch (error) {
         if (mounted) {
           setHasAccess(false);
           setCheckingAccess(false);
@@ -45,25 +50,54 @@ const RequireAccess = ({ children }: RequireAccessProps) => {
       }
     };
 
-    if (!loading && user?.id) checkEarlyAccess();
+    // Only check if not loading and user exists
+    if (!loading && user?.id) {
+      checkEarlyAccess();
+    }
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [user?.id, loading]);
 
-  const LoadingSpinner = () => (
-    <div className="container mx-auto px-4 py-16 text-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p>{t("جاري التحميل...")}</p>
+  // انتظر حتى ينتهي التحميل (بما في ذلك فحص الأدمن)
+  if (loading || checkingAccess || adminLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="arabic-text">جاري التحميل...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (loading || checkingAccess || adminLoading) return <LoadingSpinner />;
-  if (!user) return <Navigate to="/auth" replace />;
-  if (isAdmin) return <>{children}</>;
-  if (hasAccess === false) return <Navigate to="/early-access" replace />;
-  if (hasAccess === null) return <LoadingSpinner />;
+  // لا يوجد مستخدم - اذهب لتسجيل الدخول
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // الأدمن لهم وصول دائماً
+  if (isAdmin) {
+    return <>{children}</>;
+  }
+
+  // التحقق من حالة الوصول المبكر - فقط إذا تم الانتهاء من الفحص
+  if (hasAccess === false) {
+    return <Navigate to="/early-access" replace />;
+  }
+
+  // If still checking access, show loading
+  if (hasAccess === null) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="arabic-text">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
 
   return <>{children}</>;
 };
