@@ -1,14 +1,13 @@
 import { Helmet } from "react-helmet-async";
 import MiningDashboard from "@/components/mining/MiningDashboard";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const Mining = () => {
-  const { t } = useLanguage();
   return (
     <>
       <Helmet>
-        <title>{t("التعدين")} - $MS-RA Mining</title>
-        <meta name="description" content={t("لوحة التعدين")} />
+        <title>التعدين - $MS-RA Mining</title>
+        <meta name="description" content="لوحة تحكم التعدين - تتبع تقدمك في تعدين عملة $MS-RA ومراقبة قوة حسابك" />
+        <meta name="keywords" content="تعدين, $MS-RA, عملة رقمية, blockchain, mining dashboard" />
       </Helmet>
       <MiningDashboard />
     </>
