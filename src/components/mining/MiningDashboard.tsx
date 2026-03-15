@@ -6,435 +6,219 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useMining } from '@/hooks/useMining';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Play, 
-  Pause, 
-  TrendingUp, 
-  Zap, 
-  Trophy, 
-  Coins, 
-  Clock,
-  BarChart3,
-  Target,
-  Gem
-} from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Play, Pause, TrendingUp, Zap, Trophy, Coins, Clock, BarChart3, Target, Gem } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const MiningDashboard = () => {
-  const { 
-    profile, 
-    levels, 
-    history, 
-    loading, 
-    error, 
-    updateMiningProgress,
-    toggleMining,
-    getCurrentLevel,
-    getNextLevel,
-    getProgressToNextLevel,
-    getMiningRatePerMinute
-  } = useMining();
-  
+  const { profile, levels, history, loading, error, updateMiningProgress, toggleMining, getCurrentLevel, getNextLevel, getProgressToNextLevel, getMiningRatePerMinute } = useMining();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [currentMined, setCurrentMined] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Real-time mining simulation
   useEffect(() => {
     if (!profile?.is_mining_active) return;
-    
     const ratePerMinute = getMiningRatePerMinute();
     if (ratePerMinute <= 0) return;
-
-    const interval = setInterval(() => {
-      setCurrentMined(prev => prev + (ratePerMinute / 60)); // Per second
-    }, 1000);
-
+    const interval = setInterval(() => { setCurrentMined(prev => prev + (ratePerMinute / 60)); }, 1000);
     return () => clearInterval(interval);
   }, [profile?.is_mining_active, getMiningRatePerMinute]);
 
-  // Update mining progress
   const handleUpdateProgress = async () => {
     setIsUpdating(true);
     try {
       const result = await updateMiningProgress();
       if (result) {
-        setCurrentMined(0); // Reset display counter
-      toast({
-        title: "تم التحديث",
-        description: `تم تعدين $MS-RA ${result.mined_amount.toFixed(8)}`,
-      });
+        setCurrentMined(0);
+        toast({ title: t("تم التحديث"), description: `${t("إجمالي التعدين")}: ${result.mined_amount.toFixed(8)} $MS-RA` });
       }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "فشل في تحديث التعدين",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+    } catch {
+      toast({ variant: "destructive", title: t("خطأ"), description: t("فشل في تحديث التعدين") });
+    } finally { setIsUpdating(false); }
   };
 
-  // Toggle mining status
   const handleToggleMining = async () => {
     if (!profile) return;
-    
     try {
       await toggleMining(!profile.is_mining_active);
       toast({
-        title: profile.is_mining_active ? "تم إيقاف التعدين" : "تم تشغيل التعدين",
-        description: profile.is_mining_active ? "التعدين متوقف الآن" : "التعدين يعمل الآن",
+        title: profile.is_mining_active ? t("تم إيقاف التعدين") : t("تم تشغيل التعدين"),
+        description: profile.is_mining_active ? t("التعدين متوقف الآن") : t("التعدين يعمل الآن"),
       });
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: "فشل في تغيير حالة التعدين",
-      });
+    } catch {
+      toast({ variant: "destructive", title: t("خطأ"), description: t("فشل في تغيير حالة التعدين") });
     }
   };
 
-  // Prepare chart data
-  const chartData = history.map(item => ({
-    time: new Date(item.hour_timestamp).getHours() + ':00',
-    amount: parseFloat(item.amount_mined.toString()),
-    rate: parseFloat(item.mining_rate.toString())
-  }));
-
+  const chartData = history.map(item => ({ time: new Date(item.hour_timestamp).getHours() + ':00', amount: parseFloat(item.amount_mined.toString()), rate: parseFloat(item.mining_rate.toString()) }));
   const currentLevel = getCurrentLevel();
   const nextLevel = getNextLevel();
   const progressToNext = getProgressToNextLevel();
 
   if (loading) {
-    return (
-      <div className="p-6">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground mt-2">جاري تحميل بيانات التعدين...</p>
-        </div>
-      </div>
-    );
+    return (<div className="p-6"><div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div><p className="text-muted-foreground mt-2">{t("جاري تحميل بيانات التعدين...")}</p></div></div>);
   }
 
   if (error) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-destructive">خطأ: {error}</p>
-            <Button onClick={() => window.location.reload()} className="mt-4">
-              إعادة المحاولة
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return (<div className="p-6"><Card><CardContent className="text-center py-8"><p className="text-destructive">{t("خطأ")}: {error}</p><Button onClick={() => window.location.reload()} className="mt-4">{t("إعادة المحاولة")}</Button></CardContent></Card></div>);
   }
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-cairo">
-            لوحة التعدين
-            <span className="text-sm text-muted-foreground block font-normal" dir="ltr">Mining Dashboard</span>
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground font-cairo">
-            تتبع تقدم التعدين وقوة حسابك
-            <span className="text-xs block opacity-70" dir="ltr">Track your mining progress & account strength</span>
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-cairo">{t("لوحة التعدين")}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground font-cairo">{t("تتبع تقدم التعدين وقوة حسابك")}</p>
         </div>
-        <Button
-          onClick={handleToggleMining}
-          variant={profile?.is_mining_active ? "destructive" : "default"}
-          size="sm"
-          className="w-full sm:w-auto font-cairo"
-        >
-          {profile?.is_mining_active ? (
-            <>
-              <Pause className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">إيقاف التعدين</span>
-              <span className="sm:hidden">إيقاف</span>
-              <span className="text-xs opacity-70 mr-1">Stop</span>
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">بدء التعدين</span>
-              <span className="sm:hidden">بدء</span>
-              <span className="text-xs opacity-70 mr-1">Start</span>
-            </>
-          )}
+        <Button onClick={handleToggleMining} variant={profile?.is_mining_active ? "destructive" : "default"} size="sm" className="w-full sm:w-auto font-cairo">
+          {profile?.is_mining_active ? (<><Pause className="h-4 w-4 ml-2" />{t("إيقاف التعدين")}</>) : (<><Play className="h-4 w-4 ml-2" />{t("بدء التعدين")}</>)}
         </Button>
       </div>
 
-      {/* Main Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Total Mined */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
-              <span className="hidden sm:inline">إجمالي التعدين</span>
-              <span className="sm:hidden">التعدين</span>
-              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Total Mined</span>
-            </CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">{t("إجمالي التعدين")}</CardTitle>
             <Coins className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
-              {((profile?.total_mined || 0) + currentMined).toFixed(6)}
-            </div>
-            <p className="text-xs text-muted-foreground whitespace-nowrap" dir="ltr">$MS-RA</p>
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">{((profile?.total_mined || 0) + currentMined).toFixed(6)}</div>
+            <p className="text-xs text-muted-foreground" dir="ltr">$MS-RA</p>
           </CardContent>
         </Card>
 
-        {/* Mining Rate */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
-              <span className="hidden sm:inline">معدل التعدين</span>
-              <span className="sm:hidden">المعدل</span>
-              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Mining Rate</span>
-            </CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">{t("معدل التعدين")}</CardTitle>
             <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
-              {profile?.mining_rate_per_hour || 0}
-            </div>
-            <p className="text-xs text-muted-foreground" dir="ltr">$MS-RA/ساعة</p>
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">{profile?.mining_rate_per_hour || 0}</div>
+            <p className="text-xs text-muted-foreground" dir="ltr">$MS-RA/h</p>
           </CardContent>
         </Card>
 
-        {/* Account Strength */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
-              <span className="hidden sm:inline">قوة الحساب</span>
-              <span className="sm:hidden">القوة</span>
-              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Account Strength</span>
-            </CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">{t("قوة الحساب")}</CardTitle>
             <Target className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-lg sm:text-2xl font-bold">
-              {profile?.account_strength || 0}
-            </div>
-            <p className="text-xs text-muted-foreground font-cairo">نقطة <span className="opacity-70" dir="ltr">Points</span></p>
+            <div className="text-lg sm:text-2xl font-bold">{profile?.account_strength || 0}</div>
+            <p className="text-xs text-muted-foreground font-cairo">{t("نقطة")}</p>
           </CardContent>
         </Card>
 
-        {/* Current Level */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">
-              <span className="hidden sm:inline">المستوى الحالي</span>
-              <span className="sm:hidden">المستوى</span>
-              <span className="text-[10px] text-muted-foreground block opacity-70" dir="ltr">Current Level</span>
-            </CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium font-cairo">{t("المستوى الحالي")}</CardTitle>
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 text-warning flex-shrink-0" />
           </CardHeader>
           <CardContent className="pb-3">
-            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">
-              {currentLevel?.level_name || 'غير محدد'}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              #{profile?.current_level || 1}
-            </p>
+            <div className="text-base sm:text-lg md:text-2xl font-bold truncate">{currentLevel?.level_name || t('غير محدد')}</div>
+            <p className="text-xs text-muted-foreground">#{profile?.current_level || 1}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Mining Status */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-cairo">
-            <Clock className="h-5 w-5" />
-            حالة التعدين
-            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Mining Status</span>
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2 font-cairo"><Clock className="h-5 w-5" />{t("حالة التعدين")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Badge variant={profile?.is_mining_active ? "default" : "secondary"} className="font-cairo">
-                {profile?.is_mining_active ? "نشط" : "متوقف"}
+                {profile?.is_mining_active ? t("نشط") : t("متوقف")}
               </Badge>
               {profile?.is_mining_active && (
-                <span className="text-sm text-muted-foreground">
-                  التعدين منذ: {new Date(profile.last_mining_update).toLocaleString('ar-SA')}
-                </span>
+                <span className="text-sm text-muted-foreground">{t("التعدين منذ:")} {new Date(profile.last_mining_update).toLocaleString('ar-SA')}</span>
               )}
             </div>
-            <Button 
-              onClick={handleUpdateProgress} 
-              disabled={isUpdating}
-              variant="outline"
-              size="sm"
-            >
-              {isUpdating ? "جاري التحديث..." : <>تحديث الآن <span className="text-xs opacity-70">Update</span></>}
+            <Button onClick={handleUpdateProgress} disabled={isUpdating} variant="outline" size="sm">
+              {isUpdating ? t("جاري التحديث...") : t("تحديث الآن")}
             </Button>
           </div>
-
           {profile?.is_mining_active && currentMined > 0 && (
             <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
-              <p className="text-sm font-medium font-cairo">التعدين الحالي <span className="text-xs opacity-70" dir="ltr">Current Mining</span></p>
-              <p className="text-lg font-bold text-primary" dir="ltr">
-                +{currentMined.toFixed(8)} $MS-RA
-              </p>
-              <p className="text-xs text-muted-foreground font-cairo">
-                سيتم إضافتها عند التحديث التالي
-                <span className="opacity-70" dir="ltr"> • Added on next update</span>
-              </p>
+              <p className="text-sm font-medium font-cairo">{t("التعدين الحالي")}</p>
+              <p className="text-lg font-bold text-primary" dir="ltr">+{currentMined.toFixed(8)} $MS-RA</p>
+              <p className="text-xs text-muted-foreground font-cairo">{t("سيتم إضافتها عند التحديث التالي")}</p>
             </div>
           )}
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Level Progress */}
         <Card>
           <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-cairo">
-            <Gem className="h-5 w-5" />
-            تقدم المستوى
-            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Level Progress</span>
-          </CardTitle>
+            <CardTitle className="flex items-center gap-2 font-cairo"><Gem className="h-5 w-5" />{t("تقدم المستوى")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium font-cairo">
-                {currentLevel?.level_name} → {nextLevel?.level_name || 'الحد الأقصى'}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {progressToNext.toFixed(1)}%
-              </span>
+              <span className="text-sm font-medium font-cairo">{currentLevel?.level_name} → {nextLevel?.level_name || t('الحد الأقصى')}</span>
+              <span className="text-sm text-muted-foreground">{progressToNext.toFixed(1)}%</span>
             </div>
-            
             <Progress value={progressToNext} className="w-full" />
-            
             <div className="flex justify-between text-xs text-muted-foreground font-cairo">
-              <span>
-                قوة الحساب <span className="opacity-70">Strength</span>: {profile?.account_strength || 0}
-              </span>
-              <span>
-                المطلوب <span className="opacity-70">Required</span>: {nextLevel?.required_account_strength || 'مكتمل'}
-              </span>
+              <span>{t("قوة الحساب")}: {profile?.account_strength || 0}</span>
+              <span>{t("القوة المطلوبة:")} {nextLevel?.required_account_strength || t('مكتمل')}</span>
             </div>
-
             {nextLevel && (
               <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
-                <p className="text-sm font-medium font-cairo">المستوى التالي <span className="text-xs opacity-70" dir="ltr">Next Level</span></p>
+                <p className="text-sm font-medium font-cairo">{t("المستوى التالي")}</p>
                 <p className="text-lg font-bold font-cairo">{nextLevel.level_name}</p>
-                <p className="text-xs text-muted-foreground font-cairo">
-                  <span>معدل التعدين <span className="opacity-70">Rate</span>: </span>
-                  <span dir="ltr">{nextLevel.mining_rate_per_hour} $MS-RA/ساعة</span>
-                </p>
+                <p className="text-xs text-muted-foreground font-cairo">{t("معدل التعدين:")} <span dir="ltr">{nextLevel.mining_rate_per_hour} $MS-RA/h</span></p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Mining History Chart */}
         <Card>
           <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-cairo">
-            <BarChart3 className="h-5 w-5" />
-            التعدين خلال 24 ساعة
-            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">24h Mining History</span>
-          </CardTitle>
+            <CardTitle className="flex items-center gap-2 font-cairo"><BarChart3 className="h-5 w-5" />{t("التعدين خلال 24 ساعة")}</CardTitle>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    label={{ value: 'عملة', angle: -90, position: 'insideLeft' }}
-                  />
-                  <Tooltip 
-                    formatter={(value: any) => [value.toFixed(8), '$MS-RA']}
-                    labelFormatter={(label) => `الساعة: ${label}`}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="amount" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--primary))' }}
-                  />
+                  <XAxis dataKey="time" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: any) => [value.toFixed(8), '$MS-RA']} />
+                  <Line type="monotone" dataKey="amount" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ fill: 'hsl(var(--primary))' }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p className="font-cairo">لا توجد بيانات تعدين خلال الـ 24 ساعة الماضية</p>
-                <p className="text-xs opacity-70" dir="ltr">No mining data in the last 24 hours</p>
+                <p className="font-cairo">{t("لا توجد بيانات تعدين خلال الـ 24 ساعة الماضية")}</p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Mining Levels */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 font-cairo">
-            <TrendingUp className="h-5 w-5" />
-            مستويات التعدين
-            <span className="text-xs text-muted-foreground font-normal opacity-70" dir="ltr">Mining Levels</span>
-          </CardTitle>
+          <CardTitle className="flex items-center gap-2 font-cairo"><TrendingUp className="h-5 w-5" />{t("مستويات التعدين")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {levels.map((level) => (
-              <div
-                key={level.level_number}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  level.level_number === profile?.current_level
-                    ? 'border-primary bg-primary/5'
-                    : level.level_number < (profile?.current_level || 1)
-                    ? 'border-success bg-success/5'
-                    : 'border-muted bg-black/50'
-                }`}
-              >
+              <div key={level.level_number} className={`p-4 rounded-lg border-2 transition-all ${level.level_number === profile?.current_level ? 'border-primary bg-primary/5' : level.level_number < (profile?.current_level || 1) ? 'border-success bg-success/5' : 'border-muted bg-black/50'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium font-cairo">{level.level_name}</h3>
-                  <Badge
-                    variant={
-                      level.level_number === profile?.current_level
-                        ? 'default'
-                        : level.level_number < (profile?.current_level || 1)
-                        ? 'secondary'
-                        : 'outline'
-                    }
-                  >
-                    المستوى <span className="text-[10px] opacity-70">Lv.</span> {level.level_number}
+                  <Badge variant={level.level_number === profile?.current_level ? 'default' : level.level_number < (profile?.current_level || 1) ? 'secondary' : 'outline'}>
+                    {t("المستوى")} {level.level_number}
                   </Badge>
                 </div>
                 <Separator className="my-2" />
                 <div className="space-y-1 text-sm font-cairo">
-                  <p>
-                    <span className="text-muted-foreground">القوة المطلوبة:</span>{' '}
-                    <span className="font-medium">{level.required_account_strength}</span>
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">معدل التعدين:</span>{' '}
-                    <span className="font-medium" dir="ltr">{level.mining_rate_per_hour} $MS-RA/ساعة</span>
-                  </p>
-                  {level.upgrade_cost > 0 && (
-                    <p>
-                      <span className="text-muted-foreground">تكلفة الترقية:</span>{' '}
-                      <span className="font-medium" dir="ltr">{level.upgrade_cost} $MS-RA</span>
-                    </p>
-                  )}
+                  <p><span className="text-muted-foreground">{t("القوة المطلوبة:")}</span> <span className="font-medium">{level.required_account_strength}</span></p>
+                  <p><span className="text-muted-foreground">{t("معدل التعدين:")}</span> <span className="font-medium" dir="ltr">{level.mining_rate_per_hour} $MS-RA/h</span></p>
+                  {level.upgrade_cost > 0 && (<p><span className="text-muted-foreground">{t("تكلفة الترقية:")}</span> <span className="font-medium" dir="ltr">{level.upgrade_cost} $MS-RA</span></p>)}
                 </div>
               </div>
             ))}
