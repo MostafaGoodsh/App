@@ -123,6 +123,7 @@ const translations: Translations = {
 
     // ---- Wallet ----
     "الرصيد": "Balance",
+    "إرسال": "Send",
     "استقبال": "Receive",
     "تاريخ المعاملات": "Transaction History",
     "المعاملة": "Transaction",
@@ -170,6 +171,7 @@ const translations: Translations = {
     "الأسئلة": "Questions",
     "الإجابات": "Answers",
     "إرسال الاستبيان": "Submit Survey",
+    "مكتمل": "Completed",
     "لم يكتمل": "Incomplete",
 
     // ---- Early Access ----
