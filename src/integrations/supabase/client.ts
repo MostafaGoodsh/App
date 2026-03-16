@@ -2,21 +2,80 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// استخدام متغيرات البيئة بدلاً من القيم المضمنة في الكود
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("Supabase environment variables are missing. Please check your .env file.");
-}
+const createMissingSupabaseClient = () => {
+  const missingConfigError = new Error(
+    'Supabase environment variables are missing. Please check your .env file.'
+  );
+
+  const createQueryBuilder = (defaultData: unknown = []) => {
+    const response = { data: defaultData, error: missingConfigError };
+    const promise = Promise.resolve(response);
+
+    return new Proxy(
+      {},
+      {
+        get(_, prop) {
+          if (prop === 'then') return promise.then.bind(promise);
+          if (prop === 'catch') return promise.catch.bind(promise);
+          if (prop === 'finally') return promise.finally.bind(promise);
+          if (prop === 'single' || prop === 'maybeSingle') {
+            return () => createQueryBuilder(null);
+          }
+          return () => createQueryBuilder(defaultData);
+        },
+      }
+    );
+  };
+
+  const createChannel = () => {
+    const channel = {
+      on: () => channel,
+      subscribe: () => ({ unsubscribe: () => undefined }),
+    };
+
+    return channel;
+  };
+
+  console.error(missingConfigError.message);
+
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({
+        data: { subscription: { unsubscribe: () => undefined } },
+      }),
+      signInWithPassword: async () => ({ data: { user: null, session: null }, error: missingConfigError }),
+      signUp: async () => ({ data: { user: null, session: null }, error: missingConfigError }),
+      signInWithOAuth: async () => ({ data: null, error: missingConfigError }),
+      signOut: async () => ({ error: null }),
+    },
+    from: () => createQueryBuilder(),
+    rpc: async () => ({ data: null, error: missingConfigError }),
+    channel: () => createChannel(),
+    removeChannel: async () => ({ data: null, error: null }),
+    functions: {
+      invoke: async () => ({ data: null, error: missingConfigError }),
+    },
+    storage: {
+      from: () => ({
+        remove: async () => ({ data: null, error: missingConfigError }),
+      }),
+    },
+  } as any;
+};
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+export const supabase = SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
+  ? createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    })
+  : createMissingSupabaseClient();
