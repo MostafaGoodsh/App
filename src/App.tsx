@@ -130,10 +130,11 @@ const App = () => {
                   <ScrollToTop />
                   <Suspense fallback={<PageLoader />}>
                   <Routes>
-                  <Route path="/" element={<MainLayout />}>
-                    <Route index element={<RequireAccess><Index /></RequireAccess>} />
-                    <Route path="index" element={<Navigate to="/" replace />} />
-                    <Route path="auth" element={<Auth />} />
+                    <Route path="/index" element={<Navigate to="/" replace />} />
+                    <Route path="/" element={<MainLayout />}>
+                      <Route index element={<RequireAccess><Index /></RequireAccess>} />
+                      <Route path="index" element={<Navigate to="/" replace />} />
+                      <Route path="auth" element={<Auth />} />
                     <Route path="privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="payment-demo" element={<PaymentDemo />} />
                     <Route path="pi-payment" element={<PiPayment />} />
