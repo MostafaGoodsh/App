@@ -986,20 +986,34 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
+const DEFAULT_LANGUAGE: AppLanguage = "both";
+
+const isSupportedLanguage = (value: string | null): value is AppLanguage => {
+  return !!value && value in SUPPORTED_LANGUAGES;
+};
+
+const getInitialLanguage = (): AppLanguage => {
+  if (typeof window === "undefined") return DEFAULT_LANGUAGE;
+  const storedLanguage = localStorage.getItem("app_language");
+  return isSupportedLanguage(storedLanguage) ? storedLanguage : DEFAULT_LANGUAGE;
+};
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<AppLanguage>(() => {
-    return (localStorage.getItem("app_language") as AppLanguage) || "both";
-  });
+  const [language, setLanguageState] = useState<AppLanguage>(getInitialLanguage);
 
   const setLanguage = (lang: AppLanguage) => {
-    setLanguageState(lang);
-    localStorage.setItem("app_language", lang);
+    const safeLanguage = isSupportedLanguage(lang) ? lang : DEFAULT_LANGUAGE;
+    setLanguageState(safeLanguage);
+    localStorage.setItem("app_language", safeLanguage);
   };
 
   // دائماً RTL لأن التطبيق مصمم عربياً أولاً
   const dir = "rtl" as const;
 
   useEffect(() => {
+    if (!isSupportedLanguage(localStorage.getItem("app_language"))) {
+      localStorage.setItem("app_language", language);
+    }
     document.documentElement.dir = "rtl";
     document.documentElement.lang = language === "both" ? "ar" : language;
   }, [language]);
