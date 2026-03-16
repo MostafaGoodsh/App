@@ -114,8 +114,9 @@ const PageLoader = () => (
 );
 
 const App = () => {
-  const manifestUrl = `${window.location.origin}/tonconnect-manifest.json`;
-  
+  const manifestUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/tonconnect-manifest.json`
+    : "/tonconnect-manifest.json";
   return (
     <ErrorBoundary>
       <HelmetProvider>
