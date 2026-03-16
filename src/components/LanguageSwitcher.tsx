@@ -14,7 +14,7 @@ interface LanguageSwitcherProps {
 
 const LanguageSwitcher = ({ variant = "icon" }: LanguageSwitcherProps) => {
   const { language, setLanguage } = useLanguage();
-  const current = SUPPORTED_LANGUAGES[language];
+  const current = SUPPORTED_LANGUAGES[language] ?? SUPPORTED_LANGUAGES.both;
 
   return (
     <DropdownMenu>

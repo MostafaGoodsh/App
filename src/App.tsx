@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -132,6 +132,7 @@ const App = () => {
                   <Routes>
                   <Route path="/" element={<MainLayout />}>
                     <Route index element={<RequireAccess><Index /></RequireAccess>} />
+                    <Route path="index" element={<Navigate to="/" replace />} />
                     <Route path="auth" element={<Auth />} />
                     <Route path="privacy-policy" element={<PrivacyPolicy />} />
                     <Route path="payment-demo" element={<PaymentDemo />} />
