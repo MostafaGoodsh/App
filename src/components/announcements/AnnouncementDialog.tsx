@@ -38,6 +38,9 @@ export default function AnnouncementDialog() {
 
       const latestAnnouncement = announcements[0];
 
+      // Non-urgent announcements should not block the whole app on first paint
+      if (!latestAnnouncement.is_urgent) return;
+
       // Check if user already dismissed it
       const { data: dismissal } = await supabase
         .from('announcement_dismissals')
