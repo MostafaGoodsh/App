@@ -57,7 +57,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
       {/* Coming Soon badge */}
       {isComingSoon && (
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-32 bg-destructive text-destructive-foreground px-4 py-1.5 rounded-full flex items-center justify-center gap-2 shadow-md">
-          <span className="text-xs font-semibold font-cairo">قريباً</span>
+          <span className="text-xs font-semibold font-cairo">{t("قريباً")}</span>
         </div>
       )}
       
