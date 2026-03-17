@@ -120,7 +120,7 @@ const Support = () => {
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-lg">{msg.subject}</CardTitle>
-                        <CardDescription>{new Date(msg.created_at).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</CardDescription>
+                        <CardDescription>{new Date(msg.created_at).toLocaleDateString(dir === 'rtl' ? "ar-EG" : language === 'ru' ? "ru-RU" : "en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</CardDescription>
                       </div>
                       <div className="flex gap-2">{getStatusBadge(msg.status)}<Badge variant="outline">{getPriorityLabel(msg.priority)}</Badge></div>
                     </div>
