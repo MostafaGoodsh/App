@@ -283,7 +283,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <div className="bg-black/50 p-3 rounded-lg border border-primary/20">
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">التعدين</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">{t("التعدين", "Mining")}</div>
                 <div className="text-sm font-bold text-primary">{msRaBalance.toFixed(2)}</div>
               </div>
               <div className="text-center">
