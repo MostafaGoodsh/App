@@ -587,15 +587,6 @@ const translations: Translations = {
     "حدث خطأ أثناء إلغاء إكمال المهمة": "Error uncompleting task",
     "تم إكمال المهمة!": "Task Completed!",
     "حدث خطأ أثناء إكمال المهمة": "Error completing task",
-    "المهام | Tasks": "Tasks",
-    "أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي": "Complete your daily tasks to earn points and build your streak",
-    "السلسلة:": "Streak:",
-    "أطول سلسلة:": "Best Streak:",
-    "الجلسات:": "Sessions:",
-    "مهامك اليومية": "Your Daily Tasks",
-    "قرآن": "Quran",
-    "شخصية": "Personality",
-    "يومية": "Daily",
   },
 
   ru: {
