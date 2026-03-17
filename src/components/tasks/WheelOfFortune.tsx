@@ -61,15 +61,15 @@ const drawTripleRingWheel = (
   const center = size / 2;
 
   // Ring radii (3 rings + center) - wider rings for better text readability
-  const outerEdge = center - 12;
+  const outerEdge = center - 8;
   const ring3Outer = outerEdge;          // Upgrade ring outer
-  const ring3Inner = outerEdge * 0.78;   // Wider upgrade ring
-  const divider2 = outerEdge * 0.77;
-  const ring2Outer = outerEdge * 0.76;   // MS-RA ring outer
-  const ring2Inner = outerEdge * 0.55;   // Wider MS-RA ring
-  const divider1 = outerEdge * 0.54;
-  const ring1Outer = outerEdge * 0.53;   // XP ring outer
-  const innerCenterRadius = 30;
+  const ring3Inner = outerEdge * 0.74;   // Wider upgrade ring
+  const divider2 = outerEdge * 0.73;
+  const ring2Outer = outerEdge * 0.72;   // MS-RA ring outer
+  const ring2Inner = outerEdge * 0.50;   // Wider MS-RA ring
+  const divider1 = outerEdge * 0.49;
+  const ring1Outer = outerEdge * 0.48;   // XP ring outer
+  const innerCenterRadius = 28;
 
   ctx.clearRect(0, 0, size, size);
 
@@ -117,15 +117,15 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 380 ? 9 : 11}px sans-serif`;
+    ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur = 4;
-    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 3;
 
-    const maxW = (ring3Outer - ring3Inner) * 0.9;
+    const maxW = (ring3Outer - ring3Inner) * 0.85;
     const lines = wrapText(ctx, seg.label, maxW);
-    const lineH = size < 380 ? 10 : 12;
+    const lineH = size < 400 ? 12 : 15;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.strokeText(line, tx, startY + li * lineH);
@@ -168,15 +168,15 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+    ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur = 4;
-    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 3;
 
     const maxW = (ring2Outer - ring2Inner) * 0.85;
     const lines = wrapText(ctx, seg.label, maxW);
-    const lineH = size < 380 ? 11 : 13;
+    const lineH = size < 400 ? 12 : 15;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.strokeText(line, tx, startY + li * lineH);
@@ -249,26 +249,26 @@ const drawTripleRingWheel = (
 
     if (isBonusTrigger) {
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.strokeText('☥ بونص', tx, ty);
       ctx.fillText('☥ بونص', tx, ty);
     } else if (isUpgradeTrigger) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.strokeText('⬆ ترقية', tx, ty);
       ctx.fillText('⬆ ترقية', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       const maxW = (ring1Outer - innerCenterRadius) * 0.85;
       const txtLines = wrapText(ctx, seg.label, maxW);
-      const lineH = size < 380 ? 11 : 13;
+      const lineH = size < 400 ? 12 : 15;
       const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
       txtLines.forEach((line, li) => {
         ctx.strokeText(line, tx, startTxtY + li * lineH);
@@ -327,13 +327,15 @@ const WheelOfFortune = () => {
   // Fetch outer + upgrade segments from DB
   useEffect(() => {
     supabase.from("wheel_outer_segments").select("*").eq("is_active", true).order("display_order")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error("wheel_outer_segments error:", error);
         if (data && data.length > 0) {
           setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
         }
       });
     supabase.from("wheel_upgrade_segments").select("*").eq("is_active", true).order("display_order")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error("wheel_upgrade_segments error:", error);
         if (data && data.length > 0) {
           setUpgradeSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color, reward_type: s.reward_type })));
         }
@@ -605,10 +607,10 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={480}
-            height={480}
-            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 max-w-full"
-            style={{ width: '340px', height: '340px' }}
+            width={560}
+            height={560}
+            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
+            style={{ maxWidth: '95vw', aspectRatio: '1/1' }}
           />
 
           {isBonusAnimating && (
