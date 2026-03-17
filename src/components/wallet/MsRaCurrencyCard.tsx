@@ -424,7 +424,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   className="w-full"
                 >
                   <Zap className="w-4 h-4 mr-2" />
-                  {miningProgress >= 100 ? "بدء التعدين" : "انتظر 24 ساعة"}
+                  {miningProgress >= 100 ? t("بدء التعدين", "Start Mining") : t("انتظر 24 ساعة", "Wait 24 hours")}
                 </Button>
               </div>
             )}
