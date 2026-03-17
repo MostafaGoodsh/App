@@ -12,6 +12,17 @@ import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { 
+  Zap, 
+  Clock, 
+  Wallet, 
+  Shield, 
+  CheckCircle,
+  AlertCircle,
+  TrendingUp,
+  ExternalLink
+} from "lucide-react";
 import { 
   Zap, 
   Clock, 
