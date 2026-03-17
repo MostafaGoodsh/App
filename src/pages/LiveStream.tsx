@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Video, Users, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
 import LiveStreamBroadcast from "@/components/streaming/LiveStreamBroadcast";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ApplicationStatus {
   id: string;
@@ -25,66 +26,35 @@ const LiveStream = () => {
   const { user, session } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t, dir } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
   
   const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    social_media_links: [""],
-    follower_count: 0,
-    description: ""
+    full_name: "", email: "", phone: "",
+    social_media_links: [""], follower_count: 0, description: ""
   });
 
   useEffect(() => {
-    if (user) {
-      checkApplicationStatus();
-      loadUserProfile();
-    }
+    if (user) { checkApplicationStatus(); loadUserProfile(); }
   }, [user]);
 
   const checkApplicationStatus = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from('live_stream_approvals')
+      const { data } = await supabase.from('live_stream_approvals')
         .select('id, status, created_at, reviewed_at, rejection_reason')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (data) {
-        setApplicationStatus(data as ApplicationStatus);
-      }
-    } catch (error) {
-      console.error('Error checking application status:', error);
-    }
+        .eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
+      if (data) setApplicationStatus(data as ApplicationStatus);
+    } catch (error) { console.error('Error checking application status:', error); }
   };
 
   const loadUserProfile = async () => {
     if (!user) return;
-
     try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, email, phone')
-        .eq('user_id', user.id)
-        .single();
-
-      if (data) {
-        setFormData(prev => ({
-          ...prev,
-          full_name: data.full_name || "",
-          email: data.email || "",
-          phone: data.phone || ""
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    }
+      const { data } = await supabase.from('profiles').select('full_name, email, phone').eq('user_id', user.id).single();
+      if (data) setFormData(prev => ({ ...prev, full_name: data.full_name || "", email: data.email || "", phone: data.phone || "" }));
+    } catch (error) { console.error('Error loading profile:', error); }
   };
 
   const handleSocialLinkChange = (index: number, value: string) => {
@@ -93,121 +63,59 @@ const LiveStream = () => {
     setFormData({ ...formData, social_media_links: newLinks });
   };
 
-  const addSocialLink = () => {
-    setFormData({
-      ...formData,
-      social_media_links: [...formData.social_media_links, ""]
-    });
-  };
-
-  const removeSocialLink = (index: number) => {
-    const newLinks = formData.social_media_links.filter((_, i) => i !== index);
-    setFormData({ ...formData, social_media_links: newLinks });
-  };
+  const addSocialLink = () => setFormData({ ...formData, social_media_links: [...formData.social_media_links, ""] });
+  const removeSocialLink = (index: number) => setFormData({ ...formData, social_media_links: formData.social_media_links.filter((_, i) => i !== index) });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "خطأ",
-        description: "يجب تسجيل الدخول أولاً",
-        variant: "destructive"
-      });
-      return;
-    }
-
+    if (!user) { toast({ title: t("خطأ"), description: t("يجب تسجيل الدخول أولاً"), variant: "destructive" }); return; }
     setLoading(true);
-
     try {
-      const { error } = await supabase
-        .from('live_stream_approvals')
-        .insert({
-          user_id: user.id,
-          full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
-          social_media_links: formData.social_media_links.filter(link => link.trim() !== ""),
-          follower_count: formData.follower_count,
-          description: formData.description,
-          status: 'pending'
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "تم إرسال الطلب بنجاح",
-        description: "سيتم مراجعة طلبك من قبل الإدارة قريباً"
+      const { error } = await supabase.from('live_stream_approvals').insert({
+        user_id: user.id, full_name: formData.full_name, email: formData.email, phone: formData.phone,
+        social_media_links: formData.social_media_links.filter(link => link.trim() !== ""),
+        follower_count: formData.follower_count, description: formData.description, status: 'pending'
       });
-
+      if (error) throw error;
+      toast({ title: t("تم إرسال الطلب بنجاح"), description: t("سيتم مراجعة طلبك من قبل الإدارة قريباً") });
       checkApplicationStatus();
     } catch (error: any) {
-      toast({
-        title: "خطأ",
-        description: error.message || "فشل في إرسال الطلب",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: t("خطأ"), description: error.message || t("فشل في إرسال الطلب"), variant: "destructive" });
+    } finally { setLoading(false); }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-500"><CheckCircle className="w-4 h-4 mr-1" />معتمد</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-500"><Clock className="w-4 h-4 mr-1" />قيد المراجعة</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive"><XCircle className="w-4 h-4 mr-1" />مرفوض</Badge>;
-      default:
-        return null;
+      case 'approved': return <Badge className="bg-green-500"><CheckCircle className="w-4 h-4 me-1" />{t("معتمد")}</Badge>;
+      case 'pending': return <Badge className="bg-yellow-500"><Clock className="w-4 h-4 me-1" />{t("قيد المراجعة")}</Badge>;
+      case 'rejected': return <Badge variant="destructive"><XCircle className="w-4 h-4 me-1" />{t("مرفوض")}</Badge>;
+      default: return null;
     }
   };
+
+  const dateLocale = dir === 'rtl' ? 'ar-EG' : 'en-US';
 
   if (!session) {
     return (
       <div className="container mx-auto p-6">
-        <Alert>
-          <AlertDescription>
-            يجب تسجيل الدخول للوصول إلى منصة البث المباشر
-          </AlertDescription>
-        </Alert>
+        <Alert><AlertDescription>{t("يجب تسجيل الدخول للوصول إلى منصة البث المباشر")}</AlertDescription></Alert>
       </div>
     );
   }
 
   return (
-    <div 
-      className="min-h-screen py-8"
-      style={{
-        backgroundImage: `url('/lovable-uploads/egyptian-cat-wings-live.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="min-h-screen py-8" style={{ backgroundImage: `url('/lovable-uploads/egyptian-cat-wings-live.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
       <div className="min-h-screen bg-background/90">
         <div className="container mx-auto p-6 max-w-4xl">
-          <Button 
-            onClick={() => navigate('/live-streams')}
-            className="mb-4 w-full sm:w-auto"
-            variant="outline"
-            size="lg"
-          >
-            <Eye className="w-5 h-5 ml-2" />
-            شاهد البثوث المباشرة للآخرين
+          <Button onClick={() => navigate('/live-streams')} className="mb-4 w-full sm:w-auto" variant="outline" size="lg">
+            <Eye className="w-5 h-5 me-2" />{t("شاهد البثوث المباشرة للآخرين")}
           </Button>
 
           <Card className="mb-6 bg-gradient-to-br from-primary/10 to-secondary/10">
             <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <Video className="w-16 h-16 text-primary" />
-              </div>
-              <CardTitle className="text-3xl font-cairo">منصة البث المباشر</CardTitle>
-              <CardDescription className="text-lg">
-                للأعضاء المعتمدين والمؤثرين والمشاهير
-              </CardDescription>
+              <div className="flex justify-center mb-4"><Video className="w-16 h-16 text-primary" /></div>
+              <CardTitle className="text-3xl font-cairo">{t("منصة البث المباشر")}</CardTitle>
+              <CardDescription className="text-lg">{t("للأعضاء المعتمدين والمؤثرين والمشاهير")}</CardDescription>
             </CardHeader>
           </Card>
 
@@ -215,22 +123,18 @@ const LiveStream = () => {
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between font-cairo">
-                  <span>حالة الطلب</span>
+                  <span>{t("حالة الطلب")}</span>
                   {getStatusBadge(applicationStatus.status)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <p>تاريخ التقديم: {new Date(applicationStatus.created_at).toLocaleDateString('ar-EG')}</p>
+                  <p>{t("تاريخ التقديم")}: {new Date(applicationStatus.created_at).toLocaleDateString(dateLocale)}</p>
                   {applicationStatus.reviewed_at && (
-                    <p>تاريخ المراجعة: {new Date(applicationStatus.reviewed_at).toLocaleDateString('ar-EG')}</p>
+                    <p>{t("تاريخ المراجعة")}: {new Date(applicationStatus.reviewed_at).toLocaleDateString(dateLocale)}</p>
                   )}
                   {applicationStatus.rejection_reason && (
-                    <Alert variant="destructive">
-                      <AlertDescription>
-                        سبب الرفض: {applicationStatus.rejection_reason}
-                      </AlertDescription>
-                    </Alert>
+                    <Alert variant="destructive"><AlertDescription>{t("سبب الرفض")}: {applicationStatus.rejection_reason}</AlertDescription></Alert>
                   )}
                 </div>
               </CardContent>
@@ -242,16 +146,11 @@ const LiveStream = () => {
               <Card className="mb-6 bg-green-500/10 border-green-500/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-cairo text-green-600">
-                    <CheckCircle className="w-6 h-6" />
-                    تم اعتماد حسابك - ابدأ البث الآن!
+                    <CheckCircle className="w-6 h-6" />{t("تم اعتماد حسابك - ابدأ البث الآن!")}
                   </CardTitle>
-                  <CardDescription>
-                    يمكنك الآن بدء البث المباشر من التطبيق مباشرة
-                  </CardDescription>
+                  <CardDescription>{t("يمكنك الآن بدء البث المباشر من التطبيق مباشرة")}</CardDescription>
                 </CardHeader>
               </Card>
-
-              {/* واجهة البث المباشر من التطبيق */}
               <LiveStreamBroadcast />
             </>
           )}
@@ -259,111 +158,49 @@ const LiveStream = () => {
           {(!applicationStatus || applicationStatus.status === 'rejected') && (
             <Card>
               <CardHeader>
-                <CardTitle className="font-cairo">تقديم طلب الاعتماد</CardTitle>
-                <CardDescription>
-                  يرجى ملء البيانات التالية للحصول على موافقة الإدارة
-                </CardDescription>
+                <CardTitle className="font-cairo">{t("تقديم طلب الاعتماد")}</CardTitle>
+                <CardDescription>{t("يرجى ملء البيانات التالية للحصول على موافقة الإدارة")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="full_name">الاسم الكامل *</Label>
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      required
-                      className="font-cairo"
-                    />
+                    <Label htmlFor="full_name">{t("الاسم الكامل")} *</Label>
+                    <Input id="full_name" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} required className="font-cairo" />
                   </div>
-
                   <div>
-                    <Label htmlFor="email">البريد الإلكتروني *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                      className="font-cairo"
-                    />
+                    <Label htmlFor="email">{t("البريد الإلكتروني")} *</Label>
+                    <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required className="font-cairo" />
                   </div>
-
                   <div>
-                    <Label htmlFor="phone">رقم الهاتف</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="font-cairo"
-                    />
+                    <Label htmlFor="phone">{t("رقم الهاتف")}</Label>
+                    <Input id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="font-cairo" />
                   </div>
-
                   <div>
-                    <Label>روابط وسائل التواصل الاجتماعي</Label>
+                    <Label>{t("روابط وسائل التواصل الاجتماعي")}</Label>
                     {formData.social_media_links.map((link, index) => (
                       <div key={index} className="flex gap-2 mt-2">
-                        <Input
-                          value={link}
-                          onChange={(e) => handleSocialLinkChange(index, e.target.value)}
-                          placeholder="https://..."
-                          className="font-cairo"
-                        />
+                        <Input value={link} onChange={(e) => handleSocialLinkChange(index, e.target.value)} placeholder="https://..." className="font-cairo" />
                         {formData.social_media_links.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => removeSocialLink(index)}
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </Button>
+                          <Button type="button" variant="outline" size="icon" onClick={() => removeSocialLink(index)}><XCircle className="w-4 h-4" /></Button>
                         )}
                       </div>
                     ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addSocialLink}
-                      className="mt-2"
-                    >
-                      إضافة رابط
-                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={addSocialLink} className="mt-2">{t("إضافة رابط")}</Button>
                   </div>
-
                   <div>
-                    <Label htmlFor="follower_count">عدد المتابعين</Label>
-                    <Input
-                      id="follower_count"
-                      type="number"
-                      value={formData.follower_count}
-                      onChange={(e) => setFormData({ ...formData, follower_count: parseInt(e.target.value) || 0 })}
-                      className="font-cairo"
-                    />
+                    <Label htmlFor="follower_count">{t("عدد المتابعين")}</Label>
+                    <Input id="follower_count" type="number" value={formData.follower_count} onChange={(e) => setFormData({ ...formData, follower_count: parseInt(e.target.value) || 0 })} className="font-cairo" />
                   </div>
-
                   <div>
-                    <Label htmlFor="description">نبذة عنك ولماذا تريد البث المباشر *</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      required
-                      rows={5}
-                      className="font-cairo"
-                    />
+                    <Label htmlFor="description">{t("نبذة عنك ولماذا تريد البث المباشر *")}</Label>
+                    <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required rows={5} className="font-cairo" />
                   </div>
-
                   <Alert>
                     <Users className="w-4 h-4" />
-                    <AlertDescription>
-                      سيتم مراجعة طلبك من قبل الإدارة، وسيتم إشعارك بالقرار عبر البريد الإلكتروني
-                    </AlertDescription>
+                    <AlertDescription>{t("سيتم مراجعة طلبك من قبل الإدارة، وسيتم إشعارك بالقرار عبر البريد الإلكتروني")}</AlertDescription>
                   </Alert>
-
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "جاري الإرسال..." : "إرسال الطلب"}
+                    {loading ? t("جاري الإرسال...") : t("إرسال الطلب")}
                   </Button>
                 </form>
               </CardContent>

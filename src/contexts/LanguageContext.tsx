@@ -411,6 +411,114 @@ const translations: Translations = {
     "محفظة العملات الرقمية": "Digital Crypto Wallet",
     "منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية": "A simple crypto platform with secure wallet and identity verification",
 
+    // ---- Identity Verification ----
+    "توثيق الهوية": "Identity Verification",
+    "عملية التحقق من الهوية (KYC) تضمن أمان حسابك والامتثال للمعايير المطلوبة. يرجى تقديم بيانات دقيقة ومطابقة للوثائق الرسمية.": "The KYC identity verification process ensures your account security and compliance with required standards. Please provide accurate data matching your official documents.",
+    "تحذير مهم": "Important Warning",
+    "حالة التحقق الحالية": "Current Verification Status",
+    "تم التحقق": "Verified",
+    "مسودة": "Draft",
+    "ملاحظات": "Notes",
+    "تاريخ الطلب": "Request Date",
+    "آخر تحديث": "Last Update",
+    "المعلومات الشخصية": "Personal Information",
+    "أدخل معلوماتك الشخصية الصحيحة والمطابقة للوثائق الرسمية": "Enter accurate personal details matching your official documents",
+    "تاريخ الميلاد": "Date of Birth",
+    "الجنسية": "Nationality",
+    "العنوان الكامل": "Full Address",
+    "حفظ والمتابعة": "Save & Continue",
+    "جاري الحفظ...": "Saving...",
+    "بيانات ناقصة": "Missing Data",
+    "يرجى ملء جميع الحقول المطلوبة": "Please fill all required fields",
+    "تم حفظ البيانات": "Data Saved",
+    "تم حفظ معلوماتك الشخصية بنجاح": "Your personal information has been saved successfully",
+    "خطأ في الحفظ": "Save Error",
+    "حدث خطأ أثناء حفظ البيانات": "An error occurred while saving data",
+    "رفع الوثائق": "Upload Documents",
+    "اختر نوع الوثيقة وأدخل رقمها": "Select document type and enter its number",
+    "نوع الوثيقة": "Document Type",
+    "اختر نوع الوثيقة": "Select Document Type",
+    "رقم الوثيقة": "Document Number",
+    "أدخل رقم الوثيقة": "Enter document number",
+    "الهوية الوطنية": "National ID",
+    "جواز السفر": "Passport",
+    "رخصة القيادة": "Driving License",
+    "الإقامة": "Residence Permit",
+    "صورة الوثيقة - الوجه الأمامي": "Document Photo - Front Side",
+    "صورة الوثيقة - الوجه الخلفي (اختياري)": "Document Photo - Back Side (Optional)",
+    "صورة شخصية مع حمل الوثيقة": "Selfie holding the document",
+    "اضغط لرفع الصورة": "Click to upload photo",
+    "فتح الكاميرا": "Open Camera",
+    "رفع صورة": "Upload Photo",
+    "إزالة الصورة": "Remove Photo",
+    "اختر طريقة إضافة الصورة": "Choose how to add the photo",
+    "جاري الرفع...": "Uploading...",
+    "متطلبات الوثائق:": "Document Requirements:",
+    "السابق": "Previous",
+    "إرسال للمراجعة": "Submit for Review",
+    "الوثائق مطلوبة": "Documents Required",
+    "يرجى رفع صورة الوثيقة والصورة الشخصية": "Please upload the document photo and selfie",
+    "يرجى اختيار نوع الوثيقة وإدخال رقمها": "Please select document type and enter its number",
+    "تم إرسال الطلب": "Request Submitted",
+    "تم إرسال طلب التحقق من الهوية للمراجعة": "Identity verification request submitted for review",
+    "خطأ في الإرسال": "Submission Error",
+    "حدث خطأ أثناء رفع الوثائق": "An error occurred while uploading documents",
+    "مراجعة الطلب": "Request Review",
+    "تم استلام طلبك وهو قيد المراجعة من قبل فريقنا": "Your request has been received and is being reviewed by our team",
+    "طلبك قيد المراجعة": "Your request is under review",
+    "يستغرق التحقق من الهوية عادة من 1-3 أيام عمل. سنقوم بإشعارك فور اكتمال المراجعة.": "Identity verification usually takes 1-3 business days. You'll be notified when the review is complete.",
+    "ملخص الطلب:": "Request Summary:",
+    "ماذا بعد؟": "What's Next?",
+    "سبب الرفض:": "Rejection Reason:",
+    "إعادة تقديم الطلب": "Re-submit Request",
+    "تم التحقق في:": "Verified on:",
+
+    // ---- Live Stream Page ----
+    "منصة البث المباشر": "Live Streaming Platform",
+    "للأعضاء المعتمدين والمؤثرين والمشاهير": "For verified members, influencers and celebrities",
+    "شاهد البثوث المباشرة للآخرين": "Watch others' live streams",
+    "حالة الطلب": "Application Status",
+    "معتمد": "Approved",
+    "تاريخ التقديم": "Submission Date",
+    "تاريخ المراجعة": "Review Date",
+    "سبب الرفض": "Rejection Reason",
+    "تم اعتماد حسابك - ابدأ البث الآن!": "Your account is approved - Start streaming now!",
+    "يمكنك الآن بدء البث المباشر من التطبيق مباشرة": "You can now start live streaming directly from the app",
+    "تقديم طلب الاعتماد": "Submit Approval Request",
+    "يرجى ملء البيانات التالية للحصول على موافقة الإدارة": "Please fill in the following data to get admin approval",
+    "الاسم الكامل *": "Full Name *",
+    "البريد الإلكتروني *": "Email *",
+    "روابط وسائل التواصل الاجتماعي": "Social Media Links",
+    "إضافة رابط": "Add Link",
+    "عدد المتابعين": "Follower Count",
+    "نبذة عنك ولماذا تريد البث المباشر *": "About you and why you want to live stream *",
+    "سيتم مراجعة طلبك من قبل الإدارة، وسيتم إشعارك بالقرار عبر البريد الإلكتروني": "Your request will be reviewed by admin, and you'll be notified by email",
+    "يجب تسجيل الدخول أولاً": "You must sign in first",
+    "تم إرسال الطلب بنجاح": "Request submitted successfully",
+    "سيتم مراجعة طلبك من قبل الإدارة قريباً": "Your request will be reviewed by admin soon",
+    "فشل في إرسال الطلب": "Failed to submit request",
+    "إرسال الطلب": "Submit Request",
+    "يجب تسجيل الدخول للوصول إلى منصة البث المباشر": "You must sign in to access the live streaming platform",
+
+    // ---- Updates Page ----
+    "آخر التحديثات": "Latest Updates",
+    "تابع آخر الأخبار والتحديثات في منصة Crypto-MSR": "Follow the latest news and updates on Crypto-MSR",
+    "تحديث جديد": "New Update",
+    "جديد": "New",
+    "اقرأ المزيد": "Read More",
+    "لا توجد تحديثات حالياً": "No updates currently",
+    "سيتم إضافة التحديثات هنا عند توفرها": "Updates will be added here when available",
+    "المزيد من التحديثات قريباً": "More updates coming soon",
+    "نعمل باستمرار على تطوير المنصة وإضافة ميزات جديدة": "We're continuously working on developing the platform and adding new features",
+
+    // ---- Surveys Page ----
+    "الاستبيانات (Surveys)": "Surveys",
+    "شاركنا آراءك وساهم في تحسين تجربة المستخدمين على منصتنا.": "Share your opinions and help improve the user experience on our platform.",
+    "يجب تسجيل الدخول للمشاركة في الاستبيانات": "You must sign in to participate in surveys",
+    "لا توجد استبيانات نشطة حالياً.": "No active surveys currently.",
+    "أسئلة": "questions",
+    "عدة أسئلة": "Several questions",
+
     // ---- Home Cards & Components ----
     "أنوبيس - حامي الأسرار": "Anubis - Guardian of Secrets",
     "اضغط لاكتشاف أسرار أنوبيس القديمة": "Tap to discover the ancient secrets of Anubis",
@@ -1060,16 +1168,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("app_language", safeLanguage);
   };
 
-  // دائماً RTL لأن التطبيق مصمم عربياً أولاً
-  const dir = "rtl" as const;
+  // RTL for Arabic languages, LTR for others
+  const isRtl = language === "ar" || language === "both";
+  const dir = isRtl ? "rtl" : "ltr";
 
   useEffect(() => {
     if (!isSupportedLanguage(localStorage.getItem("app_language"))) {
       localStorage.setItem("app_language", language);
     }
-    document.documentElement.dir = "rtl";
+    document.documentElement.dir = dir;
     document.documentElement.lang = language === "both" ? "ar" : language;
-  }, [language]);
+    // Update text alignment based on direction
+    document.documentElement.style.textAlign = isRtl ? "right" : "left";
+  }, [language, dir, isRtl]);
 
   const t = (arabicText: string, englishText?: string): string => {
     if (language === "both") {
