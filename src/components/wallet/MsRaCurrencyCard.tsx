@@ -409,7 +409,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span>التعدين التالي: {getTimeUntilNextMining()}</span>
+                    <span>{t("التعدين التالي", "Next Mining")}: {getTimeUntilNextMining()}</span>
                   </div>
                   <div className="text-right">
                     <Badge variant={miningProgress >= 100 ? "default" : "secondary"}>
