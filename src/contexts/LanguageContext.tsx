@@ -408,6 +408,8 @@ const translations: Translations = {
     "الخصوصية": "Privacy",
     "سياسة الخصوصية": "Privacy Policy",
     "استبيان": "Survey",
+    "محفظة العملات الرقمية": "Digital Crypto Wallet",
+    "منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية": "A simple crypto platform with secure wallet and identity verification",
   },
 
   ru: {
