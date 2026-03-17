@@ -78,7 +78,7 @@ const Index = () => {
           <DynamicHomeCards />
           <div className="flex flex-col items-center justify-center gap-4 mt-8">
             <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
-              <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
+              <Link to="/early-access">{t(getContent('hero_cta', 'انضم الآن'), 'Join Now')}</Link>
             </Button>
           </div>
           <RoadmapCardsGrid />
