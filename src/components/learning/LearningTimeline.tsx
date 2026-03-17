@@ -433,7 +433,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
         <DialogTrigger asChild>
           <Button className="w-full mb-6" size="lg">
             <Plus className="h-5 w-5 mr-2" />
-            إنشاء منشور جديد
+            {t("إنشاء منشور جديد", "Create new post")}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
