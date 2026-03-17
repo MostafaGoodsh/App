@@ -220,7 +220,7 @@ export default function Profile() {
                       <p className="text-xs text-muted-foreground font-cairo">{t("إجمالي النقاط")}</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-2xl font-bold">{xpBalance.toLocaleString('ar-EG')}</p>
+                      <p className="text-2xl font-bold">{xpBalance.toLocaleString(language === 'ar' || language === 'both' ? 'ar-EG' : 'en-US')}</p>
                       <p className="text-xs text-muted-foreground font-cairo">{t("رصيد XP")}</p>
                     </div>
                   </div>
