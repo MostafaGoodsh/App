@@ -23,16 +23,6 @@ import {
   TrendingUp,
   ExternalLink
 } from "lucide-react";
-import { 
-  Zap, 
-  Clock, 
-  Wallet, 
-  Shield, 
-  CheckCircle,
-  AlertCircle,
-  TrendingUp,
-  ExternalLink
-} from "lucide-react";
 
 interface MsRaCurrencyCardProps {
   isVerified: boolean;
