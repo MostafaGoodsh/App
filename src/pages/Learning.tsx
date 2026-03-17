@@ -48,16 +48,18 @@ export default function Learning() {
       
       <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="min-h-screen bg-background/90">
-          <section className="py-8 arabic-content">
-            <div className="container mx-auto px-4 mb-8 text-center">
-              <div className="flex flex-col items-center justify-center gap-4">
-                <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4">Timeline | {t("المنصة التفاعلية")}</h1>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
+          <section className="py-8 arabic-content" dir={t("rtl", "ltr")}>
+            <div className="container mx-auto px-4 mb-8" style={{ textAlign: t("right", "left") as any }}>
+              <div className="flex flex-col gap-4" style={{ alignItems: t("flex-end", "flex-start") as any }}>
+                <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4">
+                  {t("المنصة التفاعلية", "Interactive Platform")} | Timeline
+                </h1>
+                <p className="text-muted-foreground max-w-2xl">
                   {t("تعلم، شارك، وتفاعل مع مجتمع المتداولين والمستثمرين في العملات الرقمية")}
                 </p>
                 {user && (
                   <Button onClick={() => setShowSubmissionForm(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
-                    <Plus className="w-4 h-4" /><FileText className="w-4 h-4" />{t("شارك محتوى تعليمي")}
+                    <Plus className="w-4 h-4" /><FileText className="w-4 h-4" />{t("شارك محتوى تعليمي", "Share educational content")}
                   </Button>
                 )}
               </div>
@@ -108,13 +110,13 @@ export default function Learning() {
               <Tabs defaultValue="crypto" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 mb-8 bg-black/20 border border-white/20">
                   <TabsTrigger value="crypto" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("مالي")} Crypto
+                    {t("مالي", "Financial")} Crypto
                   </TabsTrigger>
                   <TabsTrigger value="general" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("عام")} General
+                    {t("عام", "General")}
                   </TabsTrigger>
                   <TabsTrigger value="divine" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("ديني")} Divine
+                    {t("ديني", "Religious")} Divine
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="crypto"><LearningTimeline category="crypto" /></TabsContent>

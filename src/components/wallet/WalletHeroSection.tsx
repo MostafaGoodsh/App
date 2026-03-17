@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface WalletHeroSectionProps {
   totalBalance: number;
@@ -17,9 +18,11 @@ export const WalletHeroSection = ({
   points = 0
 }: WalletHeroSectionProps) => {
   const [showBalance, setShowBalance] = useState(true);
+  const { language, t } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir="rtl">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir={isArabic ? "rtl" : "ltr"}>
       {/* Background Decoration */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -54,7 +57,7 @@ export const WalletHeroSection = ({
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground font-cairo">
               {showBalance ? (
-                <span>المحفظة الداخلية</span>
+                <span>{t("المحفظة الداخلية", "Internal Wallet")}</span>
               ) : (
                 '••••••'
               )}

@@ -26,11 +26,11 @@ const DailyTasks = () => {
         style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background/90">
           <div className="w-full max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-8 arabic-content" dir={dir}>
-            <div className="text-center space-y-2 sm:space-y-4">
-              <h1 className="font-playfair text-xl sm:text-2xl md:text-4xl font-bold arabic-text">
+            <div className="space-y-2 sm:space-y-4" style={{ textAlign: dir === "rtl" ? "right" : "left" }}>
+              <h1 className="font-playfair text-xl sm:text-2xl md:text-4xl font-bold">
                 {t("المهام | Tasks")}
               </h1>
-              <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto arabic-text">
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl">
                 {t("أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي")}
               </p>
             </div>

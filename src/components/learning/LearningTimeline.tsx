@@ -12,6 +12,7 @@ import { LanguageWrapper, TextWrapper } from "@/components/ui/language-wrapper";
 import { getLanguageClass, getTextDirection } from "@/utils/language";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Heart, 
   MessageCircle, 
@@ -60,6 +61,7 @@ interface Comment {
 export default function LearningTimeline({ category = 'crypto' }: { category?: 'crypto' | 'general' | 'divine' }) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<LearningPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
@@ -431,12 +433,12 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
         <DialogTrigger asChild>
           <Button className="w-full mb-6" size="lg">
             <Plus className="h-5 w-5 mr-2" />
-            إنشاء منشور جديد
+            {t("إنشاء منشور جديد", "Create new post")}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>إنشاء منشور تعليمي</DialogTitle>
+            <DialogTitle>{t("إنشاء منشور تعليمي", "Create educational post")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
