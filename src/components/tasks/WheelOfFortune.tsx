@@ -128,6 +128,7 @@ const drawTripleRingWheel = (
     const lineH = size < 380 ? 10 : 12;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
+      ctx.strokeText(line, tx, startY + li * lineH);
       ctx.fillText(line, tx, startY + li * lineH);
     });
     ctx.shadowBlur = 0;
