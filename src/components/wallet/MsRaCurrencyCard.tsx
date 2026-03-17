@@ -249,7 +249,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
     const nextMining = new Date(lastMiningTime.getTime() + 24 * 60 * 60 * 1000);
     const timeDiff = nextMining.getTime() - now.getTime();
     
-    if (timeDiff <= 0) return "متاح الآن";
+    if (timeDiff <= 0) return t("متاح الآن", "Available Now");
     
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
