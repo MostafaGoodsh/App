@@ -594,7 +594,7 @@ const translations: Translations = {
     "عالم": "Scientist",
     "فنان": "Artist",
     "مفكر": "Intellectual",
-    "عامة": "General",
+    "عامة (تصنيف)": "General",
     "تواصل": "Contact",
 
     // ---- StableCoin Page ----
