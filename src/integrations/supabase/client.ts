@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://wnwfnziozwarlihrnjex.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indud2ZuemlvendhcmxpaHJuamV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5OTU5ODQsImV4cCI6MjA3MDU3MTk4NH0.io-XI4Ygzjgm5qbMassx44wFxZc_czECCJPRM3lHUC0";
 
 const createMissingSupabaseClient = (): SupabaseClient<Database> => {
   const missingConfigError = new Error(
