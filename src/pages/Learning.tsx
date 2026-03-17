@@ -110,13 +110,13 @@ export default function Learning() {
               <Tabs defaultValue="crypto" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 mb-8 bg-black/20 border border-white/20">
                   <TabsTrigger value="crypto" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("مالي")} Crypto
+                    {t("مالي", "Financial")} Crypto
                   </TabsTrigger>
                   <TabsTrigger value="general" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("عام")} General
+                    {t("عام", "General")}
                   </TabsTrigger>
                   <TabsTrigger value="divine" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("ديني")} Divine
+                    {t("ديني", "Religious")} Divine
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="crypto"><LearningTimeline category="crypto" /></TabsContent>

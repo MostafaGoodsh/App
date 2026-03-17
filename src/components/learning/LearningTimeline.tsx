@@ -61,6 +61,8 @@ interface Comment {
 export default function LearningTimeline({ category = 'crypto' }: { category?: 'crypto' | 'general' | 'divine' }) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const { toast } = useToast();
   const [posts, setPosts] = useState<LearningPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
