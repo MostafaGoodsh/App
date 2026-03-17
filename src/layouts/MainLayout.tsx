@@ -18,7 +18,7 @@ const MainLayoutContent = () => {
   const { dir } = useLanguage();
   
   return (
-    <div className="min-h-screen bg-background text-foreground flex w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex w-full overflow-x-hidden" dir={dir}>
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <header 
