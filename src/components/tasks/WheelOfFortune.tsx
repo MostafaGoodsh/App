@@ -117,15 +117,15 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 380 ? 9 : 11}px sans-serif`;
+    ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur = 4;
-    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+    ctx.lineWidth = 3;
 
-    const maxW = (ring3Outer - ring3Inner) * 0.9;
+    const maxW = (ring3Outer - ring3Inner) * 0.85;
     const lines = wrapText(ctx, seg.label, maxW);
-    const lineH = size < 380 ? 10 : 12;
+    const lineH = size < 400 ? 12 : 15;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.strokeText(line, tx, startY + li * lineH);
