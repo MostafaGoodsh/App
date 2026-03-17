@@ -287,7 +287,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 <div className="text-sm font-bold text-primary">{msRaBalance.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">المحفظة</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">{t("المحفظة", "Wallet")}</div>
                 <div className="text-sm font-bold text-primary">{internalMsraBalance.toFixed(2)}</div>
               </div>
             </div>
