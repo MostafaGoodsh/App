@@ -349,6 +349,7 @@ const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 *
 
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
+  const { language, t, dir } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [upgradeRotation, setUpgradeRotation] = useState(0);
   const [outerRotation, setOuterRotation] = useState(0);
@@ -362,8 +363,8 @@ const WheelOfFortune = () => {
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
   const upgradeAnimRef = useRef<number>();
-  const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
-  const [upgradeSegments, setUpgradeSegments] = useState(FALLBACK_UPGRADE_SEGMENTS);
+  const [bonusSegments, setBonusSegments] = useState<BonusSegment[]>(FALLBACK_BONUS_SEGMENTS);
+  const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>(FALLBACK_UPGRADE_SEGMENTS);
   const [lastSpinCost, setLastSpinCost] = useState(0);
 
   // Fetch outer + upgrade segments from DB
@@ -372,26 +373,55 @@ const WheelOfFortune = () => {
       .then(({ data, error }) => {
         if (error) console.error("wheel_outer_segments error:", error);
         if (data && data.length > 0) {
-          setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
+          setBonusSegments(data.map((s: any) => ({
+            label: s.label,
+            label_en: s.label_en,
+            value: Number(s.reward_value),
+            probability: Number(s.probability ?? 0),
+            color: s.color,
+          })));
         }
       });
     supabase.from("wheel_upgrade_segments").select("*").eq("is_active", true).order("display_order")
       .then(({ data, error }) => {
         if (error) console.error("wheel_upgrade_segments error:", error);
         if (data && data.length > 0) {
-          setUpgradeSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color, reward_type: s.reward_type })));
+          setUpgradeSegments(data.map((s: any) => ({
+            label: s.label,
+            label_en: s.label_en,
+            value: Number(s.reward_value),
+            probability: Number(s.probability ?? 0),
+            color: s.color,
+            reward_type: s.reward_type,
+          })));
         }
       });
   }, []);
 
+  const displaySegments = segments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en ?? undefined),
+  }));
+  const displayBonusSegments = bonusSegments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en),
+  }));
+  const displayUpgradeSegments = upgradeSegments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en),
+  }));
+  const displayTitle = getLocalizedLabel(language, settings?.title ?? "", settings?.title_en ?? undefined);
+  const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
+  const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
+
   // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || segments.length === 0) return;
+    if (!canvas || displaySegments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawTripleRingWheel(ctx, canvas, segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation]);
+    drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation]);
 
   // Spin the UPGRADE ring (3rd ring) when "ترقية" triggered
   const spinUpgradeRing = useCallback(() => {
