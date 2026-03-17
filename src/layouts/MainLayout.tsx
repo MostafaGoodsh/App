@@ -8,12 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const MainLayoutContent = () => {
   const { getContent } = useAppContent();
   const { toggleSidebar } = useSidebar();
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { dir } = useLanguage();
   
   return (
     <div className="min-h-screen bg-background text-foreground flex w-full overflow-x-hidden">
