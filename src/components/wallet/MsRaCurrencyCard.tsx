@@ -243,7 +243,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   };
 
   const getTimeUntilNextMining = () => {
-    if (!lastMiningTime) return "متاح الآن";
+    if (!lastMiningTime) return t("متاح الآن", "Available Now");
     
     const now = new Date();
     const nextMining = new Date(lastMiningTime.getTime() + 24 * 60 * 60 * 1000);
