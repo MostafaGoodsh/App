@@ -362,7 +362,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <div className="bg-black/60 p-4 rounded-lg border border-primary/20">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد التعدين</span>
+                    <span className="text-sm text-muted-foreground font-cairo" dir="rtl">{t("رصيد التعدين", "Mining Balance")}</span>
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-xl font-bold text-primary" dir="ltr">
