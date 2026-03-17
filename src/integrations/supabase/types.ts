@@ -4294,6 +4294,51 @@ export type Database = {
           },
         ]
       }
+      wheel_upgrade_segments: {
+        Row: {
+          color: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          label: string
+          label_en: string | null
+          probability: number
+          reward_description: string | null
+          reward_type: string
+          reward_value: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label: string
+          label_en?: string | null
+          probability?: number
+          reward_description?: string | null
+          reward_type?: string
+          reward_value?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          label_en?: string | null
+          probability?: number
+          reward_description?: string | null
+          reward_type?: string
+          reward_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       withdrawal_requests: {
         Row: {
           created_at: string
