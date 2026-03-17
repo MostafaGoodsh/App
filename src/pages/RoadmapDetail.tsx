@@ -238,9 +238,9 @@ const RoadmapDetail = () => {
     return (
       <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
         <CardHeader>
-          <CardTitle className="text-white">الخدمات | Services</CardTitle>
+          <CardTitle className="text-white">{t("الخدمات")} | Services</CardTitle>
           <CardDescription className="text-white/70">
-            اختر الخدمات المتاحة
+            {t("اختر الخدمات المتاحة")}
           </CardDescription>
         </CardHeader>
         <CardContent>
