@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,25 +10,25 @@ import { toast } from "sonner";
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
 const FALLBACK_BONUS_SEGMENTS = [
-  { label: '1 $MS-RA', value: 1, color: '#D4AF37' },
-  { label: '2 $MS-RA', value: 2, color: '#1a1a2e' },
-  { label: '5 $MS-RA', value: 5, color: '#B8860B' },
-  { label: '0.5 $MS-RA', value: 0.5, color: '#2d2d44' },
-  { label: '10 $MS-RA', value: 10, color: '#DAA520' },
-  { label: '3 $MS-RA', value: 3, color: '#0d0d1a' },
-  { label: '0.1 $MS-RA', value: 0.1, color: '#C5A028' },
-  { label: '7 $MS-RA', value: 7, color: '#1f1f35' },
+  { label: '1 $MS-RA', label_en: '1 $MS-RA', value: 1, probability: 10, color: '#D4AF37' },
+  { label: '2 $MS-RA', label_en: '2 $MS-RA', value: 2, probability: 10, color: '#1a1a2e' },
+  { label: '5 $MS-RA', label_en: '5 $MS-RA', value: 5, probability: 10, color: '#B8860B' },
+  { label: '0.5 $MS-RA', label_en: '0.5 $MS-RA', value: 0.5, probability: 10, color: '#2d2d44' },
+  { label: '10 $MS-RA', label_en: '10 $MS-RA', value: 10, probability: 10, color: '#DAA520' },
+  { label: 'ترقية', label_en: 'Premium Wheel', value: 0, probability: 10, color: '#C5A028' },
+  { label: '0.1 $MS-RA', label_en: '0.1 $MS-RA', value: 0.1, probability: 10, color: '#8B6914' },
+  { label: '7 $MS-RA', label_en: '7 $MS-RA', value: 7, probability: 10, color: '#1f1f35' },
 ];
 
 const FALLBACK_UPGRADE_SEGMENTS = [
-  { label: 'ترقية تعدين', value: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
-  { label: '+10% معدل', value: 10, color: '#1a1a2e', reward_type: 'rate_boost' },
-  { label: '+5 قوة', value: 5, color: '#228B22', reward_type: 'strength_boost' },
-  { label: 'ترقية مجانية', value: 1, color: '#2d2d44', reward_type: 'free_upgrade' },
-  { label: '+20% XP', value: 20, color: '#3CB371', reward_type: 'xp_boost' },
-  { label: 'نقاط مضاعفة', value: 2, color: '#0d0d1a', reward_type: 'double_points' },
-  { label: 'ترقية سريعة', value: 1, color: '#32CD32', reward_type: 'quick_upgrade' },
-  { label: '+50 قوة', value: 50, color: '#1f1f35', reward_type: 'strength_boost' },
+  { label: 'ترقية تعدين', label_en: 'Mining Upgrade', value: 1, probability: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
+  { label: '+10% معدل', label_en: '+10% Rate', value: 10, probability: 2, color: '#1a1a2e', reward_type: 'rate_boost' },
+  { label: '+5 قوة', label_en: '+5 Strength', value: 5, probability: 1.5, color: '#228B22', reward_type: 'strength_boost' },
+  { label: 'ترقية مجانية', label_en: 'Free Upgrade', value: 1, probability: 0.5, color: '#2d2d44', reward_type: 'free_upgrade' },
+  { label: '+20% XP', label_en: '+20% XP', value: 20, probability: 1, color: '#3CB371', reward_type: 'xp_boost' },
+  { label: 'نقاط مضاعفة', label_en: 'Double Points', value: 2, probability: 0.8, color: '#0d0d1a', reward_type: 'double_points' },
+  { label: 'ترقية سريعة', label_en: 'Quick Upgrade', value: 1, probability: 0.7, color: '#32CD32', reward_type: 'quick_upgrade' },
+  { label: '+50 قوة', label_en: '+50 Strength', value: 50, probability: 0.3, color: '#1f1f35', reward_type: 'strength_boost' },
 ];
 
 const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {

@@ -19,7 +19,7 @@ interface Introduction {
 const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
   const [introduction, setIntroduction] = useState<Introduction | null>(null);
   const [loading, setLoading] = useState(true);
-  const { language, dir } = useLanguage();
+  const { language, dir, t } = useLanguage();
 
   useEffect(() => {
     fetchIntroduction();
@@ -50,9 +50,11 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
     return null;
   }
 
+  const englishFallbackTitle = introduction.title_en?.trim() || undefined;
+  const englishFallbackContent = introduction.content_en?.trim() || undefined;
   const isArabic = language === "ar" || language === "both";
-  const displayTitle = (!isArabic && introduction.title_en) ? introduction.title_en : introduction.title;
-  const displayContent = (!isArabic && introduction.content_en) ? introduction.content_en : introduction.content;
+  const displayTitle = isArabic ? introduction.title : t(introduction.title, englishFallbackTitle);
+  const displayContent = isArabic ? introduction.content : t(introduction.content, englishFallbackContent);
 
   return (
     <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
@@ -64,7 +66,7 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
           {displayTitle}
         </h2>
         <p 
-          className="text-muted-foreground leading-relaxed"
+          className="text-muted-foreground leading-relaxed whitespace-pre-line"
           dir={dir}
         >
           {displayContent}
