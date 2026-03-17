@@ -16,7 +16,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
   const { language, t } = useLanguage();
   const isArabic = language === "ar" || language === "both";
   const content = (
-    <article className="relative group cursor-pointer">
+    <article className="relative group cursor-pointer" dir={isArabic ? "rtl" : "ltr"}>
       {/* الكارت الدائري */}
       <div 
         className={`w-44 h-44 md:w-52 md:h-52 rounded-full flex items-center justify-center text-center p-6 shadow-lg transition-all duration-300 bg-cover bg-center relative overflow-hidden ${isComingSoon ? 'opacity-60 grayscale' : 'hover:shadow-2xl transform hover:scale-105'}`}
