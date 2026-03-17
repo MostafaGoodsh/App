@@ -16,7 +16,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const Support = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [priority, setPriority] = useState("normal");

@@ -31,7 +31,7 @@ export default function Profile() {
   const viewUserId = searchParams.get('user');
   const { profile, loading } = useProfile(viewUserId || undefined);
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isOwnProfile = !viewUserId || viewUserId === user?.id;
   
   const { stats, dailyTasks, completedTasks, completeTask, isTaskCompleted, loading: statsLoading } = useEngagementStats();
