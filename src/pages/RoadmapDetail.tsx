@@ -203,7 +203,7 @@ const RoadmapDetail = () => {
     return (
       <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
         <CardHeader>
-          <CardTitle className="text-white text-center">الروابط | Links</CardTitle>
+          <CardTitle className="text-white text-center">{t("الروابط")} | Links</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
