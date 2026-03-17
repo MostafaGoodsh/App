@@ -399,9 +399,12 @@ const RoadmapDetail = () => {
         ) : (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle className="text-white">قريباً</CardTitle>
+              <CardTitle className="text-white">{t("قريباً")}</CardTitle>
               <CardDescription className="text-white/70">
-                المحتوى قيد الإعداد وسيتم نشره قريباً
+                {t("المحتوى قيد الإعداد وسيتم نشره قريباً")}
+              </CardDescription>
+            </CardHeader>
+          </Card>
               </CardDescription>
             </CardHeader>
           </Card>
