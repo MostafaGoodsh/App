@@ -263,6 +263,54 @@ const WheelManagement = () => {
           {outerSegments.map(renderOuterSegmentCard)}
         </TabsContent>
 
+        {/* Upgrade Segments Tab */}
+        <TabsContent value="upgrade" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold">أقسام حلقة الترقيات ({upgradeSegments.length})</h3>
+            <Button size="sm" onClick={addUpgradeSegment}><Plus className="w-4 h-4 ml-1" /> إضافة قسم</Button>
+          </div>
+          <p className="text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية (الثالثة) وتُفعّل عند وقوف السهم الداخلي على "ترقية"</p>
+          {upgradeSegments.map((seg) => (
+            <Card key={seg.id} className="border-border/50">
+              <CardContent className="pt-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: seg.color }} />
+                    <Input value={seg.label} onChange={(e) => updateUpgradeSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Switch checked={seg.is_active} onCheckedChange={(v) => updateUpgradeSegment(seg.id, "is_active", v)} />
+                    <Button size="icon" variant="ghost" onClick={() => deleteUpgradeSegment(seg.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div><Label className="text-xs">الاسم EN</Label><Input value={seg.label_en || ""} onChange={(e) => updateUpgradeSegment(seg.id, "label_en", e.target.value)} /></div>
+                  <div>
+                    <Label className="text-xs">النوع</Label>
+                    <Select value={seg.reward_type} onValueChange={(v) => updateUpgradeSegment(seg.id, "reward_type", v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mining_upgrade">ترقية تعدين</SelectItem>
+                        <SelectItem value="rate_boost">زيادة معدل %</SelectItem>
+                        <SelectItem value="strength_boost">زيادة قوة الحساب</SelectItem>
+                        <SelectItem value="xp_boost">مضاعفة XP</SelectItem>
+                        <SelectItem value="double_points">نقاط مضاعفة</SelectItem>
+                        <SelectItem value="free_upgrade">ترقية مجانية</SelectItem>
+                        <SelectItem value="quick_upgrade">ترقية سريعة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label className="text-xs">القيمة</Label><Input type="number" step="0.1" value={seg.reward_value} onChange={(e) => updateUpgradeSegment(seg.id, "reward_value", +e.target.value)} /></div>
+                  <div><Label className="text-xs">الاحتمال %</Label><Input type="number" value={seg.probability} onChange={(e) => updateUpgradeSegment(seg.id, "probability", +e.target.value)} /></div>
+                  <div><Label className="text-xs">اللون</Label><Input type="color" value={seg.color} onChange={(e) => updateUpgradeSegment(seg.id, "color", e.target.value)} className="h-9 p-1" /></div>
+                  <div><Label className="text-xs">الترتيب</Label><Input type="number" value={seg.display_order} onChange={(e) => updateUpgradeSegment(seg.id, "display_order", +e.target.value)} /></div>
+                </div>
+                <Button size="sm" onClick={() => saveUpgradeSegment(seg)} className="w-full"><Save className="w-4 h-4 ml-1" /> حفظ القسم</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
           {settings && (
