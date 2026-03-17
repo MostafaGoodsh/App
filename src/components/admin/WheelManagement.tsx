@@ -237,10 +237,11 @@ const WheelManagement = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <Tabs defaultValue="segments">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="segments"><Palette className="w-4 h-4 ml-1" /> الداخلية (XP)</TabsTrigger>
-          <TabsTrigger value="outer"><Circle className="w-4 h-4 ml-1" /> الخارجية ($MS-RA)</TabsTrigger>
-          <TabsTrigger value="settings"><Settings className="w-4 h-4 ml-1" /> الإعدادات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="segments" className="text-xs"><Palette className="w-3 h-3 ml-1" /> داخلية</TabsTrigger>
+          <TabsTrigger value="outer" className="text-xs"><Circle className="w-3 h-3 ml-1" /> $MS-RA</TabsTrigger>
+          <TabsTrigger value="upgrade" className="text-xs">⬆ ترقيات</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs"><Settings className="w-3 h-3 ml-1" /> إعدادات</TabsTrigger>
         </TabsList>
 
         {/* Inner Segments Tab */}
