@@ -423,21 +423,12 @@ const WheelOfFortune = () => {
     drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
   }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation]);
 
-  // Spin the UPGRADE ring (3rd ring) when "ترقية" triggered
+  // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
     setIsUpgradeAnimating(true);
     setUpgradeResult(null);
 
-    // Weighted random
-    const weights = upgradeSegments.map(s => 1 / (s.value + 0.1));
-    const totalW = weights.reduce((a, b) => a + b, 0);
-    let rand = Math.random() * totalW;
-    let winnerIdx = 0;
-    for (let i = 0; i < weights.length; i++) {
-      rand -= weights[i];
-      if (rand <= 0) { winnerIdx = i; break; }
-    }
-
+    const winnerIdx = pickWeightedIndex(upgradeSegments);
     const winner = upgradeSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / upgradeSegments.length;
 
@@ -461,34 +452,21 @@ const WheelOfFortune = () => {
         upgradeAnimRef.current = requestAnimationFrame(animate);
       } else {
         setIsUpgradeAnimating(false);
-        setUpgradeResult(`⬆ ${winner.label}`);
-        
-        // Process upgrade reward via bonus reward function
+        setUpgradeResult(`⬆ ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
         processBonusReward(winner.value);
-        
-        toast.success(`⬆ مبروك! حصلت على ${winner.label}`, {
-          description: `نوع الترقية: ${winner.reward_type} | القيمة: ${winner.value}`,
-        });
+        toast.success(`⬆ ${t("تم التحديث")}: ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
       }
     };
 
     upgradeAnimRef.current = requestAnimationFrame(animate);
-  }, [upgradeRotation, upgradeSegments, processBonusReward]);
+  }, [upgradeRotation, upgradeSegments, processBonusReward, language, t]);
 
   // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
-    const totalW = weights.reduce((a, b) => a + b, 0);
-    let rand = Math.random() * totalW;
-    let winnerIdx = 0;
-    for (let i = 0; i < weights.length; i++) {
-      rand -= weights[i];
-      if (rand <= 0) { winnerIdx = i; break; }
-    }
-
+    const winnerIdx = pickWeightedIndex(bonusSegments);
     const winner = bonusSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / bonusSegments.length;
 
@@ -512,20 +490,26 @@ const WheelOfFortune = () => {
         bonusAnimRef.current = requestAnimationFrame(animate);
       } else {
         setIsBonusAnimating(false);
+
+        if (isUpgradeTriggerSegment(winner)) {
+          setResult(`⬆ ${t("تم التحديث")}`);
+          toast.success(`⬆ ${t("عجلة الحظ")}: ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
+          setTimeout(() => spinUpgradeRing(), 700);
+          return;
+        }
+
         const userAmount = (winner.value * 0.8).toFixed(2);
         const poolAmount = (winner.value * 0.2).toFixed(2);
         setBonusResult(`${userAmount} $MS-RA`);
-        
         processBonusReward(winner.value);
-        
-        toast.success(`☥ مبروك! ربحت ${userAmount} $MS-RA`, {
-          description: `إجمالي: ${winner.value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)`,
+        toast.success(`☥ ${t("تم التحديث")}: ${userAmount} $MS-RA`, {
+          description: `${poolAmount} $MS-RA → Pool`,
         });
       }
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [outerRotation, bonusSegments, processBonusReward]);
+  }, [outerRotation, bonusSegments, processBonusReward, spinUpgradeRing, language, t]);
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
