@@ -64,7 +64,7 @@ const Index = () => {
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
                 <p className="font-cairo text-xl md:text-3xl lg:text-4xl text-white/90 mb-8 md:mb-12">
-                  {getContent('hero_subtitle', 'منصة مصر الرقمية')}
+                  {t(getContent('hero_subtitle', 'منصة مصر الرقمية'), 'Egypt Digital Platform')}
                 </p>
                 <div className="text-3xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
                   𓂀
