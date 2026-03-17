@@ -267,7 +267,7 @@ const RoadmapDetail = () => {
                         <span className="text-sm text-white/60">| {service.name_en}</span>
                       )}
                       {service.isEnabled && (
-                        <Badge variant="default" className="text-xs">متاح</Badge>
+                        <Badge variant="default" className="text-xs">{t("متاح")}</Badge>
                       )}
                     </div>
                     {service.description && (
