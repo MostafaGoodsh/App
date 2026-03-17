@@ -1060,16 +1060,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("app_language", safeLanguage);
   };
 
-  // دائماً RTL لأن التطبيق مصمم عربياً أولاً
-  const dir = "rtl" as const;
+  // RTL for Arabic languages, LTR for others
+  const isRtl = language === "ar" || language === "both";
+  const dir = isRtl ? "rtl" : "ltr";
 
   useEffect(() => {
     if (!isSupportedLanguage(localStorage.getItem("app_language"))) {
       localStorage.setItem("app_language", language);
     }
-    document.documentElement.dir = "rtl";
+    document.documentElement.dir = dir;
     document.documentElement.lang = language === "both" ? "ar" : language;
-  }, [language]);
+    // Update text alignment based on direction
+    document.documentElement.style.textAlign = isRtl ? "right" : "left";
+  }, [language, dir, isRtl]);
 
   const t = (arabicText: string, englishText?: string): string => {
     if (language === "both") {
