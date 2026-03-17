@@ -12,6 +12,7 @@ import { LanguageWrapper, TextWrapper } from "@/components/ui/language-wrapper";
 import { getLanguageClass, getTextDirection } from "@/utils/language";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Heart, 
   MessageCircle, 
