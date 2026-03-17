@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAppContent } from "@/hooks/useAppContent";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { HomePageCard } from "@/types/homeCards";
 
 interface ReelsCardContent {
@@ -19,21 +20,21 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
   const [loading, setLoading] = useState(!card);
   const { getContent, getAltText } = useAppContent();
   const { getSetting } = useTypography();
+  const { language, t } = useLanguage();
   const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "reels")) || getSetting("home_cards") || getSetting("general");
+
+  const isArabic = language === "ar" || language === "both";
 
   useEffect(() => {
     if (card) return;
-
     const fetchCardContent = async () => {
       try {
         setLoading(true);
-
         const { data: cardData } = await supabase
           .from("reels_card_content")
           .select("*")
           .eq("is_active", true)
           .single();
-
         if (cardData) setCardContent(cardData);
       } catch (error) {
         console.error("Error fetching reels card content:", error);
@@ -41,7 +42,6 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
         setLoading(false);
       }
     };
-
     fetchCardContent();
   }, [card]);
 
@@ -49,10 +49,12 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80" />;
   }
 
-  const displayTitle = card?.title || cardContent?.title || getContent("reels_card_title", "Reels | فيديو قصير");
-  const displayDescription =
-    card?.description ??
-    (cardContent?.description || getContent("reels_card_description", "شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة"));
+  const displayTitle = (!isArabic && card?.title_en) 
+    ? card.title_en 
+    : (card?.title || cardContent?.title || getContent("reels_card_title", t("الريلز", "Reels")));
+  const displayDescription = (!isArabic && card?.description_en) 
+    ? card.description_en 
+    : (card?.description ?? (cardContent?.description || getContent("reels_card_description", t("شاهد مجموعة مختارة من الفيديوهات التعليمية القصيرة", "Watch a curated selection of short educational videos"))));
 
   const fallbackImage = "/lovable-uploads/egyptian-ankh-reels-bg.jpg";
   const backgroundImage =
@@ -63,11 +65,9 @@ export const ExternalReelsCard = ({ card }: { card?: HomePageCard }) => {
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
-
   const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   const href = card?.route_path || "/reels-categories";
-
   const hasValidImage = !!backgroundImage && !backgroundImage.includes("placeholder");
   const gradientStyle =
     !hasValidImage && card?.background_gradient

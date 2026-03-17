@@ -8,6 +8,7 @@ import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { HomePageCard } from "@/types/homeCards";
 
 const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePageCard }>> = {
@@ -20,8 +21,13 @@ const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePag
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
   const { getSetting } = useTypography();
+  const { language, t } = useLanguage();
   const sectionKey = getCardTypographySectionKey(card.card_type);
   const sectionSetting = getSetting(sectionKey) || getSetting("home_cards") || getSetting("general");
+
+  const isArabic = language === "ar" || language === "both";
+  const displayTitle = (!isArabic && card.title_en) ? card.title_en : card.title;
+  const displayDesc = (!isArabic && card.description_en) ? card.description_en : card.description;
 
   const hasValidImage =
     card.background_image && !card.background_image.includes("placeholder") && !imgError;
@@ -46,7 +52,7 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
         {hasValidImage && (
           <img
             src={card.background_image!}
-            alt={card.title}
+            alt={displayTitle}
             className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
             loading="lazy"
             onError={() => setImgError(true)}
@@ -57,16 +63,16 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
             className="font-cairo mb-3 text-primary transition-colors duration-300 font-bold w-full"
             style={titleStyle}
           >
-            {card.title}
+            {displayTitle}
           </h2>
-          {card.description && (
+          {displayDesc && (
             <p className="font-cairo text-white/90 leading-relaxed w-full" style={descStyle}>
-              {card.description}
+              {displayDesc}
             </p>
           )}
           {card.is_coming_soon && (
             <span className="mt-2 inline-block text-xs bg-primary/20 text-primary px-3 py-1 rounded-full w-fit">
-              قريباً
+              {t("قريباً")}
             </span>
           )}
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50 group-hover:w-20 transition-all duration-300" />

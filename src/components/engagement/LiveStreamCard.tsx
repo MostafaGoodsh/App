@@ -1,20 +1,27 @@
 import { Link } from "react-router-dom";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { HomePageCard } from "@/types/homeCards";
 
 const LiveStreamCard = ({ card }: { card?: HomePageCard }) => {
   const { getSetting } = useTypography();
+  const { language, t } = useLanguage();
   const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "live_stream")) || getSetting("home_cards") || getSetting("general");
 
-  const title = card?.title || "Live | البث المباشر";
-  const desc = card?.description ?? "للأعضاء المعتمدين والمؤثرين";
+  const isArabic = language === "ar" || language === "both";
+
+  const title = (!isArabic && card?.title_en) 
+    ? card.title_en 
+    : (card?.title || t("البث المباشر", "Live Stream"));
+  const desc = (!isArabic && card?.description_en) 
+    ? card.description_en 
+    : (card?.description ?? t("للأعضاء المعتمدين والمؤثرين", "For verified members and influencers"));
 
   const backgroundImage = card?.background_image || "/lovable-uploads/egyptian-cat-wings-live.jpg";
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
-
   const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   const hasValidImage = !!backgroundImage && !backgroundImage.includes("placeholder");
@@ -49,7 +56,7 @@ const LiveStreamCard = ({ card }: { card?: HomePageCard }) => {
             </p>
           )}
           <p className="font-cairo text-xs text-white/70 mt-2 w-full" style={descStyle}>
-            يتطلب دعوة أو موافقة إدارية
+            {t("يتطلب دعوة أو موافقة إدارية", "Requires invitation or admin approval")}
           </p>
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-l from-primary to-primary/50 group-hover:w-20 transition-all duration-300" />
         </div>

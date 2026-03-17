@@ -5,6 +5,7 @@ import { useAnubisSubscription } from "@/hooks/useAnubisSubscription";
 import { useState } from "react";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { HomePageCard } from "@/types/homeCards";
 
 const AnubisCard = ({ card }: { card?: HomePageCard }) => {
@@ -13,9 +14,12 @@ const AnubisCard = ({ card }: { card?: HomePageCard }) => {
   const navigate = useNavigate();
   const { createSubscription, hasAccess } = useAnubisSubscription();
   const [registering, setRegistering] = useState(false);
+  const { language, t } = useLanguage();
 
   const { getSetting } = useTypography();
   const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "anubis")) || getSetting("home_cards") || getSetting("general");
+
+  const isArabic = language === "ar" || language === "both";
 
   if (loading && !card) {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80" />;
@@ -28,13 +32,16 @@ const AnubisCard = ({ card }: { card?: HomePageCard }) => {
     "/lovable-uploads/df3653c9-cca9-4f53-b0e2-3aa1eded6852.png",
   );
 
-  const displayTitle = card?.title || titleFromContent || "أنوبيس - حامي الأسرار";
-  const displayDescription = card?.description ?? (descriptionFromContent || "اضغط لاكتشاف أسرار أنوبيس القديمة");
+  const displayTitle = (!isArabic && card?.title_en) 
+    ? card.title_en 
+    : (card?.title || titleFromContent || t("أنوبيس - حامي الأسرار", "Anubis - Guardian of Secrets"));
+  const displayDescription = (!isArabic && card?.description_en) 
+    ? card.description_en 
+    : (card?.description ?? (descriptionFromContent || t("اضغط لاكتشاف أسرار أنوبيس القديمة", "Tap to discover the ancient secrets of Anubis")));
   const backgroundImage = card?.background_image || backgroundFromContent;
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
-
   const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   const hasValidImage = !!backgroundImage && !backgroundImage.includes("placeholder");
@@ -46,24 +53,8 @@ const AnubisCard = ({ card }: { card?: HomePageCard }) => {
         : undefined;
 
   const handleClick = async () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-
-    // Admin has direct access without subscription
-    if (isAdmin) {
-      navigate("/anubis");
-      return;
-    }
-
-    // If user already has access, go directly
-    if (hasAccess) {
-      navigate("/anubis");
-      return;
-    }
-
-    // Otherwise, create subscription first
+    if (!user) { navigate("/auth"); return; }
+    if (isAdmin || hasAccess) { navigate("/anubis"); return; }
     try {
       setRegistering(true);
       await createSubscription.mutateAsync({ subscription_type: "free_trial" });

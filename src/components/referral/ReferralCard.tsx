@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Copy, Users, Gift, Share2, CheckCircle, Sparkles } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Referral {
   id: string;
@@ -19,6 +20,7 @@ interface Referral {
 export const ReferralCard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [referralCode, setReferralCode] = useState('');
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [referralCount, setReferralCount] = useState(0);
@@ -36,8 +38,6 @@ export const ReferralCard = () => {
 
   const loadReferralData = async () => {
     if (!user) return;
-
-    // Get or generate referral code
     const { data: profile } = await supabase
       .from('profiles')
       .select('referral_code, referral_count, referred_by')
@@ -47,7 +47,6 @@ export const ReferralCard = () => {
     if (profile?.referral_code) {
       setReferralCode(profile.referral_code);
     } else {
-      // Generate code
       const { data: code } = await supabase.rpc('generate_referral_code', { p_user_id: user.id });
       if (code) setReferralCode(code as string);
     }
@@ -55,7 +54,6 @@ export const ReferralCard = () => {
     setReferralCount(profile?.referral_count || 0);
     setHasBeenReferred(!!profile?.referred_by);
 
-    // Load referrals
     const { data: refs } = await supabase
       .from('referrals')
       .select('*')
@@ -67,16 +65,16 @@ export const ReferralCard = () => {
 
   const handleCopyCode = async () => {
     await navigator.clipboard.writeText(referralCode);
-    toast({ title: 'تم النسخ!', description: 'تم نسخ رمز الإحالة' });
+    toast({ title: t('تم النسخ!', 'Copied!'), description: t('تم نسخ رمز الإحالة', 'Referral code copied') });
   };
 
   const handleShare = async () => {
-    const shareText = `انضم إلى Crypto-MSR واحصل على مكافآت! استخدم رمز الإحالة: ${referralCode}`;
+    const shareText = `${t('انضم إلى', 'Join')} Crypto-MSR ${t('واحصل على مكافآت! استخدم رمز الإحالة:', 'and earn rewards! Use referral code:')} ${referralCode}`;
     if (navigator.share) {
       await navigator.share({ title: 'Crypto-MSR', text: shareText });
     } else {
       await navigator.clipboard.writeText(shareText);
-      toast({ title: 'تم النسخ!', description: 'تم نسخ رابط المشاركة' });
+      toast({ title: t('تم النسخ!', 'Copied!'), description: t('تم نسخ رابط المشاركة', 'Share link copied') });
     }
   };
 
@@ -94,14 +92,14 @@ export const ReferralCard = () => {
       if (error) throw error;
 
       if (result?.success) {
-        toast({ title: '🎉 تم!', description: result.message });
+        toast({ title: '🎉 ' + t('تم!', 'Done!'), description: result.message });
         setHasBeenReferred(true);
         setInputCode('');
       } else {
-        toast({ title: 'خطأ', description: result?.error, variant: 'destructive' });
+        toast({ title: t('خطأ', 'Error'), description: result?.error, variant: 'destructive' });
       }
     } catch (err: any) {
-      toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
+      toast({ title: t('خطأ', 'Error'), description: err.message, variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -118,8 +116,7 @@ export const ReferralCard = () => {
             <Gift className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <span className="arabic-text">نظام الإحالة</span>
-            <span className="block text-xs font-normal text-muted-foreground" dir="ltr">Referral Program</span>
+            <span className="arabic-text">{t("نظام الإحالة", "Referral Program")}</span>
           </div>
         </CardTitle>
       </CardHeader>
@@ -130,15 +127,14 @@ export const ReferralCard = () => {
           <Sparkles className="w-5 h-5 text-primary" />
           <div className="text-center">
             <p className="text-sm font-medium arabic-text">
-              احصل على <span className="text-primary font-bold" dir="ltr">7 $MS-RA</span> لكل إحالة
+              {t("احصل على", "Earn")} <span className="text-primary font-bold" dir="ltr">7 $MS-RA</span> {t("لكل إحالة", "per referral")}
             </p>
-            <p className="text-[10px] text-muted-foreground" dir="ltr">Earn 7 $MS-RA per referral</p>
           </div>
         </div>
 
         {/* Your Code */}
         <div className="space-y-2">
-          <p className="text-sm font-medium arabic-text">رمز الإحالة الخاص بك</p>
+          <p className="text-sm font-medium arabic-text">{t("رمز الإحالة الخاص بك", "Your Referral Code")}</p>
           <div className="flex gap-2">
             <div className="flex-1 bg-black/40 border border-primary/30 rounded-lg px-4 py-3 font-mono text-lg text-center text-primary font-bold tracking-wider" dir="ltr">
               {referralCode || '...'}
@@ -155,7 +151,7 @@ export const ReferralCard = () => {
         {/* Progress */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="arabic-text text-muted-foreground">الإحالات</span>
+            <span className="arabic-text text-muted-foreground">{t("الإحالات", "Referrals")}</span>
             <span className="font-bold">
               <span className="text-primary">{referralCount}</span>
               <span className="text-muted-foreground">/{MAX_REFERRALS}</span>
@@ -163,7 +159,7 @@ export const ReferralCard = () => {
           </div>
           <Progress value={progressPercent} className="h-2" />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span className="arabic-text">المكتسب</span>
+            <span className="arabic-text">{t("المكتسب", "Earned")}</span>
             <span className="text-primary font-bold" dir="ltr">{totalEarned} $MS-RA</span>
           </div>
         </div>
@@ -191,7 +187,7 @@ export const ReferralCard = () => {
         {/* Use Referral Code */}
         {!hasBeenReferred && (
           <div className="space-y-2 pt-2 border-t border-border">
-            <p className="text-sm font-medium arabic-text">لديك رمز إحالة؟</p>
+            <p className="text-sm font-medium arabic-text">{t("لديك رمز إحالة؟", "Have a referral code?")}</p>
             <div className="flex gap-2">
               <Input
                 placeholder="MSR-XXXXXX"
@@ -205,7 +201,7 @@ export const ReferralCard = () => {
                 disabled={isSubmitting || !inputCode.trim()}
                 size="sm"
               >
-                {isSubmitting ? '...' : 'تطبيق'}
+                {isSubmitting ? '...' : t('تطبيق', 'Apply')}
               </Button>
             </div>
           </div>
@@ -214,7 +210,7 @@ export const ReferralCard = () => {
         {hasBeenReferred && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-sm">
             <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="arabic-text text-green-500">تم تفعيل الإحالة</span>
+            <span className="arabic-text text-green-500">{t("تم تفعيل الإحالة", "Referral activated")}</span>
           </div>
         )}
       </CardContent>

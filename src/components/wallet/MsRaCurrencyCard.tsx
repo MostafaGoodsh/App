@@ -12,6 +12,7 @@ import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Zap, 
   Clock, 
@@ -30,6 +31,7 @@ interface MsRaCurrencyCardProps {
 export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { getContentItem } = useAppContent();
   const { getTokenBalance } = useInternalWallet();
   const [solanaAddress, setSolanaAddress] = useState("");
@@ -241,13 +243,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   };
 
   const getTimeUntilNextMining = () => {
-    if (!lastMiningTime) return "متاح الآن";
+    if (!lastMiningTime) return t("متاح الآن", "Available Now");
     
     const now = new Date();
     const nextMining = new Date(lastMiningTime.getTime() + 24 * 60 * 60 * 1000);
     const timeDiff = nextMining.getTime() - now.getTime();
     
-    if (timeDiff <= 0) return "متاح الآن";
+    if (timeDiff <= 0) return t("متاح الآن", "Available Now");
     
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -266,13 +268,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            <span className="text-right font-cairo" dir="rtl">تعدين <span dir="ltr">☥ $MS-RA</span></span>
+            <span className="text-right font-cairo" dir="rtl">{t("تعدين", "Mining")} <span dir="ltr">☥ $MS-RA</span></span>
           </div>
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
         <CardDescription className="text-xs space-y-1">
-          <div className="text-right font-cairo" dir="rtl">الأصل والمصير</div>
-          <div className="text-left italic text-muted-foreground/80 font-playfair" dir="ltr">Origin & Fate</div>
+          <div className="text-right font-cairo" dir="rtl">{t("الأصل والمصير", "Origin & Fate")}</div>
         </CardDescription>
       </CardHeader>
       
@@ -282,22 +283,22 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <div className="bg-black/50 p-3 rounded-lg border border-primary/20">
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">التعدين</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">{t("التعدين", "Mining")}</div>
                 <div className="text-sm font-bold text-primary">{msRaBalance.toFixed(2)}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">المحفظة</div>
+                <div className="text-xs text-muted-foreground mb-1 text-right font-cairo" dir="rtl">{t("المحفظة", "Wallet")}</div>
                 <div className="text-sm font-bold text-primary">{internalMsraBalance.toFixed(2)}</div>
               </div>
             </div>
             <div className="pt-2 border-t border-primary/30 text-center space-y-1">
-              <div className="text-xs text-muted-foreground font-cairo" dir="rtl">الرصيد الكلي</div>
+              <div className="text-xs text-muted-foreground font-cairo" dir="rtl">{t("الرصيد الكلي", "Total Balance")}</div>
               <div className="text-xl font-bold text-primary">{totalMsRaBalance.toFixed(2)}</div>
               <div className="text-[10px] text-muted-foreground font-playfair" dir="ltr">Total Balance</div>
             </div>
             <div className="mt-2">
               <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-right font-cairo" dir="rtl">التعدين التالي</span>
+                <span className="text-right font-cairo" dir="rtl">{t("التعدين التالي", "Next Mining")}</span>
                 <span className="text-primary font-medium">{getTimeUntilNextMining()}</span>
               </div>
               <Progress value={miningProgress} className="h-1.5" />
@@ -312,13 +313,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <div className="bg-muted/50 border border-primary/20 p-4 rounded-lg">
             <div className="flex items-center gap-2 text-primary mb-2">
               <AlertCircle className="w-4 h-4" />
-              <span className="font-medium font-cairo" dir="rtl">تحقيق الهوية مطلوب</span>
+              <span className="font-medium font-cairo" dir="rtl">{t("تحقيق الهوية مطلوب", "Identity verification required")}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-3 font-cairo" dir="rtl">
-              يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين
+              {t("يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين", "Complete identity verification first to activate mining")}
             </p>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/identity" onClick={(e) => e.stopPropagation()}>انتقل لتحقيق الهوية</Link>
+              <Link to="/identity" onClick={(e) => e.stopPropagation()}>{t("انتقل لتحقيق الهوية", "Go to Identity Verification")}</Link>
             </Button>
           </div>
         )}
@@ -331,13 +332,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           >
             <div className="flex items-center gap-2 text-primary font-cairo" dir="rtl">
               <Wallet className="w-4 h-4" />
-              <span className="font-medium">تسجيل عنوان Solana</span>
+              <span className="font-medium">{t("تسجيل عنوان Solana", "Register Solana Address")}</span>
             </div>
             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-              <Label htmlFor="solana-address" className="font-cairo" dir="rtl">عنوان محفظة Solana</Label>
+              <Label htmlFor="solana-address" className="font-cairo" dir="rtl">{t("عنوان محفظة Solana", "Solana Wallet Address")}</Label>
               <Input
                 id="solana-address"
-                placeholder="ادخل عنوان محفظة Solana..."
+                placeholder={t("ادخل عنوان محفظة Solana...", "Enter Solana wallet address...")}
                 value={solanaAddress}
                 onChange={(e) => setSolanaAddress(e.target.value)}
                 className="font-mono text-sm"
@@ -351,7 +352,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               disabled={isSubmitting || !solanaAddress.trim()}
               className="w-full"
             >
-              {isSubmitting ? "جاري التسجيل..." : "تسجيل العنوان"}
+              {isSubmitting ? t("جاري التسجيل...", "Registering...") : t("تسجيل العنوان", "Register Address")}
             </Button>
           </div>
         ) : (
@@ -361,7 +362,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <div className="bg-black/60 p-4 rounded-lg border border-primary/20">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد التعدين</span>
+                    <span className="text-sm text-muted-foreground font-cairo" dir="rtl">{t("رصيد التعدين", "Mining Balance")}</span>
                     <TrendingUp className="w-4 h-4 text-primary" />
                   </div>
                   <div className="text-xl font-bold text-primary" dir="ltr">
@@ -372,7 +373,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   <Separator />
                   
                   <div className="space-y-1">
-                    <div className="text-sm text-muted-foreground font-cairo" dir="rtl">رصيد المحفظة</div>
+                    <div className="text-sm text-muted-foreground font-cairo" dir="rtl">{t("رصيد المحفظة", "Wallet Balance")}</div>
                     <div className="text-lg font-medium" dir="ltr">{internalMsraBalance.toFixed(2)} $MS-RA</div>
                     <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Wallet Balance</div>
                   </div>
@@ -380,7 +381,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   <Separator />
                   
                   <div className="pt-2 border-t-2 border-primary/30 space-y-1">
-                    <div className="text-sm font-medium font-cairo" dir="rtl">الإجمالي</div>
+                    <div className="text-sm font-medium font-cairo" dir="rtl">{t("الإجمالي", "Total")}</div>
                     <div className="text-2xl font-bold text-primary" dir="ltr">{totalMsRaBalance.toFixed(2)} $MS-RA</div>
                     <div className="text-xs text-muted-foreground font-playfair" dir="ltr">Total Balance</div>
                   </div>
@@ -395,7 +396,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-primary" />
-                  <span className="font-medium">مؤشر التعدين EVM</span>
+                  <span className="font-medium">{t("مؤشر التعدين EVM", "EVM Mining Indicator")}</span>
                 </div>
                 
                 <div className="space-y-2">
@@ -408,11 +409,11 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span>التعدين التالي: {getTimeUntilNextMining()}</span>
+                    <span>{t("التعدين التالي", "Next Mining")}: {getTimeUntilNextMining()}</span>
                   </div>
                   <div className="text-right">
                     <Badge variant={miningProgress >= 100 ? "default" : "secondary"}>
-                      {miningProgress >= 100 ? "جاهز للتعدين" : "في الانتظار"}
+                      {miningProgress >= 100 ? t("جاهز للتعدين", "Ready to Mine") : t("في الانتظار", "Waiting")}
                     </Badge>
                   </div>
                 </div>
@@ -423,7 +424,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   className="w-full"
                 >
                   <Zap className="w-4 h-4 mr-2" />
-                  {miningProgress >= 100 ? "بدء التعدين" : "انتظر 24 ساعة"}
+                  {miningProgress >= 100 ? t("بدء التعدين", "Start Mining") : t("انتظر 24 ساعة", "Wait 24 hours")}
                 </Button>
               </div>
             )}
@@ -432,7 +433,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
               <div className="flex items-center gap-2 text-primary mb-1">
                 <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">عنوان Solana مسجل</span>
+                <span className="text-sm font-medium">{t("العنوان المسجل", "Registered Address")}</span>
               </div>
               <p className="text-xs text-muted-foreground font-mono break-all">
                 {solanaAddress}

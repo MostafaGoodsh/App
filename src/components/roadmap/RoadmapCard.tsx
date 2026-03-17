@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RoadmapCardProps {
   title: string;
@@ -12,6 +13,7 @@ interface RoadmapCardProps {
 }
 
 const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slug, isComingSoon }: RoadmapCardProps) => {
+  const { t } = useLanguage();
   const content = (
     <article className="relative group cursor-pointer">
       {/* الكارت الدائري */}
@@ -38,7 +40,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
         {isComingSoon && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <div className="bg-destructive text-destructive-foreground px-6 py-1.5 font-cairo font-bold text-sm md:text-base rotate-[-15deg] shadow-lg w-[120%] text-center">
-              قريباً
+              {t("قريباً")}
             </div>
           </div>
         )}
@@ -55,7 +57,7 @@ const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slu
       {/* Coming Soon badge */}
       {isComingSoon && (
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-32 bg-destructive text-destructive-foreground px-4 py-1.5 rounded-full flex items-center justify-center gap-2 shadow-md">
-          <span className="text-xs font-semibold font-cairo">قريباً</span>
+          <span className="text-xs font-semibold font-cairo">{t("قريباً")}</span>
         </div>
       )}
       

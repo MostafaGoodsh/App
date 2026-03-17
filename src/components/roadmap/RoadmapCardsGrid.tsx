@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import RoadmapCard from "./RoadmapCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RoadmapCardData {
   id: string;
@@ -18,6 +19,9 @@ interface RoadmapCardData {
 const RoadmapCardsGrid = () => {
   const [cards, setCards] = useState<RoadmapCardData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language, t } = useLanguage();
+
+  const isArabic = language === "ar" || language === "both";
 
   useEffect(() => {
     fetchCards();
@@ -54,13 +58,10 @@ const RoadmapCardsGrid = () => {
     <section className="my-16">
       <div className="text-center mb-10">
         <h2 className="font-cairo text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Roadmap
+          {t("خريطة الطريق", "Roadmap")}
         </h2>
-        <p className="font-cairo text-xl md:text-2xl text-white/90 mb-2">
-          خارطة الطريق
-        </p>
         <p className="text-muted-foreground text-sm">
-          تابع تطورات المشروع والخطوات القادمة
+          {t("تابع تطورات المشروع والخطوات القادمة", "Follow the project development and upcoming steps")}
         </p>
       </div>
       
@@ -68,10 +69,10 @@ const RoadmapCardsGrid = () => {
         {cards.map((card) => (
           <RoadmapCard
             key={card.id}
-            title={card.title}
-            titleEn={card.title_en}
-            description={card.description}
-            descriptionEn={card.description_en}
+            title={isArabic ? card.title : (card.title_en || card.title)}
+            titleEn={isArabic ? card.title_en : undefined}
+            description={isArabic ? card.description : (card.description_en || card.description)}
+            descriptionEn={isArabic ? card.description_en : undefined}
             gradient={card.background_gradient}
             slug={card.slug}
             isComingSoon={card.is_coming_soon || false}
