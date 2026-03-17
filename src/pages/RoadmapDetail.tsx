@@ -117,12 +117,15 @@ const RoadmapDetail = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">
           <AlertDescription>
-            لم يتم العثور على الصفحة المطلوبة
+            {t("لم يتم العثور على الصفحة المطلوبة")}
           </AlertDescription>
         </Alert>
       </div>
     );
   }
+
+  const displayTitle = !isArabic && data.page_title_en ? data.page_title_en : (data.page_title || data.title);
+  const displayDescription = !isArabic && data.description_en ? data.description_en : data.description;
 
   const getFontSize = (size?: string) => {
     switch (size) {
