@@ -249,20 +249,29 @@ const drawTripleRingWheel = (
 
     if (isBonusTrigger) {
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 380 ? 8 : 10}px sans-serif`;
+      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.strokeStyle = 'rgba(212,175,55,0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeText('☥ بونص', tx, ty);
       ctx.fillText('☥ بونص', tx, ty);
     } else if (isUpgradeTrigger) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 380 ? 8 : 10}px sans-serif`;
+      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+      ctx.lineWidth = 2;
+      ctx.strokeText('⬆ ترقية', tx, ty);
       ctx.fillText('⬆ ترقية', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 380 ? 8 : 9}px sans-serif`;
-      const maxW = (ring1Outer - innerCenterRadius) * 0.8;
+      ctx.font = `bold ${size < 380 ? 10 : 12}px sans-serif`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+      ctx.lineWidth = 2.5;
+      const maxW = (ring1Outer - innerCenterRadius) * 0.85;
       const txtLines = wrapText(ctx, seg.label, maxW);
-      const lineH = size < 380 ? 8 : 10;
+      const lineH = size < 380 ? 11 : 13;
       const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
       txtLines.forEach((line, li) => {
+        ctx.strokeText(line, tx, startTxtY + li * lineH);
         ctx.fillText(line, tx, startTxtY + li * lineH);
       });
     }
