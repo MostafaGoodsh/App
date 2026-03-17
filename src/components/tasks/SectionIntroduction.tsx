@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SectionIntroductionProps {
   sectionType: string;
@@ -18,6 +19,7 @@ interface Introduction {
 const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
   const [introduction, setIntroduction] = useState<Introduction | null>(null);
   const [loading, setLoading] = useState(true);
+  const { language, dir } = useLanguage();
 
   useEffect(() => {
     fetchIntroduction();
@@ -48,20 +50,24 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
     return null;
   }
 
+  const isArabic = language === "ar" || language === "both";
+  const displayTitle = (!isArabic && introduction.title_en) ? introduction.title_en : introduction.title;
+  const displayContent = (!isArabic && introduction.content_en) ? introduction.content_en : introduction.content;
+
   return (
     <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
       <CardContent className="p-6">
         <h2 
           className="text-xl font-bold mb-3 text-primary"
-          dir={introduction.text_direction}
+          dir={dir}
         >
-          {introduction.title}
+          {displayTitle}
         </h2>
         <p 
           className="text-muted-foreground leading-relaxed"
-          dir={introduction.text_direction}
+          dir={dir}
         >
-          {introduction.content}
+          {displayContent}
         </p>
       </CardContent>
     </Card>

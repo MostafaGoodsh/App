@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, Coins } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DailyTask {
   id: string;
   task_key: string;
   title: string;
+  title_en?: string;
   description: string | null;
+  description_en?: string | null;
   points_reward: number;
   task_type: string;
   is_active: boolean;
@@ -27,15 +30,8 @@ const DailyTasksTab = ({
   onUncompleteTask,
   loading = false 
 }: DailyTasksTabProps) => {
-  const getTaskTypeIcon = (type: string) => {
-    switch (type) {
-      case 'login': return '🔐';
-      case 'profile': return '👤';
-      case 'mining': return '⛏️';
-      case 'learning': return '📚';
-      default: return '📝';
-    }
-  };
+  const { language, t, dir } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
 
   const handleCompleteTask = async (taskId: string) => {
     await onCompleteTask(taskId);
@@ -46,9 +42,11 @@ const DailyTasksTab = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" dir={dir}>
       {tasks.map((task) => {
         const isCompleted = completedTasks.includes(task.id);
+        const displayTitle = (!isArabic && (task as any).title_en) ? (task as any).title_en : task.title;
+        const displayDesc = (!isArabic && (task as any).description_en) ? (task as any).description_en : task.description;
         
         return (
           <div 
@@ -65,12 +63,12 @@ const DailyTasksTab = ({
               
                <div className="flex-1">
                 <h4 className="font-medium text-foreground">
-                  {task.title}
+                  {displayTitle}
                 </h4>
                 
-                {task.description && (
+                {displayDesc && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {task.description}
+                    {displayDesc}
                   </p>
                 )}
               </div>
@@ -93,7 +91,7 @@ const DailyTasksTab = ({
       {tasks.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Circle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد مهام يومية متاحة حالياً</p>
+          <p>{t("لا توجد مهام يومية متاحة حالياً")}</p>
         </div>
       )}
     </div>

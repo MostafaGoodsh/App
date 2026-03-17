@@ -5,17 +5,22 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PersonalityTask {
   id: string;
   title: string;
+  title_en?: string;
   description: string | null;
+  description_en?: string | null;
   points_reward: number;
   display_order: number;
 }
 
 const PersonalityTab = () => {
   const { user } = useAuth();
+  const { language, t, dir } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
   const [tasks, setTasks] = useState<PersonalityTask[]>([]);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +72,6 @@ const PersonalityTab = () => {
     const isCompleted = completedTasks.includes(taskId);
     
     if (isCompleted) {
-      // إلغاء إكمال المهمة
       try {
         setCompletedTasks(prev => prev.filter(id => id !== taskId));
         
@@ -80,14 +84,13 @@ const PersonalityTab = () => {
 
         if (error) throw error;
 
-        toast.success('تم إلغاء إكمال المهمة');
+        toast.success(t('تم إلغاء إكمال المهمة'));
       } catch (error) {
         console.error('Error uncompleting task:', error);
         setCompletedTasks(prev => [...prev, taskId]);
-        toast.error('حدث خطأ أثناء إلغاء إكمال المهمة');
+        toast.error(t('حدث خطأ أثناء إلغاء إكمال المهمة'));
       }
     } else {
-      // إكمال المهمة
       try {
         setCompletedTasks(prev => [...prev, taskId]);
         
@@ -101,11 +104,11 @@ const PersonalityTab = () => {
 
         if (error) throw error;
 
-        toast.success(`تم إكمال المهمة! حصلت على ${pointsReward} نقطة`);
+        toast.success(`${t('تم إكمال المهمة!')} +${pointsReward} ${t('نقطة')}`);
       } catch (error) {
         console.error('Error completing task:', error);
         setCompletedTasks(prev => prev.filter(id => id !== taskId));
-        toast.error('حدث خطأ أثناء إكمال المهمة');
+        toast.error(t('حدث خطأ أثناء إكمال المهمة'));
       }
     }
   };
@@ -121,9 +124,11 @@ const PersonalityTab = () => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" dir={dir}>
       {tasks.map((task) => {
         const isCompleted = completedTasks.includes(task.id);
+        const displayTitle = (!isArabic && task.title_en) ? task.title_en : task.title;
+        const displayDesc = (!isArabic && task.description_en) ? task.description_en : task.description;
         
         return (
           <div 
@@ -140,12 +145,12 @@ const PersonalityTab = () => {
               
               <div className="flex-1">
                 <h4 className="font-medium text-foreground">
-                  {task.title}
+                  {displayTitle}
                 </h4>
                 
-                {task.description && (
+                {displayDesc && (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {task.description}
+                    {displayDesc}
                   </p>
                 )}
               </div>
@@ -168,7 +173,7 @@ const PersonalityTab = () => {
       {tasks.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>لا توجد مهام تطوير الشخصية متاحة حالياً</p>
+          <p>{t("لا توجد مهام تطوير الشخصية متاحة حالياً")}</p>
         </div>
       )}
     </div>
