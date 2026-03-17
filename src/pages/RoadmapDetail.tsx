@@ -382,7 +382,7 @@ const RoadmapDetail = () => {
         {renderWidget()}
 
         {/* Content */}
-        {data.page_content ? (
+        {((!isArabic && data.page_content_en) ? data.page_content_en : data.page_content) ? (
           <div 
             className="text-white prose prose-lg max-w-none prose-invert 
               [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg 
@@ -394,7 +394,7 @@ const RoadmapDetail = () => {
               [&_.border-primary\\/30]:border-primary/30
               [&_.arabic-text]:text-right [&_.arabic-text]:font-cairo" 
             style={{ fontSize: getFontSize(data.content_font_size) }}
-            dangerouslySetInnerHTML={{ __html: sanitizeHTML(data.page_content) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML((!isArabic && data.page_content_en) ? data.page_content_en : (data.page_content || '')) }}
           />
         ) : (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
