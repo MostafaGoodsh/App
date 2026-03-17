@@ -74,6 +74,8 @@ interface RoadmapData {
 
 const RoadmapDetail = () => {
   const { slug } = useParams();
+  const { t, language, dir } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
   const [data, setData] = useState<RoadmapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
