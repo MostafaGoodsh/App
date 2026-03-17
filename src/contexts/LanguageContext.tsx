@@ -453,8 +453,6 @@ const translations: Translations = {
     "الإجمالي": "Total",
     "الرصيد الكلي": "Total Balance",
     "التعدين التالي": "Next Mining",
-    "التعدين": "Mining",
-    "المحفظة": "Wallet",
     "متاح الآن": "Available Now",
     "مؤشر التعدين EVM": "EVM Mining Indicator",
     "جاهز للتعدين": "Ready to Mine",
