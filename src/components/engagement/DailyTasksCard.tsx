@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { HomePageCard } from "@/types/homeCards";
 
 interface DailyTasksCardContent {
@@ -17,11 +18,13 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
   const [content, setContent] = useState<DailyTasksCardContent | null>(null);
   const [loading, setLoading] = useState(!card);
   const { getSetting } = useTypography();
+  const { language, t } = useLanguage();
   const homeSetting = getSetting(getCardTypographySectionKey(card?.card_type ?? "tasks")) || getSetting("home_cards") || getSetting("general");
+
+  const isArabic = language === "ar" || language === "both";
 
   useEffect(() => {
     if (card) return;
-
     const fetchContent = async () => {
       try {
         const { data, error } = await supabase
@@ -29,7 +32,6 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
           .select("*")
           .eq("is_active", true)
           .maybeSingle();
-
         if (error) console.error("Error fetching content:", error);
         if (data) setContent(data);
       } catch (error) {
@@ -38,7 +40,6 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
         setLoading(false);
       }
     };
-
     fetchContent();
   }, [card]);
 
@@ -46,8 +47,12 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
     return <div className="animate-pulse bg-card/30 backdrop-blur-sm rounded-xl h-80" />;
   }
 
-  const displayTitle = card?.title || content?.title || "Tasks | المهام";
-  const displayDescription = card?.description ?? (content?.description || "أكمل المهام اليومية واحصل على النقاط وقم ببناء سلسلة حضورك المتتالي");
+  const displayTitle = (!isArabic && card?.title_en) 
+    ? card.title_en 
+    : (card?.title || content?.title || t("المهام | Tasks"));
+  const displayDescription = (!isArabic && card?.description_en) 
+    ? card.description_en 
+    : (card?.description ?? (content?.description || t("أكمل مهامك اليومية لتحصل على النقاط وتبني سلسلة حضورك المتتالي")));
   const backgroundImage =
     card?.background_image ||
     content?.background_image_url ||
@@ -55,11 +60,9 @@ const DailyTasksCard = ({ card }: { card?: HomePageCard }) => {
 
   const baseTitleStyle = getTypographyStyles(homeSetting, "title") as React.CSSProperties;
   const baseContentStyle = getTypographyStyles(homeSetting, "content") as React.CSSProperties;
-
   const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
   const href = card?.route_path || "/daily-tasks";
-
   const hasValidImage = !!backgroundImage && !backgroundImage.includes("placeholder");
   const gradientStyle =
     !hasValidImage && card?.background_gradient
