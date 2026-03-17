@@ -405,9 +405,6 @@ const RoadmapDetail = () => {
               </CardDescription>
             </CardHeader>
           </Card>
-              </CardDescription>
-            </CardHeader>
-          </Card>
         )}
 
         {/* Sections */}
