@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,26 +10,43 @@ import { toast } from "sonner";
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
 const FALLBACK_BONUS_SEGMENTS = [
-  { label: '1 $MS-RA', value: 1, color: '#D4AF37' },
-  { label: '2 $MS-RA', value: 2, color: '#1a1a2e' },
-  { label: '5 $MS-RA', value: 5, color: '#B8860B' },
-  { label: '0.5 $MS-RA', value: 0.5, color: '#2d2d44' },
-  { label: '10 $MS-RA', value: 10, color: '#DAA520' },
-  { label: '3 $MS-RA', value: 3, color: '#0d0d1a' },
-  { label: '0.1 $MS-RA', value: 0.1, color: '#C5A028' },
-  { label: '7 $MS-RA', value: 7, color: '#1f1f35' },
+  { label: '1 $MS-RA', label_en: '1 $MS-RA', value: 1, probability: 10, color: '#D4AF37' },
+  { label: '2 $MS-RA', label_en: '2 $MS-RA', value: 2, probability: 10, color: '#1a1a2e' },
+  { label: '5 $MS-RA', label_en: '5 $MS-RA', value: 5, probability: 10, color: '#B8860B' },
+  { label: '0.5 $MS-RA', label_en: '0.5 $MS-RA', value: 0.5, probability: 10, color: '#2d2d44' },
+  { label: '10 $MS-RA', label_en: '10 $MS-RA', value: 10, probability: 10, color: '#DAA520' },
+  { label: 'ترقية', label_en: 'Premium Wheel', value: 0, probability: 10, color: '#C5A028' },
+  { label: '0.1 $MS-RA', label_en: '0.1 $MS-RA', value: 0.1, probability: 10, color: '#8B6914' },
+  { label: '7 $MS-RA', label_en: '7 $MS-RA', value: 7, probability: 10, color: '#1f1f35' },
 ];
 
 const FALLBACK_UPGRADE_SEGMENTS = [
-  { label: 'ترقية تعدين', value: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
-  { label: '+10% معدل', value: 10, color: '#1a1a2e', reward_type: 'rate_boost' },
-  { label: '+5 قوة', value: 5, color: '#228B22', reward_type: 'strength_boost' },
-  { label: 'ترقية مجانية', value: 1, color: '#2d2d44', reward_type: 'free_upgrade' },
-  { label: '+20% XP', value: 20, color: '#3CB371', reward_type: 'xp_boost' },
-  { label: 'نقاط مضاعفة', value: 2, color: '#0d0d1a', reward_type: 'double_points' },
-  { label: 'ترقية سريعة', value: 1, color: '#32CD32', reward_type: 'quick_upgrade' },
-  { label: '+50 قوة', value: 50, color: '#1f1f35', reward_type: 'strength_boost' },
+  { label: 'ترقية تعدين', label_en: 'Mining Upgrade', value: 1, probability: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
+  { label: '+10% معدل', label_en: '+10% Rate', value: 10, probability: 2, color: '#1a1a2e', reward_type: 'rate_boost' },
+  { label: '+5 قوة', label_en: '+5 Strength', value: 5, probability: 1.5, color: '#228B22', reward_type: 'strength_boost' },
+  { label: 'ترقية مجانية', label_en: 'Free Upgrade', value: 1, probability: 0.5, color: '#2d2d44', reward_type: 'free_upgrade' },
+  { label: '+20% XP', label_en: '+20% XP', value: 20, probability: 1, color: '#3CB371', reward_type: 'xp_boost' },
+  { label: 'نقاط مضاعفة', label_en: 'Double Points', value: 2, probability: 0.8, color: '#0d0d1a', reward_type: 'double_points' },
+  { label: 'ترقية سريعة', label_en: 'Quick Upgrade', value: 1, probability: 0.7, color: '#32CD32', reward_type: 'quick_upgrade' },
+  { label: '+50 قوة', label_en: '+50 Strength', value: 50, probability: 0.3, color: '#1f1f35', reward_type: 'strength_boost' },
 ];
+
+type BonusSegment = {
+  label: string;
+  label_en?: string;
+  value: number;
+  probability: number;
+  color: string;
+};
+
+type UpgradeSegment = {
+  label: string;
+  label_en?: string;
+  value: number;
+  probability: number;
+  color: string;
+  reward_type: string;
+};
 
 const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
   const parts = text.split(' ');
@@ -45,6 +63,30 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   }
   if (current) lines.push(current);
   return lines;
+};
+
+const getLocalizedLabel = (language: string, label: string, labelEn?: string) => {
+  if (language === "ar" || language === "both") return label;
+  return labelEn?.trim() || label;
+};
+
+const isUpgradeTriggerSegment = (segment: { label: string; label_en?: string; value: number }) => {
+  const text = `${segment.label} ${segment.label_en ?? ""}`.toLowerCase();
+  return segment.value <= 0 || text.includes("ترقي") || text.includes("upgrade") || text.includes("premium");
+};
+
+const pickWeightedIndex = <T extends { probability?: number }>(items: T[]) => {
+  const safeWeights = items.map((item) => Math.max(Number(item.probability ?? 0), 0));
+  const total = safeWeights.reduce((sum, weight) => sum + weight, 0);
+  if (total <= 0) return Math.floor(Math.random() * items.length);
+
+  let rand = Math.random() * total;
+  for (let i = 0; i < safeWeights.length; i++) {
+    rand -= safeWeights[i];
+    if (rand <= 0) return i;
+  }
+
+  return Math.max(0, items.length - 1);
 };
 
 const drawTripleRingWheel = (
@@ -307,6 +349,7 @@ const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 *
 
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
+  const { language, t, dir } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [upgradeRotation, setUpgradeRotation] = useState(0);
   const [outerRotation, setOuterRotation] = useState(0);
@@ -320,8 +363,8 @@ const WheelOfFortune = () => {
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
   const upgradeAnimRef = useRef<number>();
-  const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
-  const [upgradeSegments, setUpgradeSegments] = useState(FALLBACK_UPGRADE_SEGMENTS);
+  const [bonusSegments, setBonusSegments] = useState<BonusSegment[]>(FALLBACK_BONUS_SEGMENTS);
+  const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>(FALLBACK_UPGRADE_SEGMENTS);
   const [lastSpinCost, setLastSpinCost] = useState(0);
 
   // Fetch outer + upgrade segments from DB
@@ -330,42 +373,62 @@ const WheelOfFortune = () => {
       .then(({ data, error }) => {
         if (error) console.error("wheel_outer_segments error:", error);
         if (data && data.length > 0) {
-          setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
+          setBonusSegments(data.map((s: any) => ({
+            label: s.label,
+            label_en: s.label_en,
+            value: Number(s.reward_value),
+            probability: Number(s.probability ?? 0),
+            color: s.color,
+          })));
         }
       });
     supabase.from("wheel_upgrade_segments").select("*").eq("is_active", true).order("display_order")
       .then(({ data, error }) => {
         if (error) console.error("wheel_upgrade_segments error:", error);
         if (data && data.length > 0) {
-          setUpgradeSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color, reward_type: s.reward_type })));
+          setUpgradeSegments(data.map((s: any) => ({
+            label: s.label,
+            label_en: s.label_en,
+            value: Number(s.reward_value),
+            probability: Number(s.probability ?? 0),
+            color: s.color,
+            reward_type: s.reward_type,
+          })));
         }
       });
   }, []);
 
+  const displaySegments = segments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en ?? undefined),
+  }));
+  const displayBonusSegments = bonusSegments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en),
+  }));
+  const displayUpgradeSegments = upgradeSegments.map((segment) => ({
+    ...segment,
+    label: getLocalizedLabel(language, segment.label, segment.label_en),
+  }));
+  const displayTitle = getLocalizedLabel(language, settings?.title ?? "", settings?.title_en ?? undefined);
+  const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
+  const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
+
   // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || segments.length === 0) return;
+    if (!canvas || displaySegments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawTripleRingWheel(ctx, canvas, segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation]);
+    drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation]);
 
-  // Spin the UPGRADE ring (3rd ring) when "ترقية" triggered
+  // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
     setIsUpgradeAnimating(true);
     setUpgradeResult(null);
 
-    // Weighted random
-    const weights = upgradeSegments.map(s => 1 / (s.value + 0.1));
-    const totalW = weights.reduce((a, b) => a + b, 0);
-    let rand = Math.random() * totalW;
-    let winnerIdx = 0;
-    for (let i = 0; i < weights.length; i++) {
-      rand -= weights[i];
-      if (rand <= 0) { winnerIdx = i; break; }
-    }
-
+    const winnerIdx = pickWeightedIndex(upgradeSegments);
     const winner = upgradeSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / upgradeSegments.length;
 
@@ -389,34 +452,21 @@ const WheelOfFortune = () => {
         upgradeAnimRef.current = requestAnimationFrame(animate);
       } else {
         setIsUpgradeAnimating(false);
-        setUpgradeResult(`⬆ ${winner.label}`);
-        
-        // Process upgrade reward via bonus reward function
+        setUpgradeResult(`⬆ ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
         processBonusReward(winner.value);
-        
-        toast.success(`⬆ مبروك! حصلت على ${winner.label}`, {
-          description: `نوع الترقية: ${winner.reward_type} | القيمة: ${winner.value}`,
-        });
+        toast.success(`⬆ ${t("تم التحديث")}: ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
       }
     };
 
     upgradeAnimRef.current = requestAnimationFrame(animate);
-  }, [upgradeRotation, upgradeSegments, processBonusReward]);
+  }, [upgradeRotation, upgradeSegments, processBonusReward, language, t]);
 
   // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
-    const totalW = weights.reduce((a, b) => a + b, 0);
-    let rand = Math.random() * totalW;
-    let winnerIdx = 0;
-    for (let i = 0; i < weights.length; i++) {
-      rand -= weights[i];
-      if (rand <= 0) { winnerIdx = i; break; }
-    }
-
+    const winnerIdx = pickWeightedIndex(bonusSegments);
     const winner = bonusSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / bonusSegments.length;
 
@@ -440,20 +490,26 @@ const WheelOfFortune = () => {
         bonusAnimRef.current = requestAnimationFrame(animate);
       } else {
         setIsBonusAnimating(false);
+
+        if (isUpgradeTriggerSegment(winner)) {
+          setResult(`⬆ ${t("تم التحديث")}`);
+          toast.success(`⬆ ${t("عجلة الحظ")}: ${getLocalizedLabel(language, winner.label, winner.label_en)}`);
+          setTimeout(() => spinUpgradeRing(), 700);
+          return;
+        }
+
         const userAmount = (winner.value * 0.8).toFixed(2);
         const poolAmount = (winner.value * 0.2).toFixed(2);
         setBonusResult(`${userAmount} $MS-RA`);
-        
         processBonusReward(winner.value);
-        
-        toast.success(`☥ مبروك! ربحت ${userAmount} $MS-RA`, {
-          description: `إجمالي: ${winner.value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)`,
+        toast.success(`☥ ${t("تم التحديث")}: ${userAmount} $MS-RA`, {
+          description: `${poolAmount} $MS-RA → Pool`,
         });
       }
     };
 
     bonusAnimRef.current = requestAnimationFrame(animate);
-  }, [outerRotation, bonusSegments, processBonusReward]);
+  }, [outerRotation, bonusSegments, processBonusReward, spinUpgradeRing, language, t]);
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
@@ -497,20 +553,10 @@ const WheelOfFortune = () => {
         setIsAnimating(false);
 
         if (winner.reward_type === "nothing") {
-          // Bonus → spin MS-RA ring (ring 2)
-          setResult("☥ بونص! الحلقة الوسطى تدور...");
-          if (costXp > 0) {
-            toast("☥ بونص! تم تحويل " + costXp + " XP للمجمع", {
-              description: "حلقة $MS-RA تدور الآن!",
-            });
-          } else {
-            toast("☥ بونص! حلقة $MS-RA تدور الآن!");
-          }
+          setResult(language === "ar" || language === "both" ? "☥ بونص! الحلقة الوسطى تدور..." : "☥ Bonus! The middle ring is spinning...");
           setTimeout(() => spinBonusRing(), 800);
         } else if (winner.reward_type === "upgrade") {
-          // Upgrade → spin upgrade ring (ring 3)
-          setResult("⬆ ترقية! الحلقة الخارجية تدور...");
-          toast("⬆ ترقية! حلقة الترقيات تدور الآن!");
+          setResult(language === "ar" || language === "both" ? "⬆ ترقية! الحلقة الخارجية تدور..." : "⬆ Upgrade! The outer ring is spinning...");
           setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
           const extraSpins = Math.floor(winner.reward_value);
@@ -561,23 +607,23 @@ const WheelOfFortune = () => {
       <div className="absolute bottom-2 left-3 text-amber-500/40 text-lg select-none">𓆣</div>
       <div className="absolute bottom-2 right-3 text-amber-500/40 text-lg select-none">𓌀</div>
 
-      <CardHeader className="text-center pb-2">
+      <CardHeader className="text-center pb-2" dir={dir}>
         <CardTitle className="flex items-center justify-center gap-2 text-lg text-amber-400 arabic-text">
           <span className="text-xl">☥</span>
-          {settings.title}
+          {displayTitle}
           <span className="text-xl">☥</span>
         </CardTitle>
-        {settings.description && (
-          <p className="text-xs text-amber-500/70 arabic-text">{settings.description}</p>
+        {displayDescription && (
+          <p className="text-xs text-amber-500/70 arabic-text whitespace-pre-line">{displayDescription}</p>
         )}
-        {settings.intro_text && (
-          <p className="text-xs text-amber-500/50 arabic-text mt-1">{settings.intro_text}</p>
+        {displayIntroText && (
+          <p className="text-xs text-amber-500/50 arabic-text mt-1 whitespace-pre-line">{displayIntroText}</p>
         )}
       </CardHeader>
 
-      <CardContent className="flex flex-col items-center gap-4 pb-6">
+      <CardContent className="flex flex-col items-center gap-4 px-2 pb-6 sm:px-6">
         {/* Triple-ring wheel */}
-        <div className="relative">
+        <div className="relative w-[calc(100vw-1rem)] max-w-[40rem]">
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
@@ -607,10 +653,10 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={560}
-            height={560}
+            width={640}
+            height={640}
             className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
-            style={{ maxWidth: '95vw', aspectRatio: '1/1' }}
+            style={{ maxWidth: '100%', aspectRatio: '1/1' }}
           />
 
           {isBonusAnimating && (
@@ -624,34 +670,32 @@ const WheelOfFortune = () => {
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
-                <span className="text-emerald-400 text-[10px] font-bold">⬆ ترقية 🎰</span>
+                <span className="text-emerald-400 text-[10px] font-bold">⬆ {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
               </div>
             </div>
           )}
         </div>
 
         {/* Ring labels */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]" dir={dir}>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-emerald-500/60 arabic-text">الخارجية: ترقيات</span>
+            <span className="text-emerald-500/60 arabic-text">{language === "ar" || language === "both" ? "الخارجية: ترقيات" : "Outer: Upgrades"}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-amber-500/60 arabic-text" dir="ltr">الوسطى: $MS-RA</span>
+            <span className="text-amber-500/60 arabic-text" dir="ltr">{language === "ar" || language === "both" ? "الوسطى: $MS-RA" : "Middle: $MS-RA"}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-700" />
-            <span className="text-amber-500/60 arabic-text">الداخلية: XP</span>
+            <span className="text-amber-500/60 arabic-text">{language === "ar" || language === "both" ? "الداخلية: XP" : "Inner: XP"}</span>
           </div>
         </div>
 
-        {/* Distribution info */}
-        <div className="text-[9px] text-amber-500/40 text-center arabic-text">
-          ⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة
+        <div className="text-[9px] text-amber-500/40 text-center arabic-text" dir={dir}>
+          {language === "ar" || language === "both" ? "⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة" : "⚖️ Distribution: 80% to wallet | 20% to liquidity pool"}
         </div>
 
-        {/* Results */}
         {result && !isBonusAnimating && !isUpgradeAnimating && (
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="flex items-center gap-2 justify-center">
@@ -665,7 +709,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
               <p className="text-amber-400 font-bold text-lg">☥ {bonusResult}</p>
-              <p className="text-amber-500/70 text-xs arabic-text">80% لمحفظتك | 20% لمجمع السيولة</p>
+              <p className="text-amber-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "80% لمحفظتك | 20% لمجمع السيولة" : "80% to your wallet | 20% to liquidity pool"}</p>
             </div>
           </div>
         )}
@@ -674,13 +718,12 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
               <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
-              <p className="text-emerald-500/70 text-xs arabic-text">تم تطبيق الترقية على حسابك</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "تم تطبيق الترقية على حسابك" : "Upgrade applied to your account"}</p>
             </div>
           </div>
         )}
 
-        {/* Spin Button & Info */}
-        <div className="text-center space-y-2 w-full">
+        <div className="text-center space-y-2 w-full" dir={dir}>
           <Button
             onClick={handleSpin}
             disabled={anyAnimating || !canSpin()}
@@ -691,19 +734,19 @@ const WheelOfFortune = () => {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="arabic-text">
-                  {isUpgradeAnimating ? 'حلقة الترقية تدور...' : isBonusAnimating ? 'حلقة $MS-RA تدور...' : 'جاري التدوير...'}
+                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? 'MS-RA ring spinning...' : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
                 </span>
               </>
             ) : (
               <>
                 <span>☥</span>
-                <span className="arabic-text">{isFree() ? "لف مجاناً!" : `لف (${settings?.spin_cost_xp} XP)`}</span>
+                <span className="arabic-text">{isFree() ? (language === "ar" || language === "both" ? "لف مجاناً!" : "Spin for free!") : (language === "ar" || language === "both" ? `لف (${settings?.spin_cost_xp} XP)` : `Spin (${settings?.spin_cost_xp} XP)`)}</span>
               </>
             )}
           </Button>
           <div className="flex items-center justify-center gap-3 text-[11px] text-amber-500/60">
             <span>𓆣</span>
-            <span className="arabic-text">لفات اليوم: {todaySpins} / {settings?.free_spins_per_day || 0} مجانية</span>
+            <span className="arabic-text">{language === "ar" || language === "both" ? `لفات اليوم: ${todaySpins} / ${settings?.free_spins_per_day || 0} مجانية` : `Today's spins: ${todaySpins} / ${settings?.free_spins_per_day || 0} free`}</span>
             <span>𓆣</span>
           </div>
         </div>

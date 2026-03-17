@@ -350,6 +350,14 @@ const translations: Translations = {
     "شخصية": "Personality",
     "يومية": "Daily",
     "عجلة الحظ": "Wheel of Fortune",
+    "مرحباً بك في المهام اليومية": "Welcome to Daily Tasks",
+    [`الانتظام في آداء المهام ،،، و تنظيم الوقت ...هو تدريب علي الأنضباط و المثابرة
+لذلك الصدق و النزاهة هم لمصلحتك ...اما الغش و الخداع يجعلك متأخرا ليس أكثر..
+.لانه بعد بضع اسابيع ستري تأثير الصدق والالتزام علي كل جوانب حياتك`]: "Consistency in completing tasks and organizing your time is training in discipline and perseverance. Honesty and integrity serve your own growth, while cheating only delays you. After a few weeks, you will notice the impact of honesty and commitment across every part of your life.",
+    "المهام العامة": "General Tasks",
+    [`تسجيل حضورك بشكل يومي في توقيت محدد... يعزز انتمائك للمنصة... و يعطيك مؤشر علي قدرتك علي الالتزام  و المثابرة و الانضباط... وهو كل ما يتطلبه النجاح في كل مكان و في كل الظروف و يفتح الطريق لمعرفة امكانياتك بشكل افضل... انشاءك قائمة المهام اليومية الخاصة بك و تثبيت مواقيت لانجازها... يعطي مؤشر ممتاز،. سواء نجحت في الالتزام بها ام لا.... فهذا ما يفعله كل رواد الاعمال و الناجحين حول العالم`]: "Showing up daily at a fixed time strengthens your connection to the platform and reflects your ability to commit, persevere, and stay disciplined. Building your own daily task list and sticking to clear times is a strong indicator of growth—this is what successful founders and achievers around the world do.",
+    "محتوى الوسائط": "Media Content",
+    "اطلع على أحدث المحتوى التعليمي والإعلامي": "Explore the latest educational and media content",
 
     // ---- Admin ----
     "إدارة المستخدمين": "Users Management",
