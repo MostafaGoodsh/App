@@ -44,7 +44,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>{getContent('app_name', 'Crypto-MSR')} | محفظة العملات الرقمية</title>
+        <title>{getContent('app_name', 'Crypto-MSR')} | {t("محفظة العملات الرقمية", "Digital Crypto Wallet")}</title>
         <meta name="description" content={getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية')} />
         <link rel="canonical" href={canonical} />
       </Helmet>
