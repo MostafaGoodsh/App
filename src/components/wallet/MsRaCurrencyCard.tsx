@@ -413,7 +413,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
                   </div>
                   <div className="text-right">
                     <Badge variant={miningProgress >= 100 ? "default" : "secondary"}>
-                      {miningProgress >= 100 ? "جاهز للتعدين" : "في الانتظار"}
+                      {miningProgress >= 100 ? t("جاهز للتعدين", "Ready to Mine") : t("في الانتظار", "Waiting")}
                     </Badge>
                   </div>
                 </div>
