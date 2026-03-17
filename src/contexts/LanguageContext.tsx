@@ -663,7 +663,7 @@ const translations: Translations = {
     "الرجاء اختيار العملة": "Please select a currency",
     "الرجاء إدخال رقم المحفظة": "Please enter wallet number",
     "لا توجد طرق دفع متاحة": "No payment methods available",
-    "نقاط الخبرة": "Experience Points",
+    "نقاط الخبرة (شحن)": "Experience Points",
     "العملة الموحدة للمنصة": "Unified platform currency",
     "محددة تلقائياً": "Auto-selected",
     "نظام XP الموحد - بسيط وسريع!": "Unified XP System - Simple & Fast!",
