@@ -122,13 +122,13 @@ const CallOut = () => {
         <div className="min-h-screen bg-background/90">
           <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6" dir={dir}>
             <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-6">
-                <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="mb-6" style={{ textAlign: dir === "rtl" ? "right" : "left" }}>
+                <div className="flex items-center gap-2 mb-3" style={{ justifyContent: dir === "rtl" ? "flex-start" : "flex-start" }}>
                   <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   <h1 className="text-lg sm:text-xl md:text-2xl font-bold">{cardContent.title}</h1>
                 </div>
                 
-                <div className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-full mx-auto mb-6 px-2 sm:px-4">
+                <div className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-full mb-6 px-2 sm:px-4">
                   <p className="whitespace-pre-wrap leading-relaxed">
                     {activeCallout?.callout_text || cardContent?.description}
                   </p>

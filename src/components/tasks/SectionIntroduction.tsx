@@ -103,13 +103,16 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
     ? introduction.content
     : introduction.content_en?.trim() || localizedFallback?.content || introduction.content;
 
+  const isArabic = language === "ar" || language === "both";
+  const textAlign = isArabic ? "right" : "left";
+
   return (
     <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-      <CardContent className="p-6">
-        <h2 className="text-xl font-bold mb-3 text-primary" dir={dir}>
+      <CardContent className="p-6" dir={isArabic ? "rtl" : "ltr"}>
+        <h2 className="text-xl font-bold mb-3 text-primary" style={{ textAlign }}>
           {displayTitle}
         </h2>
-        <p className="text-muted-foreground leading-relaxed whitespace-pre-line" dir={dir}>
+        <p className="text-muted-foreground leading-relaxed whitespace-pre-line" style={{ textAlign }}>
           {displayContent}
         </p>
       </CardContent>
