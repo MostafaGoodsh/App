@@ -323,7 +323,7 @@ const translations: Translations = {
     "فيديو": "Video",
     "صوت": "Audio",
     "مختلط": "Mixed",
-    "رفع الملفات": "Upload files",
+    
     "مستوى الصعوبة": "Difficulty level",
     "مبتدئ": "Beginner",
     "متوسط": "Intermediate",
