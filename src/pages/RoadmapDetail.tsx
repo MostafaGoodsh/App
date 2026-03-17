@@ -1,5 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";

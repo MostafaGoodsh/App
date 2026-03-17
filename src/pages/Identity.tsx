@@ -216,25 +216,25 @@ const Identity = () => {
       
       <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="min-h-screen bg-background/90">
-          <section className="container mx-auto px-4 py-16">
+          <section className="container mx-auto px-4 py-16" dir={dir}>
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
+              <div className="mb-8" style={{ textAlign: dir === "rtl" ? "right" : "left" }}>
                 <div className="flex justify-center mb-4">
                   <div className="bg-primary/10 p-4 rounded-full">
                     <Shield className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h1 className="font-cairo text-3xl md:text-5xl font-bold mb-4">
-                  {t("توثيق الهوية")} | <span className="font-playfair">Identity Verification</span>
+                <h1 className="font-cairo text-3xl md:text-5xl font-bold mb-4 text-center">
+                  {t("توثيق الهوية")}
                 </h1>
-                <p className="text-muted-foreground max-w-2xl mx-auto mb-4 font-cairo">
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-4 font-cairo text-center">
                   {t("عملية التحقق من الهوية (KYC) تضمن أمان حسابك والامتثال للمعايير المطلوبة. يرجى تقديم بيانات دقيقة ومطابقة للوثائق الرسمية.")}
                 </p>
                 
-                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 max-w-2xl mx-auto text-start">
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 max-w-2xl mx-auto">
                   <p className="text-sm font-cairo text-destructive font-semibold mb-2">⚠️ {t("تحذير مهم")}</p>
                   <p className="text-xs font-cairo text-muted-foreground leading-relaxed">
-                    {t("يرجى تحري الدقة الكاملة ومطابقة الواقع في جميع المعلومات المقدمة.", "Please ensure complete accuracy in all submitted information.")}
+                    {t("يرجى تحري الدقة الكاملة ومطابقة الواقع في جميع المعلومات المقدمة.")}
                   </p>
                 </div>
               </div>
