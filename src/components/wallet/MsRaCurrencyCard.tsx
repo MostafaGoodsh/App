@@ -313,13 +313,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           <div className="bg-muted/50 border border-primary/20 p-4 rounded-lg">
             <div className="flex items-center gap-2 text-primary mb-2">
               <AlertCircle className="w-4 h-4" />
-              <span className="font-medium font-cairo" dir="rtl">تحقيق الهوية مطلوب</span>
+              <span className="font-medium font-cairo" dir="rtl">{t("تحقيق الهوية مطلوب", "Identity verification required")}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-3 font-cairo" dir="rtl">
-              يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين
+              {t("يجب إكمال عملية تحقيق الهوية أولاً لتفعيل ميزة التعدين", "Complete identity verification first to activate mining")}
             </p>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/identity" onClick={(e) => e.stopPropagation()}>انتقل لتحقيق الهوية</Link>
+              <Link to="/identity" onClick={(e) => e.stopPropagation()}>{t("انتقل لتحقيق الهوية", "Go to Identity Verification")}</Link>
             </Button>
           </div>
         )}
