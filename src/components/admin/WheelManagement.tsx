@@ -50,9 +50,22 @@ interface WSettings {
   intro_text_en: string | null;
 }
 
+interface UpgradeSegment {
+  id: string;
+  label: string;
+  label_en: string | null;
+  reward_type: string;
+  reward_value: number;
+  color: string;
+  probability: number;
+  display_order: number;
+  is_active: boolean;
+}
+
 const WheelManagement = () => {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [outerSegments, setOuterSegments] = useState<OuterSegment[]>([]);
+  const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>([]);
   const [settings, setSettings] = useState<WSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,13 +76,15 @@ const WheelManagement = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [segRes, outerRes, setRes] = await Promise.all([
+    const [segRes, outerRes, upgradeRes, setRes] = await Promise.all([
       supabase.from("wheel_segments").select("*").order("display_order"),
       supabase.from("wheel_outer_segments").select("*").order("display_order"),
+      supabase.from("wheel_upgrade_segments").select("*").order("display_order"),
       supabase.from("wheel_settings").select("*").limit(1).single(),
     ]);
     if (segRes.data) setSegments(segRes.data as unknown as Segment[]);
     if (outerRes.data) setOuterSegments(outerRes.data as unknown as OuterSegment[]);
+    if (upgradeRes.data) setUpgradeSegments(upgradeRes.data as unknown as UpgradeSegment[]);
     if (setRes.data) setSettings(setRes.data as unknown as WSettings);
     setLoading(false);
   };
@@ -154,6 +169,36 @@ const WheelManagement = () => {
     setOuterSegments((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
   };
 
+  // Upgrade segments CRUD
+  const saveUpgradeSegment = async (seg: UpgradeSegment) => {
+    const { error } = await supabase.from("wheel_upgrade_segments").update({
+      label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
+      reward_value: seg.reward_value, color: seg.color, probability: seg.probability,
+      display_order: seg.display_order, is_active: seg.is_active,
+    }).eq("id", seg.id);
+    if (error) toast.error("فشل حفظ القسم");
+    else toast.success("تم حفظ القسم");
+  };
+
+  const addUpgradeSegment = async () => {
+    const { error } = await supabase.from("wheel_upgrade_segments").insert({
+      label: "ترقية جديدة", label_en: "New Upgrade", reward_type: "mining_upgrade",
+      reward_value: 1, color: "#2E8B57", probability: 10, display_order: upgradeSegments.length + 1,
+    });
+    if (error) toast.error("فشل الإضافة");
+    else { toast.success("تم الإضافة"); fetchAll(); }
+  };
+
+  const deleteUpgradeSegment = async (id: string) => {
+    const { error } = await supabase.from("wheel_upgrade_segments").delete().eq("id", id);
+    if (error) toast.error("فشل الحذف");
+    else { toast.success("تم الحذف"); setUpgradeSegments((s) => s.filter((x) => x.id !== id)); }
+  };
+
+  const updateUpgradeSegment = (id: string, field: string, value: any) => {
+    setUpgradeSegments((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
+  };
+
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>;
 
   const renderSegmentCard = (seg: Segment) => (
@@ -222,10 +267,11 @@ const WheelManagement = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <Tabs defaultValue="segments">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="segments"><Palette className="w-4 h-4 ml-1" /> الداخلية (XP)</TabsTrigger>
-          <TabsTrigger value="outer"><Circle className="w-4 h-4 ml-1" /> الخارجية ($MS-RA)</TabsTrigger>
-          <TabsTrigger value="settings"><Settings className="w-4 h-4 ml-1" /> الإعدادات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="segments" className="text-xs"><Palette className="w-3 h-3 ml-1" /> داخلية</TabsTrigger>
+          <TabsTrigger value="outer" className="text-xs"><Circle className="w-3 h-3 ml-1" /> $MS-RA</TabsTrigger>
+          <TabsTrigger value="upgrade" className="text-xs">⬆ ترقيات</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs"><Settings className="w-3 h-3 ml-1" /> إعدادات</TabsTrigger>
         </TabsList>
 
         {/* Inner Segments Tab */}
@@ -245,6 +291,54 @@ const WheelManagement = () => {
           </div>
           <p className="text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية وتُفعّل عند وقوف السهم الداخلي على "بونص"</p>
           {outerSegments.map(renderOuterSegmentCard)}
+        </TabsContent>
+
+        {/* Upgrade Segments Tab */}
+        <TabsContent value="upgrade" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold">أقسام حلقة الترقيات ({upgradeSegments.length})</h3>
+            <Button size="sm" onClick={addUpgradeSegment}><Plus className="w-4 h-4 ml-1" /> إضافة قسم</Button>
+          </div>
+          <p className="text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية (الثالثة) وتُفعّل عند وقوف السهم الداخلي على "ترقية"</p>
+          {upgradeSegments.map((seg) => (
+            <Card key={seg.id} className="border-border/50">
+              <CardContent className="pt-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: seg.color }} />
+                    <Input value={seg.label} onChange={(e) => updateUpgradeSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Switch checked={seg.is_active} onCheckedChange={(v) => updateUpgradeSegment(seg.id, "is_active", v)} />
+                    <Button size="icon" variant="ghost" onClick={() => deleteUpgradeSegment(seg.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div><Label className="text-xs">الاسم EN</Label><Input value={seg.label_en || ""} onChange={(e) => updateUpgradeSegment(seg.id, "label_en", e.target.value)} /></div>
+                  <div>
+                    <Label className="text-xs">النوع</Label>
+                    <Select value={seg.reward_type} onValueChange={(v) => updateUpgradeSegment(seg.id, "reward_type", v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mining_upgrade">ترقية تعدين</SelectItem>
+                        <SelectItem value="rate_boost">زيادة معدل %</SelectItem>
+                        <SelectItem value="strength_boost">زيادة قوة الحساب</SelectItem>
+                        <SelectItem value="xp_boost">مضاعفة XP</SelectItem>
+                        <SelectItem value="double_points">نقاط مضاعفة</SelectItem>
+                        <SelectItem value="free_upgrade">ترقية مجانية</SelectItem>
+                        <SelectItem value="quick_upgrade">ترقية سريعة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label className="text-xs">القيمة</Label><Input type="number" step="0.1" value={seg.reward_value} onChange={(e) => updateUpgradeSegment(seg.id, "reward_value", +e.target.value)} /></div>
+                  <div><Label className="text-xs">الاحتمال %</Label><Input type="number" value={seg.probability} onChange={(e) => updateUpgradeSegment(seg.id, "probability", +e.target.value)} /></div>
+                  <div><Label className="text-xs">اللون</Label><Input type="color" value={seg.color} onChange={(e) => updateUpgradeSegment(seg.id, "color", e.target.value)} className="h-9 p-1" /></div>
+                  <div><Label className="text-xs">الترتيب</Label><Input type="number" value={seg.display_order} onChange={(e) => updateUpgradeSegment(seg.id, "display_order", +e.target.value)} /></div>
+                </div>
+                <Button size="sm" onClick={() => saveUpgradeSegment(seg)} className="w-full"><Save className="w-4 h-4 ml-1" /> حفظ القسم</Button>
+              </CardContent>
+            </Card>
+          ))}
         </TabsContent>
 
         {/* Settings Tab */}
