@@ -298,7 +298,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             </div>
             <div className="mt-2">
               <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-right font-cairo" dir="rtl">التعدين التالي</span>
+                <span className="text-right font-cairo" dir="rtl">{t("التعدين التالي", "Next Mining")}</span>
                 <span className="text-primary font-medium">{getTimeUntilNextMining()}</span>
               </div>
               <Progress value={miningProgress} className="h-1.5" />
