@@ -350,6 +350,16 @@ const translations: Translations = {
     "شخصية": "Personality",
     "يومية": "Daily",
     "عجلة الحظ": "Wheel of Fortune",
+    "مرحباً بك في المهام اليومية": "Welcome to Daily Tasks",
+    [`الانتظام في آداء المهام ،،، و تنظيم الوقت ...هو تدريب علي الأنضباط و المثابرة
+لذلك الصدق و النزاهة هم لمصلحتك ...اما الغش و الخداع يجعلك متأخرا ليس أكثر..
+.لانه بعد بضع اسابيع ستري تأثير الصدق والالتزام علي كل جوانب حياتك`]: "Consistency in completing tasks and organizing your time is training in discipline and perseverance. Honesty and integrity serve your own growth, while cheating only delays you. After a few weeks, you will notice the impact of honesty and commitment across every part of your life.",
+    "المهام العامة": "General Tasks",
+    [`تسجيل حضورك بشكل يومي في توقيت محدد... يعزز انتمائك للمنصة... و يعطيك مؤشر علي قدرتك علي الالتزام  و المثابرة و الانضباط... وهو كل ما يتطلبه النجاح في كل مكان و في كل الظروف و يفتح الطريق لمعرفة امكانياتك بشكل افضل... انشاءك قائمة المهام اليومية الخاصة بك و تثبيت مواقيت لانجازها... يعطي مؤشر ممتاز،. سواء نجحت في الالتزام بها ام لا.... فهذا ما يفعله كل رواد الاعمال و الناجحين حول العالم`]: "Showing up daily at a fixed time strengthens your connection to the platform and reflects your ability to commit, persevere, and stay disciplined. Building your own daily task list and sticking to clear times is a strong indicator of growth—this is what successful founders and achievers around the world do.",
+    "محتوى الوسائط": "Media Content",
+    "اطلع على أحدث المحتوى التعليمي والإعلامي": "Explore the latest educational and media content",
+    "مهام تطوير الشخصية": "Personality Development Tasks",
+    [`كل فرد هو وحدة مؤثرة في نسيج مجتمعه و وطنه... سواء كنت غني أو فقير كنت متعلم أو غير متعلم....اعلم انك فرد مؤثر... يمكننا سويا استغلال تواجدنا اليومي... لخلق عادات صغيرة جدا... و لكنها ثابته و مؤثرة... وفرصة لخلق النسخة التي تتمناها من نفسك... الجميع هنا سواء... لن نضع مراقبة علي اتمام المهام... لان الصدق هنا هو مقياس النمو و التميز... لا نهتم و لا نحاسبك علي اتمام المهام... و لكن سنسعد بمحاولتك كل يوم... نهدف لخلق قيمة الالتزام و الانضباط`]: "Every person shapes their community and country. No matter your background, your daily presence can help build small but lasting habits and move you closer to the version of yourself you want to become. We do not police task completion here—honesty is the true measure of growth, and we value your effort to show up each day.",
 
     // ---- Admin ----
     "إدارة المستخدمين": "Users Management",
