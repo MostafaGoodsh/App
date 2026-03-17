@@ -488,7 +488,6 @@ const translations: Translations = {
     "يرجى ملء البيانات التالية للحصول على موافقة الإدارة": "Please fill in the following data to get admin approval",
     "الاسم الكامل *": "Full Name *",
     "البريد الإلكتروني *": "Email *",
-    "رقم الهاتف": "Phone Number",
     "روابط وسائل التواصل الاجتماعي": "Social Media Links",
     "إضافة رابط": "Add Link",
     "عدد المتابعين": "Follower Count",
