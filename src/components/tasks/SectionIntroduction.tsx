@@ -103,8 +103,7 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
     ? introduction.content
     : introduction.content_en?.trim() || localizedFallback?.content || introduction.content;
 
-  const isArabic = language === "ar" || language === "both";
-  const textAlign = isArabic ? "right" : "left";
+  const textAlign = isArabic ? "right" as const : "left" as const;
 
   return (
     <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
