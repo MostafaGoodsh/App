@@ -396,7 +396,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-primary" />
-                  <span className="font-medium">مؤشر التعدين EVM</span>
+                  <span className="font-medium">{t("مؤشر التعدين EVM", "EVM Mining Indicator")}</span>
                 </div>
                 
                 <div className="space-y-2">
