@@ -327,13 +327,15 @@ const WheelOfFortune = () => {
   // Fetch outer + upgrade segments from DB
   useEffect(() => {
     supabase.from("wheel_outer_segments").select("*").eq("is_active", true).order("display_order")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error("wheel_outer_segments error:", error);
         if (data && data.length > 0) {
           setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
         }
       });
     supabase.from("wheel_upgrade_segments").select("*").eq("is_active", true).order("display_order")
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) console.error("wheel_upgrade_segments error:", error);
         if (data && data.length > 0) {
           setUpgradeSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color, reward_type: s.reward_type })));
         }
