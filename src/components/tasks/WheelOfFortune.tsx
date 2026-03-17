@@ -605,10 +605,10 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={480}
-            height={480}
-            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 max-w-full"
-            style={{ width: '340px', height: '340px' }}
+            width={560}
+            height={560}
+            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
+            style={{ maxWidth: '95vw', aspectRatio: '1/1' }}
           />
 
           {isBonusAnimating && (
