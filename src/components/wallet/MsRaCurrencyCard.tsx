@@ -352,7 +352,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
               disabled={isSubmitting || !solanaAddress.trim()}
               className="w-full"
             >
-              {isSubmitting ? "جاري التسجيل..." : "تسجيل العنوان"}
+              {isSubmitting ? t("جاري التسجيل...", "Registering...") : t("تسجيل العنوان", "Register Address")}
             </Button>
           </div>
         ) : (
