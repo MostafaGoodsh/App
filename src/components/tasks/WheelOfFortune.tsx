@@ -607,23 +607,23 @@ const WheelOfFortune = () => {
       <div className="absolute bottom-2 left-3 text-amber-500/40 text-lg select-none">𓆣</div>
       <div className="absolute bottom-2 right-3 text-amber-500/40 text-lg select-none">𓌀</div>
 
-      <CardHeader className="text-center pb-2">
+      <CardHeader className="text-center pb-2" dir={dir}>
         <CardTitle className="flex items-center justify-center gap-2 text-lg text-amber-400 arabic-text">
           <span className="text-xl">☥</span>
-          {settings.title}
+          {displayTitle}
           <span className="text-xl">☥</span>
         </CardTitle>
-        {settings.description && (
-          <p className="text-xs text-amber-500/70 arabic-text">{settings.description}</p>
+        {displayDescription && (
+          <p className="text-xs text-amber-500/70 arabic-text whitespace-pre-line">{displayDescription}</p>
         )}
-        {settings.intro_text && (
-          <p className="text-xs text-amber-500/50 arabic-text mt-1">{settings.intro_text}</p>
+        {displayIntroText && (
+          <p className="text-xs text-amber-500/50 arabic-text mt-1 whitespace-pre-line">{displayIntroText}</p>
         )}
       </CardHeader>
 
-      <CardContent className="flex flex-col items-center gap-4 pb-6">
+      <CardContent className="flex flex-col items-center gap-4 px-2 pb-6 sm:px-6">
         {/* Triple-ring wheel */}
-        <div className="relative">
+        <div className="relative w-[calc(100vw-1rem)] max-w-[40rem]">
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
@@ -653,10 +653,10 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={560}
-            height={560}
+            width={640}
+            height={640}
             className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
-            style={{ maxWidth: '95vw', aspectRatio: '1/1' }}
+            style={{ maxWidth: '100%', aspectRatio: '1/1' }}
           />
 
           {isBonusAnimating && (
@@ -670,34 +670,32 @@ const WheelOfFortune = () => {
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
-                <span className="text-emerald-400 text-[10px] font-bold">⬆ ترقية 🎰</span>
+                <span className="text-emerald-400 text-[10px] font-bold">⬆ {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
               </div>
             </div>
           )}
         </div>
 
         {/* Ring labels */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]" dir={dir}>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-emerald-500/60 arabic-text">الخارجية: ترقيات</span>
+            <span className="text-emerald-500/60 arabic-text">{language === "ar" || language === "both" ? "الخارجية: ترقيات" : "Outer: Upgrades"}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-amber-500/60 arabic-text" dir="ltr">الوسطى: $MS-RA</span>
+            <span className="text-amber-500/60 arabic-text" dir="ltr">{language === "ar" || language === "both" ? "الوسطى: $MS-RA" : "Middle: $MS-RA"}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-700" />
-            <span className="text-amber-500/60 arabic-text">الداخلية: XP</span>
+            <span className="text-amber-500/60 arabic-text">{language === "ar" || language === "both" ? "الداخلية: XP" : "Inner: XP"}</span>
           </div>
         </div>
 
-        {/* Distribution info */}
-        <div className="text-[9px] text-amber-500/40 text-center arabic-text">
-          ⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة
+        <div className="text-[9px] text-amber-500/40 text-center arabic-text" dir={dir}>
+          {language === "ar" || language === "both" ? "⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة" : "⚖️ Distribution: 80% to wallet | 20% to liquidity pool"}
         </div>
 
-        {/* Results */}
         {result && !isBonusAnimating && !isUpgradeAnimating && (
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="flex items-center gap-2 justify-center">
@@ -711,7 +709,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
               <p className="text-amber-400 font-bold text-lg">☥ {bonusResult}</p>
-              <p className="text-amber-500/70 text-xs arabic-text">80% لمحفظتك | 20% لمجمع السيولة</p>
+              <p className="text-amber-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "80% لمحفظتك | 20% لمجمع السيولة" : "80% to your wallet | 20% to liquidity pool"}</p>
             </div>
           </div>
         )}
@@ -720,13 +718,12 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
               <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
-              <p className="text-emerald-500/70 text-xs arabic-text">تم تطبيق الترقية على حسابك</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "تم تطبيق الترقية على حسابك" : "Upgrade applied to your account"}</p>
             </div>
           </div>
         )}
 
-        {/* Spin Button & Info */}
-        <div className="text-center space-y-2 w-full">
+        <div className="text-center space-y-2 w-full" dir={dir}>
           <Button
             onClick={handleSpin}
             disabled={anyAnimating || !canSpin()}
@@ -737,19 +734,19 @@ const WheelOfFortune = () => {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="arabic-text">
-                  {isUpgradeAnimating ? 'حلقة الترقية تدور...' : isBonusAnimating ? 'حلقة $MS-RA تدور...' : 'جاري التدوير...'}
+                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? 'MS-RA ring spinning...' : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
                 </span>
               </>
             ) : (
               <>
                 <span>☥</span>
-                <span className="arabic-text">{isFree() ? "لف مجاناً!" : `لف (${settings?.spin_cost_xp} XP)`}</span>
+                <span className="arabic-text">{isFree() ? (language === "ar" || language === "both" ? "لف مجاناً!" : "Spin for free!") : (language === "ar" || language === "both" ? `لف (${settings?.spin_cost_xp} XP)` : `Spin (${settings?.spin_cost_xp} XP)`)}</span>
               </>
             )}
           </Button>
           <div className="flex items-center justify-center gap-3 text-[11px] text-amber-500/60">
             <span>𓆣</span>
-            <span className="arabic-text">لفات اليوم: {todaySpins} / {settings?.free_spins_per_day || 0} مجانية</span>
+            <span className="arabic-text">{language === "ar" || language === "both" ? `لفات اليوم: ${todaySpins} / ${settings?.free_spins_per_day || 0} مجانية` : `Today's spins: ${todaySpins} / ${settings?.free_spins_per_day || 0} free`}</span>
             <span>𓆣</span>
           </div>
         </div>
