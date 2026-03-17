@@ -46,6 +46,7 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
   return (
     <Link to={card.route_path || `/${card.slug}`} className="group">
       <article
+        dir={isArabic ? "rtl" : "ltr"}
         className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm"
         style={gradientStyle}
       >

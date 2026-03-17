@@ -55,7 +55,7 @@ const RoadmapCardsGrid = () => {
   }
 
   return (
-    <section className="my-16">
+    <section className="my-16" dir={isArabic ? "rtl" : "ltr"}>
       <div className="text-center mb-10">
         <h2 className="font-cairo text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           {t("خريطة الطريق", "Roadmap")}

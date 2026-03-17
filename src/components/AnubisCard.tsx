@@ -69,6 +69,7 @@ const AnubisCard = ({ card }: { card?: HomePageCard }) => {
   return (
     <article
       onClick={handleClick}
+      dir={isArabic ? "rtl" : "ltr"}
       className="relative overflow-hidden rounded-xl border border-border/50 cursor-pointer bg-card/30 backdrop-blur-sm group hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       style={{ pointerEvents: registering ? "none" : "auto", ...(gradientStyle || {}) }}
     >
