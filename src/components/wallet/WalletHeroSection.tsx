@@ -57,7 +57,7 @@ export const WalletHeroSection = ({
           <div className="flex items-center justify-center gap-2 mb-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground font-cairo">
               {showBalance ? (
-                <span>المحفظة الداخلية</span>
+                <span>{t("المحفظة الداخلية", "Internal Wallet")}</span>
               ) : (
                 '••••••'
               )}
