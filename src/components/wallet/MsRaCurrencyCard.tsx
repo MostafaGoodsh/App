@@ -268,13 +268,12 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" />
-            <span className="text-right font-cairo" dir="rtl">تعدين <span dir="ltr">☥ $MS-RA</span></span>
+            <span className="text-right font-cairo" dir="rtl">{t("تعدين", "Mining")} <span dir="ltr">☥ $MS-RA</span></span>
           </div>
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </CardTitle>
         <CardDescription className="text-xs space-y-1">
-          <div className="text-right font-cairo" dir="rtl">الأصل والمصير</div>
-          <div className="text-left italic text-muted-foreground/80 font-playfair" dir="ltr">Origin & Fate</div>
+          <div className="text-right font-cairo" dir="rtl">{t("الأصل والمصير", "Origin & Fate")}</div>
         </CardDescription>
       </CardHeader>
       
