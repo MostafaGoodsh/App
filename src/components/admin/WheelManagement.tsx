@@ -169,6 +169,36 @@ const WheelManagement = () => {
     setOuterSegments((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
   };
 
+  // Upgrade segments CRUD
+  const saveUpgradeSegment = async (seg: UpgradeSegment) => {
+    const { error } = await supabase.from("wheel_upgrade_segments").update({
+      label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
+      reward_value: seg.reward_value, color: seg.color, probability: seg.probability,
+      display_order: seg.display_order, is_active: seg.is_active,
+    }).eq("id", seg.id);
+    if (error) toast.error("فشل حفظ القسم");
+    else toast.success("تم حفظ القسم");
+  };
+
+  const addUpgradeSegment = async () => {
+    const { error } = await supabase.from("wheel_upgrade_segments").insert({
+      label: "ترقية جديدة", label_en: "New Upgrade", reward_type: "mining_upgrade",
+      reward_value: 1, color: "#2E8B57", probability: 10, display_order: upgradeSegments.length + 1,
+    });
+    if (error) toast.error("فشل الإضافة");
+    else { toast.success("تم الإضافة"); fetchAll(); }
+  };
+
+  const deleteUpgradeSegment = async (id: string) => {
+    const { error } = await supabase.from("wheel_upgrade_segments").delete().eq("id", id);
+    if (error) toast.error("فشل الحذف");
+    else { toast.success("تم الحذف"); setUpgradeSegments((s) => s.filter((x) => x.id !== id)); }
+  };
+
+  const updateUpgradeSegment = (id: string, field: string, value: any) => {
+    setUpgradeSegments((prev) => prev.map((s) => s.id === id ? { ...s, [field]: value } : s));
+  };
+
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>;
 
   const renderSegmentCard = (seg: Segment) => (
