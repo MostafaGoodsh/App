@@ -60,16 +60,16 @@ const drawTripleRingWheel = (
   const size = canvas.width;
   const center = size / 2;
 
-  // Ring radii (3 rings + center)
-  const outerEdge = center - 10;
+  // Ring radii (3 rings + center) - wider rings for better text readability
+  const outerEdge = center - 12;
   const ring3Outer = outerEdge;          // Upgrade ring outer
-  const ring3Inner = outerEdge * 0.82;   // Upgrade ring inner
-  const divider2 = outerEdge * 0.81;
-  const ring2Outer = outerEdge * 0.80;   // MS-RA ring outer
-  const ring2Inner = outerEdge * 0.60;   // MS-RA ring inner
-  const divider1 = outerEdge * 0.59;
-  const ring1Outer = outerEdge * 0.58;   // XP ring outer
-  const innerCenterRadius = 26;
+  const ring3Inner = outerEdge * 0.78;   // Wider upgrade ring
+  const divider2 = outerEdge * 0.77;
+  const ring2Outer = outerEdge * 0.76;   // MS-RA ring outer
+  const ring2Inner = outerEdge * 0.55;   // Wider MS-RA ring
+  const divider1 = outerEdge * 0.54;
+  const ring1Outer = outerEdge * 0.53;   // XP ring outer
+  const innerCenterRadius = 30;
 
   ctx.clearRect(0, 0, size, size);
 
