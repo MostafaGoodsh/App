@@ -44,8 +44,8 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>{getContent('app_name', 'Crypto-MSR')} | محفظة العملات الرقمية</title>
-        <meta name="description" content={getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية')} />
+        <title>{getContent('app_name', 'Crypto-MSR')} | {t("محفظة العملات الرقمية", "Digital Crypto Wallet")}</title>
+        <meta name="description" content={t(getContent('page_description', 'منصة بسيطة للعملات الرقمية مع محفظة آمنة وتوثيق الهوية'), 'A simple crypto platform with secure wallet and identity verification')} />
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
@@ -64,7 +64,7 @@ const Index = () => {
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
                 <p className="font-cairo text-xl md:text-3xl lg:text-4xl text-white/90 mb-8 md:mb-12">
-                  {getContent('hero_subtitle', 'منصة مصر الرقمية')}
+                  {t(getContent('hero_subtitle', 'منصة مصر الرقمية'), 'Egypt Digital Platform')}
                 </p>
                 <div className="text-3xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
                   𓂀
@@ -78,7 +78,7 @@ const Index = () => {
           <DynamicHomeCards />
           <div className="flex flex-col items-center justify-center gap-4 mt-8">
             <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
-              <Link to="/early-access">{getContent('hero_cta', 'Join Now | انضم الآن')}</Link>
+              <Link to="/early-access">{t(getContent('hero_cta', 'انضم الآن'), 'Join Now')}</Link>
             </Button>
           </div>
           <RoadmapCardsGrid />
