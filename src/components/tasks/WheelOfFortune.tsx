@@ -19,6 +19,17 @@ const FALLBACK_BONUS_SEGMENTS = [
   { label: '7 $MS-RA', value: 7, color: '#1f1f35' },
 ];
 
+const FALLBACK_UPGRADE_SEGMENTS = [
+  { label: 'ترقية تعدين', value: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
+  { label: '+10% معدل', value: 10, color: '#1a1a2e', reward_type: 'rate_boost' },
+  { label: '+5 قوة', value: 5, color: '#228B22', reward_type: 'strength_boost' },
+  { label: 'ترقية مجانية', value: 1, color: '#2d2d44', reward_type: 'free_upgrade' },
+  { label: '+20% XP', value: 20, color: '#3CB371', reward_type: 'xp_boost' },
+  { label: 'نقاط مضاعفة', value: 2, color: '#0d0d1a', reward_type: 'double_points' },
+  { label: 'ترقية سريعة', value: 1, color: '#32CD32', reward_type: 'quick_upgrade' },
+  { label: '+50 قوة', value: 50, color: '#1f1f35', reward_type: 'strength_boost' },
+];
+
 const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
   const parts = text.split(' ');
   const lines: string[] = [];
@@ -36,60 +47,69 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   return lines;
 };
 
-const drawDualRingWheel = (
+const drawTripleRingWheel = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   xpSegments: Array<{ label: string; color: string; reward_type?: string }>,
   msraSegments: Array<{ label: string; color: string }>,
+  upgradeSegments: Array<{ label: string; color: string }>,
+  upgradeRotation: number,
   outerRotation: number,
   innerRotation: number,
 ) => {
   const size = canvas.width;
   const center = size / 2;
-  const outerRadius = center - 12;
-  const innerRadius = outerRadius * 0.58;
-  const dividerRadius = outerRadius * 0.62;
-  const innerCenterRadius = 28;
+
+  // Ring radii (3 rings + center)
+  const outerEdge = center - 10;
+  const ring3Outer = outerEdge;          // Upgrade ring outer
+  const ring3Inner = outerEdge * 0.82;   // Upgrade ring inner
+  const divider2 = outerEdge * 0.81;
+  const ring2Outer = outerEdge * 0.80;   // MS-RA ring outer
+  const ring2Inner = outerEdge * 0.60;   // MS-RA ring inner
+  const divider1 = outerEdge * 0.59;
+  const ring1Outer = outerEdge * 0.58;   // XP ring outer
+  const innerCenterRadius = 26;
 
   ctx.clearRect(0, 0, size, size);
 
   // === Outer decorative ring ===
   ctx.beginPath();
-  ctx.arc(center, center, outerRadius + 6, 0, 2 * Math.PI);
+  ctx.arc(center, center, outerEdge + 5, 0, 2 * Math.PI);
   ctx.strokeStyle = '#D4AF37';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  for (let i = 0; i < 28; i++) {
-    const angle = (i / 28) * Math.PI * 2;
-    const x = center + Math.cos(angle) * (outerRadius + 3);
-    const y = center + Math.sin(angle) * (outerRadius + 3);
+  for (let i = 0; i < 32; i++) {
+    const angle = (i / 32) * Math.PI * 2;
+    const x = center + Math.cos(angle) * (outerEdge + 3);
+    const y = center + Math.sin(angle) * (outerEdge + 3);
     ctx.fillStyle = i % 2 === 0 ? '#D4AF37' : '#B8860B';
-    ctx.font = '7px serif';
+    ctx.font = '6px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('◆', x, y);
   }
 
-  // === OUTER RING: $MS-RA tokens ===
-  const outerSegAngle = (2 * Math.PI) / msraSegments.length;
-  msraSegments.forEach((seg, i) => {
-    const startAngle = i * outerSegAngle + outerRotation;
-    const endAngle = startAngle + outerSegAngle;
+  // === RING 3 (outermost): Upgrade rewards ===
+  const ring3SegAngle = (2 * Math.PI) / upgradeSegments.length;
+  upgradeSegments.forEach((seg, i) => {
+    const startAngle = i * ring3SegAngle + upgradeRotation;
+    const endAngle = startAngle + ring3SegAngle;
 
     ctx.beginPath();
-    ctx.arc(center, center, outerRadius, startAngle, endAngle);
-    ctx.arc(center, center, dividerRadius, endAngle, startAngle, true);
+    ctx.arc(center, center, ring3Outer, startAngle, endAngle);
+    ctx.arc(center, center, ring3Inner, endAngle, startAngle, true);
     ctx.closePath();
 
     ctx.fillStyle = seg.color;
     ctx.fill();
-    ctx.strokeStyle = '#D4AF37';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#2E8B57';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    const midAngle = startAngle + outerSegAngle / 2;
-    const textR = dividerRadius + (outerRadius - dividerRadius) / 2;
+    const midAngle = startAngle + ring3SegAngle / 2;
+    const textR = ring3Inner + (ring3Outer - ring3Inner) / 2;
     const tx = center + Math.cos(midAngle) * textR;
     const ty = center + Math.sin(midAngle) * textR;
 
@@ -97,66 +117,110 @@ const drawDualRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 340 ? 8 : 10}px sans-serif`;
+    ctx.font = `bold ${size < 380 ? 7 : 8}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
-    ctx.shadowBlur = 4;
+    ctx.shadowBlur = 3;
 
-    const maxW = (outerRadius - dividerRadius) * 0.85;
+    const maxW = (ring3Outer - ring3Inner) * 0.85;
     const lines = wrapText(ctx, seg.label, maxW);
-    const lineH = size < 340 ? 10 : 12;
+    const lineH = size < 380 ? 8 : 9;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.fillText(line, tx, startY + li * lineH);
     });
-
     ctx.shadowBlur = 0;
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(center, center);
-    ctx.rotate(startAngle);
-    ctx.fillStyle = 'rgba(212, 175, 55, 0.5)';
-    ctx.font = '9px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(EGYPTIAN_SYMBOLS[i % EGYPTIAN_SYMBOLS.length], outerRadius - 8, 0);
     ctx.restore();
   });
 
-  // === Divider ring ===
+  // === Divider 2 ===
   ctx.beginPath();
-  ctx.arc(center, center, dividerRadius, 0, 2 * Math.PI);
+  ctx.arc(center, center, divider2, 0, 2 * Math.PI);
   ctx.strokeStyle = '#D4AF37';
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // === RING 2 (middle): $MS-RA tokens ===
+  const ring2SegAngle = (2 * Math.PI) / msraSegments.length;
+  msraSegments.forEach((seg, i) => {
+    const startAngle = i * ring2SegAngle + outerRotation;
+    const endAngle = startAngle + ring2SegAngle;
+
+    ctx.beginPath();
+    ctx.arc(center, center, ring2Outer, startAngle, endAngle);
+    ctx.arc(center, center, ring2Inner, endAngle, startAngle, true);
+    ctx.closePath();
+
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+    ctx.strokeStyle = '#D4AF37';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const midAngle = startAngle + ring2SegAngle / 2;
+    const textR = ring2Inner + (ring2Outer - ring2Inner) / 2;
+    const tx = center + Math.cos(midAngle) * textR;
+    const ty = center + Math.sin(midAngle) * textR;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `bold ${size < 380 ? 8 : 9}px sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 3;
+
+    const maxW = (ring2Outer - ring2Inner) * 0.85;
+    const lines = wrapText(ctx, seg.label, maxW);
+    const lineH = size < 380 ? 9 : 10;
+    const startY = ty - ((lines.length - 1) * lineH) / 2;
+    lines.forEach((line, li) => {
+      ctx.fillText(line, tx, startY + li * lineH);
+    });
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+
+  // === Divider 1 ===
+  ctx.beginPath();
+  ctx.arc(center, center, divider1, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#D4AF37';
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   for (let i = 0; i < 8; i++) {
     const angle = (i / 8) * Math.PI * 2;
-    const x = center + Math.cos(angle) * dividerRadius;
-    const y = center + Math.sin(angle) * dividerRadius;
+    const x = center + Math.cos(angle) * divider1;
+    const y = center + Math.sin(angle) * divider1;
     ctx.fillStyle = '#D4AF37';
-    ctx.font = 'bold 8px serif';
+    ctx.font = 'bold 7px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('☥', x, y);
   }
 
-  // === INNER RING: XP segments ===
-  const innerSegAngle = (2 * Math.PI) / xpSegments.length;
+  // === RING 1 (inner): XP segments ===
+  const ring1SegAngle = (2 * Math.PI) / xpSegments.length;
   xpSegments.forEach((seg, i) => {
-    const startAngle = i * innerSegAngle + innerRotation;
-    const endAngle = startAngle + innerSegAngle;
+    const startAngle = i * ring1SegAngle + innerRotation;
+    const endAngle = startAngle + ring1SegAngle;
 
     ctx.beginPath();
-    ctx.arc(center, center, innerRadius, startAngle, endAngle);
+    ctx.arc(center, center, ring1Outer, startAngle, endAngle);
     ctx.arc(center, center, innerCenterRadius, endAngle, startAngle, true);
     ctx.closePath();
 
     const isBonusTrigger = seg.reward_type === 'nothing';
+    const isUpgradeTrigger = seg.reward_type === 'upgrade';
+    
     if (isBonusTrigger) {
-      const grad = ctx.createRadialGradient(center, center, innerCenterRadius, center, center, innerRadius);
+      const grad = ctx.createRadialGradient(center, center, innerCenterRadius, center, center, ring1Outer);
       grad.addColorStop(0, '#C5A028');
       grad.addColorStop(1, '#8B6914');
+      ctx.fillStyle = grad;
+    } else if (isUpgradeTrigger) {
+      const grad = ctx.createRadialGradient(center, center, innerCenterRadius, center, center, ring1Outer);
+      grad.addColorStop(0, '#2E8B57');
+      grad.addColorStop(1, '#1B5E3A');
       ctx.fillStyle = grad;
     } else {
       ctx.fillStyle = seg.color;
@@ -166,8 +230,8 @@ const drawDualRingWheel = (
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    const midAngle = startAngle + innerSegAngle / 2;
-    const innerTextR = innerCenterRadius + (innerRadius - innerCenterRadius) / 2;
+    const midAngle = startAngle + ring1SegAngle / 2;
+    const innerTextR = innerCenterRadius + (ring1Outer - innerCenterRadius) / 2;
     const tx = center + Math.cos(midAngle) * innerTextR;
     const ty = center + Math.sin(midAngle) * innerTextR;
 
@@ -179,14 +243,18 @@ const drawDualRingWheel = (
 
     if (isBonusTrigger) {
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 340 ? 9 : 11}px sans-serif`;
+      ctx.font = `bold ${size < 380 ? 8 : 10}px sans-serif`;
       ctx.fillText('☥ بونص', tx, ty);
+    } else if (isUpgradeTrigger) {
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size < 380 ? 8 : 10}px sans-serif`;
+      ctx.fillText('⬆ ترقية', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 340 ? 8 : 10}px sans-serif`;
-      const maxW = (innerRadius - innerCenterRadius) * 0.8;
+      ctx.font = `bold ${size < 380 ? 8 : 9}px sans-serif`;
+      const maxW = (ring1Outer - innerCenterRadius) * 0.8;
       const txtLines = wrapText(ctx, seg.label, maxW);
-      const lineH = size < 340 ? 9 : 11;
+      const lineH = size < 380 ? 8 : 10;
       const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
       txtLines.forEach((line, li) => {
         ctx.fillText(line, tx, startTxtY + li * lineH);
@@ -210,7 +278,7 @@ const drawDualRingWheel = (
   ctx.stroke();
 
   ctx.fillStyle = '#1a1a2e';
-  ctx.font = 'bold 18px serif';
+  ctx.font = 'bold 16px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(212, 175, 55, 0.5)';
@@ -225,23 +293,34 @@ const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 *
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [upgradeRotation, setUpgradeRotation] = useState(0);
   const [outerRotation, setOuterRotation] = useState(0);
   const [innerRotation, setInnerRotation] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isBonusAnimating, setIsBonusAnimating] = useState(false);
+  const [isUpgradeAnimating, setIsUpgradeAnimating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [bonusResult, setBonusResult] = useState<string | null>(null);
+  const [upgradeResult, setUpgradeResult] = useState<string | null>(null);
   const animRef = useRef<number>();
   const bonusAnimRef = useRef<number>();
+  const upgradeAnimRef = useRef<number>();
   const [bonusSegments, setBonusSegments] = useState(FALLBACK_BONUS_SEGMENTS);
+  const [upgradeSegments, setUpgradeSegments] = useState(FALLBACK_UPGRADE_SEGMENTS);
   const [lastSpinCost, setLastSpinCost] = useState(0);
 
-  // Fetch outer segments from DB
+  // Fetch outer + upgrade segments from DB
   useEffect(() => {
     supabase.from("wheel_outer_segments").select("*").eq("is_active", true).order("display_order")
       .then(({ data }) => {
         if (data && data.length > 0) {
           setBonusSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color })));
+        }
+      });
+    supabase.from("wheel_upgrade_segments").select("*").eq("is_active", true).order("display_order")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setUpgradeSegments(data.map((s: any) => ({ label: s.label, value: Number(s.reward_value), color: s.color, reward_type: s.reward_type })));
         }
       });
   }, []);
@@ -252,15 +331,66 @@ const WheelOfFortune = () => {
     if (!canvas || segments.length === 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawDualRingWheel(ctx, canvas, segments, bonusSegments, outerRotation, innerRotation);
-  }, [segments, bonusSegments, outerRotation, innerRotation]);
+    drawTripleRingWheel(ctx, canvas, segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation);
+  }, [segments, bonusSegments, upgradeSegments, upgradeRotation, outerRotation, innerRotation]);
+
+  // Spin the UPGRADE ring (3rd ring) when "ترقية" triggered
+  const spinUpgradeRing = useCallback(() => {
+    setIsUpgradeAnimating(true);
+    setUpgradeResult(null);
+
+    // Weighted random
+    const weights = upgradeSegments.map(s => 1 / (s.value + 0.1));
+    const totalW = weights.reduce((a, b) => a + b, 0);
+    let rand = Math.random() * totalW;
+    let winnerIdx = 0;
+    for (let i = 0; i < weights.length; i++) {
+      rand -= weights[i];
+      if (rand <= 0) { winnerIdx = i; break; }
+    }
+
+    const winner = upgradeSegments[winnerIdx];
+    const segAngle = (2 * Math.PI) / upgradeSegments.length;
+
+    const desiredFinal = -Math.PI / 2 - winnerIdx * segAngle - segAngle / 2;
+    const currentRot = upgradeRotation;
+    let delta = desiredFinal - currentRot;
+    delta = normalizeAngle(delta);
+    const totalRot = delta + Math.PI * 2 * (6 + Math.floor(Math.random() * 3));
+
+    const startTime = Date.now();
+    const duration = 3500;
+    const startRot = currentRot;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setUpgradeRotation(startRot + totalRot * ease);
+
+      if (progress < 1) {
+        upgradeAnimRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsUpgradeAnimating(false);
+        setUpgradeResult(`⬆ ${winner.label}`);
+        
+        // Process upgrade reward via bonus reward function
+        processBonusReward(winner.value);
+        
+        toast.success(`⬆ مبروك! حصلت على ${winner.label}`, {
+          description: `نوع الترقية: ${winner.reward_type} | القيمة: ${winner.value}`,
+        });
+      }
+    };
+
+    upgradeAnimRef.current = requestAnimationFrame(animate);
+  }, [upgradeRotation, upgradeSegments, processBonusReward]);
 
   // Spin the OUTER ring ($MS-RA) when bonus triggered
   const spinBonusRing = useCallback(() => {
     setIsBonusAnimating(true);
     setBonusResult(null);
 
-    // Weighted random (lower value = higher chance)
     const weights = bonusSegments.map(s => 1 / (s.value + 0.1));
     const totalW = weights.reduce((a, b) => a + b, 0);
     let rand = Math.random() * totalW;
@@ -273,7 +403,6 @@ const WheelOfFortune = () => {
     const winner = bonusSegments[winnerIdx];
     const segAngle = (2 * Math.PI) / bonusSegments.length;
 
-    // Calculate precise target: segment center at top (pointer = -π/2)
     const desiredFinal = -Math.PI / 2 - winnerIdx * segAngle - segAngle / 2;
     const currentRot = outerRotation;
     let delta = desiredFinal - currentRot;
@@ -298,7 +427,6 @@ const WheelOfFortune = () => {
         const poolAmount = (winner.value * 0.2).toFixed(2);
         setBonusResult(`${userAmount} $MS-RA`);
         
-        // Process bonus reward (80% to user, 20% to pool)
         processBonusReward(winner.value);
         
         toast.success(`☥ مبروك! ربحت ${userAmount} $MS-RA`, {
@@ -312,10 +440,11 @@ const WheelOfFortune = () => {
 
   // Spin the INNER ring (XP)
   const handleSpin = async () => {
-    if (isAnimating || isBonusAnimating || !canSpin()) return;
+    if (isAnimating || isBonusAnimating || isUpgradeAnimating || !canSpin()) return;
 
     setResult(null);
     setBonusResult(null);
+    setUpgradeResult(null);
     setIsAnimating(true);
 
     const costXp = isFree() ? 0 : (settings?.spin_cost_xp || 0);
@@ -330,7 +459,6 @@ const WheelOfFortune = () => {
     const winnerIndex = segments.findIndex((s) => s.id === winner.id);
     const segAngle = (2 * Math.PI) / segments.length;
 
-    // Calculate precise target: segment center at top (pointer = -π/2)
     const desiredFinal = -Math.PI / 2 - winnerIndex * segAngle - segAngle / 2;
     const startRotation = innerRotation;
     let delta = desiredFinal - startRotation;
@@ -352,19 +480,22 @@ const WheelOfFortune = () => {
         setIsAnimating(false);
 
         if (winner.reward_type === "nothing") {
-          setResult("☥ بونص! الحلقة الخارجية تدور...");
+          // Bonus → spin MS-RA ring (ring 2)
+          setResult("☥ بونص! الحلقة الوسطى تدور...");
           if (costXp > 0) {
             toast("☥ بونص! تم تحويل " + costXp + " XP للمجمع", {
-              description: "الحلقة الخارجية لـ $MS-RA تدور الآن!",
+              description: "حلقة $MS-RA تدور الآن!",
             });
           } else {
-            toast("☥ بونص! الحلقة الخارجية لـ $MS-RA تدور الآن!");
+            toast("☥ بونص! حلقة $MS-RA تدور الآن!");
           }
-          setTimeout(() => {
-            spinBonusRing();
-          }, 800);
+          setTimeout(() => spinBonusRing(), 800);
+        } else if (winner.reward_type === "upgrade") {
+          // Upgrade → spin upgrade ring (ring 3)
+          setResult("⬆ ترقية! الحلقة الخارجية تدور...");
+          toast("⬆ ترقية! حلقة الترقيات تدور الآن!");
+          setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
-          // Extra free spins reward
           const extraSpins = Math.floor(winner.reward_value);
           setResult(`🎰 ${extraSpins} لفات إضافية!`);
           setTodaySpins(prev => Math.max(0, prev - extraSpins));
@@ -387,6 +518,7 @@ const WheelOfFortune = () => {
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
       if (bonusAnimRef.current) cancelAnimationFrame(bonusAnimRef.current);
+      if (upgradeAnimRef.current) cancelAnimationFrame(upgradeAnimRef.current);
     };
   }, []);
 
@@ -401,6 +533,8 @@ const WheelOfFortune = () => {
   }
 
   if (!settings?.is_visible || segments.length === 0) return null;
+
+  const anyAnimating = isAnimating || isBonusAnimating || isUpgradeAnimating;
 
   return (
     <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative">
@@ -425,7 +559,7 @@ const WheelOfFortune = () => {
       </CardHeader>
 
       <CardContent className="flex flex-col items-center gap-4 pb-6">
-        {/* Dual-ring wheel */}
+        {/* Triple-ring wheel */}
         <div className="relative">
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
@@ -439,7 +573,7 @@ const WheelOfFortune = () => {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {EGYPTIAN_SYMBOLS.slice(0, 4).map((sym, i) => {
               const angle = (i / 4) * Math.PI * 2 - Math.PI / 4;
-              const r = 170;
+              const r = 190;
               return (
                 <span
                   key={i}
@@ -456,9 +590,10 @@ const WheelOfFortune = () => {
 
           <canvas
             ref={canvasRef}
-            width={340}
-            height={340}
-            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50"
+            width={380}
+            height={380}
+            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 max-w-full"
+            style={{ width: '340px', height: '340px' }}
           />
 
           {isBonusAnimating && (
@@ -468,17 +603,29 @@ const WheelOfFortune = () => {
               </div>
             </div>
           )}
+
+          {isUpgradeAnimating && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
+                <span className="text-emerald-400 text-[10px] font-bold">⬆ ترقية 🎰</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Ring labels */}
-        <div className="flex items-center justify-center gap-4 text-[10px]">
+        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-emerald-500/60 arabic-text">الخارجية: ترقيات</span>
+          </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-amber-500/60 arabic-text" dir="ltr">الحلقة الخارجية: $MS-RA</span>
+            <span className="text-amber-500/60 arabic-text" dir="ltr">الوسطى: $MS-RA</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-amber-700" />
-            <span className="text-amber-500/60 arabic-text">الحلقة الداخلية: XP</span>
+            <span className="text-amber-500/60 arabic-text">الداخلية: XP</span>
           </div>
         </div>
 
@@ -488,7 +635,7 @@ const WheelOfFortune = () => {
         </div>
 
         {/* Results */}
-        {result && !isBonusAnimating && (
+        {result && !isBonusAnimating && !isUpgradeAnimating && (
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="flex items-center gap-2 justify-center">
               <Gift className="w-5 h-5 text-amber-400" />
@@ -506,18 +653,29 @@ const WheelOfFortune = () => {
           </div>
         )}
 
+        {upgradeResult && (
+          <div className="text-center animate-in fade-in zoom-in duration-500">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+              <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">تم تطبيق الترقية على حسابك</p>
+            </div>
+          </div>
+        )}
+
         {/* Spin Button & Info */}
         <div className="text-center space-y-2 w-full">
           <Button
             onClick={handleSpin}
-            disabled={isAnimating || isBonusAnimating || !canSpin()}
+            disabled={anyAnimating || !canSpin()}
             size="lg"
             className="w-full max-w-[220px] gap-2 font-bold bg-gradient-to-r from-amber-700 to-amber-500 hover:from-amber-600 hover:to-amber-400 text-black border border-amber-400/30"
           >
-            {isAnimating || isBonusAnimating ? (
+            {anyAnimating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="arabic-text">{isBonusAnimating ? 'الحلقة الخارجية تدور...' : 'جاري التدوير...'}</span>
+                <span className="arabic-text">
+                  {isUpgradeAnimating ? 'حلقة الترقية تدور...' : isBonusAnimating ? 'حلقة $MS-RA تدور...' : 'جاري التدوير...'}
+                </span>
               </>
             ) : (
               <>
