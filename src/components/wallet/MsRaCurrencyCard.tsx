@@ -433,7 +433,7 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
             <div className="bg-black/60 p-3 rounded-lg border border-primary/20">
               <div className="flex items-center gap-2 text-primary mb-1">
                 <CheckCircle className="w-4 h-4" />
-                <span className="text-sm font-medium">عنوان Solana مسجل</span>
+                <span className="text-sm font-medium">{t("العنوان المسجل", "Registered Address")}</span>
               </div>
               <p className="text-xs text-muted-foreground font-mono break-all">
                 {solanaAddress}
