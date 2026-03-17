@@ -50,9 +50,22 @@ interface WSettings {
   intro_text_en: string | null;
 }
 
+interface UpgradeSegment {
+  id: string;
+  label: string;
+  label_en: string | null;
+  reward_type: string;
+  reward_value: number;
+  color: string;
+  probability: number;
+  display_order: number;
+  is_active: boolean;
+}
+
 const WheelManagement = () => {
   const [segments, setSegments] = useState<Segment[]>([]);
   const [outerSegments, setOuterSegments] = useState<OuterSegment[]>([]);
+  const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>([]);
   const [settings, setSettings] = useState<WSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
