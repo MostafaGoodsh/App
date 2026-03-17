@@ -76,13 +76,15 @@ const WheelManagement = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [segRes, outerRes, setRes] = await Promise.all([
+    const [segRes, outerRes, upgradeRes, setRes] = await Promise.all([
       supabase.from("wheel_segments").select("*").order("display_order"),
       supabase.from("wheel_outer_segments").select("*").order("display_order"),
+      supabase.from("wheel_upgrade_segments").select("*").order("display_order"),
       supabase.from("wheel_settings").select("*").limit(1).single(),
     ]);
     if (segRes.data) setSegments(segRes.data as unknown as Segment[]);
     if (outerRes.data) setOuterSegments(outerRes.data as unknown as OuterSegment[]);
+    if (upgradeRes.data) setUpgradeSegments(upgradeRes.data as unknown as UpgradeSegment[]);
     if (setRes.data) setSettings(setRes.data as unknown as WSettings);
     setLoading(false);
   };
