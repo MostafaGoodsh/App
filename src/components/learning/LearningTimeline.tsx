@@ -8,8 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { LanguageWrapper, TextWrapper } from "@/components/ui/language-wrapper";
-import { getLanguageClass, getTextDirection } from "@/utils/language";
+import { LanguageWrapper } from "@/components/ui/language-wrapper";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,7 +20,6 @@ import {
   Video, 
   FileText,
   Plus,
-  Upload,
   X,
   Mic
 } from "lucide-react";
@@ -61,12 +59,13 @@ interface Comment {
 export default function LearningTimeline({ category = 'crypto' }: { category?: 'crypto' | 'general' | 'divine' }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
+
   const [posts, setPosts] = useState<LearningPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   
-  // Create post form states
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mediaType, setMediaType] = useState("text");
@@ -75,7 +74,6 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
   const [difficulty, setDifficulty] = useState("beginner");
   const [postCategory, setPostCategory] = useState(category);
   
-  // Comments states
   const [comments, setComments] = useState<{ [key: string]: Comment[] }>({});
   const [showComments, setShowComments] = useState<{ [key: string]: boolean }>({});
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
@@ -90,26 +88,12 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   const fetchPosts = async () => {
     try {
-      // First get the posts filtered by category and approved status
       const { data: postsData, error: postsError } = await supabase
         .from('learning_content')
         .select(`
-          id,
-          title,
-          content,
-          media_urls,
-          media_type,
-          likes_count,
-          comments_count,
-          created_at,
-          created_by,
-          tags,
-          difficulty_level,
-          is_published,
-          category,
-          author_name,
-          language,
-          text_direction
+          id, title, content, media_urls, media_type, likes_count, comments_count,
+          created_at, created_by, tags, difficulty_level, is_published, category,
+          author_name, language, text_direction
         `)
         .eq('approval_status', 'approved')
         .eq('category', category)
@@ -117,7 +101,6 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
       if (postsError) throw postsError;
 
-      // Then get profile data for each post
       const postsWithProfiles = await Promise.all(
         (postsData || []).map(async (post) => {
           if (post.created_by) {
@@ -126,28 +109,16 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
               .select('full_name')
               .eq('user_id', post.created_by)
               .single();
-            
-            return {
-              ...post,
-              category: post.category as 'crypto' | 'general' | 'divine',
-              profile: profileData
-            };
+            return { ...post, category: post.category as 'crypto' | 'general' | 'divine', profile: profileData };
           }
-          return {
-            ...post,
-            category: post.category as 'crypto' | 'general' | 'divine'
-          };
+          return { ...post, category: post.category as 'crypto' | 'general' | 'divine' };
         })
       );
 
       setPosts(postsWithProfiles);
     } catch (error) {
       console.error('Error fetching posts:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في جلب المنشورات",
-        variant: "destructive"
-      });
+      toast({ title: t("خطأ"), description: t("حدث خطأ في جلب المنشورات"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -155,13 +126,8 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   const fetchUserLikes = async () => {
     if (!user) return;
-    
     try {
-      const { data, error } = await supabase
-        .from('learning_likes')
-        .select('content_id')
-        .eq('user_id', user.id);
-
+      const { data, error } = await supabase.from('learning_likes').select('content_id').eq('user_id', user.id);
       if (error) throw error;
       setLikedPosts(new Set(data.map(like => like.content_id)));
     } catch (error) {
@@ -174,118 +140,62 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `learning/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('learning-media')
-        .upload(filePath, file);
-
+      const { error: uploadError } = await supabase.storage.from('learning-media').upload(filePath, file);
       if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('learning-media')
-        .getPublicUrl(filePath);
-
+      const { data } = supabase.storage.from('learning-media').getPublicUrl(filePath);
       return data.publicUrl;
     });
-
     return Promise.all(uploadPromises);
   };
 
   const createPost = async () => {
     if (!user || !title.trim()) {
-      toast({
-        title: "خطأ",
-        description: "يرجى إدخال عنوان المنشور",
-        variant: "destructive"
-      });
+      toast({ title: t("خطأ"), description: t("يرجى إدخال عنوان المنشور"), variant: "destructive" });
       return;
     }
 
     try {
       let mediaUrls: string[] = [];
-      
       if (selectedFiles.length > 0) {
         mediaUrls = await uploadFiles(selectedFiles);
       }
 
-      const { error } = await supabase
-        .from('learning_content')
-        .insert([{
-          title,
-          content,
-          media_urls: mediaUrls.length > 0 ? mediaUrls : null,
-          media_type: mediaType,
-          tags: tags ? tags.split(',').map(tag => tag.trim()) : null,
-          difficulty_level: difficulty,
-          category: postCategory,
-          created_by: user.id,
-          is_published: true
-        }]);
+      const { error } = await supabase.from('learning_content').insert([{
+        title, content,
+        media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+        media_type: mediaType,
+        tags: tags ? tags.split(',').map(tag => tag.trim()) : null,
+        difficulty_level: difficulty,
+        category: postCategory,
+        created_by: user.id,
+        is_published: true
+      }]);
 
       if (error) throw error;
-
-      toast({
-        title: "تم إنشاء المنشور",
-        description: "تم إنشاء المنشور بنجاح"
-      });
-
-      // Reset form
-      setTitle("");
-      setContent("");
-      setSelectedFiles([]);
-      setTags("");
-      setMediaType("text");
-      setDifficulty("beginner");
-      setShowCreatePost(false);
-      
+      toast({ title: t("تم إنشاء المنشور"), description: t("تم إنشاء المنشور بنجاح") });
+      setTitle(""); setContent(""); setSelectedFiles([]); setTags("");
+      setMediaType("text"); setDifficulty("beginner"); setShowCreatePost(false);
       fetchPosts();
     } catch (error) {
       console.error('Error creating post:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في إنشاء المنشور",
-        variant: "destructive"
-      });
+      toast({ title: t("خطأ"), description: t("حدث خطأ في إنشاء المنشور"), variant: "destructive" });
     }
   };
 
   const toggleLike = async (postId: string) => {
     if (!user) return;
-
     try {
       const isLiked = likedPosts.has(postId);
-      
       if (isLiked) {
-        const { error } = await supabase
-          .from('learning_likes')
-          .delete()
-          .eq('content_id', postId)
-          .eq('user_id', user.id);
-
+        const { error } = await supabase.from('learning_likes').delete().eq('content_id', postId).eq('user_id', user.id);
         if (error) throw error;
-        setLikedPosts(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(postId);
-          return newSet;
-        });
+        setLikedPosts(prev => { const s = new Set(prev); s.delete(postId); return s; });
       } else {
-        const { error } = await supabase
-          .from('learning_likes')
-          .insert([{
-            content_id: postId,
-            user_id: user.id
-          }]);
-
+        const { error } = await supabase.from('learning_likes').insert([{ content_id: postId, user_id: user.id }]);
         if (error) throw error;
         setLikedPosts(prev => new Set(prev).add(postId));
       }
-
-      // Update posts state
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, likes_count: post.likes_count + (isLiked ? -1 : 1) }
-          : post
-      ));
+      setPosts(prev => prev.map(post => post.id === postId ? { ...post, likes_count: post.likes_count + (likedPosts.has(postId) ? -1 : 1) } : post));
     } catch (error) {
       console.error('Error toggling like:', error);
     }
@@ -293,34 +203,18 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   const fetchComments = async (postId: string) => {
     try {
-      // First get the comments
       const { data: commentsData, error } = await supabase
-        .from('learning_comments')
-        .select('*')
-        .eq('content_id', postId)
-        .order('created_at', { ascending: true });
-
+        .from('learning_comments').select('*').eq('content_id', postId).order('created_at', { ascending: true });
       if (error) throw error;
-
-      // Then get profile data for each comment
       const commentsWithProfiles = await Promise.all(
         (commentsData || []).map(async (comment) => {
           if (comment.user_id) {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('user_id', comment.user_id)
-              .single();
-            
-            return {
-              ...comment,
-              profile: profileData
-            };
+            const { data: profileData } = await supabase.from('profiles').select('full_name').eq('user_id', comment.user_id).single();
+            return { ...comment, profile: profileData };
           }
           return comment;
         })
       );
-
       setComments(prev => ({ ...prev, [postId]: commentsWithProfiles || [] }));
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -329,27 +223,12 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   const addComment = async (postId: string) => {
     if (!user || !newComment[postId]?.trim()) return;
-
     try {
-      const { error } = await supabase
-        .from('learning_comments')
-        .insert([{
-          content_id: postId,
-          user_id: user.id,
-          comment: newComment[postId].trim()
-        }]);
-
+      const { error } = await supabase.from('learning_comments').insert([{ content_id: postId, user_id: user.id, comment: newComment[postId].trim() }]);
       if (error) throw error;
-
       setNewComment(prev => ({ ...prev, [postId]: "" }));
       fetchComments(postId);
-      
-      // Update comments count
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, comments_count: post.comments_count + 1 }
-          : post
-      ));
+      setPosts(prev => prev.map(post => post.id === postId ? { ...post, comments_count: post.comments_count + 1 } : post));
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -358,9 +237,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
   const toggleComments = (postId: string) => {
     setShowComments(prev => {
       const newState = { ...prev, [postId]: !prev[postId] };
-      if (newState[postId] && !comments[postId]) {
-        fetchComments(postId);
-      }
+      if (newState[postId] && !comments[postId]) fetchComments(postId);
       return newState;
     });
   };
@@ -369,47 +246,27 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const difficultyLabel = (level: string) => {
+    const map: Record<string, string> = { beginner: t("مبتدئ"), intermediate: t("متوسط"), advanced: t("متقدم") };
+    return map[level] || level;
+  };
+
   const renderMedia = (post: LearningPost) => {
     if (!post.media_urls || post.media_urls.length === 0) return null;
-
     return (
       <div className="mt-4 space-y-2">
         {post.media_urls.map((url, index) => {
           const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.avi') || url.includes('.mov');
           const isAudio = url.includes('.mp3') || url.includes('.wav') || url.includes('.ogg') || url.includes('.m4a');
-          
-          if (isVideo) {
-            return (
-              <video 
-                key={index}
-                src={url} 
-                controls 
-                className="w-full rounded-lg max-h-96"
-              />
-            );
-          } else if (isAudio) {
-            return (
-              <audio 
-                key={index}
-                src={url} 
-                controls 
-                className="w-full"
-              />
-            );
-          } else {
-            return (
-              <img 
-                key={index}
-                src={url} 
-                alt="Post media" 
-                className="w-full rounded-lg max-h-96 object-cover"
-              />
-            );
-          }
+          if (isVideo) return <video key={index} src={url} controls className="w-full rounded-lg max-h-96" />;
+          if (isAudio) return <audio key={index} src={url} controls className="w-full" />;
+          return <img key={index} src={url} alt="Post media" className="w-full rounded-lg max-h-96 object-cover" />;
         })}
       </div>
     );
   };
+
+  const dateLocale = isArabic ? 'ar-SA' : (language === 'ru' ? 'ru-RU' : 'en-US');
 
   if (loading) {
     return (
@@ -417,9 +274,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3 mx-auto"></div>
           <div className="space-y-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-muted rounded"></div>
-            ))}
+            {[1, 2, 3].map((i) => (<div key={i} className="h-48 bg-muted rounded"></div>))}
           </div>
         </div>
       </div>
@@ -427,77 +282,48 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 max-w-2xl" dir={isArabic ? "rtl" : "ltr"}>
       {/* Create Post Button */}
       <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
         <DialogTrigger asChild>
           <Button className="w-full mb-6" size="lg">
-            <Plus className="h-5 w-5 mr-2" />
-            {t("إنشاء منشور جديد", "Create new post")}
+            <Plus className="h-5 w-5 me-2" />
+            {t("إنشاء منشور جديد")}
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" dir={isArabic ? "rtl" : "ltr"}>
           <DialogHeader>
-            <DialogTitle>{t("إنشاء منشور تعليمي", "Create educational post")}</DialogTitle>
+            <DialogTitle>{t("إنشاء منشور تعليمي")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="عنوان المنشور"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            
-            <Textarea
-              placeholder="محتوى المنشور"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={4}
-            />
+            <Input placeholder={t("عنوان المنشور")} value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Textarea placeholder={t("محتوى المنشور")} value={content} onChange={(e) => setContent(e.target.value)} rows={4} />
 
             <Select value={mediaType} onValueChange={setMediaType}>
-              <SelectTrigger>
-                <SelectValue placeholder="نوع المحتوى" />
-              </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">نص</SelectItem>
-                  <SelectItem value="image">صورة</SelectItem>
-                  <SelectItem value="video">فيديو</SelectItem>
-                  <SelectItem value="audio">صوت</SelectItem>
-                  <SelectItem value="mixed">مختلط</SelectItem>
-                </SelectContent>
+              <SelectTrigger><SelectValue placeholder={t("نوع المحتوى")} /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">{t("نص")}</SelectItem>
+                <SelectItem value="image">{t("صورة")}</SelectItem>
+                <SelectItem value="video">{t("فيديو")}</SelectItem>
+                <SelectItem value="audio">{t("صوت")}</SelectItem>
+                <SelectItem value="mixed">{t("مختلط")}</SelectItem>
+              </SelectContent>
             </Select>
 
             {(mediaType === "image" || mediaType === "video" || mediaType === "audio" || mediaType === "mixed") && (
               <div className="space-y-2">
-                <label className="block text-sm font-medium">رفع الملفات</label>
+                <label className="block text-sm font-medium">{t("رفع الملفات")}</label>
                 <Input
-                  type="file"
-                  multiple
-                  accept={
-                    mediaType === "image" ? "image/*" : 
-                    mediaType === "video" ? "video/*" : 
-                    mediaType === "audio" ? "audio/*" :
-                    "image/*,video/*,audio/*"
-                  }
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    setSelectedFiles(prev => [...prev, ...files]);
-                  }}
+                  type="file" multiple
+                  accept={mediaType === "image" ? "image/*" : mediaType === "video" ? "video/*" : mediaType === "audio" ? "audio/*" : "image/*,video/*,audio/*"}
+                  onChange={(e) => { const files = Array.from(e.target.files || []); setSelectedFiles(prev => [...prev, ...files]); }}
                 />
-                
                 {selectedFiles.length > 0 && (
                   <div className="space-y-2">
                     {selectedFiles.map((file, index) => (
                       <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
                         <span className="text-sm truncate">{file.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFile(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeFile(index)}><X className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -506,36 +332,25 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
             )}
 
             <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger>
-                <SelectValue placeholder="مستوى الصعوبة" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("مستوى الصعوبة")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="beginner">مبتدئ</SelectItem>
-                <SelectItem value="intermediate">متوسط</SelectItem>
-                <SelectItem value="advanced">متقدم</SelectItem>
+                <SelectItem value="beginner">{t("مبتدئ")}</SelectItem>
+                <SelectItem value="intermediate">{t("متوسط")}</SelectItem>
+                <SelectItem value="advanced">{t("متقدم")}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={postCategory} onValueChange={(value) => setPostCategory(value as 'crypto' | 'general' | 'divine')}>
-              <SelectTrigger>
-                <SelectValue placeholder="القسم" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("القسم")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="crypto">مالي Crypto</SelectItem>
-                <SelectItem value="general">عام General</SelectItem>
-                <SelectItem value="divine">ديني Divine</SelectItem>
+                <SelectItem value="crypto">{t("مالي")} Crypto</SelectItem>
+                <SelectItem value="general">{t("عام")}</SelectItem>
+                <SelectItem value="divine">{t("ديني")} Divine</SelectItem>
               </SelectContent>
             </Select>
 
-            <Input
-              placeholder="العلامات (مفصولة بفواصل)"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-            />
-
-            <Button onClick={createPost} className="w-full">
-              نشر المحتوى
-            </Button>
+            <Input placeholder={t("العلامات (مفصولة بفواصل)")} value={tags} onChange={(e) => setTags(e.target.value)} />
+            <Button onClick={createPost} className="w-full">{t("نشر المحتوى")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -548,26 +363,20 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar>
-                    <AvatarFallback>
-                      {post.profile?.full_name?.charAt(0) || 'A'}
-                    </AvatarFallback>
+                    <AvatarFallback>{post.profile?.full_name?.charAt(0) || 'A'}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold">
-                      {post.author_name || post.profile?.full_name || 'مؤلف مجهول'}
-                    </p>
+                    <p className="font-semibold">{post.author_name || post.profile?.full_name || t("مؤلف مجهول")}</p>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(post.created_at).toLocaleDateString('ar-SA')}
+                      {new Date(post.created_at).toLocaleDateString(dateLocale)}
                       {post.language && post.language !== 'ar' && (
-                        <span className="ml-2 text-xs">
-                          • {post.language === 'en' ? 'English' : post.language === 'both' ? 'ثنائي اللغة' : post.language}
-                        </span>
+                        <span className="ms-2 text-xs">• {post.language === 'en' ? 'English' : post.language === 'both' ? t("ثنائي اللغة") : post.language}</span>
                       )}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant="secondary">{post.difficulty_level}</Badge>
+                  <Badge variant="secondary">{difficultyLabel(post.difficulty_level)}</Badge>
                   {post.media_type !== 'text' && (
                     <Badge variant="outline">
                       {post.media_type === 'image' ? <ImageIcon className="h-3 w-3" /> :
@@ -586,14 +395,8 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
                   language={post.language as "ar" | "en"}
                   textDirection={post.text_direction as "rtl" | "ltr"}
                 >
-                  <h3 className="font-bold text-lg mb-2">
-                    {post.title}
-                  </h3>
-                  {post.content && (
-                    <p className="text-muted-foreground whitespace-pre-wrap">
-                      {post.content}
-                    </p>
-                  )}
+                  <h3 className="font-bold text-lg mb-2">{post.title}</h3>
+                  {post.content && (<p className="text-muted-foreground whitespace-pre-wrap">{post.content}</p>)}
                 </LanguageWrapper>
               </div>
 
@@ -601,39 +404,22 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
               {post.tags && (
                 <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      #{tag}
-                    </Badge>
-                  ))}
+                  {post.tags.map((tag, index) => (<Badge key={index} variant="outline" className="text-xs">#{tag}</Badge>))}
                 </div>
               )}
 
               {/* Interaction Buttons */}
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLike(post.id)}
-                    className={likedPosts.has(post.id) ? "text-red-500" : ""}
-                  >
-                    <Heart className={`h-4 w-4 mr-1 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
+                  <Button variant="ghost" size="sm" onClick={() => toggleLike(post.id)} className={likedPosts.has(post.id) ? "text-red-500" : ""}>
+                    <Heart className={`h-4 w-4 me-1 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
                     {post.likes_count}
                   </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleComments(post.id)}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    {post.comments_count}
+                  <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
+                    <MessageCircle className="h-4 w-4 me-1" />{post.comments_count}
                   </Button>
-                  
                   <Button variant="ghost" size="sm">
-                    <Share2 className="h-4 w-4 mr-1" />
-                    مشاركة
+                    <Share2 className="h-4 w-4 me-1" />{t("مشاركة")}
                   </Button>
                 </div>
               </div>
@@ -644,31 +430,26 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
                   {user && (
                     <div className="flex gap-2">
                       <Input
-                        placeholder="اكتب تعليقاً..."
+                        placeholder={t("اكتب تعليقاً...")}
                         value={newComment[post.id] || ""}
                         onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
                         onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
                       />
-                      <Button onClick={() => addComment(post.id)}>إرسال</Button>
+                      <Button onClick={() => addComment(post.id)}>{t("إرسال")}</Button>
                     </div>
                   )}
-                  
                   <div className="space-y-3">
                     {comments[post.id]?.map((comment) => (
                       <div key={comment.id} className="flex gap-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {comment.profile?.full_name?.charAt(0) || 'A'}
-                          </AvatarFallback>
+                          <AvatarFallback>{comment.profile?.full_name?.charAt(0) || 'A'}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="bg-muted p-3 rounded-lg">
-                            <p className="font-semibold text-sm">{comment.profile?.full_name || 'مجهول'}</p>
+                            <p className="font-semibold text-sm">{comment.profile?.full_name || t("مجهول")}</p>
                             <p className="text-sm">{comment.comment}</p>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(comment.created_at).toLocaleDateString('ar-SA')}
-                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">{new Date(comment.created_at).toLocaleDateString(dateLocale)}</p>
                         </div>
                       </div>
                     ))}

@@ -21,7 +21,8 @@ interface PlatformMessage {
 export default function Learning() {
   const canonical = `${window.location.origin}/learning`;
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
   const [messages, setMessages] = useState<PlatformMessage[]>([]);
   const [showMessages, setShowMessages] = useState(false);
@@ -48,18 +49,18 @@ export default function Learning() {
       
       <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="min-h-screen bg-background/90">
-          <section className="py-8 arabic-content" dir={t("rtl", "ltr")}>
-            <div className="container mx-auto px-4 mb-8" style={{ textAlign: t("right", "left") as any }}>
-              <div className="flex flex-col gap-4" style={{ alignItems: t("flex-end", "flex-start") as any }}>
+          <section className="py-8" dir={isArabic ? "rtl" : "ltr"}>
+            <div className="container mx-auto px-4 mb-8" style={{ textAlign: isArabic ? "right" : "left" }}>
+              <div className="flex flex-col gap-4" style={{ alignItems: isArabic ? "flex-end" : "flex-start" }}>
                 <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4">
-                  {t("المنصة التفاعلية", "Interactive Platform")} | Timeline
+                  {t("المنصة التفاعلية")} | Timeline
                 </h1>
                 <p className="text-muted-foreground max-w-2xl">
                   {t("تعلم، شارك، وتفاعل مع مجتمع المتداولين والمستثمرين في العملات الرقمية")}
                 </p>
                 {user && (
                   <Button onClick={() => setShowSubmissionForm(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
-                    <Plus className="w-4 h-4" /><FileText className="w-4 h-4" />{t("شارك محتوى تعليمي", "Share educational content")}
+                    <Plus className="w-4 h-4" /><FileText className="w-4 h-4" />{t("شارك محتوى تعليمي")}
                   </Button>
                 )}
               </div>
@@ -77,7 +78,7 @@ export default function Learning() {
             )}
 
             <Dialog open={showMessages} onOpenChange={setShowMessages}>
-              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto" dir={isArabic ? "rtl" : "ltr"}>
                 <DialogHeader>
                   <DialogTitle className="font-cairo flex items-center justify-center gap-2 text-primary">
                     <MessageCircle className="w-5 h-5" />{t("رسالة المنصة")} ({currentMsgIndex + 1}/{messages.length})
@@ -89,15 +90,15 @@ export default function Learning() {
                       <h3 className="font-cairo font-bold text-lg text-primary mb-2">{currentMsg.title}</h3>
                       <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mb-4" />
                     </div>
-                    <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed whitespace-pre-wrap" dir="rtl">{currentMsg.content}</p>
+                    <p className="font-cairo text-sm md:text-base text-foreground/90 leading-relaxed whitespace-pre-wrap">{currentMsg.content}</p>
                     {messages.length > 1 && (
                       <div className="flex items-center justify-between pt-4 border-t border-border">
                         <Button variant="outline" size="sm" onClick={() => setCurrentMsgIndex(prev => prev - 1)} disabled={currentMsgIndex === 0}>
-                          <ChevronRight className="w-4 h-4 ml-1" />{t("السابقة")}
+                          {t("السابقة")}
                         </Button>
                         <span className="text-xs text-muted-foreground">{currentMsgIndex + 1} / {messages.length}</span>
                         <Button variant="outline" size="sm" onClick={() => setCurrentMsgIndex(prev => prev + 1)} disabled={currentMsgIndex === messages.length - 1}>
-                          {t("التالية")}<ChevronLeft className="w-4 h-4 mr-1" />
+                          {t("التالية")}
                         </Button>
                       </div>
                     )}
@@ -110,13 +111,13 @@ export default function Learning() {
               <Tabs defaultValue="crypto" className="w-full">
                 <TabsList className="grid w-full grid-cols-3 mb-8 bg-black/20 border border-white/20">
                   <TabsTrigger value="crypto" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("مالي", "Financial")} Crypto
+                    {t("مالي")} Crypto
                   </TabsTrigger>
                   <TabsTrigger value="general" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("عام", "General")}
+                    {t("عام")}
                   </TabsTrigger>
                   <TabsTrigger value="divine" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white hover:bg-white/10">
-                    {t("ديني", "Religious")} Divine
+                    {t("ديني")} Divine
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="crypto"><LearningTimeline category="crypto" /></TabsContent>
