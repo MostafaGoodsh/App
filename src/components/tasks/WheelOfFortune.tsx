@@ -31,6 +31,23 @@ const FALLBACK_UPGRADE_SEGMENTS = [
   { label: '+50 قوة', label_en: '+50 Strength', value: 50, probability: 0.3, color: '#1f1f35', reward_type: 'strength_boost' },
 ];
 
+type BonusSegment = {
+  label: string;
+  label_en?: string;
+  value: number;
+  probability: number;
+  color: string;
+};
+
+type UpgradeSegment = {
+  label: string;
+  label_en?: string;
+  value: number;
+  probability: number;
+  color: string;
+  reward_type: string;
+};
+
 const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
   const parts = text.split(' ');
   const lines: string[] = [];
@@ -46,6 +63,30 @@ const wrapText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
   }
   if (current) lines.push(current);
   return lines;
+};
+
+const getLocalizedLabel = (language: string, label: string, labelEn?: string) => {
+  if (language === "ar" || language === "both") return label;
+  return labelEn?.trim() || label;
+};
+
+const isUpgradeTriggerSegment = (segment: { label: string; label_en?: string; value: number }) => {
+  const text = `${segment.label} ${segment.label_en ?? ""}`.toLowerCase();
+  return segment.value <= 0 || text.includes("ترقي") || text.includes("upgrade") || text.includes("premium");
+};
+
+const pickWeightedIndex = <T extends { probability?: number }>(items: T[]) => {
+  const safeWeights = items.map((item) => Math.max(Number(item.probability ?? 0), 0));
+  const total = safeWeights.reduce((sum, weight) => sum + weight, 0);
+  if (total <= 0) return Math.floor(Math.random() * items.length);
+
+  let rand = Math.random() * total;
+  for (let i = 0; i < safeWeights.length; i++) {
+    rand -= safeWeights[i];
+    if (rand <= 0) return i;
+  }
+
+  return Math.max(0, items.length - 1);
 };
 
 const drawTripleRingWheel = (
