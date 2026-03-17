@@ -272,7 +272,7 @@ export default function Profile() {
                       {completedSurveys.map((survey: any) => (
                         <div key={survey.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                           <span className="text-sm font-cairo">{(survey.surveys as any)?.title || t('استبيان')}</span>
-                          <span className="text-xs text-muted-foreground">{new Date(survey.created_at).toLocaleDateString('ar-SA')}</span>
+                          <span className="text-xs text-muted-foreground">{new Date(survey.created_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</span>
                         </div>
                       ))}
                     </div>

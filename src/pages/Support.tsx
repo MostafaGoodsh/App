@@ -134,7 +134,7 @@ const Support = () => {
                       <div className="border-t pt-4">
                         <p className="text-sm font-medium mb-1 text-primary">{t("رد الإدارة:")}</p>
                         <p className="text-sm whitespace-pre-wrap">{msg.admin_response}</p>
-                        {msg.responded_at && (<p className="text-xs text-muted-foreground mt-2">{new Date(msg.responded_at).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>)}
+                        {msg.responded_at && (<p className="text-xs text-muted-foreground mt-2">{new Date(msg.responded_at).toLocaleDateString(dir === 'rtl' ? "ar-EG" : language === 'ru' ? "ru-RU" : "en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>)}
                       </div>
                     )}
                   </CardContent>
