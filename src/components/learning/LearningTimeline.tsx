@@ -438,7 +438,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>إنشاء منشور تعليمي</DialogTitle>
+            <DialogTitle>{t("إنشاء منشور تعليمي", "Create educational post")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <Input
