@@ -18,9 +18,11 @@ export const WalletHeroSection = ({
   points = 0
 }: WalletHeroSectionProps) => {
   const [showBalance, setShowBalance] = useState(true);
+  const { language, t } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir="rtl">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir={isArabic ? "rtl" : "ltr"}>
       {/* Background Decoration */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
