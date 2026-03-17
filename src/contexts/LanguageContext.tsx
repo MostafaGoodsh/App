@@ -458,8 +458,6 @@ const translations: Translations = {
     "متاح الآن": "Available Now",
     "مؤشر التعدين EVM": "EVM Mining Indicator",
     "جاهز للتعدين": "Ready to Mine",
-    "في الانتظار": "Waiting",
-    "انتظر 24 ساعة": "Wait 24 hours",
     "العنوان المسجل": "Registered Address",
     "Solana Address": "Solana Address",
     "الأصل والمصير": "Origin & Fate",
