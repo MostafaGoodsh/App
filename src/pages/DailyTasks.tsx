@@ -13,7 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const DailyTasks = () => {
   const { stats, dailyTasks, completedTasks, completeTask, uncompleteTask, loading } = useEngagementStats();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   return (
     <>
