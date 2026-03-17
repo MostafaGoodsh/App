@@ -16,7 +16,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const Support = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [priority, setPriority] = useState("normal");
@@ -120,7 +120,7 @@ const Support = () => {
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-lg">{msg.subject}</CardTitle>
-                        <CardDescription>{new Date(msg.created_at).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</CardDescription>
+                        <CardDescription>{new Date(msg.created_at).toLocaleDateString(dir === 'rtl' ? "ar-EG" : language === 'ru' ? "ru-RU" : "en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</CardDescription>
                       </div>
                       <div className="flex gap-2">{getStatusBadge(msg.status)}<Badge variant="outline">{getPriorityLabel(msg.priority)}</Badge></div>
                     </div>
@@ -134,7 +134,7 @@ const Support = () => {
                       <div className="border-t pt-4">
                         <p className="text-sm font-medium mb-1 text-primary">{t("رد الإدارة:")}</p>
                         <p className="text-sm whitespace-pre-wrap">{msg.admin_response}</p>
-                        {msg.responded_at && (<p className="text-xs text-muted-foreground mt-2">{new Date(msg.responded_at).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>)}
+                        {msg.responded_at && (<p className="text-xs text-muted-foreground mt-2">{new Date(msg.responded_at).toLocaleDateString(dir === 'rtl' ? "ar-EG" : language === 'ru' ? "ru-RU" : "en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>)}
                       </div>
                     )}
                   </CardContent>

@@ -1,5 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Helmet } from "react-helmet-async";
 import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +74,8 @@ interface RoadmapData {
 
 const RoadmapDetail = () => {
   const { slug } = useParams();
+  const { t, language, dir } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
   const [data, setData] = useState<RoadmapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -114,12 +117,15 @@ const RoadmapDetail = () => {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">
           <AlertDescription>
-            لم يتم العثور على الصفحة المطلوبة
+            {t("لم يتم العثور على الصفحة المطلوبة")}
           </AlertDescription>
         </Alert>
       </div>
     );
   }
+
+  const displayTitle = !isArabic && data.page_title_en ? data.page_title_en : (data.page_title || data.title);
+  const displayDescription = !isArabic && data.description_en ? data.description_en : data.description;
 
   const getFontSize = (size?: string) => {
     switch (size) {
@@ -197,7 +203,7 @@ const RoadmapDetail = () => {
     return (
       <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
         <CardHeader>
-          <CardTitle className="text-white text-center">الروابط | Links</CardTitle>
+          <CardTitle className="text-white text-center">{t("الروابط")} | Links</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
@@ -232,9 +238,9 @@ const RoadmapDetail = () => {
     return (
       <Card className="bg-black/60 backdrop-blur-sm border-white/20 mb-8">
         <CardHeader>
-          <CardTitle className="text-white">الخدمات | Services</CardTitle>
+          <CardTitle className="text-white">{t("الخدمات")} | Services</CardTitle>
           <CardDescription className="text-white/70">
-            اختر الخدمات المتاحة
+            {t("اختر الخدمات المتاحة")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -261,7 +267,7 @@ const RoadmapDetail = () => {
                         <span className="text-sm text-white/60">| {service.name_en}</span>
                       )}
                       {service.isEnabled && (
-                        <Badge variant="default" className="text-xs">متاح</Badge>
+                        <Badge variant="default" className="text-xs">{t("متاح")}</Badge>
                       )}
                     </div>
                     {service.description && (
@@ -310,6 +316,7 @@ const RoadmapDetail = () => {
 
       <main 
         className="mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-4xl bg-cover bg-center min-h-screen w-full max-w-[100vw] overflow-x-hidden"
+        dir={dir}
         style={{ 
           backgroundImage: data.page_cover_image 
             ? `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('${data.page_cover_image}')`
@@ -323,8 +330,8 @@ const RoadmapDetail = () => {
         <div className="mb-8">
           <Link to="/">
             <Button variant="ghost" className="mb-4 text-white hover:bg-white/10">
-              <ArrowLeft className="ml-2 h-4 w-4" />
-              العودة للرئيسية
+              <ArrowLeft className={`h-4 w-4 ${isArabic ? "ml-2" : "mr-2"}`} />
+              {t("العودة للرئيسية")}
             </Button>
           </Link>
           
@@ -335,25 +342,14 @@ const RoadmapDetail = () => {
             }}
           >
           <div className="relative z-10">
-            {data.page_title_en && (
-              <h1 
-                className="font-cairo font-bold text-primary mb-3 drop-shadow-lg"
-                style={{ fontSize: getFontSize(data.title_font_size || 'xlarge') }}
-              >
-                {data.page_title_en}
-              </h1>
-            )}
-            <p 
-              className="font-cairo text-white mb-2 drop-shadow-lg"
-              style={{ fontSize: getFontSize(data.title_font_size || 'large') }}
+            <h1 
+              className="font-cairo font-bold text-primary mb-3 drop-shadow-lg"
+              style={{ fontSize: getFontSize(data.title_font_size || 'xlarge') }}
             >
-              {data.page_title || data.title}
-            </p>
-            {data.description_en && (
-              <p className="text-white/90 drop-shadow-lg mb-1">{data.description_en}</p>
-            )}
-            {data.description && (
-              <p className="text-white/80 drop-shadow-lg">{data.description}</p>
+              {displayTitle}
+            </h1>
+            {displayDescription && (
+              <p className="text-white/90 drop-shadow-lg mb-1">{displayDescription}</p>
             )}
           </div>
           </div>
@@ -386,7 +382,7 @@ const RoadmapDetail = () => {
         {renderWidget()}
 
         {/* Content */}
-        {data.page_content ? (
+        {((!isArabic && data.page_content_en) ? data.page_content_en : data.page_content) ? (
           <div 
             className="text-white prose prose-lg max-w-none prose-invert 
               [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg 
@@ -398,14 +394,14 @@ const RoadmapDetail = () => {
               [&_.border-primary\\/30]:border-primary/30
               [&_.arabic-text]:text-right [&_.arabic-text]:font-cairo" 
             style={{ fontSize: getFontSize(data.content_font_size) }}
-            dangerouslySetInnerHTML={{ __html: sanitizeHTML(data.page_content) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHTML((!isArabic && data.page_content_en) ? data.page_content_en : (data.page_content || '')) }}
           />
         ) : (
           <Card className="bg-black/60 backdrop-blur-sm border-white/20">
             <CardHeader>
-              <CardTitle className="text-white">قريباً</CardTitle>
+              <CardTitle className="text-white">{t("قريباً")}</CardTitle>
               <CardDescription className="text-white/70">
-                المحتوى قيد الإعداد وسيتم نشره قريباً
+                {t("المحتوى قيد الإعداد وسيتم نشره قريباً")}
               </CardDescription>
             </CardHeader>
           </Card>

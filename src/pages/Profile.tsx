@@ -31,7 +31,7 @@ export default function Profile() {
   const viewUserId = searchParams.get('user');
   const { profile, loading } = useProfile(viewUserId || undefined);
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isOwnProfile = !viewUserId || viewUserId === user?.id;
   
   const { stats, dailyTasks, completedTasks, completeTask, isTaskCompleted, loading: statsLoading } = useEngagementStats();
@@ -150,7 +150,7 @@ export default function Profile() {
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("تاريخ الانضمام")}</p>
-                        <p className="font-medium">{new Date(profile.created_at).toLocaleDateString('ar-SA')}</p>
+                        <p className="font-medium">{new Date(profile.created_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</p>
                       </div>
                       <Calendar className="w-5 h-5 text-muted-foreground" />
                     </div>
@@ -216,11 +216,11 @@ export default function Profile() {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-2xl font-bold text-primary">{totalPoints.toLocaleString('ar-EG')}</p>
+                      <p className="text-2xl font-bold text-primary">{totalPoints.toLocaleString(language === 'ar' || language === 'both' ? 'ar-EG' : 'en-US')}</p>
                       <p className="text-xs text-muted-foreground font-cairo">{t("إجمالي النقاط")}</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-2xl font-bold">{xpBalance.toLocaleString('ar-EG')}</p>
+                      <p className="text-2xl font-bold">{xpBalance.toLocaleString(language === 'ar' || language === 'both' ? 'ar-EG' : 'en-US')}</p>
                       <p className="text-xs text-muted-foreground font-cairo">{t("رصيد XP")}</p>
                     </div>
                   </div>
@@ -272,7 +272,7 @@ export default function Profile() {
                       {completedSurveys.map((survey: any) => (
                         <div key={survey.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
                           <span className="text-sm font-cairo">{(survey.surveys as any)?.title || t('استبيان')}</span>
-                          <span className="text-xs text-muted-foreground">{new Date(survey.created_at).toLocaleDateString('ar-SA')}</span>
+                          <span className="text-xs text-muted-foreground">{new Date(survey.created_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</span>
                         </div>
                       ))}
                     </div>

@@ -47,17 +47,17 @@ const Updates = () => {
       
       <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="min-h-screen bg-background/90">
-          <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8" dir={dir}>
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="mb-8" style={{ textAlign: dir === "rtl" ? "right" : "left" }}>
+                <div className="flex items-center gap-2 mb-4" style={{ justifyContent: dir === "rtl" ? "flex-start" : "flex-start" }}>
                   <Bell className="w-8 h-8 text-primary" />
                   <h1 className="text-3xl md:text-4xl font-bold">
-                    {getContent('updates_title', t('آخر التحديثات'))}
+                    {t('آخر التحديثات')}
                   </h1>
                 </div>
                 <p className="text-xl text-muted-foreground">
-                  {getContent('updates_description', t('تابع آخر الأخبار والتحديثات في منصة Crypto-MSR'))}
+                  {t('تابع آخر الأخبار والتحديثات في منصة Crypto-MSR')}
                 </p>
               </div>
 
