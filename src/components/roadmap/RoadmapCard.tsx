@@ -13,7 +13,8 @@ interface RoadmapCardProps {
 }
 
 const RoadmapCard = ({ title, titleEn, description, descriptionEn, gradient, slug, isComingSoon }: RoadmapCardProps) => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const isArabic = language === "ar" || language === "both";
   const content = (
     <article className="relative group cursor-pointer">
       {/* الكارت الدائري */}
