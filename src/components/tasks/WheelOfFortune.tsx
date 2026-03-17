@@ -553,20 +553,10 @@ const WheelOfFortune = () => {
         setIsAnimating(false);
 
         if (winner.reward_type === "nothing") {
-          // Bonus → spin MS-RA ring (ring 2)
-          setResult("☥ بونص! الحلقة الوسطى تدور...");
-          if (costXp > 0) {
-            toast("☥ بونص! تم تحويل " + costXp + " XP للمجمع", {
-              description: "حلقة $MS-RA تدور الآن!",
-            });
-          } else {
-            toast("☥ بونص! حلقة $MS-RA تدور الآن!");
-          }
+          setResult(language === "ar" || language === "both" ? "☥ بونص! الحلقة الوسطى تدور..." : "☥ Bonus! The middle ring is spinning...");
           setTimeout(() => spinBonusRing(), 800);
         } else if (winner.reward_type === "upgrade") {
-          // Upgrade → spin upgrade ring (ring 3)
-          setResult("⬆ ترقية! الحلقة الخارجية تدور...");
-          toast("⬆ ترقية! حلقة الترقيات تدور الآن!");
+          setResult(language === "ar" || language === "both" ? "⬆ ترقية! الحلقة الخارجية تدور..." : "⬆ Upgrade! The outer ring is spinning...");
           setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
           const extraSpins = Math.floor(winner.reward_value);
