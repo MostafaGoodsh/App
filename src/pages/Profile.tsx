@@ -150,7 +150,7 @@ export default function Profile() {
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("تاريخ الانضمام")}</p>
-                        <p className="font-medium">{new Date(profile.created_at).toLocaleDateString('ar-SA')}</p>
+                        <p className="font-medium">{new Date(profile.created_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</p>
                       </div>
                       <Calendar className="w-5 h-5 text-muted-foreground" />
                     </div>
