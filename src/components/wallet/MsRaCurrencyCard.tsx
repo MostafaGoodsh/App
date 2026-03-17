@@ -31,6 +31,7 @@ interface MsRaCurrencyCardProps {
 export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { getContentItem } = useAppContent();
   const { getTokenBalance } = useInternalWallet();
   const [solanaAddress, setSolanaAddress] = useState("");
