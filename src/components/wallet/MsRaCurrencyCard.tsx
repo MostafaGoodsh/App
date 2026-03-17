@@ -332,13 +332,13 @@ export const MsRaCurrencyCard = ({ isVerified }: MsRaCurrencyCardProps) => {
           >
             <div className="flex items-center gap-2 text-primary font-cairo" dir="rtl">
               <Wallet className="w-4 h-4" />
-              <span className="font-medium">تسجيل عنوان Solana</span>
+              <span className="font-medium">{t("تسجيل عنوان Solana", "Register Solana Address")}</span>
             </div>
             <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-              <Label htmlFor="solana-address" className="font-cairo" dir="rtl">عنوان محفظة Solana</Label>
+              <Label htmlFor="solana-address" className="font-cairo" dir="rtl">{t("عنوان محفظة Solana", "Solana Wallet Address")}</Label>
               <Input
                 id="solana-address"
-                placeholder="ادخل عنوان محفظة Solana..."
+                placeholder={t("ادخل عنوان محفظة Solana...", "Enter Solana wallet address...")}
                 value={solanaAddress}
                 onChange={(e) => setSolanaAddress(e.target.value)}
                 className="font-mono text-sm"
