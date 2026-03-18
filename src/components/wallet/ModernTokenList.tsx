@@ -97,14 +97,8 @@ export const ModernTokenList = ({
             <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                    لنبدأ الآن
-                  </p>
                   <p className="font-medium text-foreground">
-                    قم بإيداع عملات من محفظة أخرى أو منصة تداول
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1" dir="ltr">
-                    Deposit crypto from wallet or exchange
+                    {t("قم بإيداع عملات من محفظة أخرى أو منصة تداول", "Deposit crypto from wallet or exchange")}
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
