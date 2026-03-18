@@ -35,6 +35,7 @@ export const ModernTokenList = ({
 }: ModernTokenListProps) => {
   const [activeTab, setActiveTab] = useState<'tokens' | 'nfts' | 'earn'>('tokens');
   const [sortBy, setSortBy] = useState<'value' | 'name' | 'change'>('value');
+  const { t, dir } = useLanguage();
 
   const sortedTokens = [...tokens].sort((a, b) => {
     switch (sortBy) {
