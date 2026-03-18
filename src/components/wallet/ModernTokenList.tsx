@@ -57,19 +57,13 @@ export const ModernTokenList = ({
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="bg-muted/50">
             <TabsTrigger value="tokens" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <div className="flex flex-col items-center">
-                <span>العملات</span>
-                <span className="text-[9px] opacity-70">Tokens</span>
-              </div>
+              {t("العملات", "Tokens")}
             </TabsTrigger>
             <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               NFTs
             </TabsTrigger>
             <TabsTrigger value="earn" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <div className="flex flex-col items-center">
-                <span>ربح</span>
-                <span className="text-[9px] opacity-70">Earn</span>
-              </div>
+              {t("اربح", "Earn")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
