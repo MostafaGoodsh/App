@@ -147,16 +147,14 @@ export const ModernTokenList = ({
       {/* NFTs Tab */}
       {activeTab === 'nfts' && (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">لا توجد NFTs حالياً</p>
-          <p className="text-xs mt-1 opacity-70" dir="ltr">No NFTs found</p>
+          <p className="text-sm">{t("لا توجد NFTs حالياً", "No NFTs found")}</p>
         </div>
       )}
 
       {/* Earn Tab */}
       {activeTab === 'earn' && (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">فرص الربح قادمة قريباً</p>
-          <p className="text-xs mt-1 opacity-70" dir="ltr">Earning opportunities coming soon</p>
+          <p className="text-sm">{t("فرص الربح قادمة قريباً", "Earning opportunities coming soon")}</p>
         </div>
       )}
     </div>
