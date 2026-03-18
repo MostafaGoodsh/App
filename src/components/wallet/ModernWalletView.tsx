@@ -51,7 +51,7 @@ export const ModernWalletView = () => {
   const totalUsdValue = getTotalUSDValue();
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir="rtl">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir={t("الرئيسية") === "الرئيسية" ? "rtl" : "ltr"}>
       <WalletHeroSection totalBalance={totalUsdValue} percentageChange={2.5} changeAmount={totalUsdValue * 0.025} username={profile?.full_name?.split(' ')[0]} points={xpBalance?.balance || 0} />
 
       <div className="px-3 sm:px-4 -mt-6 relative z-10 mb-4 sm:mb-6">
