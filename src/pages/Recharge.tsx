@@ -199,7 +199,7 @@ const Recharge = () => {
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       return;
     }
