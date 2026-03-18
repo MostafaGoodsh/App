@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ModernTokenCard } from "./ModernTokenCard";
 import { Plus, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface TokenData {
   symbol: string;
@@ -34,6 +35,7 @@ export const ModernTokenList = ({
 }: ModernTokenListProps) => {
   const [activeTab, setActiveTab] = useState<'tokens' | 'nfts' | 'earn'>('tokens');
   const [sortBy, setSortBy] = useState<'value' | 'name' | 'change'>('value');
+  const { t, dir } = useLanguage();
 
   const sortedTokens = [...tokens].sort((a, b) => {
     switch (sortBy) {
@@ -55,19 +57,13 @@ export const ModernTokenList = ({
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
           <TabsList className="bg-muted/50">
             <TabsTrigger value="tokens" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <div className="flex flex-col items-center">
-                <span>العملات</span>
-                <span className="text-[9px] opacity-70">Tokens</span>
-              </div>
+              {t("العملات", "Tokens")}
             </TabsTrigger>
             <TabsTrigger value="nfts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               NFTs
             </TabsTrigger>
             <TabsTrigger value="earn" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              <div className="flex flex-col items-center">
-                <span>ربح</span>
-                <span className="text-[9px] opacity-70">Earn</span>
-              </div>
+              {t("اربح", "Earn")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -101,14 +97,8 @@ export const ModernTokenList = ({
             <div className="p-6 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-                    لنبدأ الآن
-                  </p>
                   <p className="font-medium text-foreground">
-                    قم بإيداع عملات من محفظة أخرى أو منصة تداول
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1" dir="ltr">
-                    Deposit crypto from wallet or exchange
+                    {t("قم بإيداع عملات من محفظة أخرى أو منصة تداول", "Deposit crypto from wallet or exchange")}
                   </p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -148,8 +138,7 @@ export const ModernTokenList = ({
               onClick={onAddToken}
             >
               <Plus className="w-4 h-4 mr-2" />
-              <span>إضافة عملة</span>
-              <span className="text-xs opacity-70 mr-1">Add</span>
+              <span>{t("إضافة عملة", "Add Token")}</span>
             </Button>
           </div>
         </div>
@@ -158,16 +147,14 @@ export const ModernTokenList = ({
       {/* NFTs Tab */}
       {activeTab === 'nfts' && (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">لا توجد NFTs حالياً</p>
-          <p className="text-xs mt-1 opacity-70" dir="ltr">No NFTs found</p>
+          <p className="text-sm">{t("لا توجد NFTs حالياً", "No NFTs found")}</p>
         </div>
       )}
 
       {/* Earn Tab */}
       {activeTab === 'earn' && (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-sm">فرص الربح قادمة قريباً</p>
-          <p className="text-xs mt-1 opacity-70" dir="ltr">Earning opportunities coming soon</p>
+          <p className="text-sm">{t("فرص الربح قادمة قريباً", "Earning opportunities coming soon")}</p>
         </div>
       )}
     </div>

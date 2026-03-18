@@ -26,7 +26,7 @@ export const ModernWalletView = () => {
   const { profile } = useProfile();
   const { tokens: internalTokens, balances, isLoading, refreshData, getTotalUSDValue } = useInternalWallet();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   const [activeBottomTab, setActiveBottomTab] = useState<'wallet' | 'history' | 'swap' | 'rewards'>('wallet');
   const [showSwapDialog, setShowSwapDialog] = useState(false);
@@ -51,7 +51,7 @@ export const ModernWalletView = () => {
   const totalUsdValue = getTotalUSDValue();
 
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir="rtl">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir={dir}>
       <WalletHeroSection totalBalance={totalUsdValue} percentageChange={2.5} changeAmount={totalUsdValue * 0.025} username={profile?.full_name?.split(' ')[0]} points={xpBalance?.balance || 0} />
 
       <div className="px-3 sm:px-4 -mt-6 relative z-10 mb-4 sm:mb-6">

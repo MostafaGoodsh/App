@@ -36,7 +36,7 @@ export const QuickActionButtons = ({ onReceive, onSend, onEarn, onSwap, variant 
   }
 
   return (
-    <div className="grid grid-cols-4 gap-2 sm:gap-3 font-cairo" dir="rtl">
+    <div className="grid grid-cols-4 gap-2 sm:gap-3 font-cairo">
       {actions.map((action, i) => (
         <button key={i} onClick={action.onClick}
           className={cn("flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-xl", "bg-gradient-to-br border-2 transition-all duration-200", "hover:scale-105 hover:shadow-lg", action.color)}>
