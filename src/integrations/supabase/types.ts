@@ -705,6 +705,51 @@ export type Database = {
           },
         ]
       }
+      crypto_payment_addresses: {
+        Row: {
+          address: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          memo_tag: string | null
+          network_key: string
+          network_name: string
+          supported_assets: string | null
+          updated_at: string
+          warnings: string | null
+          warnings_en: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          memo_tag?: string | null
+          network_key: string
+          network_name: string
+          supported_assets?: string | null
+          updated_at?: string
+          warnings?: string | null
+          warnings_en?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          memo_tag?: string | null
+          network_key?: string
+          network_name?: string
+          supported_assets?: string | null
+          updated_at?: string
+          warnings?: string | null
+          warnings_en?: string | null
+        }
+        Relationships: []
+      }
       custom_tokens: {
         Row: {
           contract_address: string
