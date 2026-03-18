@@ -222,6 +222,10 @@ export const RechargeSection = () => {
             </div>
           )}
 
+          {selectedMethod === 'crypto' && (
+            <CryptoPaymentInstructions amount={amount} />
+          )}
+
           {/* Test Mode Warning */}
           <Alert className="bg-black/70 border-yellow-600/40">
             <Info className="h-4 w-4 text-yellow-500" />

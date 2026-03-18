@@ -72,6 +72,7 @@ export function AppSidebar() {
     { title: "إدارة الخطوط والمحاذاة", url: "/admin/typography", icon: Type },
     { title: t("إدارة مجمع السيولة"), url: "/admin/liquidity-pools", icon: Droplets },
     { title: t("إدارة عجلة الحظ"), url: "/admin/wheel", icon: Disc },
+    { title: t("عناوين الدفع بالكريبتو"), url: "/admin/crypto-payment-addresses", icon: Landmark },
     { title: t("إدارة طلبات العائلة"), url: "/admin/family", icon: Users },
     { title: t("إدارة رسالة المنصة"), url: "/admin/platform-message", icon: MessageSquare },
   ];

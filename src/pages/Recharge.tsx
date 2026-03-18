@@ -408,6 +408,10 @@ const Recharge = () => {
                   </div>
                 )}
 
+                {selectedMethod === 'crypto' && (
+                  <CryptoPaymentInstructions amount={amount} />
+                )}
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (
                     <>

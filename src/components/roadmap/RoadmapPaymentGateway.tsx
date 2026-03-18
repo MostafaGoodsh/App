@@ -269,6 +269,10 @@ export const RoadmapPaymentGateway = ({
             </div>
           )}
 
+          {selectedMethod === 'crypto' && (
+            <CryptoPaymentInstructions amount={amount} />
+          )}
+
           {/* Test Mode Warning */}
           <Alert className="bg-yellow-900/20 border-yellow-600/40">
             <Info className="h-4 w-4 text-yellow-500" />
