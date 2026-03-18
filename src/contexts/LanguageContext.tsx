@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export type AppLanguage = "both" | "ar" | "en" | "fr" | "es" | "de" | "tr" | "zh" | "hi" | "ru" | "pt" | "ja" | "ko";
+export type AppLanguage = "both" | "ar" | "en" | "ru";
 
 interface LanguageLabels {
   native: string;
