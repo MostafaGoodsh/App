@@ -76,64 +76,110 @@ const WheelManagement = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [segRes, outerRes, upgradeRes, setRes] = await Promise.all([
-      supabase.from("wheel_segments").select("*").order("display_order"),
-      supabase.from("wheel_outer_segments").select("*").order("display_order"),
-      supabase.from("wheel_upgrade_segments").select("*").order("display_order"),
-      supabase.from("wheel_settings").select("*").limit(1).single(),
-    ]);
-    if (segRes.data) setSegments(segRes.data as unknown as Segment[]);
-    if (outerRes.data) setOuterSegments(outerRes.data as unknown as OuterSegment[]);
-    if (upgradeRes.data) setUpgradeSegments(upgradeRes.data as unknown as UpgradeSegment[]);
-    if (setRes.data) setSettings(setRes.data as unknown as WSettings);
-    setLoading(false);
+    try {
+      const [segRes, outerRes, upgradeRes, setRes] = await Promise.all([
+        supabase.from("wheel_segments").select("*").order("display_order"),
+        supabase.from("wheel_outer_segments").select("*").order("display_order"),
+        supabase.from("wheel_upgrade_segments").select("*").order("display_order"),
+        supabase.from("wheel_settings").select("*").limit(1).single(),
+      ]);
+
+      if (segRes.error) throw segRes.error;
+      if (outerRes.error) throw outerRes.error;
+      if (upgradeRes.error) throw upgradeRes.error;
+      if (setRes.error) throw setRes.error;
+
+      setSegments(segRes.data as unknown as Segment[]);
+      setOuterSegments(outerRes.data as unknown as OuterSegment[]);
+      setUpgradeSegments(upgradeRes.data as unknown as UpgradeSegment[]);
+      setSettings(setRes.data as unknown as WSettings);
+    } catch (error: any) {
+      console.error("Wheel fetch failed:", error);
+      toast.error(error.message || "فشل تحميل بيانات العجلة");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const saveSettings = async () => {
     if (!settings) return;
     setSaving(true);
-    const { error } = await supabase.from("wheel_settings").update({
-      title: settings.title,
-      title_en: settings.title_en,
-      description: settings.description,
-      description_en: settings.description_en,
-      spin_cost_xp: settings.spin_cost_xp,
-      free_spins_per_day: settings.free_spins_per_day,
-      is_visible: settings.is_visible,
-      is_active: settings.is_active,
-      intro_text: settings.intro_text,
-      intro_text_en: settings.intro_text_en,
-      background_color: settings.background_color,
-    }).eq("id", settings.id);
-    setSaving(false);
-    if (error) toast.error("فشل الحفظ");
-    else toast.success("تم حفظ الإعدادات");
+    try {
+      const { error, data } = await supabase
+        .from("wheel_settings")
+        .update({
+          title: settings.title,
+          title_en: settings.title_en,
+          description: settings.description,
+          description_en: settings.description_en,
+          spin_cost_xp: settings.spin_cost_xp,
+          free_spins_per_day: settings.free_spins_per_day,
+          is_visible: settings.is_visible,
+          is_active: settings.is_active,
+          intro_text: settings.intro_text,
+          intro_text_en: settings.intro_text_en,
+          background_color: settings.background_color,
+        })
+        .eq("id", settings.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setSettings(data as unknown as WSettings);
+      toast.success("تم حفظ الإعدادات");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel settings save failed:", error);
+      toast.error(error.message || "فشل حفظ الإعدادات");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Inner segments CRUD
   const saveSegment = async (seg: Segment) => {
-    const { error } = await supabase.from("wheel_segments").update({
-      label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
-      reward_value: seg.reward_value, reward_description: seg.reward_description,
-      color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
-    }).eq("id", seg.id);
-    if (error) toast.error("فشل حفظ القسم");
-    else toast.success("تم حفظ القسم");
+    try {
+      const { error, data } = await supabase.from("wheel_segments").update({
+        label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
+        reward_value: seg.reward_value, reward_description: seg.reward_description,
+        color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
+      }).eq("id", seg.id).select().single();
+      if (error) throw error;
+      setSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as Segment : item));
+      toast.success("تم حفظ القسم");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel segment save failed:", error);
+      toast.error(error.message || "فشل حفظ القسم");
+    }
   };
 
   const addSegment = async () => {
-    const { error } = await supabase.from("wheel_segments").insert({
-      label: "جائزة جديدة", label_en: "New Prize", reward_type: "xp",
-      reward_value: 10, color: "#D4AF37", probability: 10, display_order: segments.length + 1,
-    });
-    if (error) toast.error("فشل الإضافة");
-    else { toast.success("تم الإضافة"); fetchAll(); }
+    try {
+      const { error } = await supabase.from("wheel_segments").insert({
+        label: "جائزة جديدة", label_en: "New Prize", reward_type: "xp",
+        reward_value: 10, color: "#D4AF37", probability: 10, display_order: segments.length + 1,
+      });
+      if (error) throw error;
+      toast.success("تم الإضافة");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel segment add failed:", error);
+      toast.error(error.message || "فشل الإضافة");
+    }
   };
 
   const deleteSegment = async (id: string) => {
-    const { error } = await supabase.from("wheel_segments").delete().eq("id", id);
-    if (error) toast.error("فشل الحذف");
-    else { toast.success("تم الحذف"); setSegments((s) => s.filter((x) => x.id !== id)); }
+    try {
+      const { error } = await supabase.from("wheel_segments").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("تم الحذف");
+      setSegments((s) => s.filter((x) => x.id !== id));
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel segment delete failed:", error);
+      toast.error(error.message || "فشل الحذف");
+    }
   };
 
   const updateSegment = (id: string, field: string, value: any) => {
@@ -142,27 +188,47 @@ const WheelManagement = () => {
 
   // Outer segments CRUD
   const saveOuterSegment = async (seg: OuterSegment) => {
-    const { error } = await supabase.from("wheel_outer_segments").update({
-      label: seg.label, label_en: seg.label_en, reward_value: seg.reward_value,
-      color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
-    }).eq("id", seg.id);
-    if (error) toast.error("فشل حفظ القسم");
-    else toast.success("تم حفظ القسم");
+    try {
+      const { error, data } = await supabase.from("wheel_outer_segments").update({
+        label: seg.label, label_en: seg.label_en, reward_value: seg.reward_value,
+        color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
+      }).eq("id", seg.id).select().single();
+      if (error) throw error;
+      setOuterSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as OuterSegment : item));
+      toast.success("تم حفظ القسم");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel outer segment save failed:", error);
+      toast.error(error.message || "فشل حفظ القسم");
+    }
   };
 
   const addOuterSegment = async () => {
-    const { error } = await supabase.from("wheel_outer_segments").insert({
-      label: "1 $MS-RA", label_en: "1 $MS-RA", reward_value: 1,
-      color: "#D4AF37", probability: 10, display_order: outerSegments.length + 1,
-    });
-    if (error) toast.error("فشل الإضافة");
-    else { toast.success("تم الإضافة"); fetchAll(); }
+    try {
+      const { error } = await supabase.from("wheel_outer_segments").insert({
+        label: "1 $MS-RA", label_en: "1 $MS-RA", reward_value: 1,
+        color: "#D4AF37", probability: 10, display_order: outerSegments.length + 1,
+      });
+      if (error) throw error;
+      toast.success("تم الإضافة");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel outer segment add failed:", error);
+      toast.error(error.message || "فشل الإضافة");
+    }
   };
 
   const deleteOuterSegment = async (id: string) => {
-    const { error } = await supabase.from("wheel_outer_segments").delete().eq("id", id);
-    if (error) toast.error("فشل الحذف");
-    else { toast.success("تم الحذف"); setOuterSegments((s) => s.filter((x) => x.id !== id)); }
+    try {
+      const { error } = await supabase.from("wheel_outer_segments").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("تم الحذف");
+      setOuterSegments((s) => s.filter((x) => x.id !== id));
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel outer segment delete failed:", error);
+      toast.error(error.message || "فشل الحذف");
+    }
   };
 
   const updateOuterSegment = (id: string, field: string, value: any) => {
@@ -171,28 +237,48 @@ const WheelManagement = () => {
 
   // Upgrade segments CRUD
   const saveUpgradeSegment = async (seg: UpgradeSegment) => {
-    const { error } = await supabase.from("wheel_upgrade_segments").update({
-      label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
-      reward_value: seg.reward_value, color: seg.color, probability: seg.probability,
-      display_order: seg.display_order, is_active: seg.is_active,
-    }).eq("id", seg.id);
-    if (error) toast.error("فشل حفظ القسم");
-    else toast.success("تم حفظ القسم");
+    try {
+      const { error, data } = await supabase.from("wheel_upgrade_segments").update({
+        label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
+        reward_value: seg.reward_value, color: seg.color, probability: seg.probability,
+        display_order: seg.display_order, is_active: seg.is_active,
+      }).eq("id", seg.id).select().single();
+      if (error) throw error;
+      setUpgradeSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as UpgradeSegment : item));
+      toast.success("تم حفظ القسم");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel upgrade segment save failed:", error);
+      toast.error(error.message || "فشل حفظ القسم");
+    }
   };
 
   const addUpgradeSegment = async () => {
-    const { error } = await supabase.from("wheel_upgrade_segments").insert({
-      label: "ترقية جديدة", label_en: "New Upgrade", reward_type: "mining_upgrade",
-      reward_value: 1, color: "#2E8B57", probability: 10, display_order: upgradeSegments.length + 1,
-    });
-    if (error) toast.error("فشل الإضافة");
-    else { toast.success("تم الإضافة"); fetchAll(); }
+    try {
+      const { error } = await supabase.from("wheel_upgrade_segments").insert({
+        label: "ترقية جديدة", label_en: "New Upgrade", reward_type: "mining_upgrade",
+        reward_value: 1, color: "#2E8B57", probability: 10, display_order: upgradeSegments.length + 1,
+      });
+      if (error) throw error;
+      toast.success("تم الإضافة");
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel upgrade segment add failed:", error);
+      toast.error(error.message || "فشل الإضافة");
+    }
   };
 
   const deleteUpgradeSegment = async (id: string) => {
-    const { error } = await supabase.from("wheel_upgrade_segments").delete().eq("id", id);
-    if (error) toast.error("فشل الحذف");
-    else { toast.success("تم الحذف"); setUpgradeSegments((s) => s.filter((x) => x.id !== id)); }
+    try {
+      const { error } = await supabase.from("wheel_upgrade_segments").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("تم الحذف");
+      setUpgradeSegments((s) => s.filter((x) => x.id !== id));
+      await fetchAll();
+    } catch (error: any) {
+      console.error("Wheel upgrade segment delete failed:", error);
+      toast.error(error.message || "فشل الحذف");
+    }
   };
 
   const updateUpgradeSegment = (id: string, field: string, value: any) => {

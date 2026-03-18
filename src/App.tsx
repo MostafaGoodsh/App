@@ -91,6 +91,7 @@ const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile")
 const TypographyAdmin = lazy(() => import("./pages/TypographyAdmin"));
 const LiquidityPoolAdmin = lazy(() => import("./pages/LiquidityPoolAdmin"));
 const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
+const CryptoPaymentAddressesAdmin = lazy(() => import("./pages/CryptoPaymentAddressesAdmin"));
 const FamilyAdmin = lazy(() => import("./pages/FamilyAdmin"));
 const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
 
@@ -204,6 +205,7 @@ const App = () => {
                     <Route path="admin/typography" element={<RequireAdmin><TypographyAdmin /></RequireAdmin>} />
                     <Route path="admin/liquidity-pools" element={<RequireAdmin><LiquidityPoolAdmin /></RequireAdmin>} />
                     <Route path="admin/wheel" element={<RequireAdmin><WheelAdmin /></RequireAdmin>} />
+                    <Route path="admin/crypto-payment-addresses" element={<RequireAdmin><CryptoPaymentAddressesAdmin /></RequireAdmin>} />
                     <Route path="admin/family" element={<RequireAdmin><FamilyAdmin /></RequireAdmin>} />
                     <Route path="admin/platform-message" element={<RequireAdmin><PlatformMessageAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />

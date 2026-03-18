@@ -10,6 +10,7 @@ import { useInternalWallet } from '@/hooks/useInternalWallet';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, ArrowRight, Wallet, TrendingUp, RefreshCw, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 const Recharge = () => {
   const navigate = useNavigate();
@@ -198,7 +199,7 @@ const Recharge = () => {
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       return;
     }
@@ -405,6 +406,10 @@ const Recharge = () => {
                       💡 لو الرقم مش مسجل، استخدم بطاقة ائتمان بدلاً من المحفظة
                     </p>
                   </div>
+                )}
+
+                {selectedMethod === 'crypto' && (
+                  <CryptoPaymentInstructions amount={amount} />
                 )}
 
                 <Button type="submit" className="w-full" disabled={loading}>

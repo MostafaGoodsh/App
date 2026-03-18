@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 interface UnifiedPaymentGatewayProps {
   // Mode: dialog or inline
@@ -106,7 +107,7 @@ export const UnifiedPaymentGateway = ({
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       if (onPaymentSuccess) {
         onPaymentSuccess('crypto-pending-' + Date.now(), parseFloat(amount));
@@ -251,16 +252,7 @@ export const UnifiedPaymentGateway = ({
 
       {/* Crypto wallet address */}
       {selectedMethod === 'crypto' && (
-        <div className="space-y-2">
-          <Alert className="bg-black/70 border-primary/40">
-            <Info className="h-4 w-4 text-primary" />
-            <AlertDescription className="text-xs font-cairo">
-              <p className="font-bold text-primary mb-1">₿ الدفع بالعملات الرقمية</p>
-              <p>يدعم: SOL, USDT (Solana), TON</p>
-              <p className="mt-1">سيتم توليد عنوان الدفع بعد المتابعة</p>
-            </AlertDescription>
-          </Alert>
-        </div>
+        <CryptoPaymentInstructions amount={amount} />
       )}
 
       {/* Test Mode Warning */}

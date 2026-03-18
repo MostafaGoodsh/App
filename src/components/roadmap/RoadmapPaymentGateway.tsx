@@ -9,6 +9,7 @@ import { Loader2, ArrowRight, CreditCard, Info, Wallet, Droplets, Shield, Packag
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 type PaymentType = 'presale' | 'liquidity' | 'services' | 'vault';
 
@@ -103,7 +104,7 @@ export const RoadmapPaymentGateway = ({
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — حوّل المبلغ إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد العملية يدويًا`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       return;
     }
@@ -266,6 +267,10 @@ export const RoadmapPaymentGateway = ({
                 ⚠️ الرقم لازم يكون مسجل في المحفظة الإلكترونية
               </p>
             </div>
+          )}
+
+          {selectedMethod === 'crypto' && (
+            <CryptoPaymentInstructions amount={amount} />
           )}
 
           {/* Test Mode Warning */}
