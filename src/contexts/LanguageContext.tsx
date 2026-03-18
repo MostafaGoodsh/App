@@ -168,6 +168,13 @@ const translations: Translations = {
     "إضافة عملات مخصصة قادمة قريباً": "Custom token addition coming soon",
     "اربح": "Earn",
     "تبديل": "Swap",
+    "العملات": "Tokens",
+    "قم بإيداع عملات من محفظة أخرى أو منصة تداول": "Deposit crypto from wallet or exchange",
+    "إضافة عملة": "Add Token",
+    "لا توجد NFTs حالياً": "No NFTs found",
+    "فرص الربح قادمة قريباً": "Earning opportunities coming soon",
+    "نقاط الخبرة": "Experience Points",
+    "المحفظة الداخلية": "Internal Wallet",
 
     // ---- Profile ----
     "تعديل البروفايل": "Edit Profile",
