@@ -173,7 +173,6 @@ const translations: Translations = {
     "إضافة عملة": "Add Token",
     "لا توجد NFTs حالياً": "No NFTs found",
     "فرص الربح قادمة قريباً": "Earning opportunities coming soon",
-    "نقاط الخبرة": "Experience Points",
     "المحفظة الداخلية": "Internal Wallet",
 
     // ---- Profile ----
