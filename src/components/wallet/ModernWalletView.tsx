@@ -26,7 +26,7 @@ export const ModernWalletView = () => {
   const { profile } = useProfile();
   const { tokens: internalTokens, balances, isLoading, refreshData, getTotalUSDValue } = useInternalWallet();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
 
   const [activeBottomTab, setActiveBottomTab] = useState<'wallet' | 'history' | 'swap' | 'rewards'>('wallet');
   const [showSwapDialog, setShowSwapDialog] = useState(false);
