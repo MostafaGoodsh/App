@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ModernTokenCard } from "./ModernTokenCard";
 import { Plus, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface TokenData {
   symbol: string;
