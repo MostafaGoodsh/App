@@ -45,8 +45,10 @@ const DailyTasksTab = ({
     <div className="space-y-3" dir={dir}>
       {tasks.map((task) => {
         const isCompleted = completedTasks.includes(task.id);
-        const displayTitle = (!isArabic && (task as any).title_en) ? (task as any).title_en : task.title;
-        const displayDesc = (!isArabic && (task as any).description_en) ? (task as any).description_en : task.description;
+        const rawTitle = (!isArabic && (task as any).title_en) ? (task as any).title_en : task.title;
+        const rawDesc = (!isArabic && (task as any).description_en) ? (task as any).description_en : task.description;
+        const displayTitle = isArabic ? rawTitle : t(rawTitle);
+        const displayDesc = isArabic ? rawDesc : (rawDesc ? t(rawDesc) : null);
         
         return (
           <div 
