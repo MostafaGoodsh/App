@@ -138,8 +138,7 @@ export const ModernTokenList = ({
               onClick={onAddToken}
             >
               <Plus className="w-4 h-4 mr-2" />
-              <span>إضافة عملة</span>
-              <span className="text-xs opacity-70 mr-1">Add</span>
+              <span>{t("إضافة عملة", "Add Token")}</span>
             </Button>
           </div>
         </div>
