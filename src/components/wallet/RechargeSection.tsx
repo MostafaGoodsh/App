@@ -65,7 +65,7 @@ export const RechargeSection = () => {
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — قم بالتحويل لعنوان المحفظة ثم تواصل مع الدعم لتأكيد العملية يدويًا`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       return;
     }
