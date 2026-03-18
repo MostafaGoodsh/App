@@ -11,16 +11,7 @@ export const SUPPORTED_LANGUAGES: Record<AppLanguage, LanguageLabels> = {
   both: { native: "عربي + English", flag: "🌍" },
   ar: { native: "العربية", flag: "🇪🇬" },
   en: { native: "English", flag: "🇬🇧" },
-  fr: { native: "Français", flag: "🇫🇷" },
-  es: { native: "Español", flag: "🇪🇸" },
-  de: { native: "Deutsch", flag: "🇩🇪" },
-  tr: { native: "Türkçe", flag: "🇹🇷" },
-  zh: { native: "中文", flag: "🇨🇳" },
-  hi: { native: "हिन्दी", flag: "🇮🇳" },
   ru: { native: "Русский", flag: "🇷🇺" },
-  pt: { native: "Português", flag: "🇧🇷" },
-  ja: { native: "日本語", flag: "🇯🇵" },
-  ko: { native: "한국어", flag: "🇰🇷" },
 };
 
 type TranslationKey = string;
