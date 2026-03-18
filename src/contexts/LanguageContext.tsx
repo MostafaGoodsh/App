@@ -600,6 +600,15 @@ const translations: Translations = {
     "Solana Address": "Solana Address",
     "الأصل والمصير": "Origin & Fate",
 
+    // ---- Daily Task Titles (DB fallback) ----
+    "تسجيل الدخول اليومي": "Daily Login",
+    "قم بتسجيل الدخول إلى المنصة": "Log in to the platform",
+    "تحديث الملف الشخصي": "Update Profile",
+    "قم بتحديث معلومات ملفك الشخصي": "Update your profile information",
+    "تفاعل مع المحتوى": "Engage with Content",
+    "قم باستعراض و تصفح محتوي المنصة بالتفاعل و التعليق و تفقد التحديثات": "Browse and explore platform content, interact, comment, and check updates",
+    "تواصل مع الشخصية": "Contact the personality",
+
     // ---- Tasks Page ----
     "لا توجد مهام يومية متاحة حالياً": "No daily tasks available at the moment",
     "لا توجد مهام تطوير الشخصية متاحة حالياً": "No personality tasks available at the moment",
