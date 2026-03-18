@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 interface UnifiedPaymentGatewayProps {
   // Mode: dialog or inline

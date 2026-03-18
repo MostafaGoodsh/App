@@ -9,6 +9,7 @@ import { Loader2, ArrowRight, CreditCard, Info, Wallet, Droplets, Shield, Packag
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 type PaymentType = 'presale' | 'liquidity' | 'services' | 'vault';
 

@@ -91,6 +91,7 @@ const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile")
 const TypographyAdmin = lazy(() => import("./pages/TypographyAdmin"));
 const LiquidityPoolAdmin = lazy(() => import("./pages/LiquidityPoolAdmin"));
 const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
+const CryptoPaymentAddressesAdmin = lazy(() => import("./pages/CryptoPaymentAddressesAdmin"));
 const FamilyAdmin = lazy(() => import("./pages/FamilyAdmin"));
 const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
 

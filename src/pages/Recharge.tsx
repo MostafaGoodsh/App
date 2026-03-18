@@ -10,6 +10,7 @@ import { useInternalWallet } from '@/hooks/useInternalWallet';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, ArrowRight, Wallet, TrendingUp, RefreshCw, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 const Recharge = () => {
   const navigate = useNavigate();

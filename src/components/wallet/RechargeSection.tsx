@@ -8,6 +8,7 @@ import { useInternalWallet } from '@/hooks/useInternalWallet';
 import { Loader2, ArrowRight, CreditCard, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
 
 export const RechargeSection = () => {
   const { toast } = useToast();
