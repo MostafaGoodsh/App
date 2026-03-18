@@ -107,7 +107,7 @@ export const UnifiedPaymentGateway = ({
     if (selectedMethod === 'crypto') {
       toast({
         title: "💰 الدفع بالكريبتو | Crypto Payment",
-        description: `المبلغ: ${amount} EGP — قم بتحويل المبلغ المعادل إلى عنوان المحفظة ثم تواصل مع الدعم لتأكيد التحويل`,
+        description: "اختر الشبكة وانسخ العنوان الظاهر ثم أتم التحويل من محفظتك مع مراجعة التحذيرات.",
       });
       if (onPaymentSuccess) {
         onPaymentSuccess('crypto-pending-' + Date.now(), parseFloat(amount));
