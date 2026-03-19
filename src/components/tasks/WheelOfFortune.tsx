@@ -418,13 +418,7 @@ const drawTripleRingWheel = (
   ctx.fillText('𓂀', center, center);
   ctx.shadowBlur = 0;
 
-  // === Ring label badges (static, not rotating) ===
-  // Outer ring label: L.E. / Upgrades
-  drawRingBadge(ctx, center, center, '⬆ Upgrades', '#1B5E3A', '#ffffff', -Math.PI / 2, (ring3Outer + ring3Inner) / 2 + 2);
-  // Middle ring label: $MS-RA  
-  drawRingBadge(ctx, center, center, '$MS-RA', '#8B6914', '#FFD700', Math.PI / 2, (ring2Outer + ring2Inner) / 2);
-  // Inner ring label: XP
-  drawRingBadge(ctx, center, center, 'XP', '#1a1a2e', '#D4AF37', -Math.PI / 2, (ring1Outer + innerCenterRadius) / 2 + 5);
+  // Ring label badges are now rendered as HTML overlays for clarity
 };
 
 /** Normalize angle to [0, 2π) */
@@ -741,6 +735,26 @@ const WheelOfFortune = () => {
             className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
             style={{ maxWidth: '100%', aspectRatio: '1/1' }}
           />
+
+          {/* Currency badges - HTML overlays so they never rotate */}
+          {/* XP badge - inner ring, top */}
+          <div className="absolute pointer-events-none" style={{ top: '38%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <div className="bg-[#1a1a2e] border border-amber-500/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-amber-400 text-[9px] font-bold tracking-wide" dir="ltr">XP</span>
+            </div>
+          </div>
+          {/* $MS-RA badge - middle ring, bottom */}
+          <div className="absolute pointer-events-none" style={{ bottom: '24%', left: '50%', transform: 'translate(-50%, 50%)' }}>
+            <div className="bg-[#8B6914] border border-amber-400/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-amber-100 text-[9px] font-bold tracking-wide" dir="ltr">$MS-RA</span>
+            </div>
+          </div>
+          {/* Upgrades badge - outer ring, top-right */}
+          <div className="absolute pointer-events-none" style={{ top: '12%', right: '18%', transform: 'translate(25%, -25%)' }}>
+            <div className="bg-[#1B5E3A] border border-emerald-400/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-white text-[9px] font-bold tracking-wide" dir="ltr">Upgrades</span>
+            </div>
+          </div>
 
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
