@@ -736,6 +736,26 @@ const WheelOfFortune = () => {
             style={{ maxWidth: '100%', aspectRatio: '1/1' }}
           />
 
+          {/* Currency badges - HTML overlays so they never rotate */}
+          {/* XP badge - inner ring, top */}
+          <div className="absolute pointer-events-none" style={{ top: '38%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <div className="bg-[#1a1a2e] border border-amber-500/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-amber-400 text-[9px] font-bold tracking-wide" dir="ltr">XP</span>
+            </div>
+          </div>
+          {/* $MS-RA badge - middle ring, bottom */}
+          <div className="absolute pointer-events-none" style={{ bottom: '24%', left: '50%', transform: 'translate(-50%, 50%)' }}>
+            <div className="bg-[#8B6914] border border-amber-400/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-amber-100 text-[9px] font-bold tracking-wide" dir="ltr">$MS-RA</span>
+            </div>
+          </div>
+          {/* Upgrades badge - outer ring, top-right */}
+          <div className="absolute pointer-events-none" style={{ top: '12%', right: '18%', transform: 'translate(25%, -25%)' }}>
+            <div className="bg-[#1B5E3A] border border-emerald-400/60 rounded-full px-2 py-0.5 shadow-md">
+              <span className="text-white text-[9px] font-bold tracking-wide" dir="ltr">Upgrades</span>
+            </div>
+          </div>
+
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
