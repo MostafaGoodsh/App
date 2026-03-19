@@ -418,13 +418,7 @@ const drawTripleRingWheel = (
   ctx.fillText('𓂀', center, center);
   ctx.shadowBlur = 0;
 
-  // === Ring label badges (static, not rotating) ===
-  // Outer ring label: L.E. / Upgrades
-  drawRingBadge(ctx, center, center, '⬆ Upgrades', '#1B5E3A', '#ffffff', -Math.PI / 2, (ring3Outer + ring3Inner) / 2 + 2);
-  // Middle ring label: $MS-RA  
-  drawRingBadge(ctx, center, center, '$MS-RA', '#8B6914', '#FFD700', Math.PI / 2, (ring2Outer + ring2Inner) / 2);
-  // Inner ring label: XP
-  drawRingBadge(ctx, center, center, 'XP', '#1a1a2e', '#D4AF37', -Math.PI / 2, (ring1Outer + innerCenterRadius) / 2 + 5);
+  // Ring label badges are now rendered as HTML overlays for clarity
 };
 
 /** Normalize angle to [0, 2π) */
