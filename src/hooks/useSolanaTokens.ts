@@ -146,40 +146,47 @@ export const useSolanaTokens = () => {
 
   const addCustomToken = useCallback(async (mintAddress: string, walletAddress: string) => {
     try {
-      const publicKey = new PublicKey(walletAddress);
       const mintPublicKey = new PublicKey(mintAddress);
+      const publicKey = new PublicKey(walletAddress);
       
-      // Get token account for this specific mint
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        publicKey,
-        { mint: mintPublicKey }
-      );
+      // Try to get token metadata first
+      const tokenMetadata = await fetchTokenMetadata(mintAddress);
+      
+      let balance = 0;
+      let decimals = tokenMetadata?.decimals || 9;
 
-      if (tokenAccounts.value.length > 0) {
-        const tokenInfo = tokenAccounts.value[0].account.data.parsed.info;
-        const balance = tokenInfo.tokenAmount.uiAmount || 0;
-        
-        const tokenMetadata = await fetchTokenMetadata(mintAddress);
-        
-        const newToken: SolanaToken = {
-          mintAddress,
-          symbol: tokenMetadata?.symbol || 'Custom',
-          name: tokenMetadata?.name || 'Custom Token',
-          balance: balance.toString(),
-          decimals: tokenInfo.tokenAmount.decimals,
-          logoUri: tokenMetadata?.logoUri
-        };
+      // Try to get token account for this specific mint
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+          publicKey,
+          { mint: mintPublicKey }
+        );
 
-        setTokens(prev => {
-          const exists = prev.find(t => t.mintAddress === mintAddress);
-          if (exists) return prev;
-          return [...prev, newToken];
-        });
-
-        return newToken;
-      } else {
-        throw new Error('لا يوجد رصيد من هذه العملة في المحفظة');
+        if (tokenAccounts.value.length > 0) {
+          const tokenInfo = tokenAccounts.value[0].account.data.parsed.info;
+          balance = tokenInfo.tokenAmount.uiAmount || 0;
+          decimals = tokenInfo.tokenAmount.decimals;
+        }
+      } catch (err) {
+        console.warn('No token account found, adding with 0 balance:', err);
       }
+
+      const newToken: SolanaToken = {
+        mintAddress,
+        symbol: tokenMetadata?.symbol || 'Custom',
+        name: tokenMetadata?.name || 'Custom Token',
+        balance: balance.toString(),
+        decimals,
+        logoUri: tokenMetadata?.logoUri
+      };
+
+      setTokens(prev => {
+        const exists = prev.find(t => t.mintAddress === mintAddress);
+        if (exists) return prev;
+        return [...prev, newToken];
+      });
+
+      return newToken;
     } catch (error) {
       console.error('Error adding custom token:', error);
       throw error;
