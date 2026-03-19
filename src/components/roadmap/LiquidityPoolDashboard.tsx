@@ -14,6 +14,7 @@ import {
   ArrowDownCircle, ArrowUpCircle, Lock, Heart, History,
   Plus, Minus, Zap, BarChart3,
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LiquidityPoolDashboardProps {
   title?: string;
@@ -25,6 +26,7 @@ type ActiveView = 'overview' | 'add' | 'remove' | 'staking' | 'charity' | 'histo
 export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDashboardProps) => {
   const pool = useLiquidityPool();
   const [activeView, setActiveView] = useState<ActiveView>('overview');
+  const { t } = useLanguage();
 
   if (pool.loading) {
     return (
@@ -36,24 +38,23 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
   }
 
   const inputActions = [
-    { key: 'add' as ActiveView, label: 'إضافة سيولة', icon: Plus, desc: 'إيداع في المجمع' },
-    { key: 'staking' as ActiveView, label: 'Staking', icon: Lock, desc: 'قفل وكسب عائد' },
+    { key: 'add' as ActiveView, label: t('إضافة سيولة', 'Add Liquidity'), icon: Plus, desc: t('إيداع في المجمع', 'Deposit to Pool') },
+    { key: 'staking' as ActiveView, label: 'Staking', icon: Lock, desc: t('قفل وكسب عائد', 'Lock & Earn Yield') },
   ];
 
   const outputActions = [
-    { key: 'remove' as ActiveView, label: 'سحب سيولة', icon: Minus, desc: 'سحب من المجمع' },
-    { key: 'charity' as ActiveView, label: 'تبرعات', icon: Heart, desc: 'برامج المساعدات' },
+    { key: 'remove' as ActiveView, label: t('سحب سيولة', 'Remove Liquidity'), icon: Minus, desc: t('سحب من المجمع', 'Withdraw from Pool') },
+    { key: 'charity' as ActiveView, label: t('تبرعات', 'Donations'), icon: Heart, desc: t('برامج المساعدات', 'Aid Programs') },
   ];
 
-  // If a sub-view is active, show it with a back button
   if (activeView !== 'overview') {
     const viewTitles: Record<ActiveView, string> = {
       overview: '',
-      add: 'إضافة سيولة',
-      remove: 'سحب سيولة',
+      add: t('إضافة سيولة', 'Add Liquidity'),
+      remove: t('سحب سيولة', 'Remove Liquidity'),
       staking: 'Staking',
-      charity: 'تبرعات ومساعدات',
-      history: 'سجل العمليات',
+      charity: t('تبرعات ومساعدات', 'Donations & Aid'),
+      history: t('سجل العمليات', 'Transaction History'),
     };
 
     return (
@@ -65,7 +66,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
           className="font-cairo gap-2"
         >
           <BarChart3 className="w-4 h-4" />
-          ← العودة للنظرة العامة
+          ← {t('العودة للنظرة العامة', 'Back to Overview')}
         </Button>
         <h2 className="font-cairo text-lg font-bold">{viewTitles[activeView]}</h2>
         {activeView === 'add' && <AddLiquidityTab pool={pool} />}
@@ -79,12 +80,10 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
 
   return (
     <div className="space-y-4 mb-8 w-full max-w-[100vw] overflow-x-hidden">
-      {/* Pool Selector */}
       {pool.pools.length > 1 && (
         <PoolSelector pools={pool.pools} activePool={pool.activePool} onSelect={pool.setActivePool} />
       )}
 
-      {/* Overview Stats */}
       <PoolOverviewTab pool={pool} />
 
       {/* المدخلات - Inputs */}
@@ -92,7 +91,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2 font-cairo">
             <ArrowDownCircle className="w-4 h-4 text-green-400" />
-            المدخلات
+            {t('المدخلات', 'Inputs')}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-2">
@@ -119,7 +118,7 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2 font-cairo">
             <ArrowUpCircle className="w-4 h-4 text-red-400" />
-            المخرجات
+            {t('المخرجات', 'Outputs')}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-2">
@@ -141,14 +140,13 @@ export const LiquidityPoolDashboard = ({ title, description }: LiquidityPoolDash
         </CardContent>
       </Card>
 
-      {/* سجل العمليات */}
       <Button
         variant="outline"
         className="w-full gap-2 font-cairo border-primary/20 hover:bg-primary/10"
         onClick={() => setActiveView('history')}
       >
         <History className="w-4 h-4" />
-        سجل العمليات
+        {t('سجل العمليات', 'Transaction History')}
       </Button>
     </div>
   );
