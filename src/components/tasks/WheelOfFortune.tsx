@@ -92,12 +92,22 @@ const pickWeightedIndex = <T extends { probability?: number }>(items: T[]) => {
 /** Strip unit suffixes so only the numeric value appears on wheel segments */
 const stripUnit = (label: string): string => {
   return label
-    .replace(/\$?MS-RA/gi, '')
-    .replace(/XP/gi, '')
-    .replace(/L\.?E\.?/gi, '')
+    .replace(/\$?\s*MS[\s-]?RA/gi, '')
+    .replace(/\$?\s*MSRA/gi, '')
+    .replace(/\bXP\b/gi, '')
+    .replace(/\bxp\b/gi, '')
+    .replace(/L\.?\s*E\.?/gi, '')
+    .replace(/\bLE\b/gi, '')
     .replace(/نقاط/gi, '')
     .replace(/نقطة/gi, '')
     .replace(/جنيه/gi, '')
+    .replace(/عملة/gi, '')
+    .replace(/توكن/gi, '')
+    .replace(/token[s]?/gi, '')
+    .replace(/point[s]?/gi, '')
+    .replace(/coin[s]?/gi, '')
+    .replace(/\$/g, '')
+    .replace(/^\s+|\s+$/g, '')
     .trim();
 };
 
