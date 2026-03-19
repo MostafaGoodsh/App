@@ -90,33 +90,28 @@ export const useSolanaTokens = () => {
           const mintAddress = tokenInfo.mint;
           const balance = tokenInfo.tokenAmount.uiAmount || 0;
           
-          // Only include tokens with balance > 0
-          if (balance > 0) {
-            try {
-              // Try to get token metadata from popular token list
-              const tokenMetadata = await fetchTokenMetadata(mintAddress);
-              
-              tokenList.push({
-                mintAddress,
-                symbol: tokenMetadata?.symbol || 'Unknown',
-                name: tokenMetadata?.name || 'Unknown Token',
-                balance: balance.toString(),
-                decimals: tokenInfo.tokenAmount.decimals,
-                logoUri: tokenMetadata?.logoUri,
-                isConverted: false
-              });
-            } catch (error) {
-              console.error('Error fetching token metadata:', error);
-              // Add token without metadata
-              tokenList.push({
-                mintAddress,
-                symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
-                name: 'Unknown Token',
-                balance: balance.toString(),
-                decimals: tokenInfo.tokenAmount.decimals,
-                isConverted: false
-              });
-            }
+          try {
+            const tokenMetadata = await fetchTokenMetadata(mintAddress);
+            
+            tokenList.push({
+              mintAddress,
+              symbol: tokenMetadata?.symbol || 'Unknown',
+              name: tokenMetadata?.name || 'Unknown Token',
+              balance: balance.toString(),
+              decimals: tokenInfo.tokenAmount.decimals,
+              logoUri: tokenMetadata?.logoUri,
+              isConverted: false
+            });
+          } catch (error) {
+            console.error('Error fetching token metadata:', error);
+            tokenList.push({
+              mintAddress,
+              symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
+              name: 'Unknown Token',
+              balance: balance.toString(),
+              decimals: tokenInfo.tokenAmount.decimals,
+              isConverted: false
+            });
           }
         }
       } catch (error) {
@@ -151,40 +146,47 @@ export const useSolanaTokens = () => {
 
   const addCustomToken = useCallback(async (mintAddress: string, walletAddress: string) => {
     try {
-      const publicKey = new PublicKey(walletAddress);
       const mintPublicKey = new PublicKey(mintAddress);
+      const publicKey = new PublicKey(walletAddress);
       
-      // Get token account for this specific mint
-      const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-        publicKey,
-        { mint: mintPublicKey }
-      );
+      // Try to get token metadata first
+      const tokenMetadata = await fetchTokenMetadata(mintAddress);
+      
+      let balance = 0;
+      let decimals = tokenMetadata?.decimals || 9;
 
-      if (tokenAccounts.value.length > 0) {
-        const tokenInfo = tokenAccounts.value[0].account.data.parsed.info;
-        const balance = tokenInfo.tokenAmount.uiAmount || 0;
-        
-        const tokenMetadata = await fetchTokenMetadata(mintAddress);
-        
-        const newToken: SolanaToken = {
-          mintAddress,
-          symbol: tokenMetadata?.symbol || 'Custom',
-          name: tokenMetadata?.name || 'Custom Token',
-          balance: balance.toString(),
-          decimals: tokenInfo.tokenAmount.decimals,
-          logoUri: tokenMetadata?.logoUri
-        };
+      // Try to get token account for this specific mint
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
+          publicKey,
+          { mint: mintPublicKey }
+        );
 
-        setTokens(prev => {
-          const exists = prev.find(t => t.mintAddress === mintAddress);
-          if (exists) return prev;
-          return [...prev, newToken];
-        });
-
-        return newToken;
-      } else {
-        throw new Error('لا يوجد رصيد من هذه العملة في المحفظة');
+        if (tokenAccounts.value.length > 0) {
+          const tokenInfo = tokenAccounts.value[0].account.data.parsed.info;
+          balance = tokenInfo.tokenAmount.uiAmount || 0;
+          decimals = tokenInfo.tokenAmount.decimals;
+        }
+      } catch (err) {
+        console.warn('No token account found, adding with 0 balance:', err);
       }
+
+      const newToken: SolanaToken = {
+        mintAddress,
+        symbol: tokenMetadata?.symbol || 'Custom',
+        name: tokenMetadata?.name || 'Custom Token',
+        balance: balance.toString(),
+        decimals,
+        logoUri: tokenMetadata?.logoUri
+      };
+
+      setTokens(prev => {
+        const exists = prev.find(t => t.mintAddress === mintAddress);
+        if (exists) return prev;
+        return [...prev, newToken];
+      });
+
+      return newToken;
     } catch (error) {
       console.error('Error adding custom token:', error);
       throw error;
@@ -224,7 +226,6 @@ export const useSolanaTokens = () => {
 // Helper function to fetch token metadata from Solana token list
 async function fetchTokenMetadata(mintAddress: string) {
   try {
-    // Use Jupiter token list API
     const response = await fetch(`https://token.jup.ag/strict`);
     const tokenList = await response.json();
     
@@ -232,7 +233,8 @@ async function fetchTokenMetadata(mintAddress: string) {
     return token ? {
       symbol: token.symbol,
       name: token.name,
-      logoUri: token.logoURI
+      logoUri: token.logoURI,
+      decimals: token.decimals
     } : null;
   } catch (error) {
     console.error('Error fetching token metadata:', error);
