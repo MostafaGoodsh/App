@@ -226,7 +226,6 @@ export const useSolanaTokens = () => {
 // Helper function to fetch token metadata from Solana token list
 async function fetchTokenMetadata(mintAddress: string) {
   try {
-    // Use Jupiter token list API
     const response = await fetch(`https://token.jup.ag/strict`);
     const tokenList = await response.json();
     
@@ -234,7 +233,8 @@ async function fetchTokenMetadata(mintAddress: string) {
     return token ? {
       symbol: token.symbol,
       name: token.name,
-      logoUri: token.logoURI
+      logoUri: token.logoURI,
+      decimals: token.decimals
     } : null;
   } catch (error) {
     console.error('Error fetching token metadata:', error);
