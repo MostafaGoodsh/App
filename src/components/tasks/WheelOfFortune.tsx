@@ -89,6 +89,65 @@ const pickWeightedIndex = <T extends { probability?: number }>(items: T[]) => {
   return Math.max(0, items.length - 1);
 };
 
+/** Strip unit suffixes so only the numeric value appears on wheel segments */
+const stripUnit = (label: string): string => {
+  return label
+    .replace(/\$?MS-RA/gi, '')
+    .replace(/XP/gi, '')
+    .replace(/L\.?E\.?/gi, '')
+    .replace(/نقاط/gi, '')
+    .replace(/نقطة/gi, '')
+    .replace(/جنيه/gi, '')
+    .trim();
+};
+
+/** Draw a pill-shaped ring label badge on the canvas */
+const drawRingBadge = (
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  text: string,
+  bgColor: string,
+  textColor: string,
+  angle: number,
+  radius: number,
+) => {
+  const x = cx + Math.cos(angle) * radius;
+  const y = cy + Math.sin(angle) * radius;
+
+  ctx.save();
+  ctx.font = 'bold 13px sans-serif';
+  const metrics = ctx.measureText(text);
+  const padX = 10;
+  const padY = 5;
+  const w = metrics.width + padX * 2;
+  const h = 20 + padY;
+
+  // pill background
+  const rx = x - w / 2;
+  const ry = y - h / 2;
+  const r = h / 2;
+  ctx.beginPath();
+  ctx.moveTo(rx + r, ry);
+  ctx.lineTo(rx + w - r, ry);
+  ctx.arc(rx + w - r, ry + r, r, -Math.PI / 2, Math.PI / 2);
+  ctx.lineTo(rx + r, ry + h);
+  ctx.arc(rx + r, ry + r, r, Math.PI / 2, -Math.PI / 2);
+  ctx.closePath();
+  ctx.fillStyle = bgColor;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(212,175,55,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // text
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+};
+
 const drawTripleRingWheel = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
@@ -158,6 +217,7 @@ const drawTripleRingWheel = (
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
     ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
@@ -165,8 +225,9 @@ const drawTripleRingWheel = (
     ctx.strokeStyle = 'rgba(0,0,0,0.8)';
     ctx.lineWidth = 3;
 
+    const cleanLabel = stripUnit(seg.label);
     const maxW = (ring3Outer - ring3Inner) * 0.85;
-    const lines = wrapText(ctx, seg.label, maxW);
+    const lines = wrapText(ctx, cleanLabel, maxW);
     const lineH = size < 400 ? 12 : 15;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
@@ -209,6 +270,7 @@ const drawTripleRingWheel = (
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
     ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
@@ -216,8 +278,9 @@ const drawTripleRingWheel = (
     ctx.strokeStyle = 'rgba(0,0,0,0.8)';
     ctx.lineWidth = 3;
 
+    const cleanLabel = stripUnit(seg.label);
     const maxW = (ring2Outer - ring2Inner) * 0.85;
-    const lines = wrapText(ctx, seg.label, maxW);
+    const lines = wrapText(ctx, cleanLabel, maxW);
     const lineH = size < 400 ? 12 : 15;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
@@ -286,6 +349,7 @@ const drawTripleRingWheel = (
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.direction = 'ltr';
     ctx.shadowColor = 'rgba(0,0,0,0.8)';
     ctx.shadowBlur = 3;
 
@@ -294,22 +358,23 @@ const drawTripleRingWheel = (
       ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(212,175,55,0.5)';
       ctx.lineWidth = 2.5;
-      ctx.strokeText('☥ بونص', tx, ty);
-      ctx.fillText('☥ بونص', tx, ty);
+      ctx.strokeText('☥ Bonus', tx, ty);
+      ctx.fillText('☥ Bonus', tx, ty);
     } else if (isUpgradeTrigger) {
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
       ctx.lineWidth = 2.5;
-      ctx.strokeText('⬆ ترقية', tx, ty);
-      ctx.fillText('⬆ ترقية', tx, ty);
+      ctx.strokeText('⬆ Up', tx, ty);
+      ctx.fillText('⬆ Up', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.7)';
       ctx.lineWidth = 3;
+      const cleanLabel = stripUnit(seg.label);
       const maxW = (ring1Outer - innerCenterRadius) * 0.85;
-      const txtLines = wrapText(ctx, seg.label, maxW);
+      const txtLines = wrapText(ctx, cleanLabel, maxW);
       const lineH = size < 400 ? 12 : 15;
       const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
       txtLines.forEach((line, li) => {
@@ -342,6 +407,14 @@ const drawTripleRingWheel = (
   ctx.shadowBlur = 6;
   ctx.fillText('𓂀', center, center);
   ctx.shadowBlur = 0;
+
+  // === Ring label badges (static, not rotating) ===
+  // Outer ring label: L.E. / Upgrades
+  drawRingBadge(ctx, center, center, '⬆ Upgrades', '#1B5E3A', '#ffffff', -Math.PI / 2, (ring3Outer + ring3Inner) / 2 + 2);
+  // Middle ring label: $MS-RA  
+  drawRingBadge(ctx, center, center, '$MS-RA', '#8B6914', '#FFD700', Math.PI / 2, (ring2Outer + ring2Inner) / 2);
+  // Inner ring label: XP
+  drawRingBadge(ctx, center, center, 'XP', '#1a1a2e', '#D4AF37', -Math.PI / 2, (ring1Outer + innerCenterRadius) / 2 + 5);
 };
 
 /** Normalize angle to [0, 2π) */
