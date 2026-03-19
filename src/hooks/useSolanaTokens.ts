@@ -90,33 +90,28 @@ export const useSolanaTokens = () => {
           const mintAddress = tokenInfo.mint;
           const balance = tokenInfo.tokenAmount.uiAmount || 0;
           
-          // Only include tokens with balance > 0
-          if (balance > 0) {
-            try {
-              // Try to get token metadata from popular token list
-              const tokenMetadata = await fetchTokenMetadata(mintAddress);
-              
-              tokenList.push({
-                mintAddress,
-                symbol: tokenMetadata?.symbol || 'Unknown',
-                name: tokenMetadata?.name || 'Unknown Token',
-                balance: balance.toString(),
-                decimals: tokenInfo.tokenAmount.decimals,
-                logoUri: tokenMetadata?.logoUri,
-                isConverted: false
-              });
-            } catch (error) {
-              console.error('Error fetching token metadata:', error);
-              // Add token without metadata
-              tokenList.push({
-                mintAddress,
-                symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
-                name: 'Unknown Token',
-                balance: balance.toString(),
-                decimals: tokenInfo.tokenAmount.decimals,
-                isConverted: false
-              });
-            }
+          try {
+            const tokenMetadata = await fetchTokenMetadata(mintAddress);
+            
+            tokenList.push({
+              mintAddress,
+              symbol: tokenMetadata?.symbol || 'Unknown',
+              name: tokenMetadata?.name || 'Unknown Token',
+              balance: balance.toString(),
+              decimals: tokenInfo.tokenAmount.decimals,
+              logoUri: tokenMetadata?.logoUri,
+              isConverted: false
+            });
+          } catch (error) {
+            console.error('Error fetching token metadata:', error);
+            tokenList.push({
+              mintAddress,
+              symbol: `${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`,
+              name: 'Unknown Token',
+              balance: balance.toString(),
+              decimals: tokenInfo.tokenAmount.decimals,
+              isConverted: false
+            });
           }
         }
       } catch (error) {
