@@ -398,10 +398,11 @@ const WheelManagement = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <Tabs defaultValue="segments">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="segments" className="text-xs"><Palette className="w-3 h-3 ml-1" /> داخلية</TabsTrigger>
           <TabsTrigger value="outer" className="text-xs"><Circle className="w-3 h-3 ml-1" /> $MS-RA</TabsTrigger>
           <TabsTrigger value="upgrade" className="text-xs">⬆ ترقيات</TabsTrigger>
+          <TabsTrigger value="display" className="text-xs">🎨 العرض</TabsTrigger>
           <TabsTrigger value="settings" className="text-xs"><Settings className="w-3 h-3 ml-1" /> إعدادات</TabsTrigger>
         </TabsList>
 
