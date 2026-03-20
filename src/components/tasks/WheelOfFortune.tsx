@@ -391,19 +391,37 @@ const drawTripleRingWheel = (
     ctx.shadowBlur = 3;
 
     if (isBonusTrigger) {
-      ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-      ctx.lineWidth = 2.5;
-      ctx.strokeText('☥ Bonus', tx, ty);
-      ctx.fillText('☥ Bonus', tx, ty);
-    } else if (isUpgradeTrigger) {
+      // Draw currency logo & name on bonus segment
+      const bonusFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      ctx.font = `bold ${bonusFontSize}px ${segFontFamily}`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      // Line 1: Ankh symbol
+      ctx.fillStyle = '#D4AF37';
+      const line1Y = ty - bonusFontSize * 0.7;
+      ctx.strokeText('☥', tx, line1Y);
+      ctx.fillText('☥', tx, line1Y);
+      // Line 2: Currency name
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-      ctx.lineWidth = 2.5;
-      ctx.strokeText('⬆ Up', tx, ty);
-      ctx.fillText('⬆ Up', tx, ty);
+      ctx.font = `bold ${bonusFontSize - 1}px ${segFontFamily}`;
+      const line2Y = ty + bonusFontSize * 0.5;
+      ctx.strokeText('$MS-RA', tx, line2Y);
+      ctx.fillText('$MS-RA', tx, line2Y);
+    } else if (isUpgradeTrigger) {
+      // Draw upgrade label with arrow & currency
+      const upgFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      ctx.font = `bold ${upgFontSize}px ${segFontFamily}`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      ctx.fillStyle = '#ffffff';
+      const line1Y = ty - upgFontSize * 0.7;
+      ctx.strokeText('⬆', tx, line1Y);
+      ctx.fillText('⬆', tx, line1Y);
+      ctx.font = `bold ${upgFontSize - 1}px ${segFontFamily}`;
+      const line2Y = ty + upgFontSize * 0.5;
+      ctx.fillStyle = '#90EE90';
+      ctx.strokeText('L.E.', tx, line2Y);
+      ctx.fillText('L.E.', tx, line2Y);
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
@@ -796,28 +814,7 @@ const WheelOfFortune = () => {
             style={{ maxWidth: '100%', aspectRatio: '1/1', borderWidth: `${settings?.wheel_border_width ?? 3}px`, borderStyle: 'solid', borderColor: `${settings?.wheel_border_color || '#D4AF37'}80` }}
           />
 
-          {/* Currency badges - dynamic from admin settings */}
-          {settings?.badge_outer_label && (
-            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_outer_top || '2'}%`, left: '50%', transform: 'translateX(-50%)' }}>
-              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_outer_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
-              </div>
-            </div>
-          )}
-          {settings?.badge_middle_label && (
-            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_middle_top || '15'}%`, left: '50%', transform: 'translateX(-50%)' }}>
-              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_middle_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
-              </div>
-            </div>
-          )}
-          {settings?.badge_inner_label && (
-            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_inner_top || '28'}%`, left: '50%', transform: 'translateX(-50%)' }}>
-              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_inner_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
-              </div>
-            </div>
-          )}
+          {/* Badges removed - currency names shown directly on bonus/upgrade segments */}
 
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
