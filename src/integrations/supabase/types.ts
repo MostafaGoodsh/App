@@ -4253,28 +4253,40 @@ export type Database = {
           badge_font_size: string | null
           badge_inner_bg: string | null
           badge_inner_border_color: string | null
+          badge_inner_font_size: string | null
           badge_inner_label: string | null
           badge_inner_text_color: string | null
           badge_inner_top: string | null
           badge_middle_bg: string | null
           badge_middle_border_color: string | null
+          badge_middle_font_size: string | null
           badge_middle_label: string | null
           badge_middle_text_color: string | null
           badge_middle_top: string | null
           badge_outer_bg: string | null
           badge_outer_border_color: string | null
+          badge_outer_font_size: string | null
           badge_outer_label: string | null
           badge_outer_text_color: string | null
           badge_outer_top: string | null
+          center_bg_color: string | null
+          center_icon: string | null
+          center_size: number | null
+          center_text_color: string | null
           created_at: string
           description: string | null
           description_en: string | null
+          divider_color: string | null
           free_spins_per_day: number
           id: string
+          inner_ring_stroke_color: string | null
           intro_text: string | null
           intro_text_en: string | null
           is_active: boolean
           is_visible: boolean
+          middle_ring_stroke_color: string | null
+          outer_ring_stroke_color: string | null
+          pointer_color: string | null
           ring_inner_ratio: number | null
           ring_middle_ratio: number | null
           ring_outer_ratio: number | null
@@ -4284,34 +4296,49 @@ export type Database = {
           title: string
           title_en: string | null
           updated_at: string
+          wheel_background_image: string | null
+          wheel_border_color: string | null
+          wheel_border_width: number | null
         }
         Insert: {
           background_color?: string | null
           badge_font_size?: string | null
           badge_inner_bg?: string | null
           badge_inner_border_color?: string | null
+          badge_inner_font_size?: string | null
           badge_inner_label?: string | null
           badge_inner_text_color?: string | null
           badge_inner_top?: string | null
           badge_middle_bg?: string | null
           badge_middle_border_color?: string | null
+          badge_middle_font_size?: string | null
           badge_middle_label?: string | null
           badge_middle_text_color?: string | null
           badge_middle_top?: string | null
           badge_outer_bg?: string | null
           badge_outer_border_color?: string | null
+          badge_outer_font_size?: string | null
           badge_outer_label?: string | null
           badge_outer_text_color?: string | null
           badge_outer_top?: string | null
+          center_bg_color?: string | null
+          center_icon?: string | null
+          center_size?: number | null
+          center_text_color?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
+          divider_color?: string | null
           free_spins_per_day?: number
           id?: string
+          inner_ring_stroke_color?: string | null
           intro_text?: string | null
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          middle_ring_stroke_color?: string | null
+          outer_ring_stroke_color?: string | null
+          pointer_color?: string | null
           ring_inner_ratio?: number | null
           ring_middle_ratio?: number | null
           ring_outer_ratio?: number | null
@@ -4321,34 +4348,49 @@ export type Database = {
           title?: string
           title_en?: string | null
           updated_at?: string
+          wheel_background_image?: string | null
+          wheel_border_color?: string | null
+          wheel_border_width?: number | null
         }
         Update: {
           background_color?: string | null
           badge_font_size?: string | null
           badge_inner_bg?: string | null
           badge_inner_border_color?: string | null
+          badge_inner_font_size?: string | null
           badge_inner_label?: string | null
           badge_inner_text_color?: string | null
           badge_inner_top?: string | null
           badge_middle_bg?: string | null
           badge_middle_border_color?: string | null
+          badge_middle_font_size?: string | null
           badge_middle_label?: string | null
           badge_middle_text_color?: string | null
           badge_middle_top?: string | null
           badge_outer_bg?: string | null
           badge_outer_border_color?: string | null
+          badge_outer_font_size?: string | null
           badge_outer_label?: string | null
           badge_outer_text_color?: string | null
           badge_outer_top?: string | null
+          center_bg_color?: string | null
+          center_icon?: string | null
+          center_size?: number | null
+          center_text_color?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
+          divider_color?: string | null
           free_spins_per_day?: number
           id?: string
+          inner_ring_stroke_color?: string | null
           intro_text?: string | null
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          middle_ring_stroke_color?: string | null
+          outer_ring_stroke_color?: string | null
+          pointer_color?: string | null
           ring_inner_ratio?: number | null
           ring_middle_ratio?: number | null
           ring_outer_ratio?: number | null
@@ -4358,6 +4400,9 @@ export type Database = {
           title?: string
           title_en?: string | null
           updated_at?: string
+          wheel_background_image?: string | null
+          wheel_border_color?: string | null
+          wheel_border_width?: number | null
         }
         Relationships: []
       }

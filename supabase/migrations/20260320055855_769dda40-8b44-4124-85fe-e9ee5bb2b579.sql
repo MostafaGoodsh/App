@@ -1,0 +1,16 @@
+ALTER TABLE public.wheel_settings
+  ADD COLUMN IF NOT EXISTS wheel_background_image text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS wheel_border_color text DEFAULT '#D4AF37',
+  ADD COLUMN IF NOT EXISTS wheel_border_width numeric DEFAULT 3,
+  ADD COLUMN IF NOT EXISTS center_icon text DEFAULT '𓂀',
+  ADD COLUMN IF NOT EXISTS center_bg_color text DEFAULT '#D4AF37',
+  ADD COLUMN IF NOT EXISTS center_text_color text DEFAULT '#1a1a2e',
+  ADD COLUMN IF NOT EXISTS center_size numeric DEFAULT 28,
+  ADD COLUMN IF NOT EXISTS divider_color text DEFAULT '#D4AF37',
+  ADD COLUMN IF NOT EXISTS outer_ring_stroke_color text DEFAULT '#2E8B57',
+  ADD COLUMN IF NOT EXISTS middle_ring_stroke_color text DEFAULT '#D4AF37',
+  ADD COLUMN IF NOT EXISTS inner_ring_stroke_color text DEFAULT 'rgba(212,175,55,0.6)',
+  ADD COLUMN IF NOT EXISTS pointer_color text DEFAULT '#f59e0b',
+  ADD COLUMN IF NOT EXISTS badge_outer_font_size text DEFAULT '14px',
+  ADD COLUMN IF NOT EXISTS badge_middle_font_size text DEFAULT '14px',
+  ADD COLUMN IF NOT EXISTS badge_inner_font_size text DEFAULT '14px';
