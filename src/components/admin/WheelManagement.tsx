@@ -473,6 +473,100 @@ const WheelManagement = () => {
           ))}
         </TabsContent>
 
+        {/* Display Settings Tab */}
+        <TabsContent value="display" className="space-y-4">
+          {settings && (
+            <>
+              {/* Badges */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">🏷️ يافطات الحلقات (Badges)</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label className="text-xs">حجم خط اليافطة</Label><Input value={settings.badge_font_size || "14px"} onChange={(e) => setSettings({ ...settings, badge_font_size: e.target.value })} placeholder="14px" /></div>
+                  </div>
+
+                  {/* Outer badge */}
+                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-amber-400">الحلقة الخارجية (ترقيات)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_outer_label || ""} onChange={(e) => setSettings({ ...settings, badge_outer_label: e.target.value })} /></div>
+                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_outer_top || "2"} onChange={(e) => setSettings({ ...settings, badge_outer_top: e.target.value })} /></div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_outer_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_outer_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_outer_text_color || "#fbbf24"} onChange={(e) => setSettings({ ...settings, badge_outer_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_outer_border_color || "#f59e0b"} onChange={(e) => setSettings({ ...settings, badge_outer_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                  </div>
+
+                  {/* Middle badge */}
+                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-amber-300">الحلقة الوسطى ($MS-RA)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_middle_label || ""} onChange={(e) => setSettings({ ...settings, badge_middle_label: e.target.value })} /></div>
+                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_middle_top || "15"} onChange={(e) => setSettings({ ...settings, badge_middle_top: e.target.value })} /></div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_middle_bg || "#8B6914"} onChange={(e) => setSettings({ ...settings, badge_middle_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_middle_text_color || "#ffffff"} onChange={(e) => setSettings({ ...settings, badge_middle_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_middle_border_color || "#fcd34d"} onChange={(e) => setSettings({ ...settings, badge_middle_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                  </div>
+
+                  {/* Inner badge */}
+                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-emerald-400">الحلقة الداخلية (XP)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_inner_label || ""} onChange={(e) => setSettings({ ...settings, badge_inner_label: e.target.value })} /></div>
+                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_inner_top || "28"} onChange={(e) => setSettings({ ...settings, badge_inner_top: e.target.value })} /></div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_inner_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_inner_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_inner_text_color || "#34d399"} onChange={(e) => setSettings({ ...settings, badge_inner_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_inner_border_color || "#10b981"} onChange={(e) => setSettings({ ...settings, badge_inner_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Ring Sizes */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">📐 أحجام الحلقات</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-muted-foreground">النسب تحدد مكان الفواصل بين الحلقات (0 = المركز، 1 = الحافة). قيمة أكبر = حلقة أوسع</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-xs">فاصل الحلقة الخارجية</Label>
+                      <Input type="number" step="0.01" min="0.5" max="0.95" value={settings.ring_outer_ratio ?? 0.74} onChange={(e) => setSettings({ ...settings, ring_outer_ratio: +e.target.value })} />
+                      <span className="text-[10px] text-muted-foreground">الحد الداخلي لحلقة الترقيات</span>
+                    </div>
+                    <div>
+                      <Label className="text-xs">فاصل الحلقة الوسطى</Label>
+                      <Input type="number" step="0.01" min="0.3" max="0.7" value={settings.ring_middle_ratio ?? 0.50} onChange={(e) => setSettings({ ...settings, ring_middle_ratio: +e.target.value })} />
+                      <span className="text-[10px] text-muted-foreground">الحد الداخلي لحلقة $MS-RA</span>
+                    </div>
+                    <div>
+                      <Label className="text-xs">فاصل الحلقة الداخلية</Label>
+                      <Input type="number" step="0.01" min="0.2" max="0.6" value={settings.ring_inner_ratio ?? 0.48} onChange={(e) => setSettings({ ...settings, ring_inner_ratio: +e.target.value })} />
+                      <span className="text-[10px] text-muted-foreground">الحد الخارجي لحلقة XP</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Segment Text */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">🔤 خط الكتابة على الأقسام</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label className="text-xs">حجم الخط</Label><Input value={settings.segment_font_size || "14px"} onChange={(e) => setSettings({ ...settings, segment_font_size: e.target.value })} placeholder="14px" /></div>
+                    <div><Label className="text-xs">نوع الخط</Label><Input value={settings.segment_font_family || "sans-serif"} onChange={(e) => setSettings({ ...settings, segment_font_family: e.target.value })} placeholder="sans-serif" /></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Button onClick={saveSettings} disabled={saving} className="w-full">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <Save className="w-4 h-4 ml-1" />}
+                حفظ إعدادات العرض
+              </Button>
+            </>
+          )}
+        </TabsContent>
+
         {/* Settings Tab */}
         <TabsContent value="settings" className="space-y-4">
           {settings && (
