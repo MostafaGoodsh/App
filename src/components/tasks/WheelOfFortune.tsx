@@ -800,21 +800,21 @@ const WheelOfFortune = () => {
           {settings?.badge_outer_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_outer_top || '2'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_outer_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
               </div>
             </div>
           )}
           {settings?.badge_middle_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_middle_top || '15'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_middle_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
               </div>
             </div>
           )}
           {settings?.badge_inner_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_inner_top || '28'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_inner_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
               </div>
             </div>
           )}
