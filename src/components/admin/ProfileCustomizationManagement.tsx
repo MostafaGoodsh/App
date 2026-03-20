@@ -101,9 +101,33 @@ export default function ProfileCustomizationManagement() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const payload = {
+        ...customization,
+        user_id: user.id,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Try update first
+      const { data: existing } = await supabase
         .from('profile_customization')
-        .upsert(customization, { onConflict: 'user_id' });
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      let error;
+      if (existing) {
+        ({ error } = await supabase
+          .from('profile_customization')
+          .update(payload)
+          .eq('user_id', user.id));
+      } else {
+        ({ error } = await supabase
+          .from('profile_customization')
+          .insert(payload));
+      }
 
       if (error) throw error;
 
