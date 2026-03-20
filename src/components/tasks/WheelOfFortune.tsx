@@ -171,15 +171,21 @@ const drawTripleRingWheel = (
   const size = canvas.width;
   const center = size / 2;
 
-  // Ring radii (3 rings + center) - wider rings for better text readability
+  // Ring radii from settings or defaults
   const outerEdge = center - 8;
-  const ring3Outer = outerEdge;          // Upgrade ring outer
-  const ring3Inner = outerEdge * 0.74;   // Wider upgrade ring
-  const divider2 = outerEdge * 0.73;
-  const ring2Outer = outerEdge * 0.72;   // MS-RA ring outer
-  const ring2Inner = outerEdge * 0.50;   // Wider MS-RA ring
-  const divider1 = outerEdge * 0.49;
-  const ring1Outer = outerEdge * 0.48;   // XP ring outer
+  const outerRatio = (window as any).__wheelRingOuter ?? 0.74;
+  const middleRatio = (window as any).__wheelRingMiddle ?? 0.50;
+  const innerRatio = (window as any).__wheelRingInner ?? 0.48;
+  const segFontSize = (window as any).__wheelSegFontSize ?? '14px';
+  const segFontFamily = (window as any).__wheelSegFontFamily ?? 'sans-serif';
+
+  const ring3Outer = outerEdge;
+  const ring3Inner = outerEdge * outerRatio;
+  const divider2 = outerEdge * (outerRatio - 0.01);
+  const ring2Outer = outerEdge * (outerRatio - 0.02);
+  const ring2Inner = outerEdge * middleRatio;
+  const divider1 = outerEdge * (middleRatio - 0.01);
+  const ring1Outer = outerEdge * innerRatio;
   const innerCenterRadius = 28;
 
   ctx.clearRect(0, 0, size, size);
