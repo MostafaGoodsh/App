@@ -497,6 +497,17 @@ const WheelOfFortune = () => {
   const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
   const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
 
+  // Set ring/font globals for canvas drawing function
+  useEffect(() => {
+    if (settings) {
+      (window as any).__wheelRingOuter = settings.ring_outer_ratio ?? 0.74;
+      (window as any).__wheelRingMiddle = settings.ring_middle_ratio ?? 0.50;
+      (window as any).__wheelRingInner = settings.ring_inner_ratio ?? 0.48;
+      (window as any).__wheelSegFontSize = settings.segment_font_size ?? '14px';
+      (window as any).__wheelSegFontFamily = settings.segment_font_family ?? 'sans-serif';
+    }
+  }, [settings]);
+
   // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -504,7 +515,7 @@ const WheelOfFortune = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation]);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings]);
 
   // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
