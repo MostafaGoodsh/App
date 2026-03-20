@@ -154,6 +154,7 @@ export default function Profile() {
                       </div>
                       <User className="w-5 h-5 text-muted-foreground" />
                     </div>
+                    {customization.show_join_date && (
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("تاريخ الانضمام")}</p>
@@ -161,6 +162,7 @@ export default function Profile() {
                       </div>
                       <Calendar className="w-5 h-5 text-muted-foreground" />
                     </div>
+                    )}
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("اللغة المفضلة")}</p>
