@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { User, Edit, Settings, Activity, Calendar, MapPin, Languages, Wallet, Star, ClipboardList, ExternalLink, Users } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
+import { useProfileCustomization } from '@/hooks/useProfileCustomization';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +34,7 @@ export default function Profile() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const isOwnProfile = !viewUserId || viewUserId === user?.id;
+  const { customization, containerStyle, backgroundStyle } = useProfileCustomization(viewUserId || undefined);
   
   const { stats, dailyTasks, completedTasks, completeTask, isTaskCompleted, loading: statsLoading } = useEngagementStats();
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
@@ -101,9 +103,14 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+    <div className="min-h-screen" style={{
+      ...backgroundStyle,
+      ...((!customization.background_gradient && !customization.background_image) 
+        ? { backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }
+        : {}),
+    }}>
       <div className="min-h-screen bg-background/90">
-        <div className="container max-w-4xl mx-auto p-6 arabic-content">
+        <div className="container max-w-4xl mx-auto p-6 arabic-content" style={containerStyle}>
           <ProfileHeader profile={profile} />
 
           <Tabs defaultValue="overview" className="space-y-6">
@@ -147,6 +154,7 @@ export default function Profile() {
                       </div>
                       <User className="w-5 h-5 text-muted-foreground" />
                     </div>
+                    {customization.show_join_date && (
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("تاريخ الانضمام")}</p>
@@ -154,6 +162,7 @@ export default function Profile() {
                       </div>
                       <Calendar className="w-5 h-5 text-muted-foreground" />
                     </div>
+                    )}
                     <div className="flex items-center gap-3 justify-end">
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">{t("اللغة المفضلة")}</p>
@@ -163,6 +172,7 @@ export default function Profile() {
                     </div>
                   </div>
 
+                  {customization.show_social_links && (
                   <div className="pt-4 border-t">
                     <h3 className="font-medium mb-4 text-right text-lg">{t("روابط التواصل")}</h3>
                     <div className="grid gap-3">
@@ -184,6 +194,7 @@ export default function Profile() {
                       )}
                     </div>
                   </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -282,13 +293,14 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {isOwnProfile ? (
+              {customization.show_stats && isOwnProfile && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <AccountStatsCard />
                   <EngagementStatsCard />
-                  {profile.user_id && <FollowStats userId={profile.user_id} />}
+                  {customization.show_follow_stats && profile.user_id && <FollowStats userId={profile.user_id} />}
                 </div>
-              ) : (
+              )}
+              {customization.show_follow_stats && !isOwnProfile && (
                 <div className="flex justify-center">
                   {profile.user_id && <FollowStats userId={profile.user_id} />}
                 </div>
@@ -299,7 +311,7 @@ export default function Profile() {
             <TabsContent value="edit"><ProfileEditForm profile={profile} /></TabsContent>
 
             <TabsContent value="activity" className="space-y-6">
-              <TodoList />
+              {customization.show_todo_list && <TodoList />}
               <Card>
                 <CardHeader>
                   <CardTitle>{t("سجل النشاط")}</CardTitle>
