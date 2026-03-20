@@ -171,13 +171,22 @@ const drawTripleRingWheel = (
   const size = canvas.width;
   const center = size / 2;
 
-  // Ring radii from settings or defaults
+  const ws = (window as any).__wheelSettings || {};
   const outerEdge = center - 8;
-  const outerRatio = (window as any).__wheelRingOuter ?? 0.74;
-  const middleRatio = (window as any).__wheelRingMiddle ?? 0.50;
-  const innerRatio = (window as any).__wheelRingInner ?? 0.48;
-  const segFontSize = (window as any).__wheelSegFontSize ?? '14px';
-  const segFontFamily = (window as any).__wheelSegFontFamily ?? 'sans-serif';
+  const outerRatio = ws.ring_outer_ratio ?? 0.74;
+  const middleRatio = ws.ring_middle_ratio ?? 0.50;
+  const innerRatio = ws.ring_inner_ratio ?? 0.48;
+  const segFontSize = ws.segment_font_size ?? '14px';
+  const segFontFamily = ws.segment_font_family ?? 'sans-serif';
+  const dividerColor = ws.divider_color ?? '#D4AF37';
+  const outerStroke = ws.outer_ring_stroke_color ?? '#2E8B57';
+  const middleStroke = ws.middle_ring_stroke_color ?? '#D4AF37';
+  const innerStroke = ws.inner_ring_stroke_color ?? 'rgba(212,175,55,0.6)';
+  const centerBg = ws.center_bg_color ?? '#D4AF37';
+  const centerTextColor = ws.center_text_color ?? '#1a1a2e';
+  const centerIcon = ws.center_icon ?? '𓂀';
+  const centerSize = ws.center_size ?? 28;
+  const wheelBorderColor = ws.wheel_border_color ?? '#D4AF37';
 
   const ring3Outer = outerEdge;
   const ring3Inner = outerEdge * outerRatio;
@@ -186,14 +195,26 @@ const drawTripleRingWheel = (
   const ring2Inner = outerEdge * middleRatio;
   const divider1 = outerEdge * (middleRatio - 0.01);
   const ring1Outer = outerEdge * innerRatio;
-  const innerCenterRadius = 28;
+  const innerCenterRadius = centerSize;
 
   ctx.clearRect(0, 0, size, size);
+
+  // === Background image ===
+  if (ws.bgImage && ws.bgImage.complete) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(center, center, outerEdge + 5, 0, 2 * Math.PI);
+    ctx.clip();
+    ctx.globalAlpha = 0.15;
+    ctx.drawImage(ws.bgImage, 0, 0, size, size);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
 
   // === Outer decorative ring ===
   ctx.beginPath();
   ctx.arc(center, center, outerEdge + 5, 0, 2 * Math.PI);
-  ctx.strokeStyle = '#D4AF37';
+  ctx.strokeStyle = wheelBorderColor;
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
@@ -201,7 +222,7 @@ const drawTripleRingWheel = (
     const angle = (i / 32) * Math.PI * 2;
     const x = center + Math.cos(angle) * (outerEdge + 3);
     const y = center + Math.sin(angle) * (outerEdge + 3);
-    ctx.fillStyle = i % 2 === 0 ? '#D4AF37' : '#B8860B';
+    ctx.fillStyle = i % 2 === 0 ? wheelBorderColor : '#B8860B';
     ctx.font = '6px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -221,7 +242,7 @@ const drawTripleRingWheel = (
 
     ctx.fillStyle = seg.color;
     ctx.fill();
-    ctx.strokeStyle = '#2E8B57';
+    ctx.strokeStyle = outerStroke;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -257,7 +278,7 @@ const drawTripleRingWheel = (
   // === Divider 2 ===
   ctx.beginPath();
   ctx.arc(center, center, divider2, 0, 2 * Math.PI);
-  ctx.strokeStyle = '#D4AF37';
+  ctx.strokeStyle = dividerColor;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -274,7 +295,7 @@ const drawTripleRingWheel = (
 
     ctx.fillStyle = seg.color;
     ctx.fill();
-    ctx.strokeStyle = '#D4AF37';
+    ctx.strokeStyle = middleStroke;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -310,7 +331,7 @@ const drawTripleRingWheel = (
   // === Divider 1 ===
   ctx.beginPath();
   ctx.arc(center, center, divider1, 0, 2 * Math.PI);
-  ctx.strokeStyle = '#D4AF37';
+  ctx.strokeStyle = dividerColor;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -318,7 +339,7 @@ const drawTripleRingWheel = (
     const angle = (i / 8) * Math.PI * 2;
     const x = center + Math.cos(angle) * divider1;
     const y = center + Math.sin(angle) * divider1;
-    ctx.fillStyle = '#D4AF37';
+    ctx.fillStyle = dividerColor;
     ctx.font = 'bold 7px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -353,7 +374,7 @@ const drawTripleRingWheel = (
       ctx.fillStyle = seg.color;
     }
     ctx.fill();
-    ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
+    ctx.strokeStyle = innerStroke;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -404,27 +425,25 @@ const drawTripleRingWheel = (
 
   // === Center circle ===
   const centerGrad = ctx.createRadialGradient(center, center, 0, center, center, innerCenterRadius);
-  centerGrad.addColorStop(0, '#D4AF37');
-  centerGrad.addColorStop(0.7, '#B8860B');
-  centerGrad.addColorStop(1, '#8B6914');
+  centerGrad.addColorStop(0, centerBg);
+  centerGrad.addColorStop(0.7, centerBg);
+  centerGrad.addColorStop(1, `${centerBg}88`);
   ctx.beginPath();
   ctx.arc(center, center, innerCenterRadius, 0, 2 * Math.PI);
   ctx.fillStyle = centerGrad;
   ctx.fill();
-  ctx.strokeStyle = '#1a1a2e';
+  ctx.strokeStyle = centerTextColor;
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  ctx.fillStyle = '#1a1a2e';
-  ctx.font = 'bold 16px serif';
+  ctx.fillStyle = centerTextColor;
+  ctx.font = `bold ${Math.round(innerCenterRadius * 0.8)}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(212, 175, 55, 0.5)';
+  ctx.shadowColor = `${centerBg}80`;
   ctx.shadowBlur = 6;
-  ctx.fillText('𓂀', center, center);
+  ctx.fillText(centerIcon, center, center);
   ctx.shadowBlur = 0;
-
-  // Ring label badges are now rendered as HTML overlays for clarity
 };
 
 /** Normalize angle to [0, 2π) */
@@ -497,14 +516,38 @@ const WheelOfFortune = () => {
   const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
   const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
 
-  // Set ring/font globals for canvas drawing function
+  // Set all settings as globals for canvas drawing
   useEffect(() => {
     if (settings) {
-      (window as any).__wheelRingOuter = settings.ring_outer_ratio ?? 0.74;
-      (window as any).__wheelRingMiddle = settings.ring_middle_ratio ?? 0.50;
-      (window as any).__wheelRingInner = settings.ring_inner_ratio ?? 0.48;
-      (window as any).__wheelSegFontSize = settings.segment_font_size ?? '14px';
-      (window as any).__wheelSegFontFamily = settings.segment_font_family ?? 'sans-serif';
+      const ws: Record<string, any> = {
+        ring_outer_ratio: settings.ring_outer_ratio ?? 0.74,
+        ring_middle_ratio: settings.ring_middle_ratio ?? 0.50,
+        ring_inner_ratio: settings.ring_inner_ratio ?? 0.48,
+        segment_font_size: settings.segment_font_size ?? '14px',
+        segment_font_family: settings.segment_font_family ?? 'sans-serif',
+        divider_color: settings.divider_color ?? '#D4AF37',
+        outer_ring_stroke_color: settings.outer_ring_stroke_color ?? '#2E8B57',
+        middle_ring_stroke_color: settings.middle_ring_stroke_color ?? '#D4AF37',
+        inner_ring_stroke_color: settings.inner_ring_stroke_color ?? 'rgba(212,175,55,0.6)',
+        center_bg_color: settings.center_bg_color ?? '#D4AF37',
+        center_text_color: settings.center_text_color ?? '#1a1a2e',
+        center_icon: settings.center_icon ?? '𓂀',
+        center_size: settings.center_size ?? 28,
+        wheel_border_color: settings.wheel_border_color ?? '#D4AF37',
+      };
+
+      // Load background image if set
+      if (settings.wheel_background_image) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          ws.bgImage = img;
+          (window as any).__wheelSettings = ws;
+        };
+        img.src = settings.wheel_background_image;
+      }
+
+      (window as any).__wheelSettings = ws;
     }
   }, [settings]);
 
@@ -721,8 +764,8 @@ const WheelOfFortune = () => {
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
-              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent border-t-amber-500 drop-shadow-lg" />
-              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent border-t-amber-600 absolute top-[1px] left-1/2 -translate-x-1/2" />
+              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent drop-shadow-lg" style={{ borderTopColor: settings?.pointer_color || '#f59e0b' }} />
+              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent absolute top-[1px] left-1/2 -translate-x-1/2" style={{ borderTopColor: `${settings?.pointer_color || '#f59e0b'}cc` }} />
             </div>
           </div>
 
@@ -749,29 +792,29 @@ const WheelOfFortune = () => {
             ref={canvasRef}
             width={640}
             height={640}
-            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
-            style={{ maxWidth: '100%', aspectRatio: '1/1' }}
+            className="rounded-full shadow-2xl shadow-amber-500/20 w-full"
+            style={{ maxWidth: '100%', aspectRatio: '1/1', borderWidth: `${settings?.wheel_border_width ?? 3}px`, borderStyle: 'solid', borderColor: `${settings?.wheel_border_color || '#D4AF37'}80` }}
           />
 
           {/* Currency badges - dynamic from admin settings */}
           {settings?.badge_outer_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_outer_top || '2'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_outer_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
               </div>
             </div>
           )}
           {settings?.badge_middle_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_middle_top || '15'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_middle_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
               </div>
             </div>
           )}
           {settings?.badge_inner_label && (
             <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_inner_top || '28'}%`, left: '50%', transform: 'translateX(-50%)' }}>
               <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
-                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_inner_font_size || settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
               </div>
             </div>
           )}

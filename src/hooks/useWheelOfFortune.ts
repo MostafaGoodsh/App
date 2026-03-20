@@ -44,11 +44,26 @@ interface WheelSettings {
   badge_outer_top: string | null;
   badge_middle_top: string | null;
   badge_inner_top: string | null;
+  badge_outer_font_size: string | null;
+  badge_middle_font_size: string | null;
+  badge_inner_font_size: string | null;
   ring_outer_ratio: number | null;
   ring_middle_ratio: number | null;
   ring_inner_ratio: number | null;
   segment_font_size: string | null;
   segment_font_family: string | null;
+  wheel_background_image: string | null;
+  wheel_border_color: string | null;
+  wheel_border_width: number | null;
+  center_icon: string | null;
+  center_bg_color: string | null;
+  center_text_color: string | null;
+  center_size: number | null;
+  divider_color: string | null;
+  outer_ring_stroke_color: string | null;
+  middle_ring_stroke_color: string | null;
+  inner_ring_stroke_color: string | null;
+  pointer_color: string | null;
 }
 
 export function useWheelOfFortune() {
@@ -105,7 +120,6 @@ export function useWheelOfFortune() {
 
     setSpinning(true);
     try {
-      // Weighted random selection
       const totalProb = segments.reduce((s, seg) => s + seg.probability, 0);
       let rand = Math.random() * totalProb;
       let winner = segments[0];
@@ -119,7 +133,6 @@ export function useWheelOfFortune() {
 
       const costXp = isFree() ? 0 : settings.spin_cost_xp;
 
-      // Record spin in history
       const { error } = await supabase.from("wheel_spin_history").insert({
         user_id: user.id,
         segment_id: winner.id,
@@ -130,7 +143,6 @@ export function useWheelOfFortune() {
 
       if (error) throw error;
 
-      // Process reward distribution (80/20 split + liquidity pool)
       const { data: rewardResult, error: rewardError } = await supabase.rpc('process_wheel_reward', {
         p_user_id: user.id,
         p_reward_type: winner.reward_type,
@@ -154,7 +166,6 @@ export function useWheelOfFortune() {
     }
   }, [user, settings, segments, spinning, isFree]);
 
-  // Process bonus ring MS-RA reward
   const processBonusReward = useCallback(async (msraValue: number) => {
     if (!user) return null;
     try {
