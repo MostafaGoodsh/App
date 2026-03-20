@@ -60,9 +60,13 @@ export default function ProfileCustomizationManagement() {
 
   const fetchCustomization = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data, error } = await supabase
         .from('profile_customization')
         .select('*')
+        .eq('user_id', user.id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
