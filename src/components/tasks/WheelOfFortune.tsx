@@ -171,15 +171,21 @@ const drawTripleRingWheel = (
   const size = canvas.width;
   const center = size / 2;
 
-  // Ring radii (3 rings + center) - wider rings for better text readability
+  // Ring radii from settings or defaults
   const outerEdge = center - 8;
-  const ring3Outer = outerEdge;          // Upgrade ring outer
-  const ring3Inner = outerEdge * 0.74;   // Wider upgrade ring
-  const divider2 = outerEdge * 0.73;
-  const ring2Outer = outerEdge * 0.72;   // MS-RA ring outer
-  const ring2Inner = outerEdge * 0.50;   // Wider MS-RA ring
-  const divider1 = outerEdge * 0.49;
-  const ring1Outer = outerEdge * 0.48;   // XP ring outer
+  const outerRatio = (window as any).__wheelRingOuter ?? 0.74;
+  const middleRatio = (window as any).__wheelRingMiddle ?? 0.50;
+  const innerRatio = (window as any).__wheelRingInner ?? 0.48;
+  const segFontSize = (window as any).__wheelSegFontSize ?? '14px';
+  const segFontFamily = (window as any).__wheelSegFontFamily ?? 'sans-serif';
+
+  const ring3Outer = outerEdge;
+  const ring3Inner = outerEdge * outerRatio;
+  const divider2 = outerEdge * (outerRatio - 0.01);
+  const ring2Outer = outerEdge * (outerRatio - 0.02);
+  const ring2Inner = outerEdge * middleRatio;
+  const divider1 = outerEdge * (middleRatio - 0.01);
+  const ring1Outer = outerEdge * innerRatio;
   const innerCenterRadius = 28;
 
   ctx.clearRect(0, 0, size, size);
@@ -229,7 +235,7 @@ const drawTripleRingWheel = (
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+    ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
     ctx.shadowBlur = 5;
     ctx.strokeStyle = 'rgba(0,0,0,0.8)';
@@ -282,7 +288,7 @@ const drawTripleRingWheel = (
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+    ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
     ctx.shadowBlur = 5;
     ctx.strokeStyle = 'rgba(0,0,0,0.8)';
@@ -365,21 +371,21 @@ const drawTripleRingWheel = (
 
     if (isBonusTrigger) {
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(212,175,55,0.5)';
       ctx.lineWidth = 2.5;
       ctx.strokeText('☥ Bonus', tx, ty);
       ctx.fillText('☥ Bonus', tx, ty);
     } else if (isUpgradeTrigger) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
       ctx.lineWidth = 2.5;
       ctx.strokeText('⬆ Up', tx, ty);
       ctx.fillText('⬆ Up', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(0,0,0,0.7)';
       ctx.lineWidth = 3;
       const cleanLabel = stripUnit(seg.label);
@@ -491,6 +497,17 @@ const WheelOfFortune = () => {
   const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
   const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
 
+  // Set ring/font globals for canvas drawing function
+  useEffect(() => {
+    if (settings) {
+      (window as any).__wheelRingOuter = settings.ring_outer_ratio ?? 0.74;
+      (window as any).__wheelRingMiddle = settings.ring_middle_ratio ?? 0.50;
+      (window as any).__wheelRingInner = settings.ring_inner_ratio ?? 0.48;
+      (window as any).__wheelSegFontSize = settings.segment_font_size ?? '14px';
+      (window as any).__wheelSegFontFamily = settings.segment_font_family ?? 'sans-serif';
+    }
+  }, [settings]);
+
   // Draw combined wheel
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -498,7 +515,7 @@ const WheelOfFortune = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation]);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings]);
 
   // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
@@ -736,25 +753,28 @@ const WheelOfFortune = () => {
             style={{ maxWidth: '100%', aspectRatio: '1/1' }}
           />
 
-          {/* Currency badges - stacked vertically on edge of each ring */}
-          {/* L.E. badge - outer ring edge */}
-          <div className="absolute pointer-events-none z-10" style={{ top: '2%', left: '50%', transform: 'translateX(-50%)' }}>
-            <div className="bg-[#1a1a2e]/90 border-2 border-amber-500 rounded-md px-3 py-1 shadow-lg shadow-amber-500/20">
-              <span className="text-amber-400 text-sm font-black tracking-wider" dir="ltr">L.E.</span>
+          {/* Currency badges - dynamic from admin settings */}
+          {settings?.badge_outer_label && (
+            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_outer_top || '2'}%`, left: '50%', transform: 'translateX(-50%)' }}>
+              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_outer_label}</span>
+              </div>
             </div>
-          </div>
-          {/* Ms-Ra badge - middle ring edge */}
-          <div className="absolute pointer-events-none z-10" style={{ top: '15%', left: '50%', transform: 'translateX(-50%)' }}>
-            <div className="bg-[#8B6914]/90 border-2 border-amber-300 rounded-md px-3 py-1 shadow-lg shadow-amber-400/20">
-              <span className="text-white text-sm font-black tracking-wider" dir="ltr">Ms-Ra</span>
+          )}
+          {settings?.badge_middle_label && (
+            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_middle_top || '15'}%`, left: '50%', transform: 'translateX(-50%)' }}>
+              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_middle_label}</span>
+              </div>
             </div>
-          </div>
-          {/* Xp badge - inner ring edge */}
-          <div className="absolute pointer-events-none z-10" style={{ top: '28%', left: '50%', transform: 'translateX(-50%)' }}>
-            <div className="bg-[#1a1a2e]/90 border-2 border-emerald-500 rounded-md px-3 py-1 shadow-lg shadow-emerald-500/20">
-              <span className="text-emerald-400 text-sm font-black tracking-wider" dir="ltr">Xp</span>
+          )}
+          {settings?.badge_inner_label && (
+            <div className="absolute pointer-events-none z-10" style={{ top: `${settings.badge_inner_top || '28'}%`, left: '50%', transform: 'translateX(-50%)' }}>
+              <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
+                <span className="font-black tracking-wider" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_font_size || '14px' }} dir="ltr">{settings.badge_inner_label}</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -4250,6 +4250,22 @@ export type Database = {
       wheel_settings: {
         Row: {
           background_color: string | null
+          badge_font_size: string | null
+          badge_inner_bg: string | null
+          badge_inner_border_color: string | null
+          badge_inner_label: string | null
+          badge_inner_text_color: string | null
+          badge_inner_top: string | null
+          badge_middle_bg: string | null
+          badge_middle_border_color: string | null
+          badge_middle_label: string | null
+          badge_middle_text_color: string | null
+          badge_middle_top: string | null
+          badge_outer_bg: string | null
+          badge_outer_border_color: string | null
+          badge_outer_label: string | null
+          badge_outer_text_color: string | null
+          badge_outer_top: string | null
           created_at: string
           description: string | null
           description_en: string | null
@@ -4259,6 +4275,11 @@ export type Database = {
           intro_text_en: string | null
           is_active: boolean
           is_visible: boolean
+          ring_inner_ratio: number | null
+          ring_middle_ratio: number | null
+          ring_outer_ratio: number | null
+          segment_font_family: string | null
+          segment_font_size: string | null
           spin_cost_xp: number
           title: string
           title_en: string | null
@@ -4266,6 +4287,22 @@ export type Database = {
         }
         Insert: {
           background_color?: string | null
+          badge_font_size?: string | null
+          badge_inner_bg?: string | null
+          badge_inner_border_color?: string | null
+          badge_inner_label?: string | null
+          badge_inner_text_color?: string | null
+          badge_inner_top?: string | null
+          badge_middle_bg?: string | null
+          badge_middle_border_color?: string | null
+          badge_middle_label?: string | null
+          badge_middle_text_color?: string | null
+          badge_middle_top?: string | null
+          badge_outer_bg?: string | null
+          badge_outer_border_color?: string | null
+          badge_outer_label?: string | null
+          badge_outer_text_color?: string | null
+          badge_outer_top?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
@@ -4275,6 +4312,11 @@ export type Database = {
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          ring_inner_ratio?: number | null
+          ring_middle_ratio?: number | null
+          ring_outer_ratio?: number | null
+          segment_font_family?: string | null
+          segment_font_size?: string | null
           spin_cost_xp?: number
           title?: string
           title_en?: string | null
@@ -4282,6 +4324,22 @@ export type Database = {
         }
         Update: {
           background_color?: string | null
+          badge_font_size?: string | null
+          badge_inner_bg?: string | null
+          badge_inner_border_color?: string | null
+          badge_inner_label?: string | null
+          badge_inner_text_color?: string | null
+          badge_inner_top?: string | null
+          badge_middle_bg?: string | null
+          badge_middle_border_color?: string | null
+          badge_middle_label?: string | null
+          badge_middle_text_color?: string | null
+          badge_middle_top?: string | null
+          badge_outer_bg?: string | null
+          badge_outer_border_color?: string | null
+          badge_outer_label?: string | null
+          badge_outer_text_color?: string | null
+          badge_outer_top?: string | null
           created_at?: string
           description?: string | null
           description_en?: string | null
@@ -4291,6 +4349,11 @@ export type Database = {
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          ring_inner_ratio?: number | null
+          ring_middle_ratio?: number | null
+          ring_outer_ratio?: number | null
+          segment_font_family?: string | null
+          segment_font_size?: string | null
           spin_cost_xp?: number
           title?: string
           title_en?: string | null
