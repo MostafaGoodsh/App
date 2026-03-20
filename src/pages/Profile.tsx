@@ -34,6 +34,7 @@ export default function Profile() {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const isOwnProfile = !viewUserId || viewUserId === user?.id;
+  const { customization, containerStyle, backgroundStyle } = useProfileCustomization(viewUserId || undefined);
   
   const { stats, dailyTasks, completedTasks, completeTask, isTaskCompleted, loading: statsLoading } = useEngagementStats();
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
