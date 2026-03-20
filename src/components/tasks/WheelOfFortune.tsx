@@ -371,21 +371,21 @@ const drawTripleRingWheel = (
 
     if (isBonusTrigger) {
       ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(212,175,55,0.5)';
       ctx.lineWidth = 2.5;
       ctx.strokeText('☥ Bonus', tx, ty);
       ctx.fillText('☥ Bonus', tx, ty);
     } else if (isUpgradeTrigger) {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(0,0,0,0.6)';
       ctx.lineWidth = 2.5;
       ctx.strokeText('⬆ Up', tx, ty);
       ctx.fillText('⬆ Up', tx, ty);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${size < 400 ? 11 : 14}px sans-serif`;
+      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(0,0,0,0.7)';
       ctx.lineWidth = 3;
       const cleanLabel = stripUnit(seg.label);
