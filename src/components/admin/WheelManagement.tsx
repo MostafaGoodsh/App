@@ -48,6 +48,30 @@ interface WSettings {
   background_color: string | null;
   intro_text: string | null;
   intro_text_en: string | null;
+  // Badge settings
+  badge_outer_label: string | null;
+  badge_middle_label: string | null;
+  badge_inner_label: string | null;
+  badge_outer_bg: string | null;
+  badge_outer_text_color: string | null;
+  badge_outer_border_color: string | null;
+  badge_middle_bg: string | null;
+  badge_middle_text_color: string | null;
+  badge_middle_border_color: string | null;
+  badge_inner_bg: string | null;
+  badge_inner_text_color: string | null;
+  badge_inner_border_color: string | null;
+  badge_font_size: string | null;
+  badge_outer_top: string | null;
+  badge_middle_top: string | null;
+  badge_inner_top: string | null;
+  // Ring sizes
+  ring_outer_ratio: number | null;
+  ring_middle_ratio: number | null;
+  ring_inner_ratio: number | null;
+  // Segment text
+  segment_font_size: string | null;
+  segment_font_family: string | null;
 }
 
 interface UpgradeSegment {
