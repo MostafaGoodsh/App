@@ -792,8 +792,8 @@ const WheelOfFortune = () => {
             ref={canvasRef}
             width={640}
             height={640}
-            className="rounded-full shadow-2xl shadow-amber-500/20 border-[3px] border-amber-500/50 w-full"
-            style={{ maxWidth: '100%', aspectRatio: '1/1' }}
+            className="rounded-full shadow-2xl shadow-amber-500/20 w-full"
+            style={{ maxWidth: '100%', aspectRatio: '1/1', borderWidth: `${settings?.wheel_border_width ?? 3}px`, borderStyle: 'solid', borderColor: `${settings?.wheel_border_color || '#D4AF37'}80` }}
           />
 
           {/* Currency badges - dynamic from admin settings */}
