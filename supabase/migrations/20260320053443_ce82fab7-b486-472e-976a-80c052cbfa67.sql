@@ -1,0 +1,23 @@
+
+ALTER TABLE public.wheel_settings
+  ADD COLUMN IF NOT EXISTS badge_outer_label text DEFAULT 'L.E.',
+  ADD COLUMN IF NOT EXISTS badge_middle_label text DEFAULT 'Ms-Ra',
+  ADD COLUMN IF NOT EXISTS badge_inner_label text DEFAULT 'Xp',
+  ADD COLUMN IF NOT EXISTS badge_outer_bg text DEFAULT '#1a1a2e',
+  ADD COLUMN IF NOT EXISTS badge_outer_text_color text DEFAULT '#fbbf24',
+  ADD COLUMN IF NOT EXISTS badge_outer_border_color text DEFAULT '#f59e0b',
+  ADD COLUMN IF NOT EXISTS badge_middle_bg text DEFAULT '#8B6914',
+  ADD COLUMN IF NOT EXISTS badge_middle_text_color text DEFAULT '#ffffff',
+  ADD COLUMN IF NOT EXISTS badge_middle_border_color text DEFAULT '#fcd34d',
+  ADD COLUMN IF NOT EXISTS badge_inner_bg text DEFAULT '#1a1a2e',
+  ADD COLUMN IF NOT EXISTS badge_inner_text_color text DEFAULT '#34d399',
+  ADD COLUMN IF NOT EXISTS badge_inner_border_color text DEFAULT '#10b981',
+  ADD COLUMN IF NOT EXISTS badge_font_size text DEFAULT '14px',
+  ADD COLUMN IF NOT EXISTS badge_outer_top text DEFAULT '2',
+  ADD COLUMN IF NOT EXISTS badge_middle_top text DEFAULT '15',
+  ADD COLUMN IF NOT EXISTS badge_inner_top text DEFAULT '28',
+  ADD COLUMN IF NOT EXISTS ring_outer_ratio numeric DEFAULT 0.74,
+  ADD COLUMN IF NOT EXISTS ring_middle_ratio numeric DEFAULT 0.50,
+  ADD COLUMN IF NOT EXISTS ring_inner_ratio numeric DEFAULT 0.48,
+  ADD COLUMN IF NOT EXISTS segment_font_size text DEFAULT '14px',
+  ADD COLUMN IF NOT EXISTS segment_font_family text DEFAULT 'sans-serif';
