@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2, Save, Settings, Palette, Circle } from "lucide-react";
 
@@ -48,7 +49,6 @@ interface WSettings {
   background_color: string | null;
   intro_text: string | null;
   intro_text_en: string | null;
-  // Badge settings
   badge_outer_label: string | null;
   badge_middle_label: string | null;
   badge_inner_label: string | null;
@@ -65,13 +65,26 @@ interface WSettings {
   badge_outer_top: string | null;
   badge_middle_top: string | null;
   badge_inner_top: string | null;
-  // Ring sizes
+  badge_outer_font_size: string | null;
+  badge_middle_font_size: string | null;
+  badge_inner_font_size: string | null;
   ring_outer_ratio: number | null;
   ring_middle_ratio: number | null;
   ring_inner_ratio: number | null;
-  // Segment text
   segment_font_size: string | null;
   segment_font_family: string | null;
+  wheel_background_image: string | null;
+  wheel_border_color: string | null;
+  wheel_border_width: number | null;
+  center_icon: string | null;
+  center_bg_color: string | null;
+  center_text_color: string | null;
+  center_size: number | null;
+  divider_color: string | null;
+  outer_ring_stroke_color: string | null;
+  middle_ring_stroke_color: string | null;
+  inner_ring_stroke_color: string | null;
+  pointer_color: string | null;
 }
 
 interface UpgradeSegment {
@@ -85,6 +98,48 @@ interface UpgradeSegment {
   display_order: number;
   is_active: boolean;
 }
+
+const FONT_SIZE_OPTIONS = [
+  { value: '10px', label: '10px - صغير جداً' },
+  { value: '11px', label: '11px' },
+  { value: '12px', label: '12px - صغير' },
+  { value: '13px', label: '13px' },
+  { value: '14px', label: '14px - متوسط' },
+  { value: '15px', label: '15px' },
+  { value: '16px', label: '16px - عادي' },
+  { value: '18px', label: '18px - كبير' },
+  { value: '20px', label: '20px' },
+  { value: '22px', label: '22px - كبير جداً' },
+  { value: '24px', label: '24px' },
+  { value: '28px', label: '28px - ضخم' },
+];
+
+const FONT_FAMILY_OPTIONS = [
+  { value: 'Cairo, sans-serif', label: 'Cairo (عربي)' },
+  { value: 'Tajawal, sans-serif', label: 'Tajawal (عربي)' },
+  { value: 'Amiri, serif', label: 'Amiri (عربي كلاسيكي)' },
+  { value: 'Noto Kufi Arabic, sans-serif', label: 'Noto Kufi (كوفي)' },
+  { value: 'sans-serif', label: 'Sans Serif (افتراضي)' },
+  { value: 'serif', label: 'Serif (كلاسيكي)' },
+  { value: 'monospace', label: 'Monospace (ثابت العرض)' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+  { value: 'Impact, sans-serif', label: 'Impact (عريض)' },
+  { value: 'Trebuchet MS, sans-serif', label: 'Trebuchet MS' },
+  { value: 'Courier New, monospace', label: 'Courier New' },
+];
+
+const CENTER_ICON_OPTIONS = [
+  { value: '𓂀', label: '𓂀 عين حورس' },
+  { value: '☥', label: '☥ أنخ' },
+  { value: '𓆣', label: '𓆣 جعران' },
+  { value: '𓅃', label: '𓅃 حورس' },
+  { value: '𓁢', label: '𓁢 فرعون' },
+  { value: '𓊽', label: '𓊽 عمود' },
+  { value: '🎰', label: '🎰 سلوت' },
+  { value: '⭐', label: '⭐ نجمة' },
+  { value: '💎', label: '💎 ماس' },
+  { value: '🏆', label: '🏆 كأس' },
+];
 
 const WheelManagement = () => {
   const [segments, setSegments] = useState<Segment[]>([]);
@@ -159,11 +214,26 @@ const WheelManagement = () => {
           badge_outer_top: settings.badge_outer_top,
           badge_middle_top: settings.badge_middle_top,
           badge_inner_top: settings.badge_inner_top,
+          badge_outer_font_size: settings.badge_outer_font_size,
+          badge_middle_font_size: settings.badge_middle_font_size,
+          badge_inner_font_size: settings.badge_inner_font_size,
           ring_outer_ratio: settings.ring_outer_ratio,
           ring_middle_ratio: settings.ring_middle_ratio,
           ring_inner_ratio: settings.ring_inner_ratio,
           segment_font_size: settings.segment_font_size,
           segment_font_family: settings.segment_font_family,
+          wheel_background_image: settings.wheel_background_image,
+          wheel_border_color: settings.wheel_border_color,
+          wheel_border_width: settings.wheel_border_width,
+          center_icon: settings.center_icon,
+          center_bg_color: settings.center_bg_color,
+          center_text_color: settings.center_text_color,
+          center_size: settings.center_size,
+          divider_color: settings.divider_color,
+          outer_ring_stroke_color: settings.outer_ring_stroke_color,
+          middle_ring_stroke_color: settings.middle_ring_stroke_color,
+          inner_ring_stroke_color: settings.inner_ring_stroke_color,
+          pointer_color: settings.pointer_color,
         })
         .eq("id", settings.id)
         .select()
@@ -194,7 +264,6 @@ const WheelManagement = () => {
       toast.success("تم حفظ القسم");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel segment save failed:", error);
       toast.error(error.message || "فشل حفظ القسم");
     }
   };
@@ -209,7 +278,6 @@ const WheelManagement = () => {
       toast.success("تم الإضافة");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel segment add failed:", error);
       toast.error(error.message || "فشل الإضافة");
     }
   };
@@ -220,9 +288,7 @@ const WheelManagement = () => {
       if (error) throw error;
       toast.success("تم الحذف");
       setSegments((s) => s.filter((x) => x.id !== id));
-      await fetchAll();
     } catch (error: any) {
-      console.error("Wheel segment delete failed:", error);
       toast.error(error.message || "فشل الحذف");
     }
   };
@@ -243,7 +309,6 @@ const WheelManagement = () => {
       toast.success("تم حفظ القسم");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel outer segment save failed:", error);
       toast.error(error.message || "فشل حفظ القسم");
     }
   };
@@ -258,7 +323,6 @@ const WheelManagement = () => {
       toast.success("تم الإضافة");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel outer segment add failed:", error);
       toast.error(error.message || "فشل الإضافة");
     }
   };
@@ -269,9 +333,7 @@ const WheelManagement = () => {
       if (error) throw error;
       toast.success("تم الحذف");
       setOuterSegments((s) => s.filter((x) => x.id !== id));
-      await fetchAll();
     } catch (error: any) {
-      console.error("Wheel outer segment delete failed:", error);
       toast.error(error.message || "فشل الحذف");
     }
   };
@@ -293,7 +355,6 @@ const WheelManagement = () => {
       toast.success("تم حفظ القسم");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel upgrade segment save failed:", error);
       toast.error(error.message || "فشل حفظ القسم");
     }
   };
@@ -308,7 +369,6 @@ const WheelManagement = () => {
       toast.success("تم الإضافة");
       await fetchAll();
     } catch (error: any) {
-      console.error("Wheel upgrade segment add failed:", error);
       toast.error(error.message || "فشل الإضافة");
     }
   };
@@ -319,9 +379,7 @@ const WheelManagement = () => {
       if (error) throw error;
       toast.success("تم الحذف");
       setUpgradeSegments((s) => s.filter((x) => x.id !== id));
-      await fetchAll();
     } catch (error: any) {
-      console.error("Wheel upgrade segment delete failed:", error);
       toast.error(error.message || "فشل الحذف");
     }
   };
@@ -356,6 +414,8 @@ const WheelManagement = () => {
                 <SelectItem value="tokens">توكنز</SelectItem>
                 <SelectItem value="badge">بادج</SelectItem>
                 <SelectItem value="nothing">بونص (تدوير خارجي)</SelectItem>
+                <SelectItem value="upgrade">ترقية (تدوير ترقيات)</SelectItem>
+                <SelectItem value="free_spin">لفات مجانية</SelectItem>
                 <SelectItem value="custom">مخصص</SelectItem>
               </SelectContent>
             </Select>
@@ -394,6 +454,11 @@ const WheelManagement = () => {
       </CardContent>
     </Card>
   );
+
+  // Ring size visual preview
+  const outerR = settings?.ring_outer_ratio ?? 0.74;
+  const middleR = settings?.ring_middle_ratio ?? 0.50;
+  const innerR = settings?.ring_inner_ratio ?? 0.48;
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -473,88 +538,296 @@ const WheelManagement = () => {
           ))}
         </TabsContent>
 
-        {/* Display Settings Tab */}
+        {/* Display Settings Tab - Enhanced */}
         <TabsContent value="display" className="space-y-4">
           {settings && (
             <>
-              {/* Badges */}
-              <Card>
-                <CardHeader><CardTitle className="text-base">🏷️ يافطات الحلقات (Badges)</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><Label className="text-xs">حجم خط اليافطة</Label><Input value={settings.badge_font_size || "14px"} onChange={(e) => setSettings({ ...settings, badge_font_size: e.target.value })} placeholder="14px" /></div>
-                  </div>
-
-                  {/* Outer badge */}
-                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
-                    <h4 className="font-bold text-sm text-amber-400">الحلقة الخارجية (ترقيات)</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_outer_label || ""} onChange={(e) => setSettings({ ...settings, badge_outer_label: e.target.value })} /></div>
-                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_outer_top || "2"} onChange={(e) => setSettings({ ...settings, badge_outer_top: e.target.value })} /></div>
-                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_outer_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_outer_bg: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_outer_text_color || "#fbbf24"} onChange={(e) => setSettings({ ...settings, badge_outer_text_color: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_outer_border_color || "#f59e0b"} onChange={(e) => setSettings({ ...settings, badge_outer_border_color: e.target.value })} className="h-9 p-1" /></div>
-                    </div>
-                  </div>
-
-                  {/* Middle badge */}
-                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
-                    <h4 className="font-bold text-sm text-amber-300">الحلقة الوسطى ($MS-RA)</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_middle_label || ""} onChange={(e) => setSettings({ ...settings, badge_middle_label: e.target.value })} /></div>
-                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_middle_top || "15"} onChange={(e) => setSettings({ ...settings, badge_middle_top: e.target.value })} /></div>
-                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_middle_bg || "#8B6914"} onChange={(e) => setSettings({ ...settings, badge_middle_bg: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_middle_text_color || "#ffffff"} onChange={(e) => setSettings({ ...settings, badge_middle_text_color: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_middle_border_color || "#fcd34d"} onChange={(e) => setSettings({ ...settings, badge_middle_border_color: e.target.value })} className="h-9 p-1" /></div>
-                    </div>
-                  </div>
-
-                  {/* Inner badge */}
-                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
-                    <h4 className="font-bold text-sm text-emerald-400">الحلقة الداخلية (XP)</h4>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_inner_label || ""} onChange={(e) => setSettings({ ...settings, badge_inner_label: e.target.value })} /></div>
-                      <div><Label className="text-xs">الموقع (% من الأعلى)</Label><Input value={settings.badge_inner_top || "28"} onChange={(e) => setSettings({ ...settings, badge_inner_top: e.target.value })} /></div>
-                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_inner_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_inner_bg: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_inner_text_color || "#34d399"} onChange={(e) => setSettings({ ...settings, badge_inner_text_color: e.target.value })} className="h-9 p-1" /></div>
-                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_inner_border_color || "#10b981"} onChange={(e) => setSettings({ ...settings, badge_inner_border_color: e.target.value })} className="h-9 p-1" /></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Ring Sizes */}
+              {/* === Ring Sizes with Sliders & Visual Preview === */}
               <Card>
                 <CardHeader><CardTitle className="text-base">📐 أحجام الحلقات</CardTitle></CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-xs text-muted-foreground">النسب تحدد مكان الفواصل بين الحلقات (0 = المركز، 1 = الحافة). قيمة أكبر = حلقة أوسع</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <CardContent className="space-y-5">
+                  {/* Visual ring preview */}
+                  <div className="flex justify-center">
+                    <div className="relative" style={{ width: 160, height: 160 }}>
+                      <div className="absolute rounded-full border-2 border-emerald-500/50" style={{
+                        width: 160, height: 160, top: 0, left: 0,
+                      }} />
+                      <div className="absolute rounded-full border-2 border-amber-500/50" style={{
+                        width: `${outerR * 100}%`, height: `${outerR * 100}%`,
+                        top: `${(1 - outerR) * 50}%`, left: `${(1 - outerR) * 50}%`,
+                      }} />
+                      <div className="absolute rounded-full border-2 border-amber-700/50" style={{
+                        width: `${middleR * 100}%`, height: `${middleR * 100}%`,
+                        top: `${(1 - middleR) * 50}%`, left: `${(1 - middleR) * 50}%`,
+                      }} />
+                      <div className="absolute rounded-full border-2 border-amber-900/50" style={{
+                        width: `${innerR * 100}%`, height: `${innerR * 100}%`,
+                        top: `${(1 - innerR) * 50}%`, left: `${(1 - innerR) * 50}%`,
+                      }} />
+                      {/* Labels */}
+                      <span className="absolute text-[8px] text-emerald-400" style={{ top: 2, left: '50%', transform: 'translateX(-50%)' }}>ترقيات</span>
+                      <span className="absolute text-[8px] text-amber-400" style={{ top: `${(1 - outerR) * 50 + 4}%`, left: '50%', transform: 'translateX(-50%)' }}>$MS-RA</span>
+                      <span className="absolute text-[8px] text-amber-600" style={{ top: `${(1 - middleR) * 50 + 4}%`, left: '50%', transform: 'translateX(-50%)' }}>XP</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
                     <div>
-                      <Label className="text-xs">فاصل الحلقة الخارجية</Label>
-                      <Input type="number" step="0.01" min="0.5" max="0.95" value={settings.ring_outer_ratio ?? 0.74} onChange={(e) => setSettings({ ...settings, ring_outer_ratio: +e.target.value })} />
-                      <span className="text-[10px] text-muted-foreground">الحد الداخلي لحلقة الترقيات</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="text-xs">🟢 فاصل الحلقة الخارجية (ترقيات)</Label>
+                        <span className="text-xs font-mono text-muted-foreground">{(outerR * 100).toFixed(0)}%</span>
+                      </div>
+                      <Slider value={[outerR * 100]} min={50} max={95} step={1}
+                        onValueChange={([v]) => setSettings({ ...settings, ring_outer_ratio: v / 100 })} />
+                      <p className="text-[10px] text-muted-foreground mt-1">كلما زادت القيمة كلما صغرت حلقة الترقيات</p>
                     </div>
                     <div>
-                      <Label className="text-xs">فاصل الحلقة الوسطى</Label>
-                      <Input type="number" step="0.01" min="0.3" max="0.7" value={settings.ring_middle_ratio ?? 0.50} onChange={(e) => setSettings({ ...settings, ring_middle_ratio: +e.target.value })} />
-                      <span className="text-[10px] text-muted-foreground">الحد الداخلي لحلقة $MS-RA</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="text-xs">🟡 فاصل الحلقة الوسطى ($MS-RA)</Label>
+                        <span className="text-xs font-mono text-muted-foreground">{(middleR * 100).toFixed(0)}%</span>
+                      </div>
+                      <Slider value={[middleR * 100]} min={25} max={70} step={1}
+                        onValueChange={([v]) => setSettings({ ...settings, ring_middle_ratio: v / 100 })} />
+                      <p className="text-[10px] text-muted-foreground mt-1">كلما زادت القيمة كلما صغرت حلقة $MS-RA</p>
                     </div>
                     <div>
-                      <Label className="text-xs">فاصل الحلقة الداخلية</Label>
-                      <Input type="number" step="0.01" min="0.2" max="0.6" value={settings.ring_inner_ratio ?? 0.48} onChange={(e) => setSettings({ ...settings, ring_inner_ratio: +e.target.value })} />
-                      <span className="text-[10px] text-muted-foreground">الحد الخارجي لحلقة XP</span>
+                      <div className="flex items-center justify-between mb-1">
+                        <Label className="text-xs">🟠 حد الحلقة الداخلية (XP)</Label>
+                        <span className="text-xs font-mono text-muted-foreground">{(innerR * 100).toFixed(0)}%</span>
+                      </div>
+                      <Slider value={[innerR * 100]} min={20} max={60} step={1}
+                        onValueChange={([v]) => setSettings({ ...settings, ring_inner_ratio: v / 100 })} />
+                      <p className="text-[10px] text-muted-foreground mt-1">الحد الخارجي لحلقة XP</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Segment Text */}
+              {/* === Segment Typography === */}
               <Card>
                 <CardHeader><CardTitle className="text-base">🔤 خط الكتابة على الأقسام</CardTitle></CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div><Label className="text-xs">حجم الخط</Label><Input value={settings.segment_font_size || "14px"} onChange={(e) => setSettings({ ...settings, segment_font_size: e.target.value })} placeholder="14px" /></div>
-                    <div><Label className="text-xs">نوع الخط</Label><Input value={settings.segment_font_family || "sans-serif"} onChange={(e) => setSettings({ ...settings, segment_font_family: e.target.value })} placeholder="sans-serif" /></div>
+                    <div>
+                      <Label className="text-xs">حجم الخط</Label>
+                      <Select value={settings.segment_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, segment_font_size: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">نوع الخط</Label>
+                      <Select value={settings.segment_font_family || "sans-serif"} onValueChange={(v) => setSettings({ ...settings, segment_font_family: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FONT_FAMILY_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {/* Preview */}
+                  <div className="bg-muted/30 rounded-lg p-3 text-center">
+                    <span style={{ fontSize: settings.segment_font_size || '14px', fontFamily: settings.segment_font_family || 'sans-serif', fontWeight: 'bold' }}>
+                      عينة نص - Sample Text 123
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* === Badges === */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">🏷️ يافطات الحلقات (Badges)</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Outer badge */}
+                  <div className="border border-emerald-500/20 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-emerald-400">الحلقة الخارجية (ترقيات)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_outer_label || ""} onChange={(e) => setSettings({ ...settings, badge_outer_label: e.target.value })} /></div>
+                      <div>
+                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
+                        <div className="flex items-center gap-2">
+                          <Slider value={[parseFloat(settings.badge_outer_top || '2')]} min={0} max={45} step={1}
+                            onValueChange={([v]) => setSettings({ ...settings, badge_outer_top: String(v) })} className="flex-1" />
+                          <span className="text-xs font-mono w-8">{settings.badge_outer_top || '2'}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">حجم خط اليافطة</Label>
+                        <Select value={settings.badge_outer_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_outer_font_size: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_outer_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_outer_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_outer_text_color || "#fbbf24"} onChange={(e) => setSettings({ ...settings, badge_outer_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_outer_border_color || "#f59e0b"} onChange={(e) => setSettings({ ...settings, badge_outer_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                    {/* Badge preview */}
+                    <div className="flex justify-center py-2">
+                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
+                        <span className="font-black" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_outer_font_size || settings.badge_font_size || '14px' }}>{settings.badge_outer_label || 'L.E.'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle badge */}
+                  <div className="border border-amber-500/20 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-amber-300">الحلقة الوسطى ($MS-RA)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_middle_label || ""} onChange={(e) => setSettings({ ...settings, badge_middle_label: e.target.value })} /></div>
+                      <div>
+                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
+                        <div className="flex items-center gap-2">
+                          <Slider value={[parseFloat(settings.badge_middle_top || '15')]} min={0} max={45} step={1}
+                            onValueChange={([v]) => setSettings({ ...settings, badge_middle_top: String(v) })} className="flex-1" />
+                          <span className="text-xs font-mono w-8">{settings.badge_middle_top || '15'}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">حجم خط اليافطة</Label>
+                        <Select value={settings.badge_middle_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_middle_font_size: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_middle_bg || "#8B6914"} onChange={(e) => setSettings({ ...settings, badge_middle_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_middle_text_color || "#ffffff"} onChange={(e) => setSettings({ ...settings, badge_middle_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_middle_border_color || "#fcd34d"} onChange={(e) => setSettings({ ...settings, badge_middle_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                    <div className="flex justify-center py-2">
+                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
+                        <span className="font-black" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_middle_font_size || settings.badge_font_size || '14px' }}>{settings.badge_middle_label || 'Ms-Ra'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Inner badge */}
+                  <div className="border border-emerald-500/20 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-emerald-400">الحلقة الداخلية (XP)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      <div><Label className="text-xs">النص</Label><Input value={settings.badge_inner_label || ""} onChange={(e) => setSettings({ ...settings, badge_inner_label: e.target.value })} /></div>
+                      <div>
+                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
+                        <div className="flex items-center gap-2">
+                          <Slider value={[parseFloat(settings.badge_inner_top || '28')]} min={0} max={48} step={1}
+                            onValueChange={([v]) => setSettings({ ...settings, badge_inner_top: String(v) })} className="flex-1" />
+                          <span className="text-xs font-mono w-8">{settings.badge_inner_top || '28'}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs">حجم خط اليافطة</Label>
+                        <Select value={settings.badge_inner_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_inner_font_size: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_inner_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_inner_bg: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_inner_text_color || "#34d399"} onChange={(e) => setSettings({ ...settings, badge_inner_text_color: e.target.value })} className="h-9 p-1" /></div>
+                      <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_inner_border_color || "#10b981"} onChange={(e) => setSettings({ ...settings, badge_inner_border_color: e.target.value })} className="h-9 p-1" /></div>
+                    </div>
+                    <div className="flex justify-center py-2">
+                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
+                        <span className="font-black" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_inner_font_size || settings.badge_font_size || '14px' }}>{settings.badge_inner_label || 'Xp'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* === Wheel Appearance === */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">🎡 مظهر العجلة</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">خلفية العجلة (URL صورة)</Label>
+                      <Input value={settings.wheel_background_image || ""} onChange={(e) => setSettings({ ...settings, wheel_background_image: e.target.value })} placeholder="https://..." />
+                    </div>
+                    <div>
+                      <Label className="text-xs">لون خلفية الكارد</Label>
+                      <Input type="color" value={settings.background_color || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, background_color: e.target.value })} className="h-9 p-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">لون حدود العجلة</Label>
+                      <Input type="color" value={settings.wheel_border_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, wheel_border_color: e.target.value })} className="h-9 p-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">سمك حدود العجلة</Label>
+                      <Slider value={[settings.wheel_border_width ?? 3]} min={0} max={8} step={0.5}
+                        onValueChange={([v]) => setSettings({ ...settings, wheel_border_width: v })} />
+                      <span className="text-[10px] text-muted-foreground">{settings.wheel_border_width ?? 3}px</span>
+                    </div>
+                    <div>
+                      <Label className="text-xs">لون السهم</Label>
+                      <Input type="color" value={settings.pointer_color || "#f59e0b"} onChange={(e) => setSettings({ ...settings, pointer_color: e.target.value })} className="h-9 p-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs">لون الفواصل</Label>
+                      <Input type="color" value={settings.divider_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, divider_color: e.target.value })} className="h-9 p-1" />
+                    </div>
+                  </div>
+
+                  {/* Ring stroke colors */}
+                  <div className="border border-border/50 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-xs">ألوان حدود الأقسام</h4>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <Label className="text-[10px]">خارجية</Label>
+                        <Input type="color" value={settings.outer_ring_stroke_color || "#2E8B57"} onChange={(e) => setSettings({ ...settings, outer_ring_stroke_color: e.target.value })} className="h-8 p-1" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">وسطى</Label>
+                        <Input type="color" value={settings.middle_ring_stroke_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, middle_ring_stroke_color: e.target.value })} className="h-8 p-1" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">داخلية</Label>
+                        <Input type="color" value={settings.inner_ring_stroke_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, inner_ring_stroke_color: e.target.value })} className="h-8 p-1" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* === Center Circle === */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">⭕ الدائرة المركزية</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-xs">الأيقونة</Label>
+                      <Select value={settings.center_icon || "𓂀"} onValueChange={(v) => setSettings({ ...settings, center_icon: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {CENTER_ICON_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.center_bg_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, center_bg_color: e.target.value })} className="h-9 p-1" /></div>
+                    <div><Label className="text-xs">لون الأيقونة</Label><Input type="color" value={settings.center_text_color || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, center_text_color: e.target.value })} className="h-9 p-1" /></div>
+                    <div>
+                      <Label className="text-xs">حجم المركز</Label>
+                      <Slider value={[settings.center_size ?? 28]} min={15} max={50} step={1}
+                        onValueChange={([v]) => setSettings({ ...settings, center_size: v })} />
+                      <span className="text-[10px] text-muted-foreground">{settings.center_size ?? 28}px</span>
+                    </div>
+                  </div>
+                  {/* Center preview */}
+                  <div className="flex justify-center py-2">
+                    <div className="rounded-full flex items-center justify-center" style={{
+                      width: (settings.center_size ?? 28) * 2,
+                      height: (settings.center_size ?? 28) * 2,
+                      background: `radial-gradient(circle, ${settings.center_bg_color || '#D4AF37'}, ${settings.center_bg_color || '#D4AF37'}88)`,
+                    }}>
+                      <span style={{ color: settings.center_text_color || '#1a1a2e', fontSize: (settings.center_size ?? 28) * 0.8 }}>{settings.center_icon || '𓂀'}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
