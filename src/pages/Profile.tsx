@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { User, Edit, Settings, Activity, Calendar, MapPin, Languages, Wallet, Star, ClipboardList, ExternalLink, Users } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
+import { useProfileCustomization } from '@/hooks/useProfileCustomization';
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
