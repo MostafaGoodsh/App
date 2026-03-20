@@ -391,19 +391,37 @@ const drawTripleRingWheel = (
     ctx.shadowBlur = 3;
 
     if (isBonusTrigger) {
-      ctx.fillStyle = '#1a1a2e';
-      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(212,175,55,0.5)';
-      ctx.lineWidth = 2.5;
-      ctx.strokeText('☥ Bonus', tx, ty);
-      ctx.fillText('☥ Bonus', tx, ty);
-    } else if (isUpgradeTrigger) {
+      // Draw currency logo & name on bonus segment
+      const bonusFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      ctx.font = `bold ${bonusFontSize}px ${segFontFamily}`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      // Line 1: Ankh symbol
+      ctx.fillStyle = '#D4AF37';
+      const line1Y = ty - bonusFontSize * 0.7;
+      ctx.strokeText('☥', tx, line1Y);
+      ctx.fillText('☥', tx, line1Y);
+      // Line 2: Currency name
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-      ctx.lineWidth = 2.5;
-      ctx.strokeText('⬆ Up', tx, ty);
-      ctx.fillText('⬆ Up', tx, ty);
+      ctx.font = `bold ${bonusFontSize - 1}px ${segFontFamily}`;
+      const line2Y = ty + bonusFontSize * 0.5;
+      ctx.strokeText('$MS-RA', tx, line2Y);
+      ctx.fillText('$MS-RA', tx, line2Y);
+    } else if (isUpgradeTrigger) {
+      // Draw upgrade label with arrow & currency
+      const upgFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      ctx.font = `bold ${upgFontSize}px ${segFontFamily}`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3;
+      ctx.fillStyle = '#ffffff';
+      const line1Y = ty - upgFontSize * 0.7;
+      ctx.strokeText('⬆', tx, line1Y);
+      ctx.fillText('⬆', tx, line1Y);
+      ctx.font = `bold ${upgFontSize - 1}px ${segFontFamily}`;
+      const line2Y = ty + upgFontSize * 0.5;
+      ctx.fillStyle = '#90EE90';
+      ctx.strokeText('L.E.', tx, line2Y);
+      ctx.fillText('L.E.', tx, line2Y);
     } else {
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
