@@ -172,6 +172,7 @@ export default function Profile() {
                     </div>
                   </div>
 
+                  {customization.show_social_links && (
                   <div className="pt-4 border-t">
                     <h3 className="font-medium mb-4 text-right text-lg">{t("روابط التواصل")}</h3>
                     <div className="grid gap-3">
@@ -193,6 +194,7 @@ export default function Profile() {
                       )}
                     </div>
                   </div>
+                  )}
                 </CardContent>
               </Card>
 
