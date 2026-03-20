@@ -311,7 +311,7 @@ export default function Profile() {
             <TabsContent value="edit"><ProfileEditForm profile={profile} /></TabsContent>
 
             <TabsContent value="activity" className="space-y-6">
-              <TodoList />
+              {customization.show_todo_list && <TodoList />}
               <Card>
                 <CardHeader>
                   <CardTitle>{t("سجل النشاط")}</CardTitle>
