@@ -293,13 +293,14 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {isOwnProfile ? (
+              {customization.show_stats && isOwnProfile && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <AccountStatsCard />
                   <EngagementStatsCard />
-                  {profile.user_id && <FollowStats userId={profile.user_id} />}
+                  {customization.show_follow_stats && profile.user_id && <FollowStats userId={profile.user_id} />}
                 </div>
-              ) : (
+              )}
+              {customization.show_follow_stats && !isOwnProfile && (
                 <div className="flex justify-center">
                   {profile.user_id && <FollowStats userId={profile.user_id} />}
                 </div>
