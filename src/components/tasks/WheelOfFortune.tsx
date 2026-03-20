@@ -516,14 +516,38 @@ const WheelOfFortune = () => {
   const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
   const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
 
-  // Set ring/font globals for canvas drawing function
+  // Set all settings as globals for canvas drawing
   useEffect(() => {
     if (settings) {
-      (window as any).__wheelRingOuter = settings.ring_outer_ratio ?? 0.74;
-      (window as any).__wheelRingMiddle = settings.ring_middle_ratio ?? 0.50;
-      (window as any).__wheelRingInner = settings.ring_inner_ratio ?? 0.48;
-      (window as any).__wheelSegFontSize = settings.segment_font_size ?? '14px';
-      (window as any).__wheelSegFontFamily = settings.segment_font_family ?? 'sans-serif';
+      const ws: Record<string, any> = {
+        ring_outer_ratio: settings.ring_outer_ratio ?? 0.74,
+        ring_middle_ratio: settings.ring_middle_ratio ?? 0.50,
+        ring_inner_ratio: settings.ring_inner_ratio ?? 0.48,
+        segment_font_size: settings.segment_font_size ?? '14px',
+        segment_font_family: settings.segment_font_family ?? 'sans-serif',
+        divider_color: settings.divider_color ?? '#D4AF37',
+        outer_ring_stroke_color: settings.outer_ring_stroke_color ?? '#2E8B57',
+        middle_ring_stroke_color: settings.middle_ring_stroke_color ?? '#D4AF37',
+        inner_ring_stroke_color: settings.inner_ring_stroke_color ?? 'rgba(212,175,55,0.6)',
+        center_bg_color: settings.center_bg_color ?? '#D4AF37',
+        center_text_color: settings.center_text_color ?? '#1a1a2e',
+        center_icon: settings.center_icon ?? '𓂀',
+        center_size: settings.center_size ?? 28,
+        wheel_border_color: settings.wheel_border_color ?? '#D4AF37',
+      };
+
+      // Load background image if set
+      if (settings.wheel_background_image) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          ws.bgImage = img;
+          (window as any).__wheelSettings = ws;
+        };
+        img.src = settings.wheel_background_image;
+      }
+
+      (window as any).__wheelSettings = ws;
     }
   }, [settings]);
 
