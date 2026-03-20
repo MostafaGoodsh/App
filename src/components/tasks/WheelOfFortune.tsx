@@ -764,8 +764,8 @@ const WheelOfFortune = () => {
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
-              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent border-t-amber-500 drop-shadow-lg" />
-              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent border-t-amber-600 absolute top-[1px] left-1/2 -translate-x-1/2" />
+              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent drop-shadow-lg" style={{ borderTopColor: settings?.pointer_color || '#f59e0b' }} />
+              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent absolute top-[1px] left-1/2 -translate-x-1/2" style={{ borderTopColor: `${settings?.pointer_color || '#f59e0b'}cc` }} />
             </div>
           </div>
 
