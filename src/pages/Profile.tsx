@@ -111,34 +111,29 @@ export default function Profile() {
     }}>
       <div className="min-h-screen bg-background/90">
         <div className="container max-w-4xl mx-auto p-6 arabic-content" style={containerStyle}>
-          <ProfileHeader profile={profile} />
+          <ProfileHeader profile={profile} badges={userBadges} />
 
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-              <TabsTrigger value="overview" className="flex-col py-2 gap-1 text-xs">
-                <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("نظرة عامة")}</span>
-                <span className="sm:hidden">{t("عامة")}</span>
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-5 h-12 p-1 gap-0.5">
+              <TabsTrigger value="overview" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <User className="w-4 h-4" />
+                <span>{t("عامة")}</span>
               </TabsTrigger>
-              <TabsTrigger value="family" className="flex-col py-2 gap-1 text-xs">
-                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("العائلة")}</span>
-                <span className="sm:hidden">{t("عائلة")}</span>
+              <TabsTrigger value="family" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Users className="w-4 h-4" />
+                <span>{t("عائلة")}</span>
               </TabsTrigger>
-              <TabsTrigger value="edit" className="flex-col py-2 gap-1 text-xs">
-                <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("تحرير")}</span>
-                <span className="sm:hidden">{t("تعديل")}</span>
+              <TabsTrigger value="edit" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Edit className="w-4 h-4" />
+                <span>{t("تعديل")}</span>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="flex-col py-2 gap-1 text-xs">
-                <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("النشاط")}</span>
-                <span className="sm:hidden">{t("نشاط")}</span>
+              <TabsTrigger value="activity" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Activity className="w-4 h-4" />
+                <span>{t("نشاط")}</span>
               </TabsTrigger>
-              <TabsTrigger value="settings" className="flex-col py-2 gap-1 text-xs">
-                <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("الإعدادات")}</span>
-                <span className="sm:hidden">{t("إعدادات")}</span>
+              <TabsTrigger value="settings" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Settings className="w-4 h-4" />
+                <span>{t("إعدادات")}</span>
               </TabsTrigger>
             </TabsList>
 
