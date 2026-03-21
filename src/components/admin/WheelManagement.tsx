@@ -151,32 +151,21 @@ const CENTER_ICON_OPTIONS = [
 
 const uploadWheelImage = async (file: File, folder: string): Promise<string | null> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error('يجب تسجيل الدخول أولاً');
-      return null;
-    }
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
 
-    const res = await fetch(
-      `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/upload-wheel-image`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: formData,
-      }
-    );
-    const result = await res.json();
-    if (!res.ok || !result.url) {
-      console.error('Upload error:', result);
-      toast.error(result.error || 'فشل رفع الصورة');
+    const { data, error } = await supabase.functions.invoke('upload-wheel-image', {
+      body: formData,
+    });
+
+    if (error || !data?.url) {
+      console.error('Upload error:', error || data);
+      toast.error(data?.error || error?.message || 'فشل رفع الصورة');
       return null;
     }
-    return result.url;
+
+    return data.url;
   } catch (e) {
     console.error('Upload error:', e);
     toast.error('فشل رفع الصورة');
