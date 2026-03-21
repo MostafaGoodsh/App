@@ -111,53 +111,6 @@ const stripUnit = (label: string): string => {
     .trim();
 };
 
-/** Draw a pill-shaped ring label badge on the canvas */
-const drawRingBadge = (
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  text: string,
-  bgColor: string,
-  textColor: string,
-  angle: number,
-  radius: number,
-) => {
-  const x = cx + Math.cos(angle) * radius;
-  const y = cy + Math.sin(angle) * radius;
-
-  ctx.save();
-  ctx.font = 'bold 13px sans-serif';
-  const metrics = ctx.measureText(text);
-  const padX = 10;
-  const padY = 5;
-  const w = metrics.width + padX * 2;
-  const h = 20 + padY;
-
-  // pill background
-  const rx = x - w / 2;
-  const ry = y - h / 2;
-  const r = h / 2;
-  ctx.beginPath();
-  ctx.moveTo(rx + r, ry);
-  ctx.lineTo(rx + w - r, ry);
-  ctx.arc(rx + w - r, ry + r, r, -Math.PI / 2, Math.PI / 2);
-  ctx.lineTo(rx + r, ry + h);
-  ctx.arc(rx + r, ry + r, r, Math.PI / 2, -Math.PI / 2);
-  ctx.closePath();
-  ctx.fillStyle = bgColor;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(212,175,55,0.6)';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // text
-  ctx.fillStyle = textColor;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, x, y);
-  ctx.restore();
-};
-
 const drawTripleRingWheel = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
@@ -172,11 +125,11 @@ const drawTripleRingWheel = (
   const center = size / 2;
 
   const ws = (window as any).__wheelSettings || {};
-  const outerEdge = center - 8;
+  const outerEdge = center - 14;
   const outerRatio = ws.ring_outer_ratio ?? 0.74;
   const middleRatio = ws.ring_middle_ratio ?? 0.50;
   const innerRatio = ws.ring_inner_ratio ?? 0.48;
-  const segFontSize = ws.segment_font_size ?? '14px';
+  const segFontSize = ws.segment_font_size ?? '15px';
   const segFontFamily = ws.segment_font_family ?? 'sans-serif';
   const dividerColor = ws.divider_color ?? '#D4AF37';
   const outerStroke = ws.outer_ring_stroke_color ?? '#2E8B57';
@@ -211,22 +164,40 @@ const drawTripleRingWheel = (
     ctx.restore();
   }
 
-  // === Outer decorative ring ===
+  // === Outer decorative ring with Egyptian symbols ===
   ctx.beginPath();
-  ctx.arc(center, center, outerEdge + 5, 0, 2 * Math.PI);
+  ctx.arc(center, center, outerEdge + 10, 0, 2 * Math.PI);
   ctx.strokeStyle = wheelBorderColor;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 3;
   ctx.stroke();
 
+  // Egyptian hieroglyph border - larger symbols
+  const borderSymbols = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓅃', '☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓅃', '☥', '𓆣'];
+  for (let i = 0; i < borderSymbols.length; i++) {
+    const angle = (i / borderSymbols.length) * Math.PI * 2 - Math.PI / 2;
+    const x = center + Math.cos(angle) * (outerEdge + 10);
+    const y = center + Math.sin(angle) * (outerEdge + 10);
+    ctx.save();
+    ctx.fillStyle = i % 2 === 0 ? wheelBorderColor : '#B8860B';
+    ctx.font = 'bold 16px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(212,175,55,0.5)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(borderSymbols[i], x, y);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  // Small decorative dots between symbols
   for (let i = 0; i < 32; i++) {
     const angle = (i / 32) * Math.PI * 2;
     const x = center + Math.cos(angle) * (outerEdge + 3);
     const y = center + Math.sin(angle) * (outerEdge + 3);
-    ctx.fillStyle = i % 2 === 0 ? wheelBorderColor : '#B8860B';
-    ctx.font = '6px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('◆', x, y);
+    ctx.fillStyle = wheelBorderColor;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   // === RING 3 (outermost): Upgrade rewards ===
@@ -243,7 +214,7 @@ const drawTripleRingWheel = (
     ctx.fillStyle = seg.color;
     ctx.fill();
     ctx.strokeStyle = outerStroke;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     const midAngle = startAngle + ring3SegAngle / 2;
@@ -256,16 +227,17 @@ const drawTripleRingWheel = (
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
+    const fontSize = Math.max(12, parseInt(segFontSize) || 15);
+    ctx.font = `bold ${fontSize}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur = 5;
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 3;
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = 3.5;
 
     const cleanLabel = stripUnit(seg.label);
-    const maxW = (ring3Outer - ring3Inner) * 0.85;
+    const maxW = (ring3Outer - ring3Inner) * 0.82;
     const lines = wrapText(ctx, cleanLabel, maxW);
-    const lineH = size < 400 ? 12 : 15;
+    const lineH = size < 400 ? 13 : 16;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.strokeText(line, tx, startY + li * lineH);
@@ -279,7 +251,7 @@ const drawTripleRingWheel = (
   ctx.beginPath();
   ctx.arc(center, center, divider2, 0, 2 * Math.PI);
   ctx.strokeStyle = dividerColor;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   // === RING 2 (middle): $MS-RA tokens ===
@@ -296,7 +268,7 @@ const drawTripleRingWheel = (
     ctx.fillStyle = seg.color;
     ctx.fill();
     ctx.strokeStyle = middleStroke;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     const midAngle = startAngle + ring2SegAngle / 2;
@@ -309,16 +281,17 @@ const drawTripleRingWheel = (
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
     ctx.fillStyle = '#ffffff';
-    ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
+    const fontSize = Math.max(12, parseInt(segFontSize) || 15);
+    ctx.font = `bold ${fontSize}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur = 5;
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = 3;
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = 3.5;
 
     const cleanLabel = stripUnit(seg.label);
-    const maxW = (ring2Outer - ring2Inner) * 0.85;
+    const maxW = (ring2Outer - ring2Inner) * 0.82;
     const lines = wrapText(ctx, cleanLabel, maxW);
-    const lineH = size < 400 ? 12 : 15;
+    const lineH = size < 400 ? 13 : 16;
     const startY = ty - ((lines.length - 1) * lineH) / 2;
     lines.forEach((line, li) => {
       ctx.strokeText(line, tx, startY + li * lineH);
@@ -328,11 +301,11 @@ const drawTripleRingWheel = (
     ctx.restore();
   });
 
-  // === Divider 1 ===
+  // === Divider 1 with Egyptian ankh symbols ===
   ctx.beginPath();
   ctx.arc(center, center, divider1, 0, 2 * Math.PI);
   ctx.strokeStyle = dividerColor;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   for (let i = 0; i < 8; i++) {
@@ -340,10 +313,13 @@ const drawTripleRingWheel = (
     const x = center + Math.cos(angle) * divider1;
     const y = center + Math.sin(angle) * divider1;
     ctx.fillStyle = dividerColor;
-    ctx.font = 'bold 7px serif';
+    ctx.font = 'bold 11px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(212,175,55,0.4)';
+    ctx.shadowBlur = 3;
     ctx.fillText('☥', x, y);
+    ctx.shadowBlur = 0;
   }
 
   // === RING 1 (inner): XP segments ===
@@ -375,7 +351,7 @@ const drawTripleRingWheel = (
     }
     ctx.fill();
     ctx.strokeStyle = innerStroke;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     const midAngle = startAngle + ring1SegAngle / 2;
@@ -387,50 +363,50 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
-    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-    ctx.shadowBlur = 3;
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 4;
 
     if (isBonusTrigger) {
-      // Draw currency logo & name on bonus segment
-      const bonusFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      // Bonus trigger - show "Bonus" / "بونص" with scarab symbol
+      const bonusFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.font = `bold ${bonusFontSize}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-      ctx.lineWidth = 3;
-      // Line 1: Ankh symbol
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx.lineWidth = 3.5;
+      // Line 1: Scarab symbol
       ctx.fillStyle = '#D4AF37';
       const line1Y = ty - bonusFontSize * 0.7;
-      ctx.strokeText('☥', tx, line1Y);
-      ctx.fillText('☥', tx, line1Y);
-      // Line 2: Currency name
-      ctx.fillStyle = '#ffffff';
+      ctx.strokeText('𓆣', tx, line1Y);
+      ctx.fillText('𓆣', tx, line1Y);
+      // Line 2: "Bonus" text
+      ctx.fillStyle = '#FFD700';
       ctx.font = `bold ${bonusFontSize - 1}px ${segFontFamily}`;
       const line2Y = ty + bonusFontSize * 0.5;
-      ctx.strokeText('$MS-RA', tx, line2Y);
-      ctx.fillText('$MS-RA', tx, line2Y);
+      ctx.strokeText('Bonus', tx, line2Y);
+      ctx.fillText('Bonus', tx, line2Y);
     } else if (isUpgradeTrigger) {
-      // Draw upgrade label with arrow & currency
-      const upgFontSize = Math.max(10, (parseInt(segFontSize) || 14) - 2);
+      // Upgrade trigger - show Was scepter & "Upgrade"
+      const upgFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.font = `bold ${upgFontSize}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-      ctx.lineWidth = 3;
-      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx.lineWidth = 3.5;
+      ctx.fillStyle = '#90EE90';
       const line1Y = ty - upgFontSize * 0.7;
-      ctx.strokeText('⬆', tx, line1Y);
-      ctx.fillText('⬆', tx, line1Y);
+      ctx.strokeText('𓌀', tx, line1Y);
+      ctx.fillText('𓌀', tx, line1Y);
       ctx.font = `bold ${upgFontSize - 1}px ${segFontFamily}`;
       const line2Y = ty + upgFontSize * 0.5;
-      ctx.fillStyle = '#90EE90';
-      ctx.strokeText('L.E.', tx, line2Y);
-      ctx.fillText('L.E.', tx, line2Y);
+      ctx.strokeText('⬆ L.E.', tx, line2Y);
+      ctx.fillText('⬆ L.E.', tx, line2Y);
     } else {
       ctx.fillStyle = '#ffffff';
-      ctx.font = `bold ${parseInt(segFontSize) || 14}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-      ctx.lineWidth = 3;
+      const fontSize = Math.max(12, parseInt(segFontSize) || 15);
+      ctx.font = `bold ${fontSize}px ${segFontFamily}`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      ctx.lineWidth = 3.5;
       const cleanLabel = stripUnit(seg.label);
-      const maxW = (ring1Outer - innerCenterRadius) * 0.85;
+      const maxW = (ring1Outer - innerCenterRadius) * 0.82;
       const txtLines = wrapText(ctx, cleanLabel, maxW);
-      const lineH = size < 400 ? 12 : 15;
+      const lineH = size < 400 ? 13 : 16;
       const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
       txtLines.forEach((line, li) => {
         ctx.strokeText(line, tx, startTxtY + li * lineH);
@@ -450,8 +426,8 @@ const drawTripleRingWheel = (
   ctx.arc(center, center, innerCenterRadius, 0, 2 * Math.PI);
   ctx.fillStyle = centerGrad;
   ctx.fill();
-  ctx.strokeStyle = centerTextColor;
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = dividerColor;
+  ctx.lineWidth = 2.5;
   ctx.stroke();
 
   ctx.fillStyle = centerTextColor;
@@ -459,7 +435,7 @@ const drawTripleRingWheel = (
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = `${centerBg}80`;
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 8;
   ctx.fillText(centerIcon, center, center);
   ctx.shadowBlur = 0;
 };
@@ -533,6 +509,7 @@ const WheelOfFortune = () => {
   const displayTitle = getLocalizedLabel(language, settings?.title ?? "", settings?.title_en ?? undefined);
   const displayDescription = getLocalizedLabel(language, settings?.description ?? "", settings?.description_en ?? undefined);
   const displayIntroText = getLocalizedLabel(language, settings?.intro_text ?? "", settings?.intro_text_en ?? undefined);
+  const displayNoteText = getLocalizedLabel(language, (settings as any)?.note_text ?? "", (settings as any)?.note_text_en ?? undefined);
 
   // Set all settings as globals for canvas drawing
   useEffect(() => {
@@ -541,7 +518,7 @@ const WheelOfFortune = () => {
         ring_outer_ratio: settings.ring_outer_ratio ?? 0.74,
         ring_middle_ratio: settings.ring_middle_ratio ?? 0.50,
         ring_inner_ratio: settings.ring_inner_ratio ?? 0.48,
-        segment_font_size: settings.segment_font_size ?? '14px',
+        segment_font_size: settings.segment_font_size ?? '15px',
         segment_font_family: settings.segment_font_family ?? 'sans-serif',
         divider_color: settings.divider_color ?? '#D4AF37',
         outer_ring_stroke_color: settings.outer_ring_stroke_color ?? '#2E8B57',
@@ -715,15 +692,15 @@ const WheelOfFortune = () => {
           setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
           const extraSpins = Math.floor(winner.reward_value);
-          setResult(`🎰 ${extraSpins} لفات إضافية!`);
+          setResult(`🎰 ${extraSpins} ${language === "ar" || language === "both" ? "لفات إضافية!" : "extra spins!"}`);
           setTodaySpins(prev => Math.max(0, prev - extraSpins));
-          toast.success(`🎰 مبروك! حصلت على ${extraSpins} لفات إضافية مجانية!`);
+          toast.success(`🎰 ${language === "ar" || language === "both" ? `مبروك! حصلت على ${extraSpins} لفات إضافية مجانية!` : `You got ${extraSpins} free extra spins!`}`);
         } else {
           const userAmount = (winner.reward_value * 0.8).toFixed(1);
           const poolAmount = (winner.reward_value * 0.2).toFixed(1);
           setResult(`${userAmount} ${winner.reward_type.toUpperCase()}`);
-          toast.success(`🎉 مبروك! ربحت ${userAmount} ${winner.reward_type.toUpperCase()}`, {
-            description: `إجمالي: ${winner.reward_value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)`,
+          toast.success(`🎉 ${language === "ar" || language === "both" ? `مبروك! ربحت ${userAmount} ${winner.reward_type.toUpperCase()}` : `You won ${userAmount} ${winner.reward_type.toUpperCase()}`}`, {
+            description: language === "ar" || language === "both" ? `إجمالي: ${winner.reward_value} - حصتك: ${userAmount} (80%) | المجمع: ${poolAmount} (20%)` : `Total: ${winner.reward_value} - Yours: ${userAmount} (80%) | Pool: ${poolAmount} (20%)`,
           });
         }
       }
@@ -756,23 +733,30 @@ const WheelOfFortune = () => {
 
   return (
     <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative">
-      {/* Egyptian corner decorations */}
-      <div className="absolute top-2 left-3 text-amber-500/40 text-lg select-none">𓅃</div>
-      <div className="absolute top-2 right-3 text-amber-500/40 text-lg select-none">𓁢</div>
-      <div className="absolute bottom-2 left-3 text-amber-500/40 text-lg select-none">𓆣</div>
-      <div className="absolute bottom-2 right-3 text-amber-500/40 text-lg select-none">𓌀</div>
+      {/* Egyptian corner decorations - larger and better positioned */}
+      <div className="absolute top-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓅃</div>
+      <div className="absolute top-3 right-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓁢</div>
+      <div className="absolute bottom-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓆣</div>
+      <div className="absolute bottom-3 right-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓌀</div>
+      {/* Mid-side decorations */}
+      <div className="absolute top-1/2 -translate-y-1/2 left-2 text-amber-500/30 text-xl select-none">☥</div>
+      <div className="absolute top-1/2 -translate-y-1/2 right-2 text-amber-500/30 text-xl select-none">☥</div>
 
-      <CardHeader className="text-center pb-2" dir={dir}>
-        <CardTitle className="flex items-center justify-center gap-2 text-lg text-amber-400 arabic-text">
-          <span className="text-xl">☥</span>
+      <CardHeader className="text-center pb-3 pt-5" dir={dir}>
+        <CardTitle className="flex items-center justify-center gap-3 text-xl text-amber-400 arabic-text font-bold tracking-wide">
+          <span className="text-2xl">☥</span>
           {displayTitle}
-          <span className="text-xl">☥</span>
+          <span className="text-2xl">☥</span>
         </CardTitle>
         {displayDescription && (
-          <p className="text-xs text-amber-500/70 arabic-text whitespace-pre-line">{displayDescription}</p>
+          <div className="mt-3 mx-auto max-w-sm">
+            <p className="text-sm text-amber-200/80 arabic-text whitespace-pre-line leading-relaxed text-center font-medium">{displayDescription}</p>
+          </div>
         )}
         {displayIntroText && (
-          <p className="text-xs text-amber-500/50 arabic-text mt-1 whitespace-pre-line">{displayIntroText}</p>
+          <div className="mt-2 mx-auto max-w-md border border-amber-500/20 rounded-lg px-4 py-2 bg-amber-500/5">
+            <p className="text-xs text-amber-400/70 arabic-text whitespace-pre-line leading-relaxed text-center">{displayIntroText}</p>
+          </div>
         )}
       </CardHeader>
 
@@ -782,28 +766,9 @@ const WheelOfFortune = () => {
           {/* Pointer at top */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10">
             <div className="relative">
-              <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent drop-shadow-lg" style={{ borderTopColor: settings?.pointer_color || '#f59e0b' }} />
-              <div className="w-0 h-0 border-l-[9px] border-r-[9px] border-t-[17px] border-l-transparent border-r-transparent absolute top-[1px] left-1/2 -translate-x-1/2" style={{ borderTopColor: `${settings?.pointer_color || '#f59e0b'}cc` }} />
+              <div className="w-0 h-0 border-l-[14px] border-r-[14px] border-t-[26px] border-l-transparent border-r-transparent drop-shadow-lg" style={{ borderTopColor: settings?.pointer_color || '#f59e0b' }} />
+              <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[19px] border-l-transparent border-r-transparent absolute top-[1px] left-1/2 -translate-x-1/2" style={{ borderTopColor: `${settings?.pointer_color || '#f59e0b'}cc` }} />
             </div>
-          </div>
-
-          {/* Hieroglyphic border symbols */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            {EGYPTIAN_SYMBOLS.slice(0, 4).map((sym, i) => {
-              const angle = (i / 4) * Math.PI * 2 - Math.PI / 4;
-              const r = 190;
-              return (
-                <span
-                  key={i}
-                  className="absolute text-amber-500/25 text-sm select-none"
-                  style={{
-                    transform: `translate(${Math.cos(angle) * r}px, ${Math.sin(angle) * r}px)`,
-                  }}
-                >
-                  {sym}
-                </span>
-              );
-            })}
           </div>
 
           <canvas
@@ -814,42 +779,40 @@ const WheelOfFortune = () => {
             style={{ maxWidth: '100%', aspectRatio: '1/1', borderWidth: `${settings?.wheel_border_width ?? 3}px`, borderStyle: 'solid', borderColor: `${settings?.wheel_border_color || '#D4AF37'}80` }}
           />
 
-          {/* Badges removed - currency names shown directly on bonus/upgrade segments */}
-
           {isBonusAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
-                <span className="text-amber-400 text-[10px] font-bold">$MS-RA 🎰</span>
+              <div className="bg-amber-500/20 backdrop-blur-sm rounded-full px-4 py-1.5 animate-pulse">
+                <span className="text-amber-400 text-xs font-bold">☥ $MS-RA 🎰</span>
               </div>
             </div>
           )}
 
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-3 py-1 animate-pulse">
-                <span className="text-emerald-400 text-[10px] font-bold">⬆ {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
+              <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-4 py-1.5 animate-pulse">
+                <span className="text-emerald-400 text-xs font-bold">𓌀 {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
               </div>
             </div>
           )}
         </div>
 
         {/* Ring labels */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-[9px]" dir={dir}>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-emerald-500/60 arabic-text">{language === "ar" || language === "both" ? "الخارجية: ترقيات" : "Outer: Upgrades"}</span>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-[10px]" dir={dir}>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            <span className="text-emerald-400/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الخارجية: ترقيات" : "Outer: Upgrades"}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-amber-500/60 arabic-text" dir="ltr">{language === "ar" || language === "both" ? "الوسطى: $MS-RA" : "Middle: $MS-RA"}</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
+            <span className="text-amber-400/70 arabic-text font-medium" dir="ltr">{language === "ar" || language === "both" ? "الوسطى: $MS-RA" : "Middle: $MS-RA"}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-amber-700" />
-            <span className="text-amber-500/60 arabic-text">{language === "ar" || language === "both" ? "الداخلية: XP" : "Inner: XP"}</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-700 shadow-sm shadow-amber-700/50" />
+            <span className="text-amber-600/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الداخلية: XP" : "Inner: XP"}</span>
           </div>
         </div>
 
-        <div className="text-[9px] text-amber-500/40 text-center arabic-text" dir={dir}>
+        <div className="text-[10px] text-amber-500/50 text-center arabic-text font-medium" dir={dir}>
           {language === "ar" || language === "both" ? "⚖️ التوزيع: 80% للمحفظة | 20% لمجمع السيولة" : "⚖️ Distribution: 80% to wallet | 20% to liquidity pool"}
         </div>
 
@@ -891,7 +854,7 @@ const WheelOfFortune = () => {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="arabic-text">
-                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? 'MS-RA ring spinning...' : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
+                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? (language === "ar" || language === "both" ? 'حلقة $MS-RA تدور...' : '$MS-RA ring spinning...') : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
                 </span>
               </>
             ) : (
@@ -902,11 +865,20 @@ const WheelOfFortune = () => {
             )}
           </Button>
           <div className="flex items-center justify-center gap-3 text-[11px] text-amber-500/60">
-            <span>𓆣</span>
+            <span className="text-base">𓆣</span>
             <span className="arabic-text">{language === "ar" || language === "both" ? `لفات اليوم: ${todaySpins} / ${settings?.free_spins_per_day || 0} مجانية` : `Today's spins: ${todaySpins} / ${settings?.free_spins_per_day || 0} free`}</span>
-            <span>𓆣</span>
+            <span className="text-base">𓆣</span>
           </div>
         </div>
+
+        {/* Note / Comment space below the wheel */}
+        {displayNoteText && (
+          <div className="w-full mt-2 border-t border-amber-500/15 pt-3">
+            <div className="bg-amber-500/5 border border-amber-500/15 rounded-lg px-4 py-3 text-center">
+              <p className="text-xs text-amber-400/60 arabic-text whitespace-pre-line leading-relaxed">{displayNoteText}</p>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Save, Settings, Palette, Circle } from "lucide-react";
+import { Loader2, Plus, Trash2, Save, Settings, Palette, Circle, Upload, Image as ImageIcon, X } from "lucide-react";
 
 interface Segment {
   id: string;
@@ -23,6 +23,7 @@ interface Segment {
   probability: number;
   display_order: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 interface OuterSegment {
@@ -34,6 +35,7 @@ interface OuterSegment {
   probability: number;
   display_order: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 interface WSettings {
@@ -49,6 +51,8 @@ interface WSettings {
   background_color: string | null;
   intro_text: string | null;
   intro_text_en: string | null;
+  note_text: string | null;
+  note_text_en: string | null;
   badge_outer_label: string | null;
   badge_middle_label: string | null;
   badge_inner_label: string | null;
@@ -85,6 +89,9 @@ interface WSettings {
   middle_ring_stroke_color: string | null;
   inner_ring_stroke_color: string | null;
   pointer_color: string | null;
+  inner_ring_bg_image: string | null;
+  middle_ring_bg_image: string | null;
+  outer_ring_bg_image: string | null;
 }
 
 interface UpgradeSegment {
@@ -97,6 +104,7 @@ interface UpgradeSegment {
   probability: number;
   display_order: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 const FONT_SIZE_OPTIONS = [
@@ -140,6 +148,57 @@ const CENTER_ICON_OPTIONS = [
   { value: '💎', label: '💎 ماس' },
   { value: '🏆', label: '🏆 كأس' },
 ];
+
+const uploadWheelImage = async (file: File, folder: string): Promise<string | null> => {
+  const ext = file.name.split('.').pop();
+  const fileName = `${folder}/${Date.now()}.${ext}`;
+  const { data, error } = await supabase.storage
+    .from('wheel-images')
+    .upload(fileName, file, { upsert: true });
+  if (error) {
+    console.error('Upload error:', error);
+    toast.error('فشل رفع الصورة');
+    return null;
+  }
+  const { data: urlData } = supabase.storage.from('wheel-images').getPublicUrl(data.path);
+  return urlData.publicUrl;
+};
+
+const ImageUploadField = ({ label, value, onChange, folder }: { label: string; value: string | null; onChange: (url: string | null) => void; folder: string }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadWheelImage(file, folder);
+    if (url) onChange(url);
+    setUploading(false);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      {value && (
+        <div className="relative w-full h-16 rounded-md overflow-hidden border border-border/50">
+          <img src={value} alt="" className="w-full h-full object-cover" />
+          <Button size="icon" variant="destructive" className="absolute top-1 right-1 h-5 w-5" onClick={() => onChange(null)}>
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input ref={inputRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+        <Button size="sm" variant="outline" className="w-full text-xs" onClick={() => inputRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="w-3 h-3 animate-spin ml-1" /> : <Upload className="w-3 h-3 ml-1" />}
+          {uploading ? 'جاري الرفع...' : 'رفع صورة'}
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const WheelManagement = () => {
   const [segments, setSegments] = useState<Segment[]>([]);
@@ -197,6 +256,8 @@ const WheelManagement = () => {
           is_active: settings.is_active,
           intro_text: settings.intro_text,
           intro_text_en: settings.intro_text_en,
+          note_text: settings.note_text,
+          note_text_en: settings.note_text_en,
           background_color: settings.background_color,
           badge_outer_label: settings.badge_outer_label,
           badge_middle_label: settings.badge_middle_label,
@@ -234,7 +295,10 @@ const WheelManagement = () => {
           middle_ring_stroke_color: settings.middle_ring_stroke_color,
           inner_ring_stroke_color: settings.inner_ring_stroke_color,
           pointer_color: settings.pointer_color,
-        })
+          inner_ring_bg_image: settings.inner_ring_bg_image,
+          middle_ring_bg_image: settings.middle_ring_bg_image,
+          outer_ring_bg_image: settings.outer_ring_bg_image,
+        } as any)
         .eq("id", settings.id)
         .select()
         .single();
@@ -258,7 +322,8 @@ const WheelManagement = () => {
         label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
         reward_value: seg.reward_value, reward_description: seg.reward_description,
         color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
-      }).eq("id", seg.id).select().single();
+        image_url: seg.image_url,
+      } as any).eq("id", seg.id).select().single();
       if (error) throw error;
       setSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as Segment : item));
       toast.success("تم حفظ القسم");
@@ -303,7 +368,8 @@ const WheelManagement = () => {
       const { error, data } = await supabase.from("wheel_outer_segments").update({
         label: seg.label, label_en: seg.label_en, reward_value: seg.reward_value,
         color: seg.color, probability: seg.probability, display_order: seg.display_order, is_active: seg.is_active,
-      }).eq("id", seg.id).select().single();
+        image_url: seg.image_url,
+      } as any).eq("id", seg.id).select().single();
       if (error) throw error;
       setOuterSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as OuterSegment : item));
       toast.success("تم حفظ القسم");
@@ -349,7 +415,8 @@ const WheelManagement = () => {
         label: seg.label, label_en: seg.label_en, reward_type: seg.reward_type,
         reward_value: seg.reward_value, color: seg.color, probability: seg.probability,
         display_order: seg.display_order, is_active: seg.is_active,
-      }).eq("id", seg.id).select().single();
+        image_url: seg.image_url,
+      } as any).eq("id", seg.id).select().single();
       if (error) throw error;
       setUpgradeSegments((prev) => prev.map((item) => item.id === seg.id ? data as unknown as UpgradeSegment : item));
       toast.success("تم حفظ القسم");
@@ -394,16 +461,16 @@ const WheelManagement = () => {
     <Card key={seg.id} className="border-border/50">
       <CardContent className="pt-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1">
-            <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: seg.color }} />
-            <Input value={seg.label} onChange={(e) => updateSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1" />
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-6 h-6 rounded-full border-2 border-white/20 shrink-0" style={{ backgroundColor: seg.color }} />
+            <Input value={seg.label} onChange={(e) => updateSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1 min-w-0" />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <Switch checked={seg.is_active} onCheckedChange={(v) => updateSegment(seg.id, "is_active", v)} />
             <Button size="icon" variant="ghost" onClick={() => deleteSegment(seg.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div><Label className="text-xs">الاسم EN</Label><Input value={seg.label_en || ""} onChange={(e) => updateSegment(seg.id, "label_en", e.target.value)} /></div>
           <div>
             <Label className="text-xs">النوع</Label>
@@ -425,6 +492,13 @@ const WheelManagement = () => {
           <div><Label className="text-xs">اللون</Label><Input type="color" value={seg.color} onChange={(e) => updateSegment(seg.id, "color", e.target.value)} className="h-9 p-1" /></div>
           <div><Label className="text-xs">الترتيب</Label><Input type="number" value={seg.display_order} onChange={(e) => updateSegment(seg.id, "display_order", +e.target.value)} /></div>
         </div>
+        {/* Segment image upload */}
+        <ImageUploadField
+          label="صورة القسم (اختياري)"
+          value={seg.image_url}
+          onChange={(url) => updateSegment(seg.id, "image_url", url)}
+          folder="inner-segments"
+        />
         <Button size="sm" onClick={() => saveSegment(seg)} className="w-full"><Save className="w-4 h-4 ml-1" /> حفظ القسم</Button>
       </CardContent>
     </Card>
@@ -434,22 +508,29 @@ const WheelManagement = () => {
     <Card key={seg.id} className="border-border/50">
       <CardContent className="pt-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1">
-            <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: seg.color }} />
-            <Input value={seg.label} onChange={(e) => updateOuterSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1" />
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-6 h-6 rounded-full border-2 border-white/20 shrink-0" style={{ backgroundColor: seg.color }} />
+            <Input value={seg.label} onChange={(e) => updateOuterSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1 min-w-0" />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <Switch checked={seg.is_active} onCheckedChange={(v) => updateOuterSegment(seg.id, "is_active", v)} />
             <Button size="icon" variant="ghost" onClick={() => deleteOuterSegment(seg.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div><Label className="text-xs">الاسم EN</Label><Input value={seg.label_en || ""} onChange={(e) => updateOuterSegment(seg.id, "label_en", e.target.value)} /></div>
           <div><Label className="text-xs">القيمة ($MS-RA)</Label><Input type="number" step="0.1" value={seg.reward_value} onChange={(e) => updateOuterSegment(seg.id, "reward_value", +e.target.value)} /></div>
           <div><Label className="text-xs">الاحتمال %</Label><Input type="number" value={seg.probability} onChange={(e) => updateOuterSegment(seg.id, "probability", +e.target.value)} /></div>
           <div><Label className="text-xs">اللون</Label><Input type="color" value={seg.color} onChange={(e) => updateOuterSegment(seg.id, "color", e.target.value)} className="h-9 p-1" /></div>
           <div><Label className="text-xs">الترتيب</Label><Input type="number" value={seg.display_order} onChange={(e) => updateOuterSegment(seg.id, "display_order", +e.target.value)} /></div>
         </div>
+        {/* Segment image upload */}
+        <ImageUploadField
+          label="صورة القسم (اختياري)"
+          value={seg.image_url}
+          onChange={(url) => updateOuterSegment(seg.id, "image_url", url)}
+          folder="outer-segments"
+        />
         <Button size="sm" onClick={() => saveOuterSegment(seg)} className="w-full"><Save className="w-4 h-4 ml-1" /> حفظ القسم</Button>
       </CardContent>
     </Card>
@@ -461,20 +542,20 @@ const WheelManagement = () => {
   const innerR = settings?.ring_inner_ratio ?? 0.48;
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6 max-w-[100vw] overflow-x-hidden" dir="rtl">
       <Tabs defaultValue="segments">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="segments" className="text-xs"><Palette className="w-3 h-3 ml-1" /> داخلية</TabsTrigger>
-          <TabsTrigger value="outer" className="text-xs"><Circle className="w-3 h-3 ml-1" /> $MS-RA</TabsTrigger>
-          <TabsTrigger value="upgrade" className="text-xs">⬆ ترقيات</TabsTrigger>
-          <TabsTrigger value="display" className="text-xs">🎨 العرض</TabsTrigger>
-          <TabsTrigger value="settings" className="text-xs"><Settings className="w-3 h-3 ml-1" /> إعدادات</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 h-auto">
+          <TabsTrigger value="segments" className="text-[10px] sm:text-xs px-1"><Palette className="w-3 h-3 ml-1 hidden sm:inline" /> داخلية</TabsTrigger>
+          <TabsTrigger value="outer" className="text-[10px] sm:text-xs px-1"><Circle className="w-3 h-3 ml-1 hidden sm:inline" /> $MS-RA</TabsTrigger>
+          <TabsTrigger value="upgrade" className="text-[10px] sm:text-xs px-1">⬆ ترقيات</TabsTrigger>
+          <TabsTrigger value="display" className="text-[10px] sm:text-xs px-1">🎨 العرض</TabsTrigger>
+          <TabsTrigger value="settings" className="text-[10px] sm:text-xs px-1"><Settings className="w-3 h-3 ml-1 hidden sm:inline" /> إعدادات</TabsTrigger>
         </TabsList>
 
         {/* Inner Segments Tab */}
         <TabsContent value="segments" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold">أقسام الحلقة الداخلية ({segments.length})</h3>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <h3 className="font-bold text-sm sm:text-base">أقسام الحلقة الداخلية ({segments.length})</h3>
             <Button size="sm" onClick={addSegment}><Plus className="w-4 h-4 ml-1" /> إضافة قسم</Button>
           </div>
           {segments.map(renderSegmentCard)}
@@ -482,35 +563,35 @@ const WheelManagement = () => {
 
         {/* Outer Segments Tab */}
         <TabsContent value="outer" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold">أقسام الحلقة الخارجية - $MS-RA ({outerSegments.length})</h3>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <h3 className="font-bold text-sm sm:text-base">أقسام الحلقة الخارجية - $MS-RA ({outerSegments.length})</h3>
             <Button size="sm" onClick={addOuterSegment}><Plus className="w-4 h-4 ml-1" /> إضافة قسم</Button>
           </div>
-          <p className="text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية وتُفعّل عند وقوف السهم الداخلي على "بونص"</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية وتُفعّل عند وقوف السهم الداخلي على "بونص"</p>
           {outerSegments.map(renderOuterSegmentCard)}
         </TabsContent>
 
         {/* Upgrade Segments Tab */}
         <TabsContent value="upgrade" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold">أقسام حلقة الترقيات ({upgradeSegments.length})</h3>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <h3 className="font-bold text-sm sm:text-base">أقسام حلقة الترقيات ({upgradeSegments.length})</h3>
             <Button size="sm" onClick={addUpgradeSegment}><Plus className="w-4 h-4 ml-1" /> إضافة قسم</Button>
           </div>
-          <p className="text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية (الثالثة) وتُفعّل عند وقوف السهم الداخلي على "ترقية"</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">هذه الأقسام تظهر في الحلقة الخارجية (الثالثة) وتُفعّل عند وقوف السهم الداخلي على "ترقية"</p>
           {upgradeSegments.map((seg) => (
             <Card key={seg.id} className="border-border/50">
               <CardContent className="pt-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-1">
-                    <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: seg.color }} />
-                    <Input value={seg.label} onChange={(e) => updateUpgradeSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1" />
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-6 h-6 rounded-full border-2 border-white/20 shrink-0" style={{ backgroundColor: seg.color }} />
+                    <Input value={seg.label} onChange={(e) => updateUpgradeSegment(seg.id, "label", e.target.value)} placeholder="الاسم" className="flex-1 min-w-0" />
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <Switch checked={seg.is_active} onCheckedChange={(v) => updateUpgradeSegment(seg.id, "is_active", v)} />
                     <Button size="icon" variant="ghost" onClick={() => deleteUpgradeSegment(seg.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <div><Label className="text-xs">الاسم EN</Label><Input value={seg.label_en || ""} onChange={(e) => updateUpgradeSegment(seg.id, "label_en", e.target.value)} /></div>
                   <div>
                     <Label className="text-xs">النوع</Label>
@@ -532,74 +613,94 @@ const WheelManagement = () => {
                   <div><Label className="text-xs">اللون</Label><Input type="color" value={seg.color} onChange={(e) => updateUpgradeSegment(seg.id, "color", e.target.value)} className="h-9 p-1" /></div>
                   <div><Label className="text-xs">الترتيب</Label><Input type="number" value={seg.display_order} onChange={(e) => updateUpgradeSegment(seg.id, "display_order", +e.target.value)} /></div>
                 </div>
+                {/* Segment image upload */}
+                <ImageUploadField
+                  label="صورة القسم (اختياري)"
+                  value={seg.image_url}
+                  onChange={(url) => updateUpgradeSegment(seg.id, "image_url", url)}
+                  folder="upgrade-segments"
+                />
                 <Button size="sm" onClick={() => saveUpgradeSegment(seg)} className="w-full"><Save className="w-4 h-4 ml-1" /> حفظ القسم</Button>
               </CardContent>
             </Card>
           ))}
         </TabsContent>
 
-        {/* Display Settings Tab - Enhanced */}
+        {/* Display Settings Tab */}
         <TabsContent value="display" className="space-y-4">
           {settings && (
             <>
-              {/* === Ring Sizes with Sliders & Visual Preview === */}
+              {/* === Ring Sizes === */}
               <Card>
                 <CardHeader><CardTitle className="text-base">📐 أحجام الحلقات</CardTitle></CardHeader>
                 <CardContent className="space-y-5">
-                  {/* Visual ring preview */}
                   <div className="flex justify-center">
                     <div className="relative" style={{ width: 160, height: 160 }}>
-                      <div className="absolute rounded-full border-2 border-emerald-500/50" style={{
-                        width: 160, height: 160, top: 0, left: 0,
-                      }} />
-                      <div className="absolute rounded-full border-2 border-amber-500/50" style={{
-                        width: `${outerR * 100}%`, height: `${outerR * 100}%`,
-                        top: `${(1 - outerR) * 50}%`, left: `${(1 - outerR) * 50}%`,
-                      }} />
-                      <div className="absolute rounded-full border-2 border-amber-700/50" style={{
-                        width: `${middleR * 100}%`, height: `${middleR * 100}%`,
-                        top: `${(1 - middleR) * 50}%`, left: `${(1 - middleR) * 50}%`,
-                      }} />
-                      <div className="absolute rounded-full border-2 border-amber-900/50" style={{
-                        width: `${innerR * 100}%`, height: `${innerR * 100}%`,
-                        top: `${(1 - innerR) * 50}%`, left: `${(1 - innerR) * 50}%`,
-                      }} />
-                      {/* Labels */}
+                      <div className="absolute rounded-full border-2 border-emerald-500/50" style={{ width: 160, height: 160, top: 0, left: 0 }} />
+                      <div className="absolute rounded-full border-2 border-amber-500/50" style={{ width: `${outerR * 100}%`, height: `${outerR * 100}%`, top: `${(1 - outerR) * 50}%`, left: `${(1 - outerR) * 50}%` }} />
+                      <div className="absolute rounded-full border-2 border-amber-700/50" style={{ width: `${middleR * 100}%`, height: `${middleR * 100}%`, top: `${(1 - middleR) * 50}%`, left: `${(1 - middleR) * 50}%` }} />
+                      <div className="absolute rounded-full border-2 border-amber-900/50" style={{ width: `${innerR * 100}%`, height: `${innerR * 100}%`, top: `${(1 - innerR) * 50}%`, left: `${(1 - innerR) * 50}%` }} />
                       <span className="absolute text-[8px] text-emerald-400" style={{ top: 2, left: '50%', transform: 'translateX(-50%)' }}>ترقيات</span>
                       <span className="absolute text-[8px] text-amber-400" style={{ top: `${(1 - outerR) * 50 + 4}%`, left: '50%', transform: 'translateX(-50%)' }}>$MS-RA</span>
                       <span className="absolute text-[8px] text-amber-600" style={{ top: `${(1 - middleR) * 50 + 4}%`, left: '50%', transform: 'translateX(-50%)' }}>XP</span>
                     </div>
                   </div>
-
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <Label className="text-xs">🟢 فاصل الحلقة الخارجية (ترقيات)</Label>
                         <span className="text-xs font-mono text-muted-foreground">{(outerR * 100).toFixed(0)}%</span>
                       </div>
-                      <Slider value={[outerR * 100]} min={50} max={95} step={1}
-                        onValueChange={([v]) => setSettings({ ...settings, ring_outer_ratio: v / 100 })} />
-                      <p className="text-[10px] text-muted-foreground mt-1">كلما زادت القيمة كلما صغرت حلقة الترقيات</p>
+                      <Slider value={[outerR * 100]} min={50} max={95} step={1} onValueChange={([v]) => setSettings({ ...settings, ring_outer_ratio: v / 100 })} />
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <Label className="text-xs">🟡 فاصل الحلقة الوسطى ($MS-RA)</Label>
                         <span className="text-xs font-mono text-muted-foreground">{(middleR * 100).toFixed(0)}%</span>
                       </div>
-                      <Slider value={[middleR * 100]} min={25} max={70} step={1}
-                        onValueChange={([v]) => setSettings({ ...settings, ring_middle_ratio: v / 100 })} />
-                      <p className="text-[10px] text-muted-foreground mt-1">كلما زادت القيمة كلما صغرت حلقة $MS-RA</p>
+                      <Slider value={[middleR * 100]} min={25} max={70} step={1} onValueChange={([v]) => setSettings({ ...settings, ring_middle_ratio: v / 100 })} />
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <Label className="text-xs">🟠 حد الحلقة الداخلية (XP)</Label>
                         <span className="text-xs font-mono text-muted-foreground">{(innerR * 100).toFixed(0)}%</span>
                       </div>
-                      <Slider value={[innerR * 100]} min={20} max={60} step={1}
-                        onValueChange={([v]) => setSettings({ ...settings, ring_inner_ratio: v / 100 })} />
-                      <p className="text-[10px] text-muted-foreground mt-1">الحد الخارجي لحلقة XP</p>
+                      <Slider value={[innerR * 100]} min={20} max={60} step={1} onValueChange={([v]) => setSettings({ ...settings, ring_inner_ratio: v / 100 })} />
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* === Ring Background Images === */}
+              <Card>
+                <CardHeader><CardTitle className="text-base">🖼️ خلفيات الحلقات</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <ImageUploadField
+                      label="🟢 خلفية حلقة الترقيات"
+                      value={settings.outer_ring_bg_image}
+                      onChange={(url) => setSettings({ ...settings, outer_ring_bg_image: url })}
+                      folder="ring-backgrounds"
+                    />
+                    <ImageUploadField
+                      label="🟡 خلفية حلقة $MS-RA"
+                      value={settings.middle_ring_bg_image}
+                      onChange={(url) => setSettings({ ...settings, middle_ring_bg_image: url })}
+                      folder="ring-backgrounds"
+                    />
+                    <ImageUploadField
+                      label="🟠 خلفية حلقة XP"
+                      value={settings.inner_ring_bg_image}
+                      onChange={(url) => setSettings({ ...settings, inner_ring_bg_image: url })}
+                      folder="ring-backgrounds"
+                    />
+                  </div>
+                  <ImageUploadField
+                    label="خلفية العجلة الكاملة"
+                    value={settings.wheel_background_image}
+                    onChange={(url) => setSettings({ ...settings, wheel_background_image: url })}
+                    folder="wheel-background"
+                  />
                 </CardContent>
               </Card>
 
@@ -610,7 +711,7 @@ const WheelManagement = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label className="text-xs">حجم الخط</Label>
-                      <Select value={settings.segment_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, segment_font_size: v })}>
+                      <Select value={settings.segment_font_size || "15px"} onValueChange={(v) => setSettings({ ...settings, segment_font_size: v })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
@@ -627,9 +728,8 @@ const WheelManagement = () => {
                       </Select>
                     </div>
                   </div>
-                  {/* Preview */}
                   <div className="bg-muted/30 rounded-lg p-3 text-center">
-                    <span style={{ fontSize: settings.segment_font_size || '14px', fontFamily: settings.segment_font_family || 'sans-serif', fontWeight: 'bold' }}>
+                    <span style={{ fontSize: settings.segment_font_size || '15px', fontFamily: settings.segment_font_family || 'sans-serif', fontWeight: 'bold' }}>
                       عينة نص - Sample Text 123
                     </span>
                   </div>
@@ -638,7 +738,7 @@ const WheelManagement = () => {
 
               {/* === Badges === */}
               <Card>
-                <CardHeader><CardTitle className="text-base">🏷️ يافطات الحلقات (Badges)</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base">🏷️ يافطات الحلقات</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   {/* Outer badge */}
                   <div className="border border-emerald-500/20 rounded-lg p-3 space-y-2">
@@ -646,31 +746,12 @@ const WheelManagement = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div><Label className="text-xs">النص</Label><Input value={settings.badge_outer_label || ""} onChange={(e) => setSettings({ ...settings, badge_outer_label: e.target.value })} /></div>
                       <div>
-                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
-                        <div className="flex items-center gap-2">
-                          <Slider value={[parseFloat(settings.badge_outer_top || '2')]} min={0} max={45} step={1}
-                            onValueChange={([v]) => setSettings({ ...settings, badge_outer_top: String(v) })} className="flex-1" />
-                          <span className="text-xs font-mono w-8">{settings.badge_outer_top || '2'}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs">حجم خط اليافطة</Label>
-                        <Select value={settings.badge_outer_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_outer_font_size: v })}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-xs">الموقع (%)</Label>
+                        <Slider value={[parseFloat(settings.badge_outer_top || '2')]} min={0} max={45} step={1} onValueChange={([v]) => setSettings({ ...settings, badge_outer_top: String(v) })} />
                       </div>
                       <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_outer_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_outer_bg: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_outer_text_color || "#fbbf24"} onChange={(e) => setSettings({ ...settings, badge_outer_text_color: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_outer_border_color || "#f59e0b"} onChange={(e) => setSettings({ ...settings, badge_outer_border_color: e.target.value })} className="h-9 p-1" /></div>
-                    </div>
-                    {/* Badge preview */}
-                    <div className="flex justify-center py-2">
-                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_outer_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_outer_border_color || '#f59e0b'}` }}>
-                        <span className="font-black" style={{ color: settings.badge_outer_text_color || '#fbbf24', fontSize: settings.badge_outer_font_size || settings.badge_font_size || '14px' }}>{settings.badge_outer_label || 'L.E.'}</span>
-                      </div>
                     </div>
                   </div>
 
@@ -680,63 +761,27 @@ const WheelManagement = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div><Label className="text-xs">النص</Label><Input value={settings.badge_middle_label || ""} onChange={(e) => setSettings({ ...settings, badge_middle_label: e.target.value })} /></div>
                       <div>
-                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
-                        <div className="flex items-center gap-2">
-                          <Slider value={[parseFloat(settings.badge_middle_top || '15')]} min={0} max={45} step={1}
-                            onValueChange={([v]) => setSettings({ ...settings, badge_middle_top: String(v) })} className="flex-1" />
-                          <span className="text-xs font-mono w-8">{settings.badge_middle_top || '15'}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs">حجم خط اليافطة</Label>
-                        <Select value={settings.badge_middle_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_middle_font_size: v })}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-xs">الموقع (%)</Label>
+                        <Slider value={[parseFloat(settings.badge_middle_top || '15')]} min={0} max={45} step={1} onValueChange={([v]) => setSettings({ ...settings, badge_middle_top: String(v) })} />
                       </div>
                       <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_middle_bg || "#8B6914"} onChange={(e) => setSettings({ ...settings, badge_middle_bg: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_middle_text_color || "#ffffff"} onChange={(e) => setSettings({ ...settings, badge_middle_text_color: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_middle_border_color || "#fcd34d"} onChange={(e) => setSettings({ ...settings, badge_middle_border_color: e.target.value })} className="h-9 p-1" /></div>
                     </div>
-                    <div className="flex justify-center py-2">
-                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_middle_bg || '#8B6914'}e6`, border: `2px solid ${settings.badge_middle_border_color || '#fcd34d'}` }}>
-                        <span className="font-black" style={{ color: settings.badge_middle_text_color || '#ffffff', fontSize: settings.badge_middle_font_size || settings.badge_font_size || '14px' }}>{settings.badge_middle_label || 'Ms-Ra'}</span>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Inner badge */}
-                  <div className="border border-emerald-500/20 rounded-lg p-3 space-y-2">
-                    <h4 className="font-bold text-sm text-emerald-400">الحلقة الداخلية (XP)</h4>
+                  <div className="border border-amber-600/20 rounded-lg p-3 space-y-2">
+                    <h4 className="font-bold text-sm text-amber-500">الحلقة الداخلية (XP)</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       <div><Label className="text-xs">النص</Label><Input value={settings.badge_inner_label || ""} onChange={(e) => setSettings({ ...settings, badge_inner_label: e.target.value })} /></div>
                       <div>
-                        <Label className="text-xs">الموقع (% من الأعلى)</Label>
-                        <div className="flex items-center gap-2">
-                          <Slider value={[parseFloat(settings.badge_inner_top || '28')]} min={0} max={48} step={1}
-                            onValueChange={([v]) => setSettings({ ...settings, badge_inner_top: String(v) })} className="flex-1" />
-                          <span className="text-xs font-mono w-8">{settings.badge_inner_top || '28'}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <Label className="text-xs">حجم خط اليافطة</Label>
-                        <Select value={settings.badge_inner_font_size || settings.badge_font_size || "14px"} onValueChange={(v) => setSettings({ ...settings, badge_inner_font_size: v })}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {FONT_SIZE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        <Label className="text-xs">الموقع (%)</Label>
+                        <Slider value={[parseFloat(settings.badge_inner_top || '28')]} min={0} max={48} step={1} onValueChange={([v]) => setSettings({ ...settings, badge_inner_top: String(v) })} />
                       </div>
                       <div><Label className="text-xs">لون الخلفية</Label><Input type="color" value={settings.badge_inner_bg || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, badge_inner_bg: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون النص</Label><Input type="color" value={settings.badge_inner_text_color || "#34d399"} onChange={(e) => setSettings({ ...settings, badge_inner_text_color: e.target.value })} className="h-9 p-1" /></div>
                       <div><Label className="text-xs">لون الحدود</Label><Input type="color" value={settings.badge_inner_border_color || "#10b981"} onChange={(e) => setSettings({ ...settings, badge_inner_border_color: e.target.value })} className="h-9 p-1" /></div>
-                    </div>
-                    <div className="flex justify-center py-2">
-                      <div className="rounded-md px-3 py-1 shadow-lg" style={{ backgroundColor: `${settings.badge_inner_bg || '#1a1a2e'}e6`, border: `2px solid ${settings.badge_inner_border_color || '#10b981'}` }}>
-                        <span className="font-black" style={{ color: settings.badge_inner_text_color || '#34d399', fontSize: settings.badge_inner_font_size || settings.badge_font_size || '14px' }}>{settings.badge_inner_label || 'Xp'}</span>
-                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -748,10 +793,6 @@ const WheelManagement = () => {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-xs">خلفية العجلة (URL صورة)</Label>
-                      <Input value={settings.wheel_background_image || ""} onChange={(e) => setSettings({ ...settings, wheel_background_image: e.target.value })} placeholder="https://..." />
-                    </div>
-                    <div>
                       <Label className="text-xs">لون خلفية الكارد</Label>
                       <Input type="color" value={settings.background_color || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, background_color: e.target.value })} className="h-9 p-1" />
                     </div>
@@ -761,8 +802,7 @@ const WheelManagement = () => {
                     </div>
                     <div>
                       <Label className="text-xs">سمك حدود العجلة</Label>
-                      <Slider value={[settings.wheel_border_width ?? 3]} min={0} max={8} step={0.5}
-                        onValueChange={([v]) => setSettings({ ...settings, wheel_border_width: v })} />
+                      <Slider value={[settings.wheel_border_width ?? 3]} min={0} max={8} step={0.5} onValueChange={([v]) => setSettings({ ...settings, wheel_border_width: v })} />
                       <span className="text-[10px] text-muted-foreground">{settings.wheel_border_width ?? 3}px</span>
                     </div>
                     <div>
@@ -774,8 +814,6 @@ const WheelManagement = () => {
                       <Input type="color" value={settings.divider_color || "#D4AF37"} onChange={(e) => setSettings({ ...settings, divider_color: e.target.value })} className="h-9 p-1" />
                     </div>
                   </div>
-
-                  {/* Ring stroke colors */}
                   <div className="border border-border/50 rounded-lg p-3 space-y-2">
                     <h4 className="font-bold text-xs">ألوان حدود الأقسام</h4>
                     <div className="grid grid-cols-3 gap-2">
@@ -814,12 +852,10 @@ const WheelManagement = () => {
                     <div><Label className="text-xs">لون الأيقونة</Label><Input type="color" value={settings.center_text_color || "#1a1a2e"} onChange={(e) => setSettings({ ...settings, center_text_color: e.target.value })} className="h-9 p-1" /></div>
                     <div>
                       <Label className="text-xs">حجم المركز</Label>
-                      <Slider value={[settings.center_size ?? 28]} min={15} max={50} step={1}
-                        onValueChange={([v]) => setSettings({ ...settings, center_size: v })} />
+                      <Slider value={[settings.center_size ?? 28]} min={15} max={50} step={1} onValueChange={([v]) => setSettings({ ...settings, center_size: v })} />
                       <span className="text-[10px] text-muted-foreground">{settings.center_size ?? 28}px</span>
                     </div>
                   </div>
-                  {/* Center preview */}
                   <div className="flex justify-center py-2">
                     <div className="rounded-full flex items-center justify-center" style={{
                       width: (settings.center_size ?? 28) * 2,
@@ -844,15 +880,35 @@ const WheelManagement = () => {
         <TabsContent value="settings" className="space-y-4">
           {settings && (
             <Card>
-              <CardHeader><CardTitle>إعدادات العجلة</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-sm sm:text-base">إعدادات العجلة</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div><Label>العنوان</Label><Input value={settings.title} onChange={(e) => setSettings({ ...settings, title: e.target.value })} /></div>
                   <div><Label>العنوان EN</Label><Input value={settings.title_en || ""} onChange={(e) => setSettings({ ...settings, title_en: e.target.value })} /></div>
-                  <div><Label>الوصف</Label><Textarea value={settings.description || ""} onChange={(e) => setSettings({ ...settings, description: e.target.value })} /></div>
-                  <div><Label>الوصف EN</Label><Textarea value={settings.description_en || ""} onChange={(e) => setSettings({ ...settings, description_en: e.target.value })} /></div>
-                  <div><Label>نص المقدمة</Label><Textarea value={settings.intro_text || ""} onChange={(e) => setSettings({ ...settings, intro_text: e.target.value })} /></div>
-                  <div><Label>المقدمة EN</Label><Textarea value={settings.intro_text_en || ""} onChange={(e) => setSettings({ ...settings, intro_text_en: e.target.value })} /></div>
+                  <div className="sm:col-span-2">
+                    <Label>الوصف (يظهر تحت العنوان)</Label>
+                    <Textarea value={settings.description || ""} onChange={(e) => setSettings({ ...settings, description: e.target.value })} rows={3} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>الوصف EN</Label>
+                    <Textarea value={settings.description_en || ""} onChange={(e) => setSettings({ ...settings, description_en: e.target.value })} rows={3} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>نص المقدمة (في إطار منفصل)</Label>
+                    <Textarea value={settings.intro_text || ""} onChange={(e) => setSettings({ ...settings, intro_text: e.target.value })} rows={3} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>المقدمة EN</Label>
+                    <Textarea value={settings.intro_text_en || ""} onChange={(e) => setSettings({ ...settings, intro_text_en: e.target.value })} rows={3} />
+                  </div>
+                  <div className="sm:col-span-2 border-t border-border/50 pt-3">
+                    <Label>📝 تعليق أسفل العجلة</Label>
+                    <Textarea value={settings.note_text || ""} onChange={(e) => setSettings({ ...settings, note_text: e.target.value })} rows={3} placeholder="تعليق أو ملاحظة تظهر أسفل العجلة..." />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label>التعليق EN</Label>
+                    <Textarea value={settings.note_text_en || ""} onChange={(e) => setSettings({ ...settings, note_text_en: e.target.value })} rows={3} placeholder="Note displayed below the wheel..." />
+                  </div>
                   <div><Label>تكلفة اللفة (XP)</Label><Input type="number" value={settings.spin_cost_xp} onChange={(e) => setSettings({ ...settings, spin_cost_xp: +e.target.value })} /></div>
                   <div><Label>اللفات المجانية يومياً</Label><Input type="number" value={settings.free_spins_per_day} onChange={(e) => setSettings({ ...settings, free_spins_per_day: +e.target.value })} /></div>
                 </div>
