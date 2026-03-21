@@ -23,6 +23,9 @@ export interface Profile {
   verified_by: string | null;
   followers_count: number | null;
   following_count: number | null;
+  date_of_birth: string | null;
+  marital_status: string | null;
+  country: string | null;
   created_at: string;
   updated_at: string;
 }
