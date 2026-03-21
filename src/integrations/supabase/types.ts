@@ -2643,7 +2643,9 @@ export type Database = {
           anubis_subscription_type: string | null
           avatar_url: string | null
           bio: string | null
+          country: string | null
           created_at: string
+          date_of_birth: string | null
           email: string | null
           facebook_url: string | null
           followers_count: number | null
@@ -2656,6 +2658,7 @@ export type Database = {
           instagram_url: string | null
           is_verified: boolean | null
           linkedin_url: string | null
+          marital_status: string | null
           phone: string | null
           preferred_language: string | null
           referral_code: string | null
@@ -2674,7 +2677,9 @@ export type Database = {
           anubis_subscription_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           facebook_url?: string | null
           followers_count?: number | null
@@ -2687,6 +2692,7 @@ export type Database = {
           instagram_url?: string | null
           is_verified?: boolean | null
           linkedin_url?: string | null
+          marital_status?: string | null
           phone?: string | null
           preferred_language?: string | null
           referral_code?: string | null
@@ -2705,7 +2711,9 @@ export type Database = {
           anubis_subscription_type?: string | null
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           email?: string | null
           facebook_url?: string | null
           followers_count?: number | null
@@ -2718,6 +2726,7 @@ export type Database = {
           instagram_url?: string | null
           is_verified?: boolean | null
           linkedin_url?: string | null
+          marital_status?: string | null
           phone?: string | null
           preferred_language?: string | null
           referral_code?: string | null
