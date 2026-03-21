@@ -258,22 +258,22 @@ export default function ContentManagement() {
   const otherContents = contents.filter(c => c.content_type !== 'rwa_content' && c.content_type !== 'stable_coin_content');
 
   return (
-    <div className="w-full max-w-[100vw] overflow-x-hidden px-2 py-4 sm:px-4 sm:py-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
+    <div className="box-border w-full max-w-[100vw] overflow-x-hidden px-2 py-4 sm:px-4 sm:py-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl sm:text-3xl font-bold">إدارة محتوى التطبيق</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRefresh}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button variant="outline" onClick={handleRefresh} className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             تحديث
           </Button>
           <Dialog open={showDialog} onOpenChange={setShowDialog}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm}>
+              <Button onClick={resetForm} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 إضافة محتوى جديد
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="w-[calc(100vw-1rem)] max-w-md">
               <DialogHeader>
                 <DialogTitle>
                   {editingContent ? 'تعديل المحتوى' : 'إضافة محتوى جديد'}
@@ -501,39 +501,39 @@ export default function ContentManagement() {
         </div>
       )}
 
-      <Tabs defaultValue="content" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="content" className="flex items-center gap-2">
+      <Tabs defaultValue="content" className="w-full max-w-full overflow-hidden">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
+          <TabsTrigger value="content" className="min-w-0 px-2 py-2 text-xs sm:text-sm">
             <FileText className="w-4 h-4" />
             المحتوى النصي
           </TabsTrigger>
-          <TabsTrigger value="reels" className="flex items-center gap-2">
+          <TabsTrigger value="reels" className="min-w-0 px-2 py-2 text-xs sm:text-sm">
             <Video className="w-4 h-4" />
             الريلز
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="content">
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto gap-1">
-              <TabsTrigger value="all" className="text-xs sm:text-sm px-2">جميع المحتويات</TabsTrigger>
-              <TabsTrigger value="rwa" className="flex items-center gap-1 text-xs sm:text-sm px-2">
+        <TabsContent value="content" className="mt-4 w-full max-w-full overflow-hidden">
+          <Tabs defaultValue="all" className="w-full max-w-full overflow-hidden">
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
+              <TabsTrigger value="all" className="min-w-0 px-2 py-2 text-[11px] sm:text-sm">جميع المحتويات</TabsTrigger>
+              <TabsTrigger value="rwa" className="min-w-0 gap-1 px-2 py-2 text-[11px] sm:text-sm">
                 <Building className="h-3 w-3 sm:h-4 sm:w-4" />
                 RWA
               </TabsTrigger>
-              <TabsTrigger value="stablecoin" className="flex items-center gap-1 text-xs sm:text-sm px-2">
+              <TabsTrigger value="stablecoin" className="min-w-0 gap-1 px-2 py-2 text-[11px] sm:text-sm">
                 <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
                 العملة المستقرة
               </TabsTrigger>
-              <TabsTrigger value="other" className="text-xs sm:text-sm px-2">محتويات أخرى</TabsTrigger>
+              <TabsTrigger value="other" className="min-w-0 px-2 py-2 text-[11px] sm:text-sm">محتويات أخرى</TabsTrigger>
             </TabsList>
         
-        <TabsContent value="all" className="mt-6">
+        <TabsContent value="all" className="mt-6 w-full max-w-full overflow-hidden">
           <div className="grid gap-4">
             {contents.map((content) => (
               <Card key={content.id}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <CardTitle className="flex min-w-0 items-start gap-2 break-words text-base leading-snug sm:text-lg">
                      {content.content_type === 'text' ? 
                        <FileText className="h-4 w-4" /> : 
                        content.content_type === 'msra_mining_card' ?
@@ -542,9 +542,9 @@ export default function ContentManagement() {
                        <MousePointer className="h-4 w-4" /> :
                        <Image className="h-4 w-4" />
                      }
-                    {content.content_key}
+                    <span className="min-w-0 break-all">{content.content_key}</span>
                   </CardTitle>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
                     <Button 
                       variant="outline" 
                       size="sm" 
@@ -572,7 +572,7 @@ export default function ContentManagement() {
                     content.content_type === 'sidebar_content' ||
                     content.content_type === 'admin_content') ? (
                     <div>
-                      <p className="text-muted-foreground">{content.text_content}</p>
+                      <p className="break-words text-muted-foreground">{content.text_content}</p>
                       <div className="mt-2 text-xs text-muted-foreground">
                         النوع: {content.content_type}
                       </div>
@@ -616,7 +616,7 @@ export default function ContentManagement() {
                       <p className="text-sm text-muted-foreground">{content.alt_text}</p>
                     </div>
                   )}
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                  <div className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4">
                     <span>الترتيب: {content.position_order}</span>
                     <span className={content.is_active ? "text-green-600" : "text-red-600"}>
                       {content.is_active ? "نشط" : "غير نشط"}
@@ -628,7 +628,7 @@ export default function ContentManagement() {
           </div>
         </TabsContent>
 
-        <TabsContent value="rwa" className="mt-6">
+        <TabsContent value="rwa" className="mt-6 w-full max-w-full overflow-hidden">
           <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
             <div className="flex items-center gap-2 mb-2">
               <Building className="h-5 w-5 text-primary" />
@@ -642,13 +642,13 @@ export default function ContentManagement() {
             {rwaContents.length > 0 ? rwaContents.map((content) => (
               <Card key={content.id} className="border-primary/20">
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex min-w-0 items-start gap-2 break-words text-base sm:text-lg">
                         <Building className="h-4 w-4" />
-                        {content.content_key}
+                        <span className="min-w-0 break-all">{content.content_key}</span>
                       </CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                           {content.content_type}
                         </span>
@@ -657,7 +657,7 @@ export default function ContentManagement() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -704,7 +704,7 @@ export default function ContentManagement() {
                     </div>
                   )}
                   {content.text_content && (
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="break-words text-muted-foreground text-sm leading-relaxed">
                       {content.text_content.length > 200 
                         ? `${content.text_content.substring(0, 200)}...` 
                         : content.text_content
@@ -725,7 +725,7 @@ export default function ContentManagement() {
           </div>
         </TabsContent>
 
-        <TabsContent value="stablecoin" className="mt-6">
+        <TabsContent value="stablecoin" className="mt-6 w-full max-w-full overflow-hidden">
           <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins className="h-5 w-5 text-primary" />
@@ -739,13 +739,13 @@ export default function ContentManagement() {
             {stableCoinContents.length > 0 ? stableCoinContents.map((content) => (
               <Card key={content.id} className="border-primary/20">
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="flex min-w-0 items-start gap-2 break-words text-base sm:text-lg">
                         <Coins className="h-4 w-4" />
-                        {content.content_key}
+                        <span className="min-w-0 break-all">{content.content_key}</span>
                       </CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                           {content.content_type}
                         </span>
@@ -754,7 +754,7 @@ export default function ContentManagement() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -801,7 +801,7 @@ export default function ContentManagement() {
                     </div>
                   )}
                   {content.text_content && (
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="break-words text-muted-foreground text-sm leading-relaxed">
                       {content.text_content.length > 200 
                         ? `${content.text_content.substring(0, 200)}...` 
                         : content.text_content
@@ -822,15 +822,15 @@ export default function ContentManagement() {
           </div>
         </TabsContent>
 
-        <TabsContent value="other" className="mt-6">
+        <TabsContent value="other" className="mt-6 w-full max-w-full overflow-hidden">
           <div className="grid gap-4">
             {otherContents.map((content) => (
               <Card key={content.id}>
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{content.content_key}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="min-w-0 break-all text-base sm:text-lg">{content.content_key}</CardTitle>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         <span className="text-xs bg-muted px-2 py-1 rounded">
                           {content.content_type}
                         </span>
@@ -839,7 +839,7 @@ export default function ContentManagement() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -886,7 +886,7 @@ export default function ContentManagement() {
                     </div>
                   )}
                   {content.text_content && (
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="break-words text-muted-foreground text-sm leading-relaxed">
                        {content.text_content.length > 200 
                         ? `${content.text_content.substring(0, 200)}...` 
                         : content.text_content
