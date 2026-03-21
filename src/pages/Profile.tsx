@@ -111,34 +111,29 @@ export default function Profile() {
     }}>
       <div className="min-h-screen bg-background/90">
         <div className="container max-w-4xl mx-auto p-6 arabic-content" style={containerStyle}>
-          <ProfileHeader profile={profile} />
+          <ProfileHeader profile={profile} badges={userBadges} />
 
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-              <TabsTrigger value="overview" className="flex-col py-2 gap-1 text-xs">
-                <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("نظرة عامة")}</span>
-                <span className="sm:hidden">{t("عامة")}</span>
+          <Tabs defaultValue="overview" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-5 h-12 p-1 gap-0.5">
+              <TabsTrigger value="overview" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <User className="w-4 h-4" />
+                <span>{t("عامة")}</span>
               </TabsTrigger>
-              <TabsTrigger value="family" className="flex-col py-2 gap-1 text-xs">
-                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("العائلة")}</span>
-                <span className="sm:hidden">{t("عائلة")}</span>
+              <TabsTrigger value="family" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Users className="w-4 h-4" />
+                <span>{t("عائلة")}</span>
               </TabsTrigger>
-              <TabsTrigger value="edit" className="flex-col py-2 gap-1 text-xs">
-                <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("تحرير")}</span>
-                <span className="sm:hidden">{t("تعديل")}</span>
+              <TabsTrigger value="edit" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Edit className="w-4 h-4" />
+                <span>{t("تعديل")}</span>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="flex-col py-2 gap-1 text-xs">
-                <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("النشاط")}</span>
-                <span className="sm:hidden">{t("نشاط")}</span>
+              <TabsTrigger value="activity" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Activity className="w-4 h-4" />
+                <span>{t("نشاط")}</span>
               </TabsTrigger>
-              <TabsTrigger value="settings" className="flex-col py-2 gap-1 text-xs">
-                <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{t("الإعدادات")}</span>
-                <span className="sm:hidden">{t("إعدادات")}</span>
+              <TabsTrigger value="settings" className="flex-col py-1.5 gap-0.5 text-[10px] sm:text-xs px-1 data-[state=active]:bg-primary/10">
+                <Settings className="w-4 h-4" />
+                <span>{t("إعدادات")}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -198,25 +193,6 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {userBadges.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-right flex items-center gap-2 justify-end">
-                      <span>{t("البادجات")}</span><Star className="w-5 h-5 text-primary" />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-3 justify-end">
-                      {userBadges.map((ub: any) => (
-                        <div key={ub.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border" style={{ borderColor: (ub.badges as any)?.badge_color }}>
-                          <span className="text-lg">{(ub.badges as any)?.icon_emoji}</span>
-                          <span className="text-sm font-cairo" style={{ color: (ub.badges as any)?.badge_color }}>{(ub.badges as any)?.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               <Card>
                 <CardHeader>
