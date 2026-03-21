@@ -258,9 +258,9 @@ export default function ContentManagement() {
   const otherContents = contents.filter(c => c.content_type !== 'rwa_content' && c.content_type !== 'stable_coin_content');
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">إدارة محتوى التطبيق</h1>
+    <div className="w-full max-w-[100vw] overflow-x-hidden px-2 py-4 sm:px-4 sm:py-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
+        <h1 className="text-xl sm:text-3xl font-bold">إدارة محتوى التطبيق</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -515,17 +515,17 @@ export default function ContentManagement() {
 
         <TabsContent value="content">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">جميع المحتويات</TabsTrigger>
-              <TabsTrigger value="rwa" className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                محتوى RWA
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto gap-1">
+              <TabsTrigger value="all" className="text-xs sm:text-sm px-2">جميع المحتويات</TabsTrigger>
+              <TabsTrigger value="rwa" className="flex items-center gap-1 text-xs sm:text-sm px-2">
+                <Building className="h-3 w-3 sm:h-4 sm:w-4" />
+                RWA
               </TabsTrigger>
-              <TabsTrigger value="stablecoin" className="flex items-center gap-2">
-                <Coins className="h-4 w-4" />
-                محتوى العملة المستقرة
+              <TabsTrigger value="stablecoin" className="flex items-center gap-1 text-xs sm:text-sm px-2">
+                <Coins className="h-3 w-3 sm:h-4 sm:w-4" />
+                العملة المستقرة
               </TabsTrigger>
-              <TabsTrigger value="other">محتويات أخرى</TabsTrigger>
+              <TabsTrigger value="other" className="text-xs sm:text-sm px-2">محتويات أخرى</TabsTrigger>
             </TabsList>
         
         <TabsContent value="all" className="mt-6">
