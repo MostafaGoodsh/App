@@ -1,0 +1,4 @@
+ALTER TABLE public.profiles 
+ADD COLUMN IF NOT EXISTS date_of_birth date DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS marital_status text DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS country text DEFAULT NULL;
