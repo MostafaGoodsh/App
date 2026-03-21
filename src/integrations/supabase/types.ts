@@ -4178,6 +4178,7 @@ export type Database = {
           created_at: string
           display_order: number
           id: string
+          image_url: string | null
           is_active: boolean
           label: string
           label_en: string | null
@@ -4190,6 +4191,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label: string
           label_en?: string | null
@@ -4202,6 +4204,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label?: string
           label_en?: string | null
@@ -4217,6 +4220,7 @@ export type Database = {
           created_at: string
           display_order: number
           id: string
+          image_url: string | null
           is_active: boolean
           label: string
           label_en: string | null
@@ -4231,6 +4235,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label: string
           label_en?: string | null
@@ -4245,6 +4250,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label?: string
           label_en?: string | null
@@ -4288,12 +4294,17 @@ export type Database = {
           divider_color: string | null
           free_spins_per_day: number
           id: string
+          inner_ring_bg_image: string | null
           inner_ring_stroke_color: string | null
           intro_text: string | null
           intro_text_en: string | null
           is_active: boolean
           is_visible: boolean
+          middle_ring_bg_image: string | null
           middle_ring_stroke_color: string | null
+          note_text: string | null
+          note_text_en: string | null
+          outer_ring_bg_image: string | null
           outer_ring_stroke_color: string | null
           pointer_color: string | null
           ring_inner_ratio: number | null
@@ -4340,12 +4351,17 @@ export type Database = {
           divider_color?: string | null
           free_spins_per_day?: number
           id?: string
+          inner_ring_bg_image?: string | null
           inner_ring_stroke_color?: string | null
           intro_text?: string | null
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          middle_ring_bg_image?: string | null
           middle_ring_stroke_color?: string | null
+          note_text?: string | null
+          note_text_en?: string | null
+          outer_ring_bg_image?: string | null
           outer_ring_stroke_color?: string | null
           pointer_color?: string | null
           ring_inner_ratio?: number | null
@@ -4392,12 +4408,17 @@ export type Database = {
           divider_color?: string | null
           free_spins_per_day?: number
           id?: string
+          inner_ring_bg_image?: string | null
           inner_ring_stroke_color?: string | null
           intro_text?: string | null
           intro_text_en?: string | null
           is_active?: boolean
           is_visible?: boolean
+          middle_ring_bg_image?: string | null
           middle_ring_stroke_color?: string | null
+          note_text?: string | null
+          note_text_en?: string | null
+          outer_ring_bg_image?: string | null
           outer_ring_stroke_color?: string | null
           pointer_color?: string | null
           ring_inner_ratio?: number | null
@@ -4462,6 +4483,7 @@ export type Database = {
           created_at: string
           display_order: number
           id: string
+          image_url: string | null
           is_active: boolean
           label: string
           label_en: string | null
@@ -4476,6 +4498,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label: string
           label_en?: string | null
@@ -4490,6 +4513,7 @@ export type Database = {
           created_at?: string
           display_order?: number
           id?: string
+          image_url?: string | null
           is_active?: boolean
           label?: string
           label_en?: string | null
