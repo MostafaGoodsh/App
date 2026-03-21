@@ -193,25 +193,6 @@ export default function Profile() {
                 </CardContent>
               </Card>
 
-              {userBadges.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-right flex items-center gap-2 justify-end">
-                      <span>{t("البادجات")}</span><Star className="w-5 h-5 text-primary" />
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-3 justify-end">
-                      {userBadges.map((ub: any) => (
-                        <div key={ub.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border" style={{ borderColor: (ub.badges as any)?.badge_color }}>
-                          <span className="text-lg">{(ub.badges as any)?.icon_emoji}</span>
-                          <span className="text-sm font-cairo" style={{ color: (ub.badges as any)?.badge_color }}>{(ub.badges as any)?.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               <Card>
                 <CardHeader>
