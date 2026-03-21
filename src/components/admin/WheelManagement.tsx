@@ -150,18 +150,38 @@ const CENTER_ICON_OPTIONS = [
 ];
 
 const uploadWheelImage = async (file: File, folder: string): Promise<string | null> => {
-  const ext = file.name.split('.').pop();
-  const fileName = `${folder}/${Date.now()}.${ext}`;
-  const { data, error } = await supabase.storage
-    .from('wheel-images')
-    .upload(fileName, file, { upsert: true });
-  if (error) {
-    console.error('Upload error:', error);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return null;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    const res = await fetch(
+      `https://wnwfnziozwarlihrnjex.supabase.co/functions/v1/upload-wheel-image`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: formData,
+      }
+    );
+    const result = await res.json();
+    if (!res.ok || !result.url) {
+      console.error('Upload error:', result);
+      toast.error(result.error || 'فشل رفع الصورة');
+      return null;
+    }
+    return result.url;
+  } catch (e) {
+    console.error('Upload error:', e);
     toast.error('فشل رفع الصورة');
     return null;
   }
-  const { data: urlData } = supabase.storage.from('wheel-images').getPublicUrl(data.path);
-  return urlData.publicUrl;
 };
 
 const ImageUploadField = ({ label, value, onChange, folder }: { label: string; value: string | null; onChange: (url: string | null) => void; folder: string }) => {
