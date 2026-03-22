@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Wallet, CheckCircle2, AlertCircle, Coins } from 'lucide-react';
 import { toast } from 'sonner';
+import { PI_NETWORK_OPTIONS } from '@/config/pi';
 
 const PiPayment = () => {
   const {
@@ -17,6 +18,9 @@ const PiPayment = () => {
     isInitializing,
     authenticate,
     createPayment,
+    networkMode,
+    networkLabel,
+    setNetworkMode,
   } = usePiNetwork();
 
   const [amount, setAmount] = useState<number>(1);
@@ -103,6 +107,13 @@ const PiPayment = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {PI_NETWORK_OPTIONS.map((option) => (
+                  <Button key={option.value} type="button" variant={networkMode === option.value ? 'default' : 'outline'} size="sm" onClick={() => setNetworkMode(option.value)}>
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
               {isInitializing ? (
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -119,6 +130,8 @@ const PiPayment = () => {
                   <div>
                     <p className="font-semibold text-white">متصل / Connected</p>
                     <p className="text-sm text-white/70">
+                      {networkLabel}
+                      <br />
                       مرحباً، {piUser.username || piUser.uid}
                       <br />
                       <span className="text-xs">Welcome, {piUser.username || 'Pioneer'}</span>

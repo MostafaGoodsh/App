@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
+import { PI_NETWORK_OPTIONS } from '@/config/pi';
 
 interface UnifiedPaymentGatewayProps {
   // Mode: dialog or inline
@@ -59,7 +60,7 @@ export const UnifiedPaymentGateway = ({
   const { toast } = useToast();
   const { processPayment, loading, getSupportedMethods } = usePayment();
   const { tokens } = useInternalWallet();
-  const { isPiBrowser, isAuthenticated, piUser, isProcessing, isInitializing, authenticate, createPayment: createPiPayment } = usePiNetwork();
+  const { isPiBrowser, isAuthenticated, piUser, isProcessing, isInitializing, authenticate, createPayment: createPiPayment, networkMode, networkLabel, setNetworkMode } = usePiNetwork();
   
   const [amount, setAmount] = useState(fixedAmount?.toString() || '');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -294,11 +295,21 @@ export const UnifiedPaymentGateway = ({
 
       {/* Pi Network info */}
       {selectedMethod === 'pi_network' && (
-        <Alert className="border-purple-500/30 bg-purple-500/10">
-          <Info className="h-4 w-4 text-purple-400" />
+        <Alert className="border-primary/30 bg-primary/10">
+          <Info className="h-4 w-4 text-primary" />
           <AlertDescription>
             <div className="space-y-2">
-              <p className="font-bold text-purple-300">π Pi Network Payment</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-bold text-foreground">π Pi Network Payment</p>
+                <Badge variant="outline">{networkLabel}</Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {PI_NETWORK_OPTIONS.map((option) => (
+                  <Button key={option.value} type="button" size="sm" variant={networkMode === option.value ? 'default' : 'outline'} onClick={() => setNetworkMode(option.value)}>
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
               {!isPiBrowser ? (
                 <p className="text-sm text-muted-foreground">
                   يرجى فتح هذه الصفحة من Pi Browser لإتمام الدفع
@@ -309,7 +320,7 @@ export const UnifiedPaymentGateway = ({
                 <p className="text-sm text-muted-foreground">
                   متصل كـ {piUser.username || 'Pioneer'} ✅
                   <br />
-                  <span className="text-xs">1 π = 100 MS-RA Tokens</span>
+                  <span className="text-xs">{networkLabel} • 1 π = 100 MS-RA Tokens</span>
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -339,7 +350,7 @@ export const UnifiedPaymentGateway = ({
         </Alert>
       )}
 
-      <Button type="submit" className="w-full" size="lg" disabled={loading}>
+      <Button type="submit" className="w-full" size="lg" disabled={loading || isProcessing}>
         {loading ? (
           <>
             <Loader2 className="ml-2 h-4 w-4 animate-spin" />
