@@ -9,6 +9,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2, CheckCircle2, LogIn, Send, ArrowDownLeft, Coins, Copy } from "lucide-react";
 import { PI_NETWORK_OPTIONS } from "@/config/pi";
 import { toast } from "sonner";
+import piWalletBg from "@/assets/pi-wallet-bg.jpg";
+import piLogo from "@/assets/pi-logo.png";
 
 export const PiWalletCard = () => {
   const {
@@ -51,14 +53,17 @@ export const PiWalletCard = () => {
 
   return (
     <>
-      <Card className="overflow-hidden border-border/50 bg-card">
-        <CardContent className="p-4 space-y-4">
+      <Card className="overflow-hidden border-border/50 relative">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img src={piWalletBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        </div>
+        <CardContent className="p-4 space-y-4 relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-lg font-bold text-primary shrink-0">
-                π
-              </div>
+              <img src={piLogo} alt="Pi" className="w-10 h-10 rounded-full shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <h4 className="font-bold text-foreground text-sm">Pi Network</h4>
