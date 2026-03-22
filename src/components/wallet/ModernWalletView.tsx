@@ -9,6 +9,7 @@ import { RechargeSection } from "./RechargeSection";
 import { WalletConnectButton } from "./WalletConnectButton";
 import { EvmWalletConnectCard } from "./EvmWalletConnectCard";
 import { TonWalletConnectCard } from "./TonWalletConnectCard";
+import { PiWalletCard } from "./PiWalletCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { useProfile } from "@/hooks/useProfile";
@@ -94,6 +95,7 @@ export const ModernWalletView = () => {
                 <WalletConnectButton variant="card" showBalance={true} />
                 <EvmWalletConnectCard />
                 <TonWalletConnectCard />
+                <PiWalletCard />
               </div>
             </div>
           </>
