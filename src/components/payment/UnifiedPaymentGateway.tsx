@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePayment } from '@/hooks/usePayment';
 import { useInternalWallet } from '@/hooks/useInternalWallet';
+import { usePiNetwork } from '@/hooks/usePiNetwork';
 import { Loader2, ArrowRight, CreditCard, Info, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
