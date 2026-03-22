@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Wallet, CheckCircle2, AlertCircle, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 import { PI_NETWORK_OPTIONS } from '@/config/pi';
+import piPaymentBg from '@/assets/pi-payment-bg.jpg';
+import piLogo from '@/assets/pi-logo.png';
 
 const PiPayment = () => {
   const {
@@ -58,12 +60,17 @@ const PiPayment = () => {
   const presetAmounts = [1, 5, 10, 20, 50, 100];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4">
-      <div className="max-w-lg mx-auto space-y-6">
+    <div className="min-h-screen relative p-4">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <img src={piPaymentBg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      </div>
+      <div className="max-w-lg mx-auto space-y-6 relative z-10">
         {/* Header */}
         <header className="text-center space-y-2">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <Coins className="w-10 h-10 text-primary" />
+            <img src={piLogo} alt="Pi" className="w-10 h-10 rounded-full" />
             <h1 className="font-cairo text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Pi Payment
             </h1>
