@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import tonWalletBg from '@/assets/ton-wallet-bg.jpg';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,8 +94,12 @@ export const TonWalletConnectCard = () => {
 
   return (
     <>
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-blue-500/20 via-blue-500/10 to-transparent rounded-t-lg border-b border-primary/20">
+      <Card className="border-primary/20 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img src={tonWalletBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        </div>
+        <CardHeader className="relative z-10 rounded-t-lg border-b border-primary/20">
           <CardTitle className="flex items-center gap-2 text-base">
             <Wallet className="w-5 h-5 text-blue-500" />
             <div className="space-y-1">
@@ -109,7 +114,7 @@ export const TonWalletConnectCard = () => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-4 pt-4 relative z-10">
           {isConnected && userFriendlyAddress ? (
             <>
               <div className="flex items-center justify-between">

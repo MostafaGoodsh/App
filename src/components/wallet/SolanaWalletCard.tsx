@@ -7,6 +7,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { Wallet, RefreshCw, Send, Gift, Copy } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import solanaWalletBg from '@/assets/solana-wallet-bg.jpg';
 
 interface SolanaToken {
   mint: string;
@@ -99,14 +100,18 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
 
   if (!connected) {
     return (
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
+      <Card className="border-primary/20 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img src={solanaWalletBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        </div>
+        <CardHeader className="relative z-10 rounded-t-lg border-b border-amber-500/30">
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-amber-500" />
             <span className="arabic-text">محفظة سولانا</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-4 pt-4 relative z-10">
           <p className="text-center text-muted-foreground arabic-text">
             اتصل بمحفظة سولانا للبدء
           </p>
@@ -119,8 +124,12 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
   }
 
   return (
-    <Card className="border-primary/20">
-      <CardHeader className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-t-lg border-b border-amber-500/30">
+    <Card className="border-primary/20 relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <img src={solanaWalletBg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      </div>
+      <CardHeader className="relative z-10 rounded-t-lg border-b border-amber-500/30">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-amber-500" />
@@ -129,7 +138,7 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
           <Badge variant="secondary" className="bg-green-600 text-white">متصل</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-10">
         {/* Address */}
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <span className="text-sm font-mono">
