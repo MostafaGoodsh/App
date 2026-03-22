@@ -105,6 +105,41 @@ export const UnifiedPaymentGateway = ({
       return;
     }
 
+    // Pi Network payment
+    if (selectedMethod === 'pi_network') {
+      if (!isPiBrowser) {
+        toast({
+          title: "غير متوفر | Not Available",
+          description: "يرجى فتح التطبيق من Pi Browser | Please open from Pi Browser",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!isAuthenticated) {
+        const authResult = await authenticate();
+        if (!authResult) return;
+      }
+
+      const piAmount = parseFloat(amount);
+      const payment = await createPiPayment(piAmount, `MS-RA Token Purchase - ${piAmount} Pi`, {
+        type: 'token_purchase',
+        tokenAmount: piAmount * 100,
+        purpose,
+      });
+
+      if (payment) {
+        toast({
+          title: "π تم بدء الدفع بـ Pi",
+          description: `جاري معالجة ${piAmount} π | Processing ${piAmount} π`,
+        });
+        if (onPaymentSuccess) {
+          onPaymentSuccess('pi-' + payment.identifier, piAmount);
+        }
+      }
+      return;
+    }
+
     // Crypto payment - handled client-side, no Paymob needed
     if (selectedMethod === 'crypto') {
       toast({
