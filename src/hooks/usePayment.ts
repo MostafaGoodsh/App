@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import mobileWalletsImg from '@/assets/payment-mobile-wallets.jpeg';
 import fawryImg from '@/assets/payment-fawry.jpeg';
 import cardImg from '@/assets/payment-visa-mastercard.jpeg';
+import piNetworkImg from '@/assets/payment-pi-network.jpg';
 
 interface PaymentRequest {
   amount: number;
@@ -140,6 +141,14 @@ export const usePayment = () => {
         icon: '₿',
         color: 'from-amber-500 to-yellow-600',
         bgImage: '/lovable-uploads/egyptian-golden-snake-bg.jpg'
+      },
+      {
+        id: 'pi_network',
+        name: 'Pi Network',
+        name_en: 'Pi Network',
+        icon: 'π',
+        color: 'from-purple-500 to-purple-700',
+        bgImage: piNetworkImg
       }
     ];
   }, []);
