@@ -292,6 +292,39 @@ export const UnifiedPaymentGateway = ({
         <CryptoPaymentInstructions amount={amount} />
       )}
 
+      {/* Pi Network info */}
+      {selectedMethod === 'pi_network' && (
+        <Alert className="border-purple-500/30 bg-purple-500/10">
+          <Info className="h-4 w-4 text-purple-400" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="font-bold text-purple-300">π Pi Network Payment</p>
+              {!isPiBrowser ? (
+                <p className="text-sm text-muted-foreground">
+                  يرجى فتح هذه الصفحة من Pi Browser لإتمام الدفع
+                  <br />
+                  <span className="text-xs">Please open this page in Pi Browser to pay</span>
+                </p>
+              ) : isAuthenticated && piUser ? (
+                <p className="text-sm text-muted-foreground">
+                  متصل كـ {piUser.username || 'Pioneer'} ✅
+                  <br />
+                  <span className="text-xs">1 π = 100 MS-RA Tokens</span>
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">يرجى تسجيل الدخول أولاً</p>
+                  <Button size="sm" variant="outline" onClick={authenticate} disabled={isInitializing}>
+                    {isInitializing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                    تسجيل الدخول بـ Pi
+                  </Button>
+                </div>
+              )}
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Test Mode Warning */}
       {showTestWarning && (
         <Alert className="bg-black/70 border-yellow-600/40">
