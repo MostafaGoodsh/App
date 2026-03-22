@@ -95,6 +95,7 @@ export const ModernWalletView = () => {
                 <WalletConnectButton variant="card" showBalance={true} />
                 <EvmWalletConnectCard />
                 <TonWalletConnectCard />
+                <PiWalletCard />
               </div>
             </div>
           </>
