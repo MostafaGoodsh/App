@@ -111,7 +111,7 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
             <span className="arabic-text">محفظة سولانا</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pt-4">
+        <CardContent className="space-y-4 pt-4 relative z-10">
           <p className="text-center text-muted-foreground arabic-text">
             اتصل بمحفظة سولانا للبدء
           </p>
@@ -138,7 +138,7 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
           <Badge variant="secondary" className="bg-green-600 text-white">متصل</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative z-10">
         {/* Address */}
         <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
           <span className="text-sm font-mono">

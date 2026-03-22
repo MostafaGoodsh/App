@@ -1,4 +1,5 @@
 import { useState } from "react";
+import evmWalletBg from '@/assets/evm-wallet-bg.jpg';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -154,8 +155,12 @@ export const EvmWalletConnectCard = () => {
   )?.[0] || 'ethereum';
 
   return (
-    <Card className="border-primary/20">
-      <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent rounded-t-lg border-b border-primary/20">
+    <Card className="border-primary/20 relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <img src={evmWalletBg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+      </div>
+      <CardHeader className="relative z-10 rounded-t-lg border-b border-primary/20">
         <CardTitle className="flex items-center gap-2 text-base">
           <Link2 className="w-5 h-5 text-primary" />
           <div className="space-y-1">
