@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { WalletHeroSection } from "./WalletHeroSection";
 import { QuickActionButtons } from "./QuickActionButtons";
 import { ModernTokenList, TokenData } from "./ModernTokenList";
@@ -10,16 +10,17 @@ import { WalletConnectButton } from "./WalletConnectButton";
 import { EvmWalletConnectCard } from "./EvmWalletConnectCard";
 import { TonWalletConnectCard } from "./TonWalletConnectCard";
 import { PiWalletCard } from "./PiWalletCard";
+import { TokenContractManager } from "./TokenContractManager";
 import { useAuth } from "@/hooks/useAuth";
 import { useInternalWallet } from "@/hooks/useInternalWallet";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Wallet, History, ArrowRightLeft, Gift, Link2, QrCode, ArrowDownLeft, Send, RefreshCw, TrendingUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Wallet, History, ArrowRightLeft, Gift, Link2, QrCode, ArrowDownLeft, Send, TrendingUp, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
@@ -27,6 +28,16 @@ interface ModernWalletViewProps {
   solanaNetwork: WalletAdapterNetwork;
   onSolanaNetworkChange: (network: WalletAdapterNetwork) => void;
 }
+
+type ContractNetwork = 'solana-devnet' | 'solana-mainnet' | 'ethereum' | 'bsc' | 'polygon';
+
+const CONTRACT_NETWORKS: { value: ContractNetwork; label: string }[] = [
+  { value: 'solana-devnet', label: 'Solana Devnet' },
+  { value: 'solana-mainnet', label: 'Solana Mainnet' },
+  { value: 'ethereum', label: 'Ethereum' },
+  { value: 'bsc', label: 'BSC (BNB Chain)' },
+  { value: 'polygon', label: 'Polygon' },
+];
 
 export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: ModernWalletViewProps) => {
   const { user } = useAuth();
@@ -40,18 +51,18 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
-  const [userXP, setUserXP] = useState(0);
+  const [contractNetwork, setContractNetwork] = useState<ContractNetwork>('solana-devnet');
 
   useEffect(() => {
-    const loadUserXP = async () => {
-      if (!user) return;
-      await supabase.from('profiles').select('*').eq('user_id', user.id).single();
-    };
-    loadUserXP();
+    if (!user) return;
+    supabase.from('profiles').select('*').eq('user_id', user.id).single();
   }, [user]);
 
   const tokenList: TokenData[] = balances
-    .filter((bal) => { const symbol = (bal.token?.symbol || '').toUpperCase(); return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA'; })
+    .filter((bal) => {
+      const symbol = (bal.token?.symbol || '').toUpperCase();
+      return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA';
+    })
     .map((bal) => ({ symbol: bal.token?.symbol || 'Unknown', name: bal.token?.name || 'Unknown Token', balance: bal.balance, isInternal: true }));
 
   const xpBalance = balances.find(b => b.token?.symbol === 'XP');
@@ -92,6 +103,8 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
         {activeBottomTab === 'wallet' && (
           <>
             <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={() => toast({ title: t("قريباً"), description: t("إضافة عملات مخصصة قادمة قريباً") })} onRefresh={refreshData} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
+
+            {/* External Wallets */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-primary" />
@@ -118,6 +131,30 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            </div>
+
+            {/* Token Contract Manager */}
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                <h3 className="font-bold">{t("إضافة عقود العملات")}</h3>
+              </div>
+              <div className="space-y-3">
+                <Select value={contractNetwork} onValueChange={(v) => setContractNetwork(v as ContractNetwork)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الشبكة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONTRACT_NETWORKS.map((n) => (
+                      <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <TokenContractManager
+                  network={contractNetwork}
+                  onTokenAdded={() => refreshData()}
+                />
               </div>
             </div>
           </>
@@ -150,6 +187,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
         )}
       </div>
 
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2 safe-area-pb">
         <div className="flex justify-around max-w-lg mx-auto">
           {[
