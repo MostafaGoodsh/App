@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,8 @@ import {
   FileText, Plus, Trash2, Loader2, CheckCircle2, 
   ExternalLink, Copy, AlertTriangle, Search
 } from 'lucide-react';
+import { PublicKey } from '@solana/web3.js';
+import { getAddress, isAddress } from 'ethers';
 
 interface TokenContract {
   id: string;
@@ -25,12 +27,12 @@ interface TokenContract {
 }
 
 interface TokenContractManagerProps {
-  network?: 'solana' | 'ethereum' | 'bsc' | 'polygon';
+  network?: 'solana-devnet' | 'solana-mainnet' | 'solana' | 'ethereum' | 'bsc' | 'polygon';
   onTokenAdded?: (token: TokenContract) => void;
 }
 
 export const TokenContractManager = ({ 
-  network = 'solana',
+  network = 'solana-devnet',
   onTokenAdded 
 }: TokenContractManagerProps) => {
   const { toast } = useToast();
@@ -41,14 +43,14 @@ export const TokenContractManager = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<Partial<TokenContract> | null>(null);
   const [savedTokens, setSavedTokens] = useState<TokenContract[]>([]);
+  const isSolanaNetwork = network.startsWith('solana');
 
   // Load saved tokens
   const loadSavedTokens = async () => {
     try {
-      const { data, error } = await supabase
-        .from('custom_tokens')
-        .select('*')
-        .eq('network', network);
+      let query = supabase.from('custom_tokens').select('*');
+      query = network === 'solana-mainnet' ? query.in('network', ['solana-mainnet', 'solana']) : query.eq('network', network);
+      const { data, error } = await query;
 
       if (!error && data) {
         setSavedTokens(data as TokenContract[]);
@@ -57,6 +59,12 @@ export const TokenContractManager = ({
       console.error('Error loading tokens:', err);
     }
   };
+
+  useEffect(() => {
+    loadSavedTokens();
+    setVerifiedToken(null);
+    setContractAddress('');
+  }, [network]);
 
   // Verify token contract
   const verifyContract = async () => {
@@ -71,47 +79,26 @@ export const TokenContractManager = ({
 
     setIsVerifying(true);
     try {
-      if (network === 'solana') {
-        // For Solana, fetch token metadata from Jupiter
-        const response = await fetch(`https://token.jup.ag/strict?address=${contractAddress}`);
-        if (response.ok) {
-          const tokens = await response.json();
-          const token = tokens.find((t: any) => t.address === contractAddress);
-          
-          if (token) {
-            setVerifiedToken({
-              contract_address: token.address,
-              name: token.name,
-              symbol: token.symbol,
-              decimals: token.decimals,
-              logo_url: token.logoURI,
-              network: 'solana',
-              is_verified: true
-            });
-          } else {
-            // Try getting basic info from RPC
-            setVerifiedToken({
-              contract_address: contractAddress,
-              name: 'Unknown Token',
-              symbol: 'UNKNOWN',
-              decimals: 9,
-              network: 'solana',
-              is_verified: false
-            });
-            toast({
-              title: "تحذير | Warning",
-              description: "لم يتم التحقق من العملة - استخدمها بحذر",
-              variant: "destructive"
-            });
+      if (isSolanaNetwork) {
+        const normalizedAddress = new PublicKey(contractAddress.trim()).toBase58();
+        if (network === 'solana-mainnet') {
+          const response = await fetch(`https://tokens.jup.ag/token/${normalizedAddress}`);
+          if (response.ok) {
+            const token = await response.json();
+            if (token?.address) {
+              setVerifiedToken({ contract_address: token.address, name: token.name, symbol: token.symbol, decimals: token.decimals, logo_url: token.logoURI, network, is_verified: true });
+              return;
+            }
           }
         }
+
+        setVerifiedToken({ contract_address: normalizedAddress, name: network === 'solana-devnet' ? 'Solana Devnet Token' : 'Unknown Solana Token', symbol: 'SPL', decimals: 9, network, is_verified: false });
+        toast({ title: network === 'solana-devnet' ? 'تم قبول عنوان الـ Mint' : 'تحذير | Warning', description: network === 'solana-devnet' ? 'يمكن حفظ العقد مباشرة على Devnet.' : 'لم يتم العثور على بيانات موثقة لكن يمكن حفظ العقد يدوياً.' });
       } else {
-        // For EVM chains, we would use ethers.js
-        // This is simplified - in production use actual contract calls
-        toast({
-          title: "قيد التطوير",
-          description: "التحقق من عقود EVM قيد التطوير",
-        });
+        if (!isAddress(contractAddress.trim())) throw new Error('عنوان العقد غير صالح');
+        const normalizedAddress = getAddress(contractAddress.trim());
+        setVerifiedToken({ contract_address: normalizedAddress, name: 'EVM Token', symbol: 'ERC20', decimals: 18, network, is_verified: false });
+        toast({ title: 'تم قبول العقد', description: 'تم التحقق من صيغة العنوان ويمكن حفظه الآن.' });
       }
     } catch (error) {
       console.error('Verification error:', error);
@@ -206,6 +193,9 @@ export const TokenContractManager = ({
 
   const getExplorerUrl = (address: string) => {
     switch (network) {
+      case 'solana-devnet':
+        return `https://solscan.io/token/${address}?cluster=devnet`;
+      case 'solana-mainnet':
       case 'solana':
         return `https://solscan.io/token/${address}`;
       case 'ethereum':
@@ -253,7 +243,7 @@ export const TokenContractManager = ({
           <div className="flex gap-2">
             <Input
               id="contract"
-              placeholder={network === 'solana' 
+              placeholder={isSolanaNetwork 
                 ? "أدخل Mint Address..." 
                 : "0x..."}
               value={contractAddress}

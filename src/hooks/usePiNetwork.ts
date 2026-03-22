@@ -1,7 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import {
+  getPiNetworkLabel,
+  getPiNetworkMode,
+  getPiSdkConfig,
+  setPiNetworkMode as persistPiNetworkMode,
+  type PiNetworkMode,
+} from '@/config/pi';
 
 declare global {
   interface Window {
@@ -66,15 +73,82 @@ interface PiPaymentCallbacks {
 }
 
 export const usePiNetwork = () => {
+  const [networkMode, setNetworkModeState] = useState<PiNetworkMode>(() => getPiNetworkMode());
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [piUser, setPiUser] = useState<PiAuthResult['user'] | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const { user } = useAuth();
+  const hasMountedRef = useRef(false);
+  const PI_AUTH_STORAGE_KEY = 'pi_auth_state';
 
   const isPiBrowser = useCallback(() => {
     return typeof window !== 'undefined' && typeof window.Pi !== 'undefined';
+  }, []);
+
+  const clearStoredAuth = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.removeItem(PI_AUTH_STORAGE_KEY);
+  }, []);
+
+  useEffect(() => {
+    if (!isPiBrowser()) return;
+
+    try {
+      window.Pi.init(getPiSdkConfig(networkMode));
+      console.log('Pi SDK initialized:', networkMode);
+    } catch (error) {
+      console.error('Pi SDK init error:', error);
+    }
+  }, [isPiBrowser, networkMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const raw = window.sessionStorage.getItem(PI_AUTH_STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        networkMode: PiNetworkMode;
+        accessToken: string;
+        user: PiAuthResult['user'];
+      };
+
+      if (parsed.networkMode === networkMode && parsed.accessToken && parsed.user) {
+        setAccessToken(parsed.accessToken);
+        setPiUser(parsed.user);
+        setIsAuthenticated(true);
+      }
+    } catch (error) {
+      console.error('Failed to restore Pi auth state:', error);
+      clearStoredAuth();
+    }
+  }, [clearStoredAuth, networkMode]);
+
+  useEffect(() => {
+    persistPiNetworkMode(networkMode);
+
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    setIsAuthenticated(false);
+    setPiUser(null);
+    setAccessToken(null);
+    clearStoredAuth();
+    toast.info(`تم التحويل إلى ${getPiNetworkLabel(networkMode)} / Switched to ${getPiNetworkLabel(networkMode)}`);
+  }, [clearStoredAuth, networkMode]);
+
+  const setNetworkMode = useCallback((mode: PiNetworkMode) => {
+    setNetworkModeState(mode);
+  }, []);
+
+  const getAuthHeaders = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined;
   }, []);
 
   const handleIncompletePayment = useCallback(async (payment: PiPaymentDTO) => {
@@ -82,12 +156,15 @@ export const usePiNetwork = () => {
     // Try to complete the incomplete payment
     if (payment.transaction?.txid) {
       try {
+        const headers = await getAuthHeaders();
         const { error } = await supabase.functions.invoke('pi-payment-complete', {
           body: { 
             paymentId: payment.identifier, 
             txid: payment.transaction.txid,
-            accessToken 
-          }
+            accessToken,
+            networkMode,
+          },
+          headers,
         });
         if (!error) {
           toast.success('تم إتمام الدفعة المعلقة / Pending payment completed');
@@ -97,7 +174,7 @@ export const usePiNetwork = () => {
       }
     }
     toast.info('تم العثور على دفعة غير مكتملة / Incomplete payment found');
-  }, [accessToken]);
+  }, [accessToken, getAuthHeaders, networkMode]);
 
   const authenticate = useCallback(async () => {
     if (!isPiBrowser()) {
@@ -117,6 +194,14 @@ export const usePiNetwork = () => {
       setIsAuthenticated(true);
       setPiUser(authResult.user);
       setAccessToken(authResult.accessToken);
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(PI_AUTH_STORAGE_KEY, JSON.stringify({
+          networkMode,
+          accessToken: authResult.accessToken,
+          user: authResult.user,
+        }));
+      }
       
       toast.success(`مرحباً ${authResult.user.username || 'Pioneer'}! / Welcome!`);
       return authResult;
@@ -128,7 +213,7 @@ export const usePiNetwork = () => {
     } finally {
       setIsInitializing(false);
     }
-  }, [isPiBrowser, handleIncompletePayment]);
+  }, [handleIncompletePayment, isPiBrowser, networkMode]);
 
   const createPayment = useCallback(async (
     amount: number,
@@ -154,6 +239,10 @@ export const usePiNetwork = () => {
         metadata: {
           ...metadata,
           userId: user?.id,
+          piUserUid: piUser?.uid,
+          piUsername: piUser?.username,
+          networkMode,
+          networkLabel: getPiNetworkLabel(networkMode),
           timestamp: new Date().toISOString(),
         },
       };
@@ -164,8 +253,10 @@ export const usePiNetwork = () => {
           
           // Call your backend to approve the payment
           try {
+            const headers = await getAuthHeaders();
             const { error } = await supabase.functions.invoke('pi-payment-approve', {
-              body: { paymentId, accessToken }
+              body: { paymentId, accessToken, networkMode },
+              headers,
             });
             
             if (error) {
@@ -182,8 +273,10 @@ export const usePiNetwork = () => {
           
           // Call your backend to complete the payment
           try {
+            const headers = await getAuthHeaders();
             const { data, error } = await supabase.functions.invoke('pi-payment-complete', {
-              body: { paymentId, txid, accessToken }
+              body: { paymentId, txid, accessToken, networkMode },
+              headers,
             });
             
             if (error) {
@@ -221,15 +314,18 @@ export const usePiNetwork = () => {
       setIsProcessing(false);
       return null;
     }
-  }, [isPiBrowser, isAuthenticated, user, accessToken]);
+  }, [accessToken, getAuthHeaders, isAuthenticated, isPiBrowser, networkMode, piUser, user]);
 
   return {
     isPiBrowser: isPiBrowser(),
     isAuthenticated,
     piUser,
     accessToken,
+    networkMode,
+    networkLabel: getPiNetworkLabel(networkMode),
     isProcessing,
     isInitializing,
+    setNetworkMode,
     authenticate,
     createPayment,
   };

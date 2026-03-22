@@ -15,12 +15,34 @@ serve(async (req) => {
   }
 
   try {
-    const { paymentId, txid, accessToken } = await req.json();
+    const { paymentId, txid, networkMode } = await req.json();
 
     if (!paymentId || !txid) {
       return new Response(
         JSON.stringify({ error: 'Missing paymentId or txid' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!authHeader?.startsWith('Bearer ') || !supabaseUrl || !supabaseKey) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized request' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !userData.user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized request' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -56,20 +78,25 @@ serve(async (req) => {
     console.log('Payment completed:', result);
 
     // Credit tokens to user's internal wallet
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const piAmount = result.amount || 0;
     const tokenAmount = piAmount * 100; // 1 Pi = 100 MS-RA
-    const userId = result.metadata?.userId;
+    const userId = result.metadata?.userId || userData.user.id;
+    const networkLabel = networkMode === 'mainnet' ? 'Pi Mainnet' : 'Pi Testnet';
+
+    if (result.metadata?.userId && result.metadata.userId !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: 'User mismatch for payment completion' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     if (userId && tokenAmount > 0) {
       const { data: token } = await supabase
         .from('internal_tokens')
-        .select('id')
-        .eq('symbol', 'MS-RA')
-        .single();
+        .select('id, symbol')
+        .in('symbol', ['$MS-RA', 'MS-RA', 'MSRA'])
+        .limit(1)
+        .maybeSingle();
 
       if (token) {
         const { data: existingBalance } = await supabase
@@ -97,19 +124,43 @@ serve(async (req) => {
             });
         }
 
-        await supabase
+        const paymentPayload = {
+          user_id: userId,
+          amount: piAmount,
+          currency: 'PI',
+          payment_method: 'pi_network',
+          provider: 'pi_network',
+          provider_transaction_id: txid,
+          provider_reference: paymentId,
+          status: 'completed',
+          tokens_credited: tokenAmount,
+          internal_token_id: token.id,
+          completed_at: new Date().toISOString(),
+          payment_details: {
+            network_mode: networkMode || 'testnet',
+            network_label: networkLabel,
+            token_symbol: token.symbol,
+            token_amount: tokenAmount,
+            source_amount: piAmount,
+            source_currency: 'PI',
+            txid,
+            pi_user_uid: result.user_uid,
+            pi_username: result.metadata?.piUsername || null,
+            explorer_url: result.transaction?._link || null,
+          },
+        };
+
+        const { data: existingTransaction } = await supabase
           .from('payment_transactions')
-          .insert({
-            user_id: userId,
-            amount: piAmount,
-            currency: 'Pi',
-            payment_method: 'pi_network',
-            provider: 'pi_network',
-            provider_transaction_id: txid,
-            status: 'completed',
-            tokens_credited: tokenAmount,
-            completed_at: new Date().toISOString(),
-          });
+          .select('id')
+          .eq('provider_reference', paymentId)
+          .maybeSingle();
+
+        if (existingTransaction?.id) {
+          await supabase.from('payment_transactions').update(paymentPayload).eq('id', existingTransaction.id);
+        } else {
+          await supabase.from('payment_transactions').insert(paymentPayload);
+        }
       }
     }
 

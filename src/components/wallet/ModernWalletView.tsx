@@ -21,8 +21,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Wallet, History, ArrowRightLeft, Gift, Link2, QrCode, ArrowDownLeft, Send, RefreshCw, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
-export const ModernWalletView = () => {
+interface ModernWalletViewProps {
+  solanaNetwork: WalletAdapterNetwork;
+  onSolanaNetworkChange: (network: WalletAdapterNetwork) => void;
+}
+
+export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: ModernWalletViewProps) => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { tokens: internalTokens, balances, isLoading, refreshData, getTotalUSDValue } = useInternalWallet();
@@ -45,7 +51,7 @@ export const ModernWalletView = () => {
   }, [user]);
 
   const tokenList: TokenData[] = balances
-    .filter((bal) => { const symbol = (bal.token?.symbol || '').toUpperCase(); return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA'; })
+    .filter((bal) => { const symbol = (bal.token?.symbol || '').toUpperCase(); return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA'; })
     .map((bal) => ({ symbol: bal.token?.symbol || 'Unknown', name: bal.token?.name || 'Unknown Token', balance: bal.balance, isInternal: true }));
 
   const xpBalance = balances.find(b => b.token?.symbol === 'XP');
@@ -96,6 +102,22 @@ export const ModernWalletView = () => {
                 <EvmWalletConnectCard />
                 <TonWalletConnectCard />
                 <PiWalletCard />
+                <Card className="border-border/50 bg-card">
+                  <CardContent className="p-4 space-y-3">
+                    <div>
+                      <p className="font-semibold text-sm">Solana Network</p>
+                      <p className="text-xs text-muted-foreground">اختيار الشبكة لعرض المحافظ والعقود</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Devnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Devnet)}>
+                        Devnet
+                      </Button>
+                      <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Mainnet)}>
+                        Mainnet
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </>
@@ -114,7 +136,7 @@ export const ModernWalletView = () => {
               </CardContent>
             </Card>
             <XpToMsRaConverter />
-            <HybridTokenSwap />
+            <HybridTokenSwap solanaNetwork={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'mainnet' : 'devnet'} />
             <RechargeSection />
           </div>
         )}
@@ -146,7 +168,7 @@ export const ModernWalletView = () => {
       </div>
 
       <Dialog open={showSwapDialog} onOpenChange={setShowSwapDialog}>
-        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>{t("تبديل العملات")}</DialogTitle></DialogHeader><HybridTokenSwap /></DialogContent>
+        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>{t("تبديل العملات")}</DialogTitle></DialogHeader><HybridTokenSwap solanaNetwork={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'mainnet' : 'devnet'} /></DialogContent>
       </Dialog>
 
       <WithdrawalDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
@@ -187,10 +209,35 @@ const TransactionHistoryTab = () => {
       setIsLoading(true);
       try {
         const { data: swaps } = await supabase.from('internal_swaps').select(`*, from_token:internal_tokens!internal_swaps_from_token_id_fkey(symbol), to_token:internal_tokens!internal_swaps_to_token_id_fkey(symbol)`).eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
-        const { data: payments } = await supabase.from('payment_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
+        const { data: payments } = await supabase.from('payment_transactions').select('*, payment_details, internal_token:internal_tokens(symbol)').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
         const allTx = [
           ...(swaps || []).map(s => ({ id: s.id, type: 'swap', description: `${s.from_token?.symbol} → ${s.to_token?.symbol}`, amount: s.to_amount, symbol: s.to_token?.symbol, date: new Date(s.created_at), status: s.status })),
-          ...(payments || []).map(p => ({ id: p.id, type: 'deposit', description: `${t("شحن المحفظة")} ${p.payment_method}`, amount: p.amount, symbol: p.currency, date: new Date(p.created_at), status: p.status }))
+          ...(payments || []).map(p => {
+            const paymentDetails = p.payment_details && typeof p.payment_details === 'object' && !Array.isArray(p.payment_details)
+              ? p.payment_details as Record<string, string | number | boolean | null>
+              : {};
+            const networkLabel = typeof paymentDetails.network_label === 'string'
+              ? paymentDetails.network_label
+              : typeof paymentDetails.network_mode === 'string'
+                ? paymentDetails.network_mode
+                : undefined;
+            const tokenSymbol = typeof paymentDetails.token_symbol === 'string'
+              ? paymentDetails.token_symbol
+              : p.internal_token?.symbol || p.currency;
+            const creditedAmount = typeof paymentDetails.token_amount === 'number'
+              ? paymentDetails.token_amount
+              : p.tokens_credited || p.amount;
+            return {
+              id: p.id,
+              type: 'deposit',
+              description: p.payment_method === 'pi_network' ? `شراء ${tokenSymbol} عبر ${networkLabel || 'Pi Network'}` : `${t("شحن المحفظة")} ${p.payment_method}`,
+              meta: p.payment_method === 'pi_network' ? `${p.amount} ${p.currency} → ${creditedAmount} ${tokenSymbol}` : undefined,
+              amount: creditedAmount,
+              symbol: tokenSymbol,
+              date: new Date(p.created_at),
+              status: p.status
+            };
+          })
         ].sort((a, b) => b.date.getTime() - a.date.getTime());
         setTransactions(allTx.slice(0, 20));
       } catch (error) { console.error('Failed to load transactions:', error); }
@@ -216,6 +263,7 @@ const TransactionHistoryTab = () => {
             <div>
               <p className="font-medium text-foreground">{tx.description}</p>
               <p className="text-xs text-muted-foreground">{tx.date.toLocaleDateString('ar-EG')} • {tx.date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
+              {tx.meta ? <p className="text-[11px] text-muted-foreground">{tx.meta}</p> : null}
             </div>
           </div>
           <div className="text-right">

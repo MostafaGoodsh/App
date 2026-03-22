@@ -9,7 +9,11 @@ import { Label } from '@/components/ui/label';
 import { TokenContractManager } from './TokenContractManager';
 import msraIcon from '@/assets/msra-token-icon.jpg';
 
-export const HybridTokenSwap = () => {
+interface HybridTokenSwapProps {
+  solanaNetwork?: 'devnet' | 'mainnet';
+}
+
+export const HybridTokenSwap = ({ solanaNetwork = 'devnet' }: HybridTokenSwapProps) => {
   const { 
     tokens, 
     swapTokens, 
@@ -248,7 +252,7 @@ export const HybridTokenSwap = () => {
       {/* Token Contract Manager */}
       {showContractManager && (
         <TokenContractManager 
-          network="solana"
+            network={solanaNetwork === 'mainnet' ? 'solana-mainnet' : 'solana-devnet'}
           onTokenAdded={() => {
             setShowContractManager(false);
           }}
