@@ -59,6 +59,7 @@ export const UnifiedPaymentGateway = ({
   const { toast } = useToast();
   const { processPayment, loading, getSupportedMethods } = usePayment();
   const { tokens } = useInternalWallet();
+  const { isPiBrowser, isAuthenticated, piUser, isProcessing, isInitializing, authenticate, createPayment: createPiPayment } = usePiNetwork();
   
   const [amount, setAmount] = useState(fixedAmount?.toString() || '');
   const [phoneNumber, setPhoneNumber] = useState('');
