@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ModernWalletView } from '@/components/wallet/ModernWalletView';
 import { useAuth } from '@/hooks/useAuth';
 import { SolanaWalletProvider } from '@/components/wallet/SolanaWalletProvider';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 const WalletPage = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const [solanaNetwork, setSolanaNetwork] = useState<WalletAdapterNetwork>(WalletAdapterNetwork.Devnet);
 
   if (!user) {
     return (
@@ -20,8 +22,8 @@ const WalletPage = () => {
   }
 
   return (
-    <SolanaWalletProvider>
-      <ModernWalletView />
+    <SolanaWalletProvider network={solanaNetwork}>
+      <ModernWalletView solanaNetwork={solanaNetwork} onSolanaNetworkChange={setSolanaNetwork} />
     </SolanaWalletProvider>
   );
 };
