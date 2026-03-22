@@ -213,9 +213,20 @@ const TransactionHistoryTab = () => {
         const allTx = [
           ...(swaps || []).map(s => ({ id: s.id, type: 'swap', description: `${s.from_token?.symbol} → ${s.to_token?.symbol}`, amount: s.to_amount, symbol: s.to_token?.symbol, date: new Date(s.created_at), status: s.status })),
           ...(payments || []).map(p => {
-            const networkLabel = p.payment_details?.network_label || p.payment_details?.network_mode;
-            const tokenSymbol = p.payment_details?.token_symbol || p.internal_token?.symbol || p.currency;
-            const creditedAmount = p.payment_details?.token_amount || p.tokens_credited || p.amount;
+            const paymentDetails = p.payment_details && typeof p.payment_details === 'object' && !Array.isArray(p.payment_details)
+              ? p.payment_details as Record<string, string | number | boolean | null>
+              : {};
+            const networkLabel = typeof paymentDetails.network_label === 'string'
+              ? paymentDetails.network_label
+              : typeof paymentDetails.network_mode === 'string'
+                ? paymentDetails.network_mode
+                : undefined;
+            const tokenSymbol = typeof paymentDetails.token_symbol === 'string'
+              ? paymentDetails.token_symbol
+              : p.internal_token?.symbol || p.currency;
+            const creditedAmount = typeof paymentDetails.token_amount === 'number'
+              ? paymentDetails.token_amount
+              : p.tokens_credited || p.amount;
             return {
               id: p.id,
               type: 'deposit',
