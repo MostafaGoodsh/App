@@ -2164,6 +2164,54 @@ export type Database = {
         }
         Relationships: []
       }
+      official_links: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          display_order: number
+          icon_name: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          title: string
+          title_en: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon_name?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon_name?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount: number
@@ -2561,6 +2609,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      presale_rounds: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          description_en: string | null
+          display_order: number
+          end_date: string | null
+          id: string
+          is_active: boolean
+          max_purchase: number | null
+          min_purchase: number
+          sold_amount: number
+          stage: string
+          start_date: string | null
+          status: string
+          title: string
+          title_en: string | null
+          token_price: number
+          total_supply: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          max_purchase?: number | null
+          min_purchase?: number
+          sold_amount?: number
+          stage?: string
+          start_date?: string | null
+          status?: string
+          title: string
+          title_en?: string | null
+          token_price?: number
+          total_supply?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          max_purchase?: number | null
+          min_purchase?: number
+          sold_amount?: number
+          stage?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+          title_en?: string | null
+          token_price?: number
+          total_supply?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       profile_customization: {
         Row: {
