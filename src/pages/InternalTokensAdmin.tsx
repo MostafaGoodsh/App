@@ -111,11 +111,15 @@ const InternalTokensAdmin = () => {
     }
   };
 
-  const resetForm = () => setForm({
-    symbol: '', name: '', description: '', icon_url: '',
-    decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
-    contract_address: '', network: 'solana'
-  });
+  const resetForm = () => {
+    setForm({
+      symbol: '', name: '', description: '', icon_url: '',
+      decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
+      contract_address: '', network: 'solana'
+    });
+    setIconFile(null);
+    setIconPreview(null);
+  };
 
   const openEdit = (t: Token) => {
     setEditToken(t);
