@@ -4104,6 +4104,84 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_card_settings: {
+        Row: {
+          background_color: string | null
+          background_gradient: string | null
+          background_image: string | null
+          border_color: string | null
+          card_key: string
+          created_at: string
+          description: string | null
+          description_en: string | null
+          description_text_align: string | null
+          display_order: number
+          font_family: string | null
+          font_size: string | null
+          font_weight: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          overlay_opacity: number | null
+          text_color: string | null
+          title: string
+          title_en: string | null
+          title_font_size: string | null
+          title_text_align: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          border_color?: string | null
+          card_key: string
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          description_text_align?: string | null
+          display_order?: number
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          overlay_opacity?: number | null
+          text_color?: string | null
+          title: string
+          title_en?: string | null
+          title_font_size?: string | null
+          title_text_align?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          border_color?: string | null
+          card_key?: string
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          description_text_align?: string | null
+          display_order?: number
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          overlay_opacity?: number | null
+          text_color?: string | null
+          title?: string
+          title_en?: string | null
+          title_font_size?: string | null
+          title_text_align?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wallet_security: {
         Row: {
           access_count: number | null
