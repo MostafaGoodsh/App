@@ -97,6 +97,7 @@ const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
 const PresaleAdmin = lazy(() => import("./pages/PresaleAdmin"));
 const OfficialLinksAdmin = lazy(() => import("./pages/OfficialLinksAdmin"));
 const CardPage = lazy(() => import("./pages/CardPage"));
+const WalletCardAdmin = lazy(() => import("./pages/WalletCardAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -213,6 +214,7 @@ const App = () => {
                     <Route path="admin/platform-message" element={<RequireAdmin><PlatformMessageAdmin /></RequireAdmin>} />
                     <Route path="admin/presale" element={<RequireAdmin><PresaleAdmin /></RequireAdmin>} />
                     <Route path="admin/official-links" element={<RequireAdmin><OfficialLinksAdmin /></RequireAdmin>} />
+                    <Route path="admin/wallet-cards" element={<RequireAdmin><WalletCardAdmin /></RequireAdmin>} />
                     <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>

@@ -75,6 +75,9 @@ export function AppSidebar() {
     { title: t("عناوين الدفع بالكريبتو"), url: "/admin/crypto-payment-addresses", icon: Landmark },
     { title: t("إدارة طلبات العائلة"), url: "/admin/family", icon: Users },
     { title: t("إدارة رسالة المنصة"), url: "/admin/platform-message", icon: MessageSquare },
+    { title: t("إدارة البيع المبكر"), url: "/admin/presale", icon: Coins },
+    { title: t("إدارة الروابط الرسمية"), url: "/admin/official-links", icon: Globe },
+    { title: t("إدارة كروت المحافظ"), url: "/admin/wallet-cards", icon: Wallet },
   ];
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>

@@ -9,11 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { useTonConnectUI, useTonWallet, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
 import { Copy, Link2, LogOut, RefreshCw, Wallet, Send, ArrowRightLeft, Plus } from "lucide-react";
+import { useWalletCardSettings } from "@/hooks/useWalletCardSettings";
 
 const shortenAddress = (address: string) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`;
 
 export const TonWalletConnectCard = () => {
+  const { getCardSetting } = useWalletCardSettings();
+  const cardSetting = getCardSetting('ton');
+  const bgImage = cardSetting?.background_image || tonWalletBg;
+  const overlayOpacity = cardSetting?.overlay_opacity ?? 0.6;
   const { toast } = useToast();
   const [tonConnectUI] = useTonConnectUI();
   const wallet = useTonWallet();
@@ -96,8 +101,8 @@ export const TonWalletConnectCard = () => {
     <>
       <Card className="border-primary/20 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img src={tonWalletBg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+          <img src={bgImage} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 backdrop-blur-[2px]" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
         </div>
         <CardHeader className="relative z-10 rounded-t-lg border-b border-primary/20">
           <CardTitle className="flex items-center gap-2 text-base">
