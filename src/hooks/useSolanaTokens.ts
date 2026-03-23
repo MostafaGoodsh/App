@@ -278,7 +278,7 @@ export const useSolanaTokens = () => {
 };
 
 // Helper function to fetch token metadata from Solana token list
-async function fetchTokenMetadata(mintAddress: string) {
+async function fetchTokenMetadata(mintAddress: string, _isMainnet = false) {
   try {
     const response = await fetch(`https://token.jup.ag/strict`);
     const tokenList = await response.json();
