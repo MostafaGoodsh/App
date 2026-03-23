@@ -31,6 +31,9 @@ interface TokenContractManagerProps {
   onTokenAdded?: (token: TokenContract) => void;
 }
 
+const normalizeSolanaNetwork = (network: TokenContractManagerProps['network']) =>
+  network === 'solana' ? 'solana-mainnet' : network;
+
 export const TokenContractManager = ({ 
   network = 'solana-devnet',
   onTokenAdded 
@@ -49,7 +52,9 @@ export const TokenContractManager = ({
   const loadSavedTokens = async () => {
     try {
       let query = supabase.from('custom_tokens').select('*');
-      query = network === 'solana-mainnet' ? query.in('network', ['solana-mainnet', 'solana']) : query.eq('network', network);
+      query = network === 'solana-mainnet' || network === 'solana'
+        ? query.in('network', ['solana-mainnet', 'solana'])
+        : query.eq('network', network);
       const { data, error } = await query;
 
       if (!error && data) {
@@ -116,6 +121,8 @@ export const TokenContractManager = ({
   const addToken = async () => {
     if (!verifiedToken || !user) return;
 
+    const normalizedNetwork = normalizeSolanaNetwork(network);
+
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -125,7 +132,7 @@ export const TokenContractManager = ({
           name: verifiedToken.name!,
           symbol: verifiedToken.symbol!,
           decimals: verifiedToken.decimals || 9,
-          network: network,
+          network: normalizedNetwork,
           logo_url: verifiedToken.logo_url,
           is_verified: verifiedToken.is_verified || false
         })
@@ -181,6 +188,14 @@ export const TokenContractManager = ({
     } catch (error) {
       console.error('Error removing token:', error);
     }
+  };
+
+  const handleAddSavedTokenToWallet = async (token: TokenContract) => {
+    onTokenAdded?.(token);
+    toast({
+      title: 'تمت الإضافة للمحفظة',
+      description: `${token.name} (${token.symbol})`,
+    });
   };
 
   const copyAddress = (address: string) => {
@@ -356,6 +371,15 @@ export const TokenContractManager = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      onClick={() => handleAddSavedTokenToWallet(token)}
+                      title="إضافة للمحفظة"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
                     <Button 
                       size="icon" 
                       variant="ghost"
