@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import mobileWalletsImg from '@/assets/payment-mobile-wallets.jpeg';
 import fawryImg from '@/assets/payment-fawry.jpeg';
 import cardImg from '@/assets/payment-visa-mastercard.jpeg';
-import piNetworkImg from '@/assets/payment-pi-network.jpg';
+import piNetworkImg from '@/assets/pi-logo.png';
 
 interface PaymentRequest {
   amount: number;
