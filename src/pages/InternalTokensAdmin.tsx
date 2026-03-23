@@ -29,6 +29,10 @@ const InternalTokensAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editToken, setEditToken] = useState<Token | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     symbol: '', name: '', description: '', icon_url: '',
     decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
