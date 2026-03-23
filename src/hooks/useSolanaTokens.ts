@@ -21,24 +21,23 @@ export const useSolanaTokens = () => {
   const [tokens, setTokens] = useState<SolanaToken[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getConnection = useCallback((walletAddress?: string) => {
-    const endpoint = walletAddress ? 'https://api.mainnet-beta.solana.com' : 'https://api.devnet.solana.com';
-    return new Connection(endpoint, 'confirmed');
+  const getConnection = useCallback(() => {
+    return new Connection('https://api.devnet.solana.com', 'confirmed');
   }, []);
 
-  const fetchSavedCustomTokens = useCallback(async (walletAddress?: string) => {
+  const fetchSavedCustomTokens = useCallback(async () => {
     try {
-      let query = supabase.from('custom_tokens').select('*');
-      query = walletAddress
-        ? query.in('network', ['solana', 'solana-mainnet'])
-        : query.eq('network', 'solana-devnet');
+      const query = supabase
+        .from('custom_tokens')
+        .select('*')
+        .in('network', ['solana-devnet', 'solana-mainnet', 'solana']);
 
       const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
 
       const savedTokens = await Promise.all(
         (data || []).map(async (token) => {
-          const metadata = await fetchTokenMetadata(token.contract_address, Boolean(walletAddress));
+          const metadata = await fetchTokenMetadata(token.contract_address);
           return {
             mintAddress: token.contract_address,
             symbol: metadata?.symbol || token.symbol || 'Custom',
@@ -105,11 +104,11 @@ export const useSolanaTokens = () => {
     setIsLoading(true);
     try {
       const publicKey = new PublicKey(walletAddress);
-      const connection = getConnection(walletAddress);
+      const connection = getConnection();
       
       // First, always fetch converted tokens
       const convertedTokens = await fetchConvertedTokens();
-      const savedCustomTokens = await fetchSavedCustomTokens(walletAddress);
+      const savedCustomTokens = await fetchSavedCustomTokens();
       console.log('Fetched converted tokens:', convertedTokens);
       
       // Try to get token accounts for this wallet
@@ -128,7 +127,7 @@ export const useSolanaTokens = () => {
           const balance = tokenInfo.tokenAmount.uiAmount || 0;
           
           try {
-              const tokenMetadata = await fetchTokenMetadata(mintAddress, Boolean(walletAddress));
+              const tokenMetadata = await fetchTokenMetadata(mintAddress);
             
             tokenList.push({
               mintAddress,
@@ -180,7 +179,7 @@ export const useSolanaTokens = () => {
       console.error('Error fetching token accounts:', error);
       // Even if there's an error, try to show converted tokens
       const convertedTokens = await fetchConvertedTokens();
-      const savedCustomTokens = await fetchSavedCustomTokens(walletAddress);
+      const savedCustomTokens = await fetchSavedCustomTokens();
       const fallbackTokens = [...savedCustomTokens];
 
       convertedTokens.forEach((convertedToken) => {
@@ -201,10 +200,10 @@ export const useSolanaTokens = () => {
     try {
       const mintPublicKey = new PublicKey(mintAddress);
       const publicKey = new PublicKey(walletAddress);
-      const connection = getConnection(walletAddress);
+      const connection = getConnection();
       
       // Try to get token metadata first
-      const tokenMetadata = await fetchTokenMetadata(mintAddress, Boolean(walletAddress));
+      const tokenMetadata = await fetchTokenMetadata(mintAddress);
       
       let balance = 0;
       let decimals = tokenMetadata?.decimals || 9;
