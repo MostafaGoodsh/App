@@ -7,6 +7,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { Wallet, RefreshCw, Send, Gift, Copy } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
+import { useWalletCardSettings } from '@/hooks/useWalletCardSettings';
 import solanaWalletBg from '@/assets/solana-bg.jpg';
 
 interface SolanaToken {
@@ -25,6 +26,10 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
   const { connected, publicKey } = useWallet();
   const { getBalance, getTokenBalance, requestAirdrop } = useSolanaWallet();
   const { toast } = useToast();
+  const { getCardSetting } = useWalletCardSettings();
+  const cardSetting = getCardSetting('solana');
+  const bgImage = cardSetting?.background_image || solanaWalletBg;
+  const overlayOpacity = cardSetting?.overlay_opacity ?? 0.6;
   
   const [solBalance, setSolBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,13 +107,13 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
     return (
       <Card className="border-primary/20 relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img src={solanaWalletBg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+          <img src={bgImage} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 backdrop-blur-[2px]" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
         </div>
         <CardHeader className="relative z-10 rounded-t-lg border-b border-amber-500/30">
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-amber-500" />
-            <span className="arabic-text">محفظة سولانا</span>
+            <span className="arabic-text">{cardSetting?.title || 'محفظة سولانا'}</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-4 relative z-10">
