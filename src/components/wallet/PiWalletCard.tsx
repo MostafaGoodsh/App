@@ -30,6 +30,7 @@ export const PiWalletCard = () => {
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
   const [sendAmount, setSendAmount] = useState("");
+  const [sendAddress, setSendAddress] = useState("");
   const [sendMemo, setSendMemo] = useState("");
 
   const handleSend = async () => {
