@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Edit, Coins } from "lucide-react";
+import { Plus, Edit, Coins, Upload, X } from "lucide-react";
 import AdminPageShell from "@/components/admin/AdminPageShell";
 
 interface Token {
@@ -29,6 +29,10 @@ const InternalTokensAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editToken, setEditToken] = useState<Token | null>(null);
+  const [iconFile, setIconFile] = useState<File | null>(null);
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     symbol: '', name: '', description: '', icon_url: '',
     decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
@@ -44,13 +48,36 @@ const InternalTokensAdmin = () => {
     setLoading(false);
   };
 
+  const uploadIcon = async (): Promise<string | null> => {
+    if (!iconFile) return form.icon_url || null;
+    setUploading(true);
+    try {
+      const ext = iconFile.name.split('.').pop();
+      const filePath = `token-icons/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('content-backgrounds')
+        .upload(filePath, iconFile, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage
+        .from('content-backgrounds')
+        .getPublicUrl(filePath);
+      return urlData.publicUrl;
+    } catch (err: any) {
+      toast({ title: 'خطأ في رفع الصورة', description: err.message, variant: 'destructive' });
+      return form.icon_url || null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
+      const iconUrl = await uploadIcon();
       const tokenData = {
         symbol: form.symbol.toUpperCase(),
         name: form.name,
         description: form.description || null,
-        icon_url: form.icon_url || null,
+        icon_url: iconUrl,
         decimals: form.decimals,
         exchange_rate_usd: form.exchange_rate_usd,
         is_active: form.is_active,
@@ -84,14 +111,20 @@ const InternalTokensAdmin = () => {
     }
   };
 
-  const resetForm = () => setForm({
-    symbol: '', name: '', description: '', icon_url: '',
-    decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
-    contract_address: '', network: 'solana'
-  });
+  const resetForm = () => {
+    setForm({
+      symbol: '', name: '', description: '', icon_url: '',
+      decimals: 8, exchange_rate_usd: 0, is_active: true, is_base_currency: false,
+      contract_address: '', network: 'solana'
+    });
+    setIconFile(null);
+    setIconPreview(null);
+  };
 
   const openEdit = (t: Token) => {
     setEditToken(t);
+    setIconFile(null);
+    setIconPreview(t.icon_url || null);
     setForm({
       symbol: t.symbol, name: t.name, description: t.description || '',
       icon_url: t.icon_url || '', decimals: t.decimals,
@@ -166,8 +199,43 @@ const InternalTokensAdmin = () => {
               <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
             </div>
             <div>
-              <Label>رابط الأيقونة</Label>
-              <Input value={form.icon_url} onChange={e => setForm({...form, icon_url: e.target.value})} dir="ltr" />
+              <Label>أيقونة العملة</Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setIconFile(file);
+                    setIconPreview(URL.createObjectURL(file));
+                  }
+                }}
+              />
+              <div className="flex items-center gap-3 mt-1">
+                {iconPreview ? (
+                  <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-border">
+                    <img src={iconPreview} alt="icon" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center"
+                      onClick={() => { setIconFile(null); setIconPreview(null); setForm({...form, icon_url: ''}); }}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {iconPreview ? 'تغيير الصورة' : 'رفع صورة'}
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
