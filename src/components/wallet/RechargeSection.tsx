@@ -70,6 +70,14 @@ export const RechargeSection = () => {
       return;
     }
 
+    if (selectedMethod === 'pi_network') {
+      toast({
+        title: "π Pi Network",
+        description: "استخدم محفظة Pi في صفحة المحفظة للدفع بعملة Pi | Use Pi Wallet to pay with Pi",
+      });
+      return;
+    }
+
     if ((selectedMethod === 'vodafone_cash' || selectedMethod === 'orange_cash' || selectedMethod === 'etisalat_cash') && !phoneNumber) {
       toast({
         title: "خطأ | Error",
