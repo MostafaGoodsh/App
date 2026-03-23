@@ -35,12 +35,17 @@ export const PiWalletCard = () => {
 
   const handleSend = async () => {
     const amount = parseFloat(sendAmount);
+    if (!sendAddress.trim()) {
+      toast.error("أدخل عنوان المستلم / Enter recipient address");
+      return;
+    }
     if (!amount || amount <= 0) {
       toast.error("أدخل مبلغ صحيح / Enter a valid amount");
       return;
     }
-    await createPayment(amount, sendMemo || "Pi Payment", {});
+    await createPayment(amount, sendMemo || "Pi Payment", { recipient: sendAddress.trim() });
     setSendAmount("");
+    setSendAddress("");
     setSendMemo("");
     setShowSendDialog(false);
   };
