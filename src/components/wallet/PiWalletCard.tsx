@@ -30,16 +30,22 @@ export const PiWalletCard = () => {
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
   const [sendAmount, setSendAmount] = useState("");
+  const [sendAddress, setSendAddress] = useState("");
   const [sendMemo, setSendMemo] = useState("");
 
   const handleSend = async () => {
     const amount = parseFloat(sendAmount);
+    if (!sendAddress.trim()) {
+      toast.error("أدخل عنوان المستلم / Enter recipient address");
+      return;
+    }
     if (!amount || amount <= 0) {
       toast.error("أدخل مبلغ صحيح / Enter a valid amount");
       return;
     }
-    await createPayment(amount, sendMemo || "Pi Payment", {});
+    await createPayment(amount, sendMemo || "Pi Payment", { recipient: sendAddress.trim() });
     setSendAmount("");
+    setSendAddress("");
     setSendMemo("");
     setShowSendDialog(false);
   };
@@ -197,6 +203,15 @@ export const PiWalletCard = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("عنوان المستلم")} (Wallet Address)</label>
+              <Input
+                placeholder="GABC...XYZ أو Pi Username"
+                value={sendAddress}
+                onChange={(e) => setSendAddress(e.target.value)}
+                dir="ltr"
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">{t("المبلغ")} (π)</label>
               <Input
