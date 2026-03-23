@@ -97,6 +97,7 @@ const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
 const PresaleAdmin = lazy(() => import("./pages/PresaleAdmin"));
 const OfficialLinksAdmin = lazy(() => import("./pages/OfficialLinksAdmin"));
 const CardPage = lazy(() => import("./pages/CardPage"));
+const WalletCardAdmin = lazy(() => import("./pages/WalletCardAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
