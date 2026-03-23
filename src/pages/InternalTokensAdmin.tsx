@@ -123,6 +123,8 @@ const InternalTokensAdmin = () => {
 
   const openEdit = (t: Token) => {
     setEditToken(t);
+    setIconFile(null);
+    setIconPreview(t.icon_url || null);
     setForm({
       symbol: t.symbol, name: t.name, description: t.description || '',
       icon_url: t.icon_url || '', decimals: t.decimals,
