@@ -109,8 +109,9 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
 
   const setting = getCardSetting(cardKey);
   const cardStyle = setting ? getCardStyle(cardKey) : {};
-  const titleStyle = setting ? getTitleStyle(cardKey) : { textAlign: (isArabic ? "right" : "left") as const };
-  const descStyle = setting ? getDescriptionStyle(cardKey) : { textAlign: (isArabic ? "right" : "left") as const };
+  const textAlignVal: "right" | "left" = isArabic ? "right" : "left";
+  const titleStyle = setting ? getTitleStyle(cardKey) : { textAlign: textAlignVal };
+  const descStyle = setting ? getDescriptionStyle(cardKey) : { textAlign: textAlignVal };
 
   const hasCustomBg = setting?.background_image || setting?.background_gradient || setting?.background_color;
 
