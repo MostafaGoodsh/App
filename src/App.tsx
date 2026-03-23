@@ -94,6 +94,9 @@ const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
 const CryptoPaymentAddressesAdmin = lazy(() => import("./pages/CryptoPaymentAddressesAdmin"));
 const FamilyAdmin = lazy(() => import("./pages/FamilyAdmin"));
 const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
+const PresaleAdmin = lazy(() => import("./pages/PresaleAdmin"));
+const OfficialLinksAdmin = lazy(() => import("./pages/OfficialLinksAdmin"));
+const CardPage = lazy(() => import("./pages/CardPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
