@@ -205,7 +205,7 @@ export const useInternalWallet = () => {
     getUSDValue,
     getTotalUSDValue,
     refreshData: async () => {
-      await Promise.all([loadBalances(), loadSwapHistory()]);
+      await Promise.all([loadTokens(), loadBalances(), loadSwapHistory()]);
     },
   };
 };
