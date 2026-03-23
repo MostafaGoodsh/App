@@ -105,57 +105,94 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
           <>
             <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={() => toast({ title: t("قريباً"), description: t("إضافة عملات مخصصة قادمة قريباً") })} onRefresh={refreshData} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
 
-            {/* External Wallets */}
+            {/* External Wallets with Network Tabs */}
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-2">
                 <Link2 className="w-5 h-5 text-primary" />
                 <h3 className="font-bold">{t("المحافظ الخارجية")}</h3>
               </div>
-              <div className="grid gap-4">
-                <WalletConnectButton variant="card" showBalance={true} />
-                <EvmWalletConnectCard />
-                <TonWalletConnectCard />
-                <PiWalletCard />
-                <Card className="border-border/50 bg-card">
-                  <CardContent className="p-4 space-y-3">
-                    <div>
-                      <p className="font-semibold text-sm">Solana Network</p>
-                      <p className="text-xs text-muted-foreground">اختيار الشبكة لعرض المحافظ والعقود</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Devnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Devnet)}>
-                        Devnet
-                      </Button>
-                      <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Mainnet)}>
-                        Mainnet
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
 
-            {/* Token Contract Manager */}
-            <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                <h3 className="font-bold">{t("إضافة عقود العملات")}</h3>
+              {/* Network Tabs */}
+              <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
+                {[
+                  { id: 'solana' as const, label: 'Solana', icon: '◎' },
+                  { id: 'pi' as const, label: 'Pi', icon: 'π' },
+                  { id: 'ton' as const, label: 'TON', icon: '💎' },
+                ].map((net) => (
+                  <button
+                    key={net.id}
+                    onClick={() => setActiveNetworkTab(net.id)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
+                      activeNetworkTab === net.id
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <span className="text-base">{net.icon}</span>
+                    <span>{net.label}</span>
+                  </button>
+                ))}
               </div>
-              <div className="space-y-3">
-                <Select value={contractNetwork} onValueChange={(v) => setContractNetwork(v as ContractNetwork)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="اختر الشبكة" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CONTRACT_NETWORKS.map((n) => (
-                      <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <TokenContractManager
-                  network={contractNetwork}
-                  onTokenAdded={() => refreshData()}
-                />
+
+              {/* Solana Content */}
+              {activeNetworkTab === 'solana' && (
+                <div className="space-y-4">
+                  <WalletConnectButton variant="card" showBalance={true} />
+                  <Card className="border-border/50 bg-card">
+                    <CardContent className="p-4 space-y-3">
+                      <div>
+                        <p className="font-semibold text-sm">Solana Network</p>
+                        <p className="text-xs text-muted-foreground">{t("اختيار الشبكة لعرض المحافظ والعقود")}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Devnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Devnet)}>
+                          Devnet
+                        </Button>
+                        <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Mainnet)}>
+                          Mainnet
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Token Contract Manager for Solana */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      <h4 className="font-semibold text-sm">{t("إضافة عقود العملات")}</h4>
+                    </div>
+                    <Select value={contractNetwork} onValueChange={(v) => setContractNetwork(v as ContractNetwork)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="اختر الشبكة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CONTRACT_NETWORKS.map((n) => (
+                          <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <TokenContractManager network={contractNetwork} onTokenAdded={() => refreshData()} />
+                  </div>
+                </div>
+              )}
+
+              {/* Pi Network Content */}
+              {activeNetworkTab === 'pi' && (
+                <div className="space-y-4">
+                  <PiWalletCard />
+                </div>
+              )}
+
+              {/* TON Content */}
+              {activeNetworkTab === 'ton' && (
+                <div className="space-y-4">
+                  <TonWalletConnectCard />
+                </div>
+              )}
+
+              {/* EVM Wallet (always visible below tabs) */}
+              <div className="pt-2">
+                <EvmWalletConnectCard />
               </div>
             </div>
           </>
