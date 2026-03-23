@@ -3588,6 +3588,90 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_card_settings: {
+        Row: {
+          background_color: string | null
+          background_gradient: string | null
+          background_image: string | null
+          border_color: string | null
+          border_radius: string | null
+          card_key: string
+          card_label: string
+          card_label_en: string | null
+          created_at: string | null
+          description_text_align: string | null
+          display_order: number | null
+          font_family: string | null
+          font_size: string | null
+          font_weight: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean | null
+          overlay_opacity: number | null
+          page_name: string
+          text_color: string | null
+          title_color: string | null
+          title_font_size: string | null
+          title_font_weight: string | null
+          title_text_align: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          border_color?: string | null
+          border_radius?: string | null
+          card_key: string
+          card_label: string
+          card_label_en?: string | null
+          created_at?: string | null
+          description_text_align?: string | null
+          display_order?: number | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          overlay_opacity?: number | null
+          page_name?: string
+          text_color?: string | null
+          title_color?: string | null
+          title_font_size?: string | null
+          title_font_weight?: string | null
+          title_text_align?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          background_color?: string | null
+          background_gradient?: string | null
+          background_image?: string | null
+          border_color?: string | null
+          border_radius?: string | null
+          card_key?: string
+          card_label?: string
+          card_label_en?: string | null
+          created_at?: string | null
+          description_text_align?: string | null
+          display_order?: number | null
+          font_family?: string | null
+          font_size?: string | null
+          font_weight?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          overlay_opacity?: number | null
+          page_name?: string
+          text_color?: string | null
+          title_color?: string | null
+          title_font_size?: string | null
+          title_font_weight?: string | null
+          title_text_align?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string

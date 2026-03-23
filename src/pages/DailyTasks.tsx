@@ -8,12 +8,18 @@ import DailyTasksTab from "@/components/tasks/DailyTasksTab";
 import SectionIntroduction from "@/components/tasks/SectionIntroduction";
 import WheelOfFortune from "@/components/tasks/WheelOfFortune";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
+import { useUICardSettings } from "@/hooks/useUICardSettings";
 import { Target, Flame, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const DailyTasks = () => {
   const { stats, dailyTasks, completedTasks, completeTask, uncompleteTask, loading } = useEngagementStats();
   const { t, dir } = useLanguage();
+  const { getCardStyle, getTitleStyle, getCardSetting } = useUICardSettings();
+  const taskCardSetting = getCardSetting('tasks_daily_card');
+  const hasCustomTaskCard = taskCardSetting?.background_image || taskCardSetting?.background_gradient || taskCardSetting?.background_color;
+  const taskCardStyle = hasCustomTaskCard ? getCardStyle('tasks_daily_card') : {};
+  const taskTitleStyle = hasCustomTaskCard ? getTitleStyle('tasks_daily_card') : {};
 
   return (
     <>
@@ -55,11 +61,14 @@ const DailyTasks = () => {
               </div>
             </div>
 
-            <Card className="w-full overflow-hidden">
-              <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
-                <CardTitle className="text-center arabic-text text-base sm:text-lg">{t("مهامك اليومية")}</CardTitle>
+            <Card className={`w-full overflow-hidden ${hasCustomTaskCard ? 'relative' : ''}`} style={taskCardStyle}>
+              {taskCardSetting?.background_image && (
+                <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${taskCardSetting.overlay_opacity || 0.6})` }} />
+              )}
+              <CardHeader className="px-3 sm:px-6 py-3 sm:py-6 relative z-10">
+                <CardTitle className="text-center arabic-text text-base sm:text-lg" style={taskTitleStyle}>{t("مهامك اليومية")}</CardTitle>
               </CardHeader>
-              <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6">
+              <CardContent className="px-2 sm:px-6 pb-3 sm:pb-6 relative z-10">
                 <Tabs defaultValue="daily" className="w-full">
                   <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-9 sm:h-10">
                     <TabsTrigger value="quran" className="arabic-text text-[11px] sm:text-sm px-1 sm:px-3">

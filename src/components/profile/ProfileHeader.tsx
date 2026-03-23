@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUICardSettings } from '@/hooks/useUICardSettings';
 import { Camera, Trash2, User, BadgeCheck, Calendar, Star, Heart, MapPin } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,10 @@ export function ProfileHeader({ profile, badges = [] }: ProfileHeaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const isOwnProfile = user?.id === profile.user_id;
   const isArabic = language === 'ar' || language === 'both';
+  const { getCardStyle, getCardSetting } = useUICardSettings();
+  const setting = getCardSetting('profile_header');
+  const hasCustom = setting?.background_image || setting?.background_gradient || setting?.background_color;
+  const cardStyle = hasCustom ? getCardStyle('profile_header') : {};
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -101,11 +106,14 @@ export function ProfileHeader({ profile, badges = [] }: ProfileHeaderProps) {
   const maritalLabel = profile.marital_status ? (isArabic ? maritalStatusLabels[profile.marital_status]?.ar : maritalStatusLabels[profile.marital_status]?.en) : null;
 
   return (
-    <Card className="mb-4 overflow-hidden border-primary/20" dir={isArabic ? 'rtl' : 'ltr'}>
+    <Card className={`mb-4 overflow-hidden border-primary/20 ${hasCustom ? 'relative' : ''}`} dir={isArabic ? 'rtl' : 'ltr'} style={cardStyle}>
+      {setting?.background_image && (
+        <div className="absolute inset-0 z-0" style={{ backgroundColor: `rgba(0,0,0,${setting.overlay_opacity || 0.6})` }} />
+      )}
       {/* Top decorative bar */}
-      <div className="h-2 bg-gradient-to-r from-primary via-primary/60 to-primary/20" />
+      <div className="h-2 bg-gradient-to-r from-primary via-primary/60 to-primary/20 relative z-10" />
       
-      <div className="p-4 sm:p-5">
+      <div className="p-4 sm:p-5 relative z-10">
         {/* ID Card Layout */}
         <div className="flex items-start gap-4">
           {/* Large Avatar */}

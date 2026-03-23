@@ -1,5 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets, Disc, Landmark } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets, Disc, Landmark, LayoutGrid } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -78,6 +78,7 @@ export function AppSidebar() {
     { title: t("إدارة البيع المبكر"), url: "/admin/presale", icon: Coins },
     { title: t("إدارة الروابط الرسمية"), url: "/admin/official-links", icon: Globe },
     { title: t("إدارة كروت المحافظ"), url: "/admin/wallet-cards", icon: Wallet },
+    { title: t("إدارة تصميم الكروت"), url: "/admin/ui-card-settings", icon: LayoutGrid },
   ];
 
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
