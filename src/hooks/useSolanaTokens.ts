@@ -21,7 +21,41 @@ export const useSolanaTokens = () => {
   const [tokens, setTokens] = useState<SolanaToken[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+  const getConnection = useCallback(() => {
+    return new Connection('https://api.devnet.solana.com', 'confirmed');
+  }, []);
+
+  const fetchSavedCustomTokens = useCallback(async () => {
+    try {
+      const query = supabase
+        .from('custom_tokens')
+        .select('*')
+        .in('network', ['solana-devnet', 'solana-mainnet', 'solana']);
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const savedTokens = await Promise.all(
+        (data || []).map(async (token) => {
+          const metadata = await fetchTokenMetadata(token.contract_address);
+          return {
+            mintAddress: token.contract_address,
+            symbol: metadata?.symbol || token.symbol || 'Custom',
+            name: metadata?.name || token.name || 'Custom Token',
+            balance: '0',
+            decimals: metadata?.decimals || token.decimals || 9,
+            logoUri: metadata?.logoUri || token.logo_url || undefined,
+            isConverted: false,
+          } satisfies SolanaToken;
+        })
+      );
+
+      return savedTokens;
+    } catch (error) {
+      console.error('Error fetching saved custom tokens:', error);
+      return [] as SolanaToken[];
+    }
+  }, []);
 
   // Fetch converted tokens from database
   const fetchConvertedTokens = useCallback(async () => {
@@ -70,9 +104,11 @@ export const useSolanaTokens = () => {
     setIsLoading(true);
     try {
       const publicKey = new PublicKey(walletAddress);
+      const connection = getConnection();
       
       // First, always fetch converted tokens
       const convertedTokens = await fetchConvertedTokens();
+      const savedCustomTokens = await fetchSavedCustomTokens();
       console.log('Fetched converted tokens:', convertedTokens);
       
       // Try to get token accounts for this wallet
@@ -91,7 +127,7 @@ export const useSolanaTokens = () => {
           const balance = tokenInfo.tokenAmount.uiAmount || 0;
           
           try {
-            const tokenMetadata = await fetchTokenMetadata(mintAddress);
+              const tokenMetadata = await fetchTokenMetadata(mintAddress);
             
             tokenList.push({
               mintAddress,
@@ -119,12 +155,18 @@ export const useSolanaTokens = () => {
         // This is normal for new wallets, continue with converted tokens only
       }
       
-      // Merge with converted tokens (avoid duplicates)
+      // Merge with saved and converted tokens (avoid duplicates)
       const allTokens = [...tokenList];
+
+      savedCustomTokens.forEach((savedToken) => {
+        const exists = allTokens.find((t) => t.mintAddress === savedToken.mintAddress);
+        if (!exists) {
+          allTokens.push(savedToken);
+        }
+      });
       
-      // Add converted tokens that don't already exist in the token list
       convertedTokens.forEach(convertedToken => {
-        const exists = tokenList.find(t => t.mintAddress === convertedToken.mintAddress);
+        const exists = allTokens.find(t => t.mintAddress === convertedToken.mintAddress);
         if (!exists) {
           allTokens.push(convertedToken);
         }
@@ -137,17 +179,28 @@ export const useSolanaTokens = () => {
       console.error('Error fetching token accounts:', error);
       // Even if there's an error, try to show converted tokens
       const convertedTokens = await fetchConvertedTokens();
-      setTokens(convertedTokens);
-      return convertedTokens;
+      const savedCustomTokens = await fetchSavedCustomTokens();
+      const fallbackTokens = [...savedCustomTokens];
+
+      convertedTokens.forEach((convertedToken) => {
+        const exists = fallbackTokens.find((token) => token.mintAddress === convertedToken.mintAddress);
+        if (!exists) {
+          fallbackTokens.push(convertedToken);
+        }
+      });
+
+      setTokens(fallbackTokens);
+      return fallbackTokens;
     } finally {
       setIsLoading(false);
     }
-  }, [connection, fetchConvertedTokens]);
+  }, [fetchConvertedTokens, fetchSavedCustomTokens, getConnection]);
 
   const addCustomToken = useCallback(async (mintAddress: string, walletAddress: string) => {
     try {
       const mintPublicKey = new PublicKey(mintAddress);
       const publicKey = new PublicKey(walletAddress);
+      const connection = getConnection();
       
       // Try to get token metadata first
       const tokenMetadata = await fetchTokenMetadata(mintAddress);
@@ -191,7 +244,7 @@ export const useSolanaTokens = () => {
       console.error('Error adding custom token:', error);
       throw error;
     }
-  }, [connection]);
+  }, [getConnection]);
 
   // Listen for conversion events to auto-refresh tokens
   const handleConversionCompleted = useCallback(async (event: CustomEvent) => {
@@ -224,7 +277,7 @@ export const useSolanaTokens = () => {
 };
 
 // Helper function to fetch token metadata from Solana token list
-async function fetchTokenMetadata(mintAddress: string) {
+async function fetchTokenMetadata(mintAddress: string, _isMainnet = false) {
   try {
     const response = await fetch(`https://token.jup.ag/strict`);
     const tokenList = await response.json();

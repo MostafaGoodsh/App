@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { WalletHeroSection } from "./WalletHeroSection";
 import { QuickActionButtons } from "./QuickActionButtons";
 import { ModernTokenList, TokenData } from "./ModernTokenList";
@@ -53,21 +53,42 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [contractNetwork, setContractNetwork] = useState<ContractNetwork>('solana-devnet');
+  const contractManagerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase.from('profiles').select('*').eq('user_id', user.id).single();
   }, [user]);
 
-  const tokenList: TokenData[] = balances
-    .filter((bal) => {
-      const symbol = (bal.token?.symbol || '').toUpperCase();
+  const tokenList: TokenData[] = internalTokens
+    .filter((token) => {
+      const symbol = (token.symbol || '').toUpperCase();
       return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA';
     })
-    .map((bal) => ({ symbol: bal.token?.symbol || 'Unknown', name: bal.token?.name || 'Unknown Token', balance: bal.balance, isInternal: true }));
+    .map((token) => {
+      const balance = balances.find((item) => item.token_id === token.id || item.token?.symbol === token.symbol);
+      return {
+        symbol: token.symbol || 'Unknown',
+        name: token.name || 'Unknown Token',
+        balance: balance?.balance || 0,
+        usdValue: (balance?.balance || 0) * (token.exchange_rate_usd || 0),
+        network: 'internal',
+        isInternal: true,
+      };
+    });
 
   const xpBalance = balances.find(b => b.token?.symbol === 'XP');
   const totalUsdValue = getTotalUSDValue();
+
+  const handleOpenAddToken = () => {
+    setActiveBottomTab('wallet');
+    setActiveNetworkTab('solana');
+    setContractNetwork(solanaNetwork === WalletAdapterNetwork.Mainnet ? 'solana-mainnet' : 'solana-devnet');
+
+    requestAnimationFrame(() => {
+      contractManagerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir={dir}>
@@ -103,7 +124,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
 
         {activeBottomTab === 'wallet' && (
           <>
-            <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={() => toast({ title: t("قريباً"), description: t("إضافة عملات مخصصة قادمة قريباً") })} onRefresh={refreshData} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
+            <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={handleOpenAddToken} onRefresh={refreshData} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
 
             {/* External Wallets with Network Tabs */}
             <div className="space-y-4 pt-4">
@@ -136,7 +157,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
 
               {/* Solana Content */}
               {activeNetworkTab === 'solana' && (
-                <div className="space-y-4">
+                  <div className="space-y-4">
                   <WalletConnectButton variant="card" showBalance={true} />
                   <Card className="border-border/50 bg-card">
                     <CardContent className="p-4 space-y-3">
@@ -156,7 +177,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
                   </Card>
 
                   {/* Token Contract Manager for Solana */}
-                  <div className="space-y-3">
+                  <div ref={contractManagerRef} className="space-y-3">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-primary" />
                       <h4 className="font-semibold text-sm">{t("إضافة عقود العملات")}</h4>
