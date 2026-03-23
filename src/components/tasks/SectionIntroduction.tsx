@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUICardSettings } from "@/hooks/useUICardSettings";
 
 interface SectionIntroductionProps {
   sectionType: string;
@@ -63,6 +64,9 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
   const [introduction, setIntroduction] = useState<Introduction | null>(null);
   const [loading, setLoading] = useState(true);
   const { language, dir } = useLanguage();
+  const { getCardStyle, getTitleStyle, getDescriptionStyle, getCardSetting } = useUICardSettings();
+
+  const cardKey = sectionType === "general" ? "tasks_intro_general" : `tasks_intro_${sectionType}`;
 
   useEffect(() => {
     fetchIntroduction();
@@ -103,15 +107,26 @@ const SectionIntroduction = ({ sectionType }: SectionIntroductionProps) => {
     ? introduction.content
     : introduction.content_en?.trim() || localizedFallback?.content || introduction.content;
 
-  const textAlign = isArabic ? "right" as const : "left" as const;
+  const setting = getCardSetting(cardKey);
+  const cardStyle = setting ? getCardStyle(cardKey) : {};
+  const titleStyle = setting ? getTitleStyle(cardKey) : { textAlign: (isArabic ? "right" : "left") as const };
+  const descStyle = setting ? getDescriptionStyle(cardKey) : { textAlign: (isArabic ? "right" : "left") as const };
+
+  const hasCustomBg = setting?.background_image || setting?.background_gradient || setting?.background_color;
 
   return (
-    <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-      <CardContent className="p-6" dir={isArabic ? "rtl" : "ltr"}>
-        <h2 className="text-xl font-bold mb-3 text-primary" style={{ textAlign }}>
+    <Card
+      className={hasCustomBg ? "mb-6 relative overflow-hidden" : "mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20"}
+      style={cardStyle}
+    >
+      {setting?.background_image && (
+        <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${setting.overlay_opacity || 0.6})` }} />
+      )}
+      <CardContent className="p-6 relative z-10" dir={isArabic ? "rtl" : "ltr"}>
+        <h2 className={hasCustomBg ? "text-xl mb-3" : "text-xl font-bold mb-3 text-primary"} style={titleStyle}>
           {displayTitle}
         </h2>
-        <p className="text-muted-foreground leading-relaxed whitespace-pre-line" style={{ textAlign }}>
+        <p className={hasCustomBg ? "leading-relaxed whitespace-pre-line" : "text-muted-foreground leading-relaxed whitespace-pre-line"} style={descStyle}>
           {displayContent}
         </p>
       </CardContent>
