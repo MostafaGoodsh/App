@@ -7,7 +7,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
 import { Wallet, RefreshCw, Send, Gift, Copy } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
-import solanaWalletBg from '@/assets/solana-wallet-bg.jpg';
+import solanaWalletBg from '@/assets/solana-bg.jpg';
 
 interface SolanaToken {
   mint: string;
