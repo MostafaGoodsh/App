@@ -48,13 +48,36 @@ const InternalTokensAdmin = () => {
     setLoading(false);
   };
 
+  const uploadIcon = async (): Promise<string | null> => {
+    if (!iconFile) return form.icon_url || null;
+    setUploading(true);
+    try {
+      const ext = iconFile.name.split('.').pop();
+      const filePath = `token-icons/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('content-backgrounds')
+        .upload(filePath, iconFile, { upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage
+        .from('content-backgrounds')
+        .getPublicUrl(filePath);
+      return urlData.publicUrl;
+    } catch (err: any) {
+      toast({ title: 'خطأ في رفع الصورة', description: err.message, variant: 'destructive' });
+      return form.icon_url || null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     try {
+      const iconUrl = await uploadIcon();
       const tokenData = {
         symbol: form.symbol.toUpperCase(),
         name: form.name,
         description: form.description || null,
-        icon_url: form.icon_url || null,
+        icon_url: iconUrl,
         decimals: form.decimals,
         exchange_rate_usd: form.exchange_rate_usd,
         is_active: form.is_active,
