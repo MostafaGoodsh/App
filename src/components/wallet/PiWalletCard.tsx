@@ -199,6 +199,15 @@ export const PiWalletCard = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
+              <label className="text-sm font-medium">{t("عنوان المستلم")} (Wallet Address)</label>
+              <Input
+                placeholder="GABC...XYZ أو Pi Username"
+                value={sendAddress}
+                onChange={(e) => setSendAddress(e.target.value)}
+                dir="ltr"
+              />
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">{t("المبلغ")} (π)</label>
               <Input
                 type="number"
