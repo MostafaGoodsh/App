@@ -47,6 +47,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   const { t, dir } = useLanguage();
 
   const [activeBottomTab, setActiveBottomTab] = useState<'wallet' | 'history' | 'swap' | 'rewards'>('wallet');
+  const [activeNetworkTab, setActiveNetworkTab] = useState<'solana' | 'pi' | 'ton'>('solana');
   const [showSwapDialog, setShowSwapDialog] = useState(false);
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
