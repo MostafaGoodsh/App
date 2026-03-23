@@ -211,6 +211,9 @@ const App = () => {
                     <Route path="admin/crypto-payment-addresses" element={<RequireAdmin><CryptoPaymentAddressesAdmin /></RequireAdmin>} />
                     <Route path="admin/family" element={<RequireAdmin><FamilyAdmin /></RequireAdmin>} />
                     <Route path="admin/platform-message" element={<RequireAdmin><PlatformMessageAdmin /></RequireAdmin>} />
+                    <Route path="admin/presale" element={<RequireAdmin><PresaleAdmin /></RequireAdmin>} />
+                    <Route path="admin/official-links" element={<RequireAdmin><OfficialLinksAdmin /></RequireAdmin>} />
+                    <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
