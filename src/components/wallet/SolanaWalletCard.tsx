@@ -138,7 +138,7 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-amber-500" />
-            <span className="arabic-text">محفظة سولانا</span>
+            <span className="arabic-text">{cardSetting?.title || 'محفظة سولانا'}</span>
           </div>
           <Badge variant="secondary" className="bg-green-600 text-white">متصل</Badge>
         </CardTitle>
