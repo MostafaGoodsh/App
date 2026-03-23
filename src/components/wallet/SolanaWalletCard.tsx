@@ -131,8 +131,8 @@ export const SolanaWalletCard = ({ onSendToken }: SolanaWalletCardProps) => {
   return (
     <Card className="border-primary/20 relative overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <img src={solanaWalletBg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        <img src={bgImage} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 backdrop-blur-[2px]" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
       </div>
       <CardHeader className="relative z-10 rounded-t-lg border-b border-amber-500/30">
         <CardTitle className="flex items-center justify-between">
