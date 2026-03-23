@@ -9,10 +9,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2, CheckCircle2, LogIn, Send, ArrowDownLeft, Coins, Copy } from "lucide-react";
 import { PI_NETWORK_OPTIONS } from "@/config/pi";
 import { toast } from "sonner";
+import { useWalletCardSettings } from "@/hooks/useWalletCardSettings";
 import piWalletBg from "@/assets/pi-wallet-bg.jpg";
 import piLogo from "@/assets/pi-logo.png";
 
 export const PiWalletCard = () => {
+  const { getCardSetting } = useWalletCardSettings();
+  const cardSetting = getCardSetting('pi');
+  const bgImage = cardSetting?.background_image || piWalletBg;
+  const overlayOpacity = cardSetting?.overlay_opacity ?? 0.6;
   const {
     isPiBrowser,
     isAuthenticated,
@@ -62,8 +67,8 @@ export const PiWalletCard = () => {
       <Card className="overflow-hidden border-border/50 relative">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <img src={piWalletBg} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+          <img src={bgImage} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 backdrop-blur-[2px]" style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }} />
         </div>
         <CardContent className="p-4 space-y-4 relative z-10">
           {/* Header */}
