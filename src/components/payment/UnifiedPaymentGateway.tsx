@@ -294,47 +294,27 @@ export const UnifiedPaymentGateway = ({
         <CryptoPaymentInstructions amount={amount} />
       )}
 
-      {/* Pi Network info */}
+      {/* Pi Network - minimal info */}
       {selectedMethod === 'pi_network' && (
-        <Alert className="border-primary/30 bg-primary/10">
-          <Info className="h-4 w-4 text-primary" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-bold text-foreground">π Pi Network Payment</p>
-                <Badge variant="outline">{networkLabel}</Badge>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {PI_NETWORK_OPTIONS.map((option) => (
-                  <Button key={option.value} type="button" size="sm" variant={networkMode === option.value ? 'default' : 'outline'} onClick={() => setNetworkMode(option.value)}>
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-              {!isPiBrowser ? (
-                <p className="text-sm text-muted-foreground">
-                  يرجى فتح هذه الصفحة من Pi Browser لإتمام الدفع
-                  <br />
-                  <span className="text-xs">Please open this page in Pi Browser to pay</span>
-                </p>
-              ) : isAuthenticated && piUser ? (
-                <p className="text-sm text-muted-foreground">
-                  متصل كـ {piUser.username || 'Pioneer'} ✅
-                  <br />
-                  <span className="text-xs">{networkLabel} • 1 π = 100 MS-RA Tokens</span>
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">يرجى تسجيل الدخول أولاً</p>
-                  <Button size="sm" variant="outline" onClick={authenticate} disabled={isInitializing}>
-                    {isInitializing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                    تسجيل الدخول بـ Pi
-                  </Button>
-                </div>
-              )}
-            </div>
-          </AlertDescription>
-        </Alert>
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            {PI_NETWORK_OPTIONS.map((option) => (
+              <Button key={option.value} type="button" size="sm" variant={networkMode === option.value ? 'default' : 'outline'} onClick={() => setNetworkMode(option.value)}>
+                {option.label}
+              </Button>
+            ))}
+          </div>
+          {!isPiBrowser && (
+            <p className="text-xs text-destructive">
+              ⚠️ يرجى فتح الصفحة من Pi Browser
+            </p>
+          )}
+          {isAuthenticated && piUser && (
+            <p className="text-xs text-muted-foreground">
+              متصل كـ {piUser.username || 'Pioneer'} ✅ • {networkLabel} • 1 π = 100 $MS-RA
+            </p>
+          )}
+        </div>
       )}
 
       {/* Test Mode Warning */}
