@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolanaWallet } from '@/hooks/useSolanaWallet';
-import { Wallet, Copy, RefreshCw, LogOut, ExternalLink, Ghost } from 'lucide-react';
+import { Copy, RefreshCw, LogOut, ExternalLink, Ghost } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import solanaWalletBg from '@/assets/solana-bg.jpg';
 
 interface WalletConnectButtonProps {
   variant?: 'default' | 'card' | 'compact';
@@ -27,7 +28,6 @@ export const WalletConnectButton = ({
   const [balance, setBalance] = useState<number>(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Load balance when connected
   useEffect(() => {
     if (connected && publicKey) {
       handleRefresh();
@@ -39,8 +39,8 @@ export const WalletConnectButton = ({
     if (publicKey) {
       navigator.clipboard.writeText(publicKey.toString());
       toast({
-        title: "✅ تم النسخ",
-        description: "تم نسخ عنوان المحفظة",
+        title: '✅ تم النسخ',
+        description: 'تم نسخ عنوان المحفظة',
       });
     }
   };
@@ -64,8 +64,8 @@ export const WalletConnectButton = ({
       setBalance(0);
       onDisconnect?.();
       toast({
-        title: "تم قطع الاتصال",
-        description: "تم فصل المحفظة بنجاح",
+        title: 'تم قطع الاتصال',
+        description: 'تم فصل المحفظة بنجاح',
       });
     } catch (error) {
       console.error('Disconnect error:', error);
@@ -78,7 +78,6 @@ export const WalletConnectButton = ({
     }
   };
 
-  // Compact variant - just a button
   if (variant === 'compact') {
     return (
       <div className="wallet-adapter-button-container">
@@ -87,16 +86,20 @@ export const WalletConnectButton = ({
     );
   }
 
-  // Card variant - full card with details
   if (variant === 'card') {
     return (
-      <Card className="border-primary/20">
-        <CardHeader className="bg-gradient-to-r from-primary/20 via-primary/10 to-transparent rounded-t-lg border-b border-primary/20">
+      <Card className="relative overflow-hidden border-primary/20">
+        <div className="absolute inset-0 z-0">
+          <img src={solanaWalletBg} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-background/75 backdrop-blur-[2px]" />
+        </div>
+
+        <CardHeader className="relative z-10 rounded-t-lg border-b border-primary/20 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent">
           <CardTitle className="flex items-center gap-2 text-base">
             <Ghost className="w-5 h-5 text-primary" />
             <div className="space-y-1">
               <span className="font-cairo" dir="rtl">محفظة Solana</span>
-              <span className="text-sm font-normal text-muted-foreground block font-playfair" dir="ltr">
+              <span className="block text-sm font-normal text-muted-foreground font-playfair" dir="ltr">
                 Solana Wallet
               </span>
             </div>
@@ -105,10 +108,10 @@ export const WalletConnectButton = ({
             اتصل بمحفظتك الخارجية عبر Phantom أو Solflare
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 pt-4">
+
+        <CardContent className="relative z-10 space-y-4 pt-4">
           {connected && publicKey ? (
             <>
-              {/* Connected State */}
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="border-primary/30 text-primary">
                   متصل | Connected
@@ -126,8 +129,7 @@ export const WalletConnectButton = ({
                 </div>
               </div>
 
-              {/* Wallet Address */}
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg bg-muted/60 p-3">
                 <span className="text-sm font-mono">
                   {publicKey.toString().slice(0, 6)}...{publicKey.toString().slice(-6)}
                 </span>
@@ -136,32 +138,29 @@ export const WalletConnectButton = ({
                 </Button>
               </div>
 
-              {/* Balance */}
               {showBalance && (
-                <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg">
+                <div className="rounded-lg bg-primary/10 p-4">
                   <p className="text-sm text-muted-foreground">الرصيد | Balance</p>
-                  <p className="text-2xl font-bold">{balance.toFixed(4)} SOL</p>
+                  <p className="text-2xl font-bold text-foreground">{balance.toFixed(4)} SOL</p>
                 </div>
               )}
 
-              {/* Wallet Button for changing wallet */}
               <div className="pt-2">
-                <WalletMultiButton className="!w-full !bg-muted hover:!bg-muted/80 !rounded-md !h-10 !justify-center" />
+                <WalletMultiButton className="!h-10 !w-full !justify-center !rounded-md !bg-muted hover:!bg-muted/80" />
               </div>
             </>
           ) : (
             <>
-              {/* Disconnected State */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <span className="text-sm">Phantom / Solflare</span>
                 <Badge variant="secondary">غير متصل</Badge>
               </div>
-              
+
               <div className="flex justify-center">
-                <WalletMultiButton className="!bg-primary hover:!bg-primary/80 !rounded-md !h-10" />
+                <WalletMultiButton className="!h-10 !rounded-md !bg-primary hover:!bg-primary/80" />
               </div>
 
-              <p className="text-xs text-center text-muted-foreground mt-2">
+              <p className="mt-2 text-center text-xs text-muted-foreground">
                 يدعم Phantom, Solflare, وجميع محافظ Solana
               </p>
             </>
