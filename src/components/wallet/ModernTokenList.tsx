@@ -134,11 +134,11 @@ export const ModernTokenList = ({
           <div className="flex gap-3 pt-4">
             <Button
               variant="outline"
-              className="flex-1 rounded-full border-2 opacity-60 cursor-not-allowed"
-              disabled
+              className="flex-1 rounded-full border-2 border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5"
+              onClick={onAddToken}
             >
               <Plus className="w-4 h-4 mr-2" />
-              <span>{t("إضافة عملة", "Add Token")} — {t("قريباً", "Coming Soon")}</span>
+              <span>{t("إضافة عملة", "Add Token")}</span>
             </Button>
           </div>
         </div>
