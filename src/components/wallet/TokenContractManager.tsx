@@ -398,6 +398,15 @@ export const TokenContractManager = ({
                       size="icon"
                       variant="ghost"
                       className="h-7 w-7"
+                      onClick={() => openEditDialog(token)}
+                      title="تعديل"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
                       onClick={() => handleAddSavedTokenToWallet(token)}
                       title="إضافة للمحفظة"
                     >
@@ -426,6 +435,31 @@ export const TokenContractManager = ({
           </div>
         )}
       </CardContent>
+
+      {/* Edit Token Dialog */}
+      <Dialog open={!!editingToken} onOpenChange={(o) => { if (!o) setEditingToken(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>تعديل العملة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>الرمز (Symbol)</Label>
+              <Input value={editForm.symbol} onChange={e => setEditForm({...editForm, symbol: e.target.value})} dir="ltr" />
+            </div>
+            <div>
+              <Label>الاسم (Name)</Label>
+              <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+            </div>
+            {editingToken && (
+              <p className="text-xs text-muted-foreground font-mono" dir="ltr">
+                {editingToken.contract_address.slice(0, 16)}...{editingToken.contract_address.slice(-8)}
+              </p>
+            )}
+            <Button onClick={saveEditToken} className="w-full">تحديث</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
