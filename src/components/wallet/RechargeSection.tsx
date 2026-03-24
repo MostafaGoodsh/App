@@ -9,6 +9,7 @@ import { Loader2, ArrowRight, CreditCard, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CryptoPaymentInstructions from '@/components/payment/CryptoPaymentInstructions';
+import { PiPaymentSection } from './PiPaymentSection';
 
 export const RechargeSection = () => {
   const { toast } = useToast();
@@ -71,10 +72,7 @@ export const RechargeSection = () => {
     }
 
     if (selectedMethod === 'pi_network') {
-      toast({
-        title: "π Pi Network",
-        description: "استخدم محفظة Pi في صفحة المحفظة للدفع بعملة Pi | Use Pi Wallet to pay with Pi",
-      });
+      // Pi payment is handled inline below
       return;
     }
 
@@ -232,6 +230,10 @@ export const RechargeSection = () => {
 
           {selectedMethod === 'crypto' && (
             <CryptoPaymentInstructions amount={amount} />
+          )}
+
+          {selectedMethod === 'pi_network' && (
+            <PiPaymentSection />
           )}
 
           {/* Test Mode Warning */}
