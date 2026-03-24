@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Loader2, Upload, Play } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, ListMusic } from 'lucide-react';
 import { toast } from 'sonner';
+import PlaylistTracksManager from './PlaylistTracksManager';
 
 interface Episode {
   id: string;
@@ -29,6 +30,14 @@ interface Episode {
   display_order: number;
 }
 
+interface Track {
+  id?: string;
+  title: string;
+  audio_url: string;
+  duration_seconds: number | null;
+  track_order: number;
+}
+
 const emptyForm = {
   title: '', title_en: '', description: '', description_en: '',
   audio_url: '', thumbnail_url: '', episode_type: 'podcast',
@@ -42,16 +51,39 @@ const PodcastManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [trackCounts, setTrackCounts] = useState<Record<string, number>>({});
 
   const fetchEpisodes = async () => {
     const { data } = await supabase.from('podcast_episodes').select('*').order('display_order');
     setEpisodes((data as Episode[]) || []);
     setLoading(false);
+    
+    // Fetch track counts
+    if (data) {
+      const { data: countData } = await supabase
+        .from('playlist_tracks')
+        .select('episode_id');
+      if (countData) {
+        const counts: Record<string, number> = {};
+        countData.forEach((t: any) => { counts[t.episode_id] = (counts[t.episode_id] || 0) + 1; });
+        setTrackCounts(counts);
+      }
+    }
   };
 
   useEffect(() => { fetchEpisodes(); }, []);
+
+  const fetchTracks = async (episodeId: string) => {
+    const { data } = await supabase
+      .from('playlist_tracks')
+      .select('*')
+      .eq('episode_id', episodeId)
+      .order('track_order');
+    setTracks((data as Track[]) || []);
+  };
 
   const uploadAudio = async (file: File) => {
     setUploading(true);
@@ -75,26 +107,61 @@ const PodcastManagement = () => {
     toast.success('تم رفع الصورة');
   };
 
+  const saveTracks = async (episodeId: string) => {
+    // Delete existing tracks
+    await supabase.from('playlist_tracks').delete().eq('episode_id', episodeId);
+    
+    // Insert new tracks
+    if (tracks.length > 0) {
+      const trackData = tracks
+        .filter(t => t.title && t.audio_url)
+        .map((t, i) => ({
+          episode_id: episodeId,
+          title: t.title,
+          audio_url: t.audio_url,
+          duration_seconds: t.duration_seconds,
+          track_order: i,
+        }));
+      if (trackData.length > 0) {
+        await supabase.from('playlist_tracks').insert(trackData as any);
+      }
+    }
+  };
+
   const handleSave = async () => {
-    if (!form.title || !form.audio_url) { toast.error('العنوان والملف الصوتي مطلوبان'); return; }
+    if (!form.title || (!form.audio_url && tracks.length === 0)) {
+      toast.error('العنوان مطلوب، وكذلك ملف صوتي أو مقاطع في القائمة');
+      return;
+    }
     setSaving(true);
-    const payload = { ...form, thumbnail_url: form.thumbnail_url || null, duration_seconds: form.duration_seconds || null };
+    const payload = {
+      ...form,
+      audio_url: form.audio_url || (tracks.length > 0 ? tracks[0].audio_url : ''),
+      thumbnail_url: form.thumbnail_url || null,
+      duration_seconds: form.duration_seconds || null,
+    };
 
     let error;
+    let episodeId = editingId;
     if (editingId) {
       ({ error } = await supabase.from('podcast_episodes').update(payload as any).eq('id', editingId));
     } else {
-      ({ error } = await supabase.from('podcast_episodes').insert(payload as any));
+      const { data, error: insertError } = await supabase.from('podcast_episodes').insert(payload as any).select('id').single();
+      error = insertError;
+      if (data) episodeId = data.id;
     }
-    if (error) toast.error(error.message);
-    else {
-      toast.success(editingId ? 'تم التحديث' : 'تمت الإضافة');
-      setDialogOpen(false); setEditingId(null); setForm(emptyForm); fetchEpisodes();
-    }
+    
+    if (error) { toast.error(error.message); setSaving(false); return; }
+    
+    // Save tracks
+    if (episodeId) await saveTracks(episodeId);
+    
+    toast.success(editingId ? 'تم التحديث' : 'تمت الإضافة');
+    setDialogOpen(false); setEditingId(null); setForm(emptyForm); setTracks([]); fetchEpisodes();
     setSaving(false);
   };
 
-  const handleEdit = (ep: Episode) => {
+  const handleEdit = async (ep: Episode) => {
     setEditingId(ep.id);
     setForm({
       title: ep.title, title_en: ep.title_en || '', description: ep.description || '',
@@ -104,6 +171,7 @@ const PodcastManagement = () => {
       is_featured: ep.is_featured, is_background_audio: ep.is_background_audio,
       display_order: ep.display_order,
     });
+    await fetchTracks(ep.id);
     setDialogOpen(true);
   };
 
@@ -119,7 +187,7 @@ const PodcastManagement = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">إدارة البودكاست والراديو</h1>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditingId(null); setForm(emptyForm); } }}>
+        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditingId(null); setForm(emptyForm); setTracks([]); } }}>
           <DialogTrigger asChild>
             <Button><Plus className="w-4 h-4 mr-2" />إضافة حلقة</Button>
           </DialogTrigger>
@@ -139,7 +207,7 @@ const PodcastManagement = () => {
 
               {/* Audio upload */}
               <div>
-                <Label>الملف الصوتي</Label>
+                <Label>الملف الصوتي الرئيسي</Label>
                 <div className="flex gap-2 mt-1">
                   <Input value={form.audio_url} onChange={e => setForm({...form, audio_url: e.target.value})} placeholder="رابط الصوت أو ارفع ملف" className="flex-1" />
                   <label className="cursor-pointer">
@@ -149,10 +217,15 @@ const PodcastManagement = () => {
                     </Button>
                   </label>
                 </div>
-                {form.audio_url && (
-                  <audio src={form.audio_url} controls className="w-full mt-2 h-8" />
-                )}
+                {form.audio_url && <audio src={form.audio_url} controls className="w-full mt-2 h-8" />}
               </div>
+
+              {/* Playlist Tracks */}
+              <PlaylistTracksManager
+                episodeId={editingId || ''}
+                tracks={tracks}
+                onTracksChange={setTracks}
+              />
 
               {/* Thumbnail */}
               <div>
@@ -204,6 +277,7 @@ const PodcastManagement = () => {
               <TableRow>
                 <TableHead>العنوان</TableHead>
                 <TableHead>النوع</TableHead>
+                <TableHead>المقاطع</TableHead>
                 <TableHead>خلفية</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead>إجراءات</TableHead>
@@ -214,6 +288,11 @@ const PodcastManagement = () => {
                 <TableRow key={ep.id} className={!ep.is_active ? 'opacity-50' : ''}>
                   <TableCell className="font-medium">{ep.title}</TableCell>
                   <TableCell><Badge variant="outline">{ep.episode_type}</Badge></TableCell>
+                  <TableCell>
+                    {trackCounts[ep.id] ? (
+                      <Badge variant="secondary"><ListMusic className="w-3 h-3 mr-1" />{trackCounts[ep.id]}</Badge>
+                    ) : '-'}
+                  </TableCell>
                   <TableCell>{ep.is_background_audio ? '🔊 نعم' : '-'}</TableCell>
                   <TableCell>{ep.is_active ? <Badge>مفعّل</Badge> : <Badge variant="secondary">معطل</Badge>}</TableCell>
                   <TableCell>
@@ -225,7 +304,7 @@ const PodcastManagement = () => {
                 </TableRow>
               ))}
               {episodes.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">لا توجد حلقات</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">لا توجد حلقات</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
