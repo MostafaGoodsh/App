@@ -52,16 +52,19 @@ const InternalTokensAdmin = () => {
     if (!iconFile) return form.icon_url || null;
     setUploading(true);
     try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(iconFile);
+      });
       const ext = iconFile.name.split('.').pop();
       const filePath = `token-icons/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from('content-backgrounds')
-        .upload(filePath, iconFile, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage
-        .from('content-backgrounds')
-        .getPublicUrl(filePath);
-      return urlData.publicUrl;
+      const { data, error } = await supabase.functions.invoke('upload-content-background', {
+        body: { fileData: base64, filePath, contentType: iconFile.type },
+      });
+      if (error) throw error;
+      return data?.url || form.icon_url || null;
     } catch (err: any) {
       toast({ title: 'خطأ في رفع الصورة', description: err.message, variant: 'destructive' });
       return form.icon_url || null;
