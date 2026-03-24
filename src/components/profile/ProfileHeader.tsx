@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useUICardSettings } from '@/hooks/useUICardSettings';
-import { Camera, Trash2, User, BadgeCheck, Calendar, Star, Heart, MapPin } from 'lucide-react';
+import { Camera, Trash2, User, BadgeCheck, ShieldCheck, Calendar, Star, Heart, MapPin } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,9 +63,10 @@ function calculateAge(dateOfBirth: string): number {
 interface ProfileHeaderProps {
   profile: Profile;
   badges?: any[];
+  isKycVerified?: boolean;
 }
 
-export function ProfileHeader({ profile, badges = [] }: ProfileHeaderProps) {
+export function ProfileHeader({ profile, badges = [], isKycVerified = false }: ProfileHeaderProps) {
   const { uploadAvatar, deleteAvatar, uploading } = useProfile();
   const { user } = useAuth();
   const { t, language } = useLanguage();
@@ -161,6 +162,12 @@ export function ProfileHeader({ profile, badges = [] }: ProfileHeaderProps) {
                 <Badge variant="default" className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-primary/90">
                   <BadgeCheck className="w-3 h-3" />
                   <span className="font-cairo">{t("معتمد", "Verified")}</span>
+                </Badge>
+              )}
+              {isKycVerified && (
+                <Badge variant="default" className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-emerald-600 hover:bg-emerald-600 text-white">
+                  <ShieldCheck className="w-3 h-3" />
+                  <span className="font-cairo">{t("موثق", "KYC Verified")}</span>
                 </Badge>
               )}
             </div>
