@@ -46,6 +46,7 @@ export default function Profile() {
   const tonAddress = useTonAddress();
   const [totalPoints, setTotalPoints] = useState(0);
   const [userBadges, setUserBadges] = useState<any[]>([]);
+  const [isKycVerified, setIsKycVerified] = useState(false);
 
   useEffect(() => {
     const targetUserId = viewUserId || user?.id;
@@ -78,7 +79,12 @@ export default function Profile() {
       if (data) setUserBadges(data);
     };
 
-    fetchSurveys(); fetchPoints(); fetchWallets(); fetchBadges();
+    const fetchKycStatus = async () => {
+      const { data } = await supabase.from('identity_verification').select('status').eq('user_id', targetUserId).eq('status', 'approved').maybeSingle();
+      setIsKycVerified(!!data);
+    };
+
+    fetchSurveys(); fetchPoints(); fetchWallets(); fetchBadges(); fetchKycStatus();
   }, [viewUserId, user?.id, tonAddress]);
 
   if (loading || statsLoading) {
@@ -111,7 +117,7 @@ export default function Profile() {
     }}>
       <div className="min-h-screen bg-background/90">
         <div className="container max-w-4xl mx-auto p-6 arabic-content" style={containerStyle}>
-          <ProfileHeader profile={profile} badges={userBadges} />
+          <ProfileHeader profile={profile} badges={userBadges} isKycVerified={isKycVerified} />
 
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList className="grid w-full grid-cols-5 h-12 p-1 gap-0.5">
