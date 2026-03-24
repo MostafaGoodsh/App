@@ -22,63 +22,51 @@ export const WalletHeroSection = ({
   const isArabic = language === "ar" || language === "both";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-background via-card to-primary/5 p-6 border border-border/50 font-cairo" dir={isArabic ? "rtl" : "ltr"}>
-      {/* Background Decoration */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2" />
-      </div>
-      
+    <div className="relative overflow-hidden rounded-2xl p-4 font-cairo" dir={isArabic ? "rtl" : "ltr"}>
       <div className="relative z-10">
         {/* User Info Row */}
         {(username || points > 0) && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
                 <span className="text-lg">👤</span>
               </div>
               {username && (
-                <span className="text-sm text-muted-foreground">@{username}</span>
+                <span className="text-sm text-white/80">@{username}</span>
               )}
             </div>
             {points > 0 && (
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <span className="text-primary text-sm">✦</span>
-                <span className="text-sm font-medium text-primary">
-                  {points.toLocaleString()}
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30">
+                <span className="text-amber-400 text-sm">✦</span>
+                <span className="text-sm font-medium text-amber-400">
+                  {points.toLocaleString()} XP
                 </span>
               </div>
             )}
           </div>
         )}
 
-        {/* Main Balance - Token based, no USD */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground font-cairo">
+        {/* Main Balance */}
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <h2 className="text-xl font-bold text-white font-cairo">
               {showBalance ? (
                 <span>{t("المحفظة الداخلية", "Internal Wallet")}</span>
               ) : (
                 '••••••'
               )}
-            </h1>
-            <button 
+            </h2>
+            <button
               onClick={() => setShowBalance(!showBalance)}
-              className="p-2 hover:bg-muted rounded-full transition-colors"
+              className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
             >
               {showBalance ? (
-                <Eye className="w-5 h-5 text-muted-foreground" />
+                <Eye className="w-4 h-4 text-white/60" />
               ) : (
-                <EyeOff className="w-5 h-5 text-muted-foreground" />
+                <EyeOff className="w-4 h-4 text-white/60" />
               )}
             </button>
           </div>
-          
-          {points > 0 && showBalance && (
-            <p className="text-sm text-muted-foreground">
-              <span dir="ltr" className="text-primary font-bold">{points.toLocaleString()} XP</span>
-            </p>
-          )}
         </div>
       </div>
     </div>

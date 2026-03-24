@@ -59,6 +59,7 @@ export const ModernTokenCard = ({
         "hover:bg-card hover:border-primary/30 transition-all duration-200 cursor-pointer",
         "backdrop-blur-sm"
       )}
+      dir="ltr"
       onClick={onClick}
     >
       {/* Left: Token Info */}
@@ -86,13 +87,14 @@ export const ModernTokenCard = ({
           </div>
           
           {/* Network Badge */}
-          {network && (
+          {network && network !== 'internal' && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border-2 border-background flex items-center justify-center">
               <div className={cn(
                 "w-3 h-3 rounded-full",
-                network === 'solana' ? 'bg-purple-500' :
+                network.startsWith('solana') ? 'bg-purple-500' :
                 network === 'ethereum' ? 'bg-blue-500' :
                 network === 'ton' ? 'bg-blue-400' :
+                network === 'bsc' ? 'bg-yellow-500' :
                 'bg-gray-500'
               )} />
             </div>
@@ -101,17 +103,17 @@ export const ModernTokenCard = ({
 
         {/* Token Name */}
         <div>
-          <h4 className="font-semibold text-foreground" dir="ltr">{getDisplaySymbol(symbol)}</h4>
+          <h4 className="font-semibold text-foreground">{getDisplaySymbol(symbol)}</h4>
           <p className="text-sm text-muted-foreground">{name}</p>
         </div>
       </div>
 
       {/* Right: Balance */}
       <div className="text-right">
-        <p className="font-semibold text-foreground" dir="ltr">
+        <p className="font-semibold text-foreground">
           {balance.toLocaleString('en-US', { maximumFractionDigits: 6 })}
         </p>
-        <p className="text-xs text-muted-foreground" dir="ltr">{getDisplaySymbol(symbol)}</p>
+        <p className="text-xs text-muted-foreground">{getDisplaySymbol(symbol)}</p>
       </div>
     </div>
   );

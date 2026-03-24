@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Wallet, History, ArrowRightLeft, Gift, Link2, QrCode, ArrowDownLeft, Send, TrendingUp, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import msrWalletBg from '@/assets/msr-wallet-bg.jpg';
 
 interface ModernWalletViewProps {
   solanaNetwork: WalletAdapterNetwork;
@@ -47,12 +48,12 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   const { t, dir } = useLanguage();
 
   const [activeBottomTab, setActiveBottomTab] = useState<'wallet' | 'history' | 'swap' | 'rewards'>('wallet');
-  const [activeNetworkTab, setActiveNetworkTab] = useState<'solana' | 'pi' | 'ton'>('solana');
   const [showSwapDialog, setShowSwapDialog] = useState(false);
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showReceiveDialog, setShowReceiveDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
   const [contractNetwork, setContractNetwork] = useState<ContractNetwork>('solana-devnet');
+  const [customTokens, setCustomTokens] = useState<any[]>([]);
   const contractManagerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -60,8 +61,24 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
     supabase.from('profiles').select('*').eq('user_id', user.id).single();
   }, [user]);
 
-  const tokenList: TokenData[] = internalTokens
-    .map((token) => {
+  // Load custom tokens from DB
+  useEffect(() => {
+    const loadCustomTokens = async () => {
+      const { data } = await supabase.from('custom_tokens').select('*');
+      if (data) setCustomTokens(data);
+    };
+    loadCustomTokens();
+  }, []);
+
+  const reloadCustomTokens = async () => {
+    const { data } = await supabase.from('custom_tokens').select('*');
+    if (data) setCustomTokens(data);
+    refreshData();
+  };
+
+  // Build token list: internal + custom tokens merged
+  const tokenList: TokenData[] = [
+    ...internalTokens.map((token) => {
       const balance = balances.find((item) => item.token_id === token.id || item.token?.symbol === token.symbol);
       return {
         symbol: token.symbol || 'Unknown',
@@ -73,16 +90,27 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
         network: 'internal',
         isInternal: true,
       };
-    });
+    }),
+    ...customTokens
+      .filter(ct => !internalTokens.some(it => it.symbol === ct.symbol))
+      .map(ct => ({
+        symbol: ct.symbol,
+        name: ct.name,
+        balance: 0,
+        usdValue: 0,
+        price: 0,
+        logoUrl: ct.logo_url || undefined,
+        network: ct.network,
+        isInternal: false,
+      })),
+  ];
 
   const xpBalance = balances.find(b => b.token?.symbol === 'XP');
   const totalUsdValue = getTotalUSDValue();
 
   const handleOpenAddToken = () => {
     setActiveBottomTab('wallet');
-    setActiveNetworkTab('solana');
     setContractNetwork(solanaNetwork === WalletAdapterNetwork.Mainnet ? 'solana-mainnet' : 'solana-devnet');
-
     requestAnimationFrame(() => {
       contractManagerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -90,7 +118,24 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
 
   return (
     <div className="min-h-screen bg-background pb-24 overflow-x-hidden w-full max-w-screen-md mx-auto font-cairo" dir={dir}>
-      <WalletHeroSection totalBalance={totalUsdValue} percentageChange={2.5} changeAmount={totalUsdValue * 0.025} username={profile?.full_name?.split(' ')[0]} points={xpBalance?.balance || 0} />
+      {/* MSR-Wallet Hero Card with Background */}
+      <div className="relative overflow-hidden rounded-b-3xl">
+        <img src={msrWalletBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        <div className="relative z-10 p-6 pt-8 pb-12">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold text-amber-400 font-cairo mb-1">MSR-Wallet</h1>
+            <p className="text-white/70 text-sm">{t("محفظة مصر الرقمية", "MSR Digital Wallet")}</p>
+          </div>
+          <WalletHeroSection
+            totalBalance={totalUsdValue}
+            percentageChange={2.5}
+            changeAmount={totalUsdValue * 0.025}
+            username={profile?.full_name?.split(' ')[0]}
+            points={xpBalance?.balance || 0}
+          />
+        </div>
+      </div>
 
       <div className="px-3 sm:px-4 -mt-6 relative z-10 mb-4 sm:mb-6">
         <QuickActionButtons onReceive={() => setShowReceiveDialog(true)} onSend={() => setShowSendDialog(true)} onEarn={() => toast({ title: t("قريباً"), description: t("ميزة الربح قادمة قريباً!") })} onSwap={() => setShowSwapDialog(true)} />
@@ -122,96 +167,58 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
 
         {activeBottomTab === 'wallet' && (
           <>
-            <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={handleOpenAddToken} onRefresh={refreshData} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
+            {/* Token List - all tokens including custom */}
+            <ModernTokenList tokens={tokenList} isLoading={isLoading} onAddToken={handleOpenAddToken} onRefresh={reloadCustomTokens} onTokenClick={(token) => { toast({ title: token.name, description: `${t("الرصيد")}: ${token.balance} ${token.symbol}` }); }} />
 
-            {/* External Wallets with Network Tabs */}
+            {/* External Wallet Cards - always visible */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-2 mb-2">
                 <Link2 className="w-5 h-5 text-primary" />
                 <h3 className="font-bold">{t("المحافظ الخارجية")}</h3>
               </div>
 
-              {/* Network Tabs */}
-              <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
-                {[
-                  { id: 'solana' as const, label: 'Solana', icon: '◎' },
-                  { id: 'pi' as const, label: 'Pi', icon: 'π' },
-                  { id: 'ton' as const, label: 'TON', icon: '💎' },
-                ].map((net) => (
-                  <button
-                    key={net.id}
-                    onClick={() => setActiveNetworkTab(net.id)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
-                      activeNetworkTab === net.id
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    <span className="text-base">{net.icon}</span>
-                    <span>{net.label}</span>
-                  </button>
-                ))}
-              </div>
+              {/* 3 Wallet Cards */}
+              <WalletConnectButton variant="card" showBalance={true} />
+              <PiWalletCard />
+              <TonWalletConnectCard />
+              <EvmWalletConnectCard />
+            </div>
 
-              {/* Solana Content */}
-              {activeNetworkTab === 'solana' && (
-                  <div className="space-y-4">
-                  <WalletConnectButton variant="card" showBalance={true} />
-                  <Card className="border-border/50 bg-card">
-                    <CardContent className="p-4 space-y-3">
-                      <div>
-                        <p className="font-semibold text-sm">Solana Network</p>
-                        <p className="text-xs text-muted-foreground">{t("اختيار الشبكة لعرض المحافظ والعقود")}</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Devnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Devnet)}>
-                          Devnet
-                        </Button>
-                        <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Mainnet)}>
-                          Mainnet
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Token Contract Manager for Solana */}
-                  <div ref={contractManagerRef} className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4 text-primary" />
-                      <h4 className="font-semibold text-sm">{t("إضافة عقود العملات")}</h4>
-                    </div>
-                    <Select value={contractNetwork} onValueChange={(v) => setContractNetwork(v as ContractNetwork)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="اختر الشبكة" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CONTRACT_NETWORKS.map((n) => (
-                          <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <TokenContractManager network={contractNetwork} onTokenAdded={() => refreshData()} />
+            {/* Solana Network Selector & Contract Manager */}
+            <div className="space-y-4 pt-4">
+              <Card className="border-border/50 bg-card">
+                <CardContent className="p-4 space-y-3">
+                  <div>
+                    <p className="font-semibold text-sm">Solana Network</p>
+                    <p className="text-xs text-muted-foreground">{t("اختيار الشبكة لعرض المحافظ والعقود")}</p>
                   </div>
-                </div>
-              )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Devnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Devnet)}>
+                      Devnet
+                    </Button>
+                    <Button type="button" size="sm" variant={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'default' : 'outline'} onClick={() => onSolanaNetworkChange(WalletAdapterNetwork.Mainnet)}>
+                      Mainnet
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Pi Network Content */}
-              {activeNetworkTab === 'pi' && (
-                <div className="space-y-4">
-                  <PiWalletCard />
+              <div ref={contractManagerRef} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  <h4 className="font-semibold text-sm">{t("إضافة عقود العملات")}</h4>
                 </div>
-              )}
-
-              {/* TON Content */}
-              {activeNetworkTab === 'ton' && (
-                <div className="space-y-4">
-                  <TonWalletConnectCard />
-                </div>
-              )}
-
-              {/* EVM Wallet (always visible below tabs) */}
-              <div className="pt-2">
-                <EvmWalletConnectCard />
+                <Select value={contractNetwork} onValueChange={(v) => setContractNetwork(v as ContractNetwork)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الشبكة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONTRACT_NETWORKS.map((n) => (
+                      <SelectItem key={n.value} value={n.value}>{n.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <TokenContractManager network={contractNetwork} onTokenAdded={() => reloadCustomTokens()} />
               </div>
             </div>
           </>
@@ -339,35 +346,57 @@ const TransactionHistoryTab = () => {
       finally { setIsLoading(false); }
     };
     loadTransactions();
-  }, [user]);
+  }, [user, t]);
 
-  if (isLoading) return (<div className="space-y-3">{[1, 2, 3].map((i) => (<div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />))}</div>);
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-16 rounded-xl bg-muted/50 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
 
   if (transactions.length === 0) {
-    return (<div className="text-center py-12"><History className="w-16 h-16 mx-auto text-muted-foreground mb-4" /><h3 className="font-bold text-lg mb-2">{t("لا توجد معاملات")}</h3><p className="text-muted-foreground">{t("ستظهر معاملاتك هنا")}</p></div>);
+    return (
+      <div className="text-center py-12">
+        <History className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <h3 className="font-bold text-lg mb-1">{t("لا توجد معاملات")}</h3>
+        <p className="text-muted-foreground">{t("ستظهر معاملاتك هنا")}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      <h3 className="font-bold text-lg flex items-center gap-2">
+        <History className="w-5 h-5 text-primary" />
+        {t("المعاملات الأخيرة")}
+      </h3>
       {transactions.map((tx) => (
-        <div key={tx.id} className="flex items-center justify-between p-4 rounded-xl bg-card border border-border/50">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'swap' ? 'bg-purple-500/20 text-purple-500' : tx.type === 'deposit' ? 'bg-green-500/20 text-green-500' : 'bg-orange-500/20 text-orange-500'}`}>
-              {tx.type === 'swap' ? <ArrowRightLeft className="w-5 h-5" /> : tx.type === 'deposit' ? <ArrowDownLeft className="w-5 h-5" /> : <Send className="w-5 h-5" />}
+        <Card key={tx.id} className="bg-card/80">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'swap' ? 'bg-blue-500/20 text-blue-500' : 'bg-green-500/20 text-green-500'}`}>
+                {tx.type === 'swap' ? <ArrowRightLeft className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+              </div>
+              <div>
+                <p className="font-medium text-sm">{tx.description}</p>
+                {tx.meta && <p className="text-xs text-muted-foreground" dir="ltr">{tx.meta}</p>}
+                <p className="text-xs text-muted-foreground">
+                  {tx.date.toLocaleDateString('ar-EG')} • {tx.date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium text-foreground">{tx.description}</p>
-              <p className="text-xs text-muted-foreground">{tx.date.toLocaleDateString('ar-EG')} • {tx.date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</p>
-              {tx.meta ? <p className="text-[11px] text-muted-foreground">{tx.meta}</p> : null}
+            <div className="text-end">
+              <p className="font-semibold text-sm" dir="ltr">
+                +{tx.amount?.toLocaleString('en-US', { maximumFractionDigits: 4 })}
+              </p>
+              <p className="text-xs text-muted-foreground" dir="ltr">{tx.symbol}</p>
             </div>
-          </div>
-          <div className="text-right">
-            <p className={`font-semibold ${tx.type === 'deposit' ? 'text-green-500' : ''}`}>{tx.type === 'deposit' ? '+' : ''}{tx.amount} {tx.symbol}</p>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${tx.status === 'completed' ? 'bg-green-500/20 text-green-500' : tx.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}`}>
-              {tx.status === 'completed' ? t('مكتمل') : tx.status === 'pending' ? t('قيد التنفيذ') : t('فشل')}
-            </span>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
