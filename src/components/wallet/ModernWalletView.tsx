@@ -6,6 +6,7 @@ import { HybridTokenSwap } from "./HybridTokenSwap";
 import { WithdrawalDialog } from "./WithdrawalDialog";
 import { XpToMsRaConverter } from "./XpToMsRaConverter";
 import { RechargeSection } from "./RechargeSection";
+import { PiPaymentSection } from "./PiPaymentSection";
 import { WalletConnectButton } from "./WalletConnectButton";
 import { EvmWalletConnectCard } from "./EvmWalletConnectCard";
 import { TonWalletConnectCard } from "./TonWalletConnectCard";
@@ -238,6 +239,7 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
             </Card>
             <XpToMsRaConverter />
             <HybridTokenSwap solanaNetwork={solanaNetwork === WalletAdapterNetwork.Mainnet ? 'mainnet' : 'devnet'} />
+            <PiPaymentSection />
             <RechargeSection />
           </div>
         )}
