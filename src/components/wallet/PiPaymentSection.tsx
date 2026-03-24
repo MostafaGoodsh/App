@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Wallet, CheckCircle2, AlertCircle, Coins, Info } from 'lucide-react';
+import { Loader2, Wallet, CheckCircle2, AlertCircle, Coins, Info, Copy } from 'lucide-react';
 import { toast } from 'sonner';
-import { PI_NETWORK_OPTIONS } from '@/config/pi';
+import { PI_NETWORK_OPTIONS, PI_APP_WALLET_ADDRESS } from '@/config/pi';
 import piLogo from '@/assets/pi-logo.png';
 
 export const PiPaymentSection = () => {
@@ -89,6 +89,28 @@ export const PiPaymentSection = () => {
           </div>
         </div>
 
+        {/* App Wallet Address */}
+        {PI_APP_WALLET_ADDRESS[networkMode] && (
+          <div className="space-y-1">
+            <Label className="text-xs">عنوان محفظة التطبيق / App Wallet</Label>
+            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-2">
+              <code className="text-[10px] text-muted-foreground break-all flex-1 ltr" dir="ltr">
+                {PI_APP_WALLET_ADDRESS[networkMode]}
+              </code>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 shrink-0"
+                onClick={() => {
+                  navigator.clipboard.writeText(PI_APP_WALLET_ADDRESS[networkMode]);
+                  toast.success('تم النسخ / Copied');
+                }}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
         {/* Auth Status */}
         {isPiBrowser && !isAuthenticated && (
           <Button onClick={authenticate} className="w-full" disabled={isInitializing}>

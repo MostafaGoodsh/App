@@ -2,6 +2,12 @@ export type PiNetworkMode = 'testnet' | 'mainnet';
 
 export const PI_NETWORK_MODE_STORAGE_KEY = 'pi_network_mode';
 
+/** Wallet address the app receives payments on (per network) */
+export const PI_APP_WALLET_ADDRESS: Record<PiNetworkMode, string> = {
+  testnet: 'GCSTKWX4QG6KPIYIXKZHJJRLKDZXWLHGSAL6CSK2DNUREKSM7JUAPGWE',
+  mainnet: '', // سيتم إضافته عند الانتقال للمين نت
+};
+
 export const PI_NETWORK_OPTIONS: Array<{
   value: PiNetworkMode;
   label: string;

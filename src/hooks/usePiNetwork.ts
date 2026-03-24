@@ -7,6 +7,7 @@ import {
   getPiNetworkMode,
   getPiSdkConfig,
   setPiNetworkMode as persistPiNetworkMode,
+  PI_APP_WALLET_ADDRESS,
   type PiNetworkMode,
 } from '@/config/pi';
 
@@ -243,6 +244,7 @@ export const usePiNetwork = () => {
           piUsername: piUser?.username,
           networkMode,
           networkLabel: getPiNetworkLabel(networkMode),
+          appWalletAddress: PI_APP_WALLET_ADDRESS[networkMode],
           timestamp: new Date().toISOString(),
         },
       };
