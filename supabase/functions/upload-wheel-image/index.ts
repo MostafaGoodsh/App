@@ -26,8 +26,8 @@ Deno.serve(async (req) => {
     )
 
     const token = authHeader.replace('Bearer ', '')
-    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token)
-    const userId = claimsData?.claims?.sub
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    const userId = user?.id
 
     if (authError || !userId) {
       return new Response(JSON.stringify({ error: 'Invalid session' }), {

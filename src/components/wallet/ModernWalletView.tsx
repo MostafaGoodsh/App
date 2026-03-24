@@ -61,10 +61,6 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   }, [user]);
 
   const tokenList: TokenData[] = internalTokens
-    .filter((token) => {
-      const symbol = (token.symbol || '').toUpperCase();
-      return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA';
-    })
     .map((token) => {
       const balance = balances.find((item) => item.token_id === token.id || item.token?.symbol === token.symbol);
       return {
@@ -72,6 +68,8 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
         name: token.name || 'Unknown Token',
         balance: balance?.balance || 0,
         usdValue: (balance?.balance || 0) * (token.exchange_rate_usd || 0),
+        price: token.exchange_rate_usd || 0,
+        logoUrl: token.icon_url || undefined,
         network: 'internal',
         isInternal: true,
       };
