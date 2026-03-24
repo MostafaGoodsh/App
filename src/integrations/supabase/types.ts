@@ -2424,6 +2424,63 @@ export type Database = {
         }
         Relationships: []
       }
+      podcast_episodes: {
+        Row: {
+          audio_url: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          duration_seconds: number | null
+          episode_type: string
+          id: string
+          is_active: boolean | null
+          is_background_audio: boolean | null
+          is_featured: boolean | null
+          thumbnail_url: string | null
+          title: string
+          title_en: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          episode_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_background_audio?: boolean | null
+          is_featured?: boolean | null
+          thumbnail_url?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          episode_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_background_audio?: boolean | null
+          is_featured?: boolean | null
+          thumbnail_url?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       point_to_token_conversions: {
         Row: {
           completed_at: string | null
