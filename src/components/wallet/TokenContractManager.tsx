@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   FileText, Plus, Trash2, Loader2, CheckCircle2, 
-  ExternalLink, Copy, AlertTriangle, Search
+  ExternalLink, Copy, AlertTriangle, Search, Pencil
 } from 'lucide-react';
 import { PublicKey } from '@solana/web3.js';
 import { getAddress, isAddress } from 'ethers';
@@ -46,6 +47,8 @@ export const TokenContractManager = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<Partial<TokenContract> | null>(null);
   const [savedTokens, setSavedTokens] = useState<TokenContract[]>([]);
+  const [editingToken, setEditingToken] = useState<TokenContract | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', symbol: '' });
   const isSolanaNetwork = network.startsWith('solana');
 
   // Load saved tokens
@@ -196,6 +199,26 @@ export const TokenContractManager = ({
       title: 'تمت الإضافة للمحفظة',
       description: `${token.name} (${token.symbol})`,
     });
+  };
+
+  const openEditDialog = (token: TokenContract) => {
+    setEditingToken(token);
+    setEditForm({ name: token.name, symbol: token.symbol });
+  };
+
+  const saveEditToken = async () => {
+    if (!editingToken || !editForm.name || !editForm.symbol) return;
+    const { error } = await supabase
+      .from('custom_tokens')
+      .update({ name: editForm.name, symbol: editForm.symbol.toUpperCase() })
+      .eq('id', editingToken.id);
+    if (error) {
+      toast({ title: 'خطأ', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'تم التحديث' });
+      setEditingToken(null);
+      loadSavedTokens();
+    }
   };
 
   const copyAddress = (address: string) => {
@@ -375,6 +398,15 @@ export const TokenContractManager = ({
                       size="icon"
                       variant="ghost"
                       className="h-7 w-7"
+                      onClick={() => openEditDialog(token)}
+                      title="تعديل"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
                       onClick={() => handleAddSavedTokenToWallet(token)}
                       title="إضافة للمحفظة"
                     >
@@ -403,6 +435,31 @@ export const TokenContractManager = ({
           </div>
         )}
       </CardContent>
+
+      {/* Edit Token Dialog */}
+      <Dialog open={!!editingToken} onOpenChange={(o) => { if (!o) setEditingToken(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>تعديل العملة</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>الرمز (Symbol)</Label>
+              <Input value={editForm.symbol} onChange={e => setEditForm({...editForm, symbol: e.target.value})} dir="ltr" />
+            </div>
+            <div>
+              <Label>الاسم (Name)</Label>
+              <Input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} />
+            </div>
+            {editingToken && (
+              <p className="text-xs text-muted-foreground font-mono" dir="ltr">
+                {editingToken.contract_address.slice(0, 16)}...{editingToken.contract_address.slice(-8)}
+              </p>
+            )}
+            <Button onClick={saveEditToken} className="w-full">تحديث</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

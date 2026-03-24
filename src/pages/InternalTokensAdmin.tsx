@@ -85,6 +85,31 @@ const InternalTokensAdmin = () => {
 
       if (editToken) {
         await supabase.from('internal_tokens').update(tokenData).eq('id', editToken.id);
+        // Update or add contract
+        if (form.contract_address) {
+          const { data: existing } = await supabase
+            .from('custom_tokens')
+            .select('id')
+            .eq('symbol', form.symbol.toUpperCase())
+            .eq('network', form.network)
+            .maybeSingle();
+          if (existing) {
+            await supabase.from('custom_tokens').update({
+              contract_address: form.contract_address,
+              name: form.name,
+              symbol: form.symbol.toUpperCase(),
+            }).eq('id', existing.id);
+          } else {
+            await supabase.from('custom_tokens').insert({
+              contract_address: form.contract_address,
+              name: form.name,
+              symbol: form.symbol.toUpperCase(),
+              network: form.network,
+              decimals: form.decimals,
+              is_verified: true,
+            });
+          }
+        }
         toast({ title: 'تم التحديث' });
       } else {
         await supabase.from('internal_tokens').insert(tokenData);
@@ -120,15 +145,26 @@ const InternalTokensAdmin = () => {
     setIconPreview(null);
   };
 
-  const openEdit = (t: Token) => {
+  const openEdit = async (t: Token) => {
     setEditToken(t);
     setIconFile(null);
     setIconPreview(t.icon_url || null);
+    
+    // Load existing contract
+    const { data: contract } = await supabase
+      .from('custom_tokens')
+      .select('contract_address, network')
+      .eq('symbol', t.symbol)
+      .eq('is_verified', true)
+      .maybeSingle();
+    
     setForm({
       symbol: t.symbol, name: t.name, description: t.description || '',
       icon_url: t.icon_url || '', decimals: t.decimals,
       exchange_rate_usd: t.exchange_rate_usd, is_active: t.is_active,
-      is_base_currency: t.is_base_currency, contract_address: '', network: 'solana'
+      is_base_currency: t.is_base_currency,
+      contract_address: contract?.contract_address || '',
+      network: contract?.network || 'solana',
     });
     setShowAdd(true);
   };
@@ -247,25 +283,23 @@ const InternalTokensAdmin = () => {
               </div>
             </div>
             
-            {!editToken && (
-              <div className="border-t pt-4">
-                <p className="text-sm font-medium mb-3">عقد العملة (اختياري)</p>
-                <div>
-                  <Label>عنوان العقد</Label>
-                  <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
-                </div>
-                <div className="mt-2">
-                  <Label>الشبكة</Label>
-                  <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
-                    <option value="solana">Solana</option>
-                    <option value="ethereum">Ethereum</option>
-                    <option value="polygon">Polygon</option>
-                    <option value="bsc">BSC</option>
-                    <option value="ton">TON</option>
-                  </select>
-                </div>
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3">عقد العملة {editToken ? '' : '(اختياري)'}</p>
+              <div>
+                <Label>عنوان العقد</Label>
+                <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
               </div>
-            )}
+              <div className="mt-2">
+                <Label>الشبكة</Label>
+                <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
+                  <option value="solana">Solana</option>
+                  <option value="ethereum">Ethereum</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="bsc">BSC</option>
+                  <option value="ton">TON</option>
+                </select>
+              </div>
+            </div>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
