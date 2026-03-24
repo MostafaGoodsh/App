@@ -16,6 +16,7 @@ import RequireAccess from "./components/auth/RequireAccess";
 import RequireAnubisAccess from "./components/auth/RequireAnubisAccess";
 import { Loader2 } from "lucide-react";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { PodcastProvider } from "./contexts/PodcastContext";
 
 // Lazy-loaded pages
 const Index = lazy(() => import("./pages/Index"));
@@ -101,6 +102,7 @@ const WalletCardAdmin = lazy(() => import("./pages/WalletCardAdmin"));
 const UICardSettingsAdmin = lazy(() => import("./pages/UICardSettingsAdmin"));
 const Podcast = lazy(() => import("./pages/Podcast"));
 const PodcastAdmin = lazy(() => import("./pages/PodcastAdmin"));
+const OfficialLinks = lazy(() => import("./pages/OfficialLinks"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -130,6 +132,7 @@ const App = () => {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <LanguageProvider>
+          <PodcastProvider>
           <TonConnectUIProvider manifestUrl={manifestUrl}>
             <SolanaWalletProvider>
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -221,6 +224,7 @@ const App = () => {
                     <Route path="admin/ui-card-settings" element={<RequireAdmin><UICardSettingsAdmin /></RequireAdmin>} />
                     <Route path="admin/podcast" element={<RequireAdmin><PodcastAdmin /></RequireAdmin>} />
                     <Route path="podcast" element={<RequireAccess><Podcast /></RequireAccess>} />
+                    <Route path="official-links" element={<RequireAccess><OfficialLinks /></RequireAccess>} />
                     <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
@@ -230,6 +234,7 @@ const App = () => {
               </BrowserRouter>
             </SolanaWalletProvider>
           </TonConnectUIProvider>
+          </PodcastProvider>
           </LanguageProvider>
         </QueryClientProvider>
       </HelmetProvider>
