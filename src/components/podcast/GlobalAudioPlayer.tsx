@@ -1,4 +1,4 @@
-import { usePodcast } from '@/hooks/usePodcast';
+import { usePodcastContext } from '@/contexts/PodcastContext';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, X } from 'lucide-react';
 import { useState } from 'react';
@@ -22,7 +22,7 @@ const GlobalAudioPlayer = () => {
     playNext,
     playPrev,
     seek,
-  } = usePodcast();
+  } = usePodcastContext();
 
   const [dismissed, setDismissed] = useState(false);
 
@@ -31,7 +31,6 @@ const GlobalAudioPlayer = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border shadow-2xl">
       <div className="max-w-screen-lg mx-auto px-3 py-2">
-        {/* Progress bar */}
         <div 
           className="w-full h-1 bg-muted rounded-full mb-2 cursor-pointer"
           onClick={(e) => {
@@ -47,20 +46,15 @@ const GlobalAudioPlayer = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Thumbnail */}
           {currentEpisode.thumbnail_url && (
             <img src={currentEpisode.thumbnail_url} alt="" className="w-10 h-10 rounded-lg object-cover" />
           )}
-
-          {/* Info */}
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate">{currentEpisode.title}</p>
             <p className="text-[10px] text-muted-foreground">
               {formatTime(progress)} / {formatTime(duration)}
             </p>
           </div>
-
-          {/* Controls */}
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={playPrev}>
               <SkipBack className="h-3.5 w-3.5" />
