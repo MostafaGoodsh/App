@@ -145,15 +145,26 @@ const InternalTokensAdmin = () => {
     setIconPreview(null);
   };
 
-  const openEdit = (t: Token) => {
+  const openEdit = async (t: Token) => {
     setEditToken(t);
     setIconFile(null);
     setIconPreview(t.icon_url || null);
+    
+    // Load existing contract
+    const { data: contract } = await supabase
+      .from('custom_tokens')
+      .select('contract_address, network')
+      .eq('symbol', t.symbol)
+      .eq('is_verified', true)
+      .maybeSingle();
+    
     setForm({
       symbol: t.symbol, name: t.name, description: t.description || '',
       icon_url: t.icon_url || '', decimals: t.decimals,
       exchange_rate_usd: t.exchange_rate_usd, is_active: t.is_active,
-      is_base_currency: t.is_base_currency, contract_address: '', network: 'solana'
+      is_base_currency: t.is_base_currency,
+      contract_address: contract?.contract_address || '',
+      network: contract?.network || 'solana',
     });
     setShowAdd(true);
   };
