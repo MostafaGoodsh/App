@@ -294,23 +294,26 @@ export const UnifiedPaymentGateway = ({
         <CryptoPaymentInstructions amount={amount} />
       )}
 
-      {/* Pi Network - minimal info */}
       {selectedMethod === 'pi_network' && (
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            {PI_NETWORK_OPTIONS.map((option) => (
-              <Button key={option.value} type="button" size="sm" variant={networkMode === option.value ? 'default' : 'outline'} onClick={() => setNetworkMode(option.value)}>
-                {option.label}
-              </Button>
-            ))}
-          </div>
-          {!isPiBrowser && (
-            <p className="text-xs text-destructive">
-              ⚠️ يرجى فتح الصفحة من Pi Browser
-            </p>
-          )}
+        <div className="space-y-3">
+          <a
+            href="https://crypto-msr.com/pi-payment"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <Button type="button" variant="outline" className="w-full gap-2 border-primary/50 text-primary hover:bg-primary/10">
+              <span className="text-lg">π</span>
+              فتح صفحة الدفع بـ Pi | Open Pi Payment Page
+            </Button>
+          </a>
+          <p className="text-xs text-muted-foreground text-center">
+            ⚠️ هذه الخدمة تعمل فقط من خلال Pi Browser
+            <br />
+            This feature works only in Pi Browser
+          </p>
           {isAuthenticated && piUser && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground text-center">
               متصل كـ {piUser.username || 'Pioneer'} ✅ • {networkLabel} • 1 π = 100 $MS-RA
             </p>
           )}

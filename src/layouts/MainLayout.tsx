@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
+import GlobalAudioPlayer from "@/components/podcast/GlobalAudioPlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MainLayoutContent = () => {
@@ -68,6 +69,7 @@ const MainLayoutContent = () => {
           <Outlet />
         </main>
         <AnnouncementDialog />
+        <GlobalAudioPlayer />
       </div>
     </div>
   );
