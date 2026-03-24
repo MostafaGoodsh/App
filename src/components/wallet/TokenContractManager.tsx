@@ -47,6 +47,8 @@ export const TokenContractManager = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifiedToken, setVerifiedToken] = useState<Partial<TokenContract> | null>(null);
   const [savedTokens, setSavedTokens] = useState<TokenContract[]>([]);
+  const [editingToken, setEditingToken] = useState<TokenContract | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', symbol: '' });
   const isSolanaNetwork = network.startsWith('solana');
 
   // Load saved tokens
@@ -197,6 +199,26 @@ export const TokenContractManager = ({
       title: 'تمت الإضافة للمحفظة',
       description: `${token.name} (${token.symbol})`,
     });
+  };
+
+  const openEditDialog = (token: TokenContract) => {
+    setEditingToken(token);
+    setEditForm({ name: token.name, symbol: token.symbol });
+  };
+
+  const saveEditToken = async () => {
+    if (!editingToken || !editForm.name || !editForm.symbol) return;
+    const { error } = await supabase
+      .from('custom_tokens')
+      .update({ name: editForm.name, symbol: editForm.symbol.toUpperCase() })
+      .eq('id', editingToken.id);
+    if (error) {
+      toast({ title: 'خطأ', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'تم التحديث' });
+      setEditingToken(null);
+      loadSavedTokens();
+    }
   };
 
   const copyAddress = (address: string) => {
