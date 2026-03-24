@@ -61,10 +61,6 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
   }, [user]);
 
   const tokenList: TokenData[] = internalTokens
-    .filter((token) => {
-      const symbol = (token.symbol || '').toUpperCase();
-      return symbol === 'XP' || symbol === 'MSRA' || symbol === 'MS-RA' || symbol === '$MS-RA';
-    })
     .map((token) => {
       const balance = balances.find((item) => item.token_id === token.id || item.token?.symbol === token.symbol);
       return {
