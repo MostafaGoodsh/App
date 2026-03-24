@@ -68,6 +68,8 @@ export const ModernWalletView = ({ solanaNetwork, onSolanaNetworkChange }: Moder
         name: token.name || 'Unknown Token',
         balance: balance?.balance || 0,
         usdValue: (balance?.balance || 0) * (token.exchange_rate_usd || 0),
+        price: token.exchange_rate_usd || 0,
+        logoUrl: token.icon_url || undefined,
         network: 'internal',
         isInternal: true,
       };
