@@ -18,10 +18,21 @@ export interface PodcastEpisode {
   created_at: string;
 }
 
+export interface PlaylistTrack {
+  id: string;
+  episode_id: string;
+  title: string;
+  audio_url: string;
+  duration_seconds: number | null;
+  track_order: number;
+}
+
 interface PodcastContextValue {
   episodes: PodcastEpisode[];
   loading: boolean;
   currentEpisode: PodcastEpisode | null;
+  currentTrack: PlaylistTrack | null;
+  playlistTracks: PlaylistTrack[];
   isPlaying: boolean;
   isMuted: boolean;
   progress: number;
@@ -33,6 +44,7 @@ interface PodcastContextValue {
   seek: (time: number) => void;
   playNext: () => void;
   playPrev: () => void;
+  playTrack: (track: PlaylistTrack) => void;
   refetch: () => void;
 }
 
@@ -48,15 +60,15 @@ export const PodcastProvider = ({ children }: { children: ReactNode }) => {
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentEpisode, setCurrentEpisode] = useState<PodcastEpisode | null>(null);
+  const [playlistTracks, setPlaylistTracks] = useState<PlaylistTrack[]>([]);
+  const [currentTrack, setCurrentTrack] = useState<PlaylistTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    fetchEpisodes();
-  }, []);
+  useEffect(() => { fetchEpisodes(); }, []);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -69,7 +81,6 @@ export const PodcastProvider = ({ children }: { children: ReactNode }) => {
       });
       audioRef.current.addEventListener('ended', () => {
         setIsPlaying(false);
-        // auto-play next
         setTimeout(() => playNextRef.current?.(), 100);
       });
     }
@@ -86,14 +97,7 @@ export const PodcastProvider = ({ children }: { children: ReactNode }) => {
     if (episodes.length > 0 && !currentEpisode) {
       const bgEpisode = episodes.find(e => e.is_background_audio);
       if (bgEpisode) {
-        setCurrentEpisode(bgEpisode);
-        if (audioRef.current) {
-          audioRef.current.src = bgEpisode.audio_url;
-          audioRef.current.load();
-          // Try to auto-play (may be blocked by browser)
-          audioRef.current.play().catch(() => {});
-          setIsPlaying(true);
-        }
+        loadEpisode(bgEpisode);
       }
     }
   }, [episodes]);
@@ -108,15 +112,45 @@ export const PodcastProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   };
 
+  const fetchTracks = async (episodeId: string): Promise<PlaylistTrack[]> => {
+    const { data } = await supabase
+      .from('playlist_tracks')
+      .select('*')
+      .eq('episode_id', episodeId)
+      .order('track_order');
+    return (data as PlaylistTrack[]) || [];
+  };
+
+  const playAudio = (url: string) => {
+    if (!audioRef.current) return;
+    audioRef.current.src = url;
+    audioRef.current.load();
+    audioRef.current.play().catch(() => {});
+    setIsPlaying(true);
+  };
+
+  const loadEpisode = async (episode: PodcastEpisode) => {
+    setCurrentEpisode(episode);
+    const tracks = await fetchTracks(episode.id);
+    setPlaylistTracks(tracks);
+    
+    if (tracks.length > 0) {
+      setCurrentTrack(tracks[0]);
+      playAudio(tracks[0].audio_url);
+    } else {
+      setCurrentTrack(null);
+      playAudio(episode.audio_url);
+    }
+  };
+
   const play = useCallback((episode?: PodcastEpisode) => {
     if (!audioRef.current) return;
-    const ep = episode || currentEpisode;
-    if (!ep) return;
     if (episode && episode.id !== currentEpisode?.id) {
-      setCurrentEpisode(episode);
-      audioRef.current.src = episode.audio_url;
-      audioRef.current.load();
+      loadEpisode(episode);
+      return;
     }
+    const ep = currentEpisode;
+    if (!ep) return;
     audioRef.current.play().catch(console.error);
     setIsPlaying(true);
   }, [currentEpisode]);
@@ -141,28 +175,54 @@ export const PodcastProvider = ({ children }: { children: ReactNode }) => {
     if (audioRef.current) audioRef.current.currentTime = time;
   }, []);
 
+  const playTrack = useCallback((track: PlaylistTrack) => {
+    setCurrentTrack(track);
+    playAudio(track.audio_url);
+  }, []);
+
   const playNext = useCallback(() => {
+    // If we have playlist tracks, navigate within them first
+    if (playlistTracks.length > 0 && currentTrack) {
+      const idx = playlistTracks.findIndex(t => t.id === currentTrack.id);
+      if (idx < playlistTracks.length - 1) {
+        const next = playlistTracks[idx + 1];
+        setCurrentTrack(next);
+        playAudio(next.audio_url);
+        return;
+      }
+    }
+    // Otherwise go to next episode
     if (!currentEpisode || episodes.length === 0) return;
     const idx = episodes.findIndex(e => e.id === currentEpisode.id);
     const next = episodes[(idx + 1) % episodes.length];
-    if (next) play(next);
-  }, [currentEpisode, episodes, play]);
+    if (next) loadEpisode(next);
+  }, [currentEpisode, episodes, playlistTracks, currentTrack]);
 
   const playPrev = useCallback(() => {
+    if (playlistTracks.length > 0 && currentTrack) {
+      const idx = playlistTracks.findIndex(t => t.id === currentTrack.id);
+      if (idx > 0) {
+        const prev = playlistTracks[idx - 1];
+        setCurrentTrack(prev);
+        playAudio(prev.audio_url);
+        return;
+      }
+    }
     if (!currentEpisode || episodes.length === 0) return;
     const idx = episodes.findIndex(e => e.id === currentEpisode.id);
     const prev = episodes[(idx - 1 + episodes.length) % episodes.length];
-    if (prev) play(prev);
-  }, [currentEpisode, episodes, play]);
+    if (prev) loadEpisode(prev);
+  }, [currentEpisode, episodes, playlistTracks, currentTrack]);
 
-  // Ref to allow ended callback to call playNext
   const playNextRef = useRef(playNext);
   useEffect(() => { playNextRef.current = playNext; }, [playNext]);
 
   return (
     <PodcastContext.Provider value={{
-      episodes, loading, currentEpisode, isPlaying, isMuted, progress, duration,
-      play, pause, togglePlay, toggleMute, seek, playNext, playPrev, refetch: fetchEpisodes,
+      episodes, loading, currentEpisode, currentTrack, playlistTracks,
+      isPlaying, isMuted, progress, duration,
+      play, pause, togglePlay, toggleMute, seek, playNext, playPrev, playTrack,
+      refetch: fetchEpisodes,
     }}>
       {children}
     </PodcastContext.Provider>
