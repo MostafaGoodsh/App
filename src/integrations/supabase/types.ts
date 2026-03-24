@@ -2424,6 +2424,44 @@ export type Database = {
         }
         Relationships: []
       }
+      playlist_tracks: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          episode_id: string
+          id: string
+          title: string
+          track_order: number
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          episode_id: string
+          id?: string
+          title: string
+          track_order?: number
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          episode_id?: string
+          id?: string
+          title?: string
+          track_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_tracks_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "podcast_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       podcast_episodes: {
         Row: {
           audio_url: string
