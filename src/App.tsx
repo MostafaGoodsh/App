@@ -99,6 +99,8 @@ const OfficialLinksAdmin = lazy(() => import("./pages/OfficialLinksAdmin"));
 const CardPage = lazy(() => import("./pages/CardPage"));
 const WalletCardAdmin = lazy(() => import("./pages/WalletCardAdmin"));
 const UICardSettingsAdmin = lazy(() => import("./pages/UICardSettingsAdmin"));
+const Podcast = lazy(() => import("./pages/Podcast"));
+const PodcastAdmin = lazy(() => import("./pages/PodcastAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -217,6 +219,8 @@ const App = () => {
                     <Route path="admin/official-links" element={<RequireAdmin><OfficialLinksAdmin /></RequireAdmin>} />
                     <Route path="admin/wallet-cards" element={<RequireAdmin><WalletCardAdmin /></RequireAdmin>} />
                     <Route path="admin/ui-card-settings" element={<RequireAdmin><UICardSettingsAdmin /></RequireAdmin>} />
+                    <Route path="admin/podcast" element={<RequireAdmin><PodcastAdmin /></RequireAdmin>} />
+                    <Route path="podcast" element={<RequireAccess><Podcast /></RequireAccess>} />
                     <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
