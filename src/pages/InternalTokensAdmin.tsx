@@ -247,25 +247,23 @@ const InternalTokensAdmin = () => {
               </div>
             </div>
             
-            {!editToken && (
-              <div className="border-t pt-4">
-                <p className="text-sm font-medium mb-3">عقد العملة (اختياري)</p>
-                <div>
-                  <Label>عنوان العقد</Label>
-                  <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
-                </div>
-                <div className="mt-2">
-                  <Label>الشبكة</Label>
-                  <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
-                    <option value="solana">Solana</option>
-                    <option value="ethereum">Ethereum</option>
-                    <option value="polygon">Polygon</option>
-                    <option value="bsc">BSC</option>
-                    <option value="ton">TON</option>
-                  </select>
-                </div>
+            <div className="border-t pt-4">
+              <p className="text-sm font-medium mb-3">عقد العملة {editToken ? '' : '(اختياري)'}</p>
+              <div>
+                <Label>عنوان العقد</Label>
+                <Input value={form.contract_address} onChange={e => setForm({...form, contract_address: e.target.value})} placeholder="0x... أو عنوان Solana" dir="ltr" />
               </div>
-            )}
+              <div className="mt-2">
+                <Label>الشبكة</Label>
+                <select className="w-full p-2 border rounded-md bg-background" value={form.network} onChange={e => setForm({...form, network: e.target.value})}>
+                  <option value="solana">Solana</option>
+                  <option value="ethereum">Ethereum</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="bsc">BSC</option>
+                  <option value="ton">TON</option>
+                </select>
+              </div>
+            </div>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
