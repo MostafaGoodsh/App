@@ -85,6 +85,31 @@ const InternalTokensAdmin = () => {
 
       if (editToken) {
         await supabase.from('internal_tokens').update(tokenData).eq('id', editToken.id);
+        // Update or add contract
+        if (form.contract_address) {
+          const { data: existing } = await supabase
+            .from('custom_tokens')
+            .select('id')
+            .eq('symbol', form.symbol.toUpperCase())
+            .eq('network', form.network)
+            .maybeSingle();
+          if (existing) {
+            await supabase.from('custom_tokens').update({
+              contract_address: form.contract_address,
+              name: form.name,
+              symbol: form.symbol.toUpperCase(),
+            }).eq('id', existing.id);
+          } else {
+            await supabase.from('custom_tokens').insert({
+              contract_address: form.contract_address,
+              name: form.name,
+              symbol: form.symbol.toUpperCase(),
+              network: form.network,
+              decimals: form.decimals,
+              is_verified: true,
+            });
+          }
+        }
         toast({ title: 'تم التحديث' });
       } else {
         await supabase.from('internal_tokens').insert(tokenData);
