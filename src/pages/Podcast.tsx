@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { usePodcast, PodcastEpisode } from '@/hooks/usePodcast';
+import { usePodcastContext, type PodcastEpisode } from '@/contexts/PodcastContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 
 const Podcast = () => {
   const { t, language } = useLanguage();
-  const { episodes, loading, currentEpisode, isPlaying, play, pause } = usePodcast();
+  const { episodes, loading, currentEpisode, isPlaying, play, pause } = usePodcastContext();
   const isAr = language === 'ar' || language === 'both';
 
   const getTitle = (ep: PodcastEpisode) => (!isAr && ep.title_en) ? ep.title_en : ep.title;
