@@ -65,10 +65,11 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
           .single();
 
         if (data) {
-          setAnubisUser(data);
+          const userData = data as any;
+          setAnubisUser(userData);
           setSettings(prev => ({
             ...prev,
-            twoFactorEnabled: data.two_factor_enabled || false
+            twoFactorEnabled: userData.two_factor_enabled || false
           }));
         }
       } catch (error) {
