@@ -59,7 +59,7 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
       setLoadingSettings(true);
       try {
         const { data, error } = await supabase
-          .from('anubis_users')
+          .from('anubis_users_safe' as any)
           .select('id, email, full_name, phone, status, subscription_type, two_factor_enabled, created_at, updated_at, last_login, end_date')
           .eq('email', user.email)
           .single();
