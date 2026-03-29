@@ -169,6 +169,13 @@ export type Database = {
             referencedRelation: "anubis_users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "anubis_2fa_codes_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: false
+            referencedRelation: "anubis_users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       anubis_2fa_settings: {
@@ -207,6 +214,13 @@ export type Database = {
             referencedRelation: "anubis_users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "anubis_2fa_settings_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: true
+            referencedRelation: "anubis_users_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       anubis_sessions: {
@@ -243,6 +257,13 @@ export type Database = {
             columns: ["anubis_user_id"]
             isOneToOne: false
             referencedRelation: "anubis_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "anubis_sessions_anubis_user_id_fkey"
+            columns: ["anubis_user_id"]
+            isOneToOne: false
+            referencedRelation: "anubis_users_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -4951,7 +4972,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      anubis_users_safe: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          end_date: string | null
+          full_name: string | null
+          id: string | null
+          last_login: string | null
+          phone: string | null
+          status: string | null
+          subscription_type: string | null
+          two_factor_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          end_date?: string | null
+          full_name?: string | null
+          id?: string | null
+          last_login?: string | null
+          phone?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          end_date?: string | null
+          full_name?: string | null
+          id?: string | null
+          last_login?: string | null
+          phone?: string | null
+          status?: string | null
+          subscription_type?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_content: {
