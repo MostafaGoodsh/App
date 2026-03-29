@@ -60,7 +60,7 @@ export function SecuritySettingsDialog({ open, onOpenChange }: SecuritySettingsD
       try {
         const { data, error } = await supabase
           .from('anubis_users')
-          .select('*')
+          .select('id, email, full_name, phone, status, subscription_type, two_factor_enabled, created_at, updated_at, last_login, end_date')
           .eq('email', user.email)
           .single();
 
