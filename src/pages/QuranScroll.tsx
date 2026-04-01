@@ -8,76 +8,57 @@ import { Loader2, BookmarkCheck, ChevronUp, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-interface QuranPage {
-  id: string;
-  page_number: number;
-  surah_name: string;
-  juz_number: number;
-  arabic_image_url?: string;
-  points_reward?: number | null;
+interface Surah {
+  number: number;
+  name: string;
+  englishName: string;
+  ayahs: Ayah[];
 }
 
-const getArchiveIdentifier = (pdfUrl: string) => {
-  try {
-    const parsedUrl = new URL(pdfUrl);
-    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-    const itemsIndex = pathParts.indexOf("items");
-    if (itemsIndex !== -1 && pathParts[itemsIndex + 1]) return pathParts[itemsIndex + 1];
-    const downloadIndex = pathParts.indexOf("download");
-    if (downloadIndex !== -1 && pathParts[downloadIndex + 1]) return pathParts[downloadIndex + 1];
-    return null;
-  } catch { return null; }
-};
+interface Ayah {
+  number: number;
+  numberInSurah: number;
+  text: string;
+  juz: number;
+  page: number;
+}
 
-const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
-
-const getDisplayUrl = (url: string) => {
-  if (!isPdfUrl(url)) return url;
-  const [baseUrl, hash = ""] = url.split("#");
-  const pageMatch = hash.match(/page=(\d+)/i);
-  if (!pageMatch) return url;
-  const identifier = getArchiveIdentifier(baseUrl);
-  if (identifier) {
-    return `https://archive.org/download/${identifier}/page/n${Number(pageMatch[1])}.jpg`;
-  }
-  return url;
-};
+const BISMILLAH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ";
 
 const QuranScroll = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [pages, setPages] = useState<QuranPage[]>([]);
+  const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookmarkPage, setBookmarkPage] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [bookmarkAyah, setBookmarkAyah] = useState<{ surah: number; ayah: number } | null>(null);
   const [savingBookmark, setSavingBookmark] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const surahRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
-    fetchPages();
+    fetchQuranText();
     if (user) fetchBookmark();
   }, [user]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 600);
-    };
+    const handleScroll = () => setShowScrollTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const fetchPages = async () => {
+  const fetchQuranText = async () => {
     try {
-      const { data, error } = await supabase
-        .from("quran_pages")
-        .select("id, page_number, surah_name, juz_number, arabic_image_url, points_reward")
-        .eq("is_active", true)
-        .order("page_number");
-      if (error) throw error;
-      setPages(data || []);
+      const res = await fetch("https://api.alquran.cloud/v1/quran/quran-uthmani");
+      const json = await res.json();
+      if (json.code === 200 && json.data?.surahs) {
+        setSurahs(json.data.surahs);
+      } else {
+        throw new Error("Invalid API response");
+      }
     } catch (err) {
-      console.error("Error fetching quran pages:", err);
+      console.error("Error fetching Quran text:", err);
+      setError(t("حدث خطأ في تحميل النص", "Error loading text"));
     } finally {
       setLoading(false);
     }
@@ -91,50 +72,57 @@ const QuranScroll = () => {
         .select("page_number")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (data) setBookmarkPage(data.page_number);
+      if (data) {
+        // page_number stores surah number, we reuse the field
+        setBookmarkAyah({ surah: data.page_number, ayah: 1 });
+      }
     } catch (err) {
       console.error("Error fetching bookmark:", err);
     }
   };
 
-  const scrollToPage = useCallback((pageNum: number) => {
-    const el = pageRefs.current.get(pageNum);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  const scrollToSurah = useCallback((surahNum: number) => {
+    const el = surahRefs.current.get(surahNum);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Scroll to bookmark after pages load
   useEffect(() => {
-    if (!loading && bookmarkPage && pages.length > 0) {
-      // Small delay to let images mount
-      setTimeout(() => scrollToPage(bookmarkPage), 300);
+    if (!loading && bookmarkAyah && surahs.length > 0) {
+      setTimeout(() => scrollToSurah(bookmarkAyah.surah), 300);
     }
-  }, [loading, bookmarkPage, pages.length, scrollToPage]);
+  }, [loading, bookmarkAyah, surahs.length, scrollToSurah]);
 
-  const saveBookmark = async (page: QuranPage) => {
+  const saveBookmark = async (surahNumber: number, surahName: string) => {
     if (!user) {
       toast.error(t("يجب تسجيل الدخول أولاً"));
       return;
     }
     setSavingBookmark(true);
     try {
+      // We reuse quran_bookmarks table, storing surah number in page_number
+      const { data: pageData } = await supabase
+        .from("quran_pages")
+        .select("id")
+        .eq("page_number", surahNumber)
+        .limit(1)
+        .maybeSingle();
+
+      const pageId = pageData?.id || crypto.randomUUID();
+
       const { error } = await supabase
         .from("quran_bookmarks")
         .upsert(
           {
             user_id: user.id,
-            page_id: page.id,
-            page_number: page.page_number,
+            page_id: pageId,
+            page_number: surahNumber,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" }
         );
       if (error) throw error;
-      setBookmarkPage(page.page_number);
-      toast.success(
-        `${t("تم حفظ العلامة عند الصفحة")} ${page.page_number} ✅`
-      );
+      setBookmarkAyah({ surah: surahNumber, ayah: 1 });
+      toast.success(`${t("تم حفظ العلامة عند سورة")} ${surahName} ✅`);
     } catch (err) {
       console.error("Error saving bookmark:", err);
       toast.error(t("حدث خطأ أثناء حفظ العلامة"));
@@ -145,129 +133,138 @@ const QuranScroll = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">{t("جاري تحميل القرآن الكريم...", "Loading Holy Quran...")}</p>
       </div>
     );
   }
 
-  if (pages.length === 0) {
+  if (error || surahs.length === 0) {
     return (
       <div className="text-center py-20" dir="rtl">
         <BookOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <p className="text-muted-foreground text-lg">
-          {t("لا توجد صفحات متاحة حالياً")}
+          {error || t("لا توجد بيانات متاحة حالياً")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-24" dir="rtl" ref={containerRef}>
+    <div className="min-h-screen pb-24" dir="rtl">
       <Helmet>
-        <title>{t("القرآن الكريم - سكرول", "Quran - Scroll")} | MS-RA</title>
+        <title>{t("القرآن الكريم", "Holy Quran")} | MS-RA</title>
         <meta
           name="description"
-          content={t(
-            "قراءة القرآن الكريم بالتمرير المتواصل",
-            "Read the Holy Quran with continuous scrolling"
-          )}
+          content={t("قراءة القرآن الكريم بالتمرير المتواصل", "Read the Holy Quran with continuous scrolling")}
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap"
+          rel="stylesheet"
         />
       </Helmet>
 
-      {/* Header */}
+      {/* Sticky Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
-        <div className="container mx-auto flex items-center justify-between">
+        <div className="container mx-auto flex items-center justify-between max-w-2xl">
           <h1 className="font-cairo text-lg font-bold text-foreground">
             {t("القرآن الكريم", "Holy Quran")}
           </h1>
           <div className="flex items-center gap-2">
-            {bookmarkPage && (
+            {bookmarkAyah && (
               <Button
                 variant="outline"
                 size="sm"
                 className="gap-1.5 text-xs"
-                onClick={() => scrollToPage(bookmarkPage)}
+                onClick={() => scrollToSurah(bookmarkAyah.surah)}
               >
                 <BookmarkCheck className="h-3.5 w-3.5 text-primary" />
-                {t("الصفحة")} {bookmarkPage}
+                {t("سورة")} {bookmarkAyah.surah}
               </Button>
             )}
           </div>
         </div>
       </div>
 
-      {/* Pages */}
-      <div className="container mx-auto px-2 sm:px-4 py-4 space-y-1">
-        {pages.map((page) => {
-          const imageUrl = page.arabic_image_url
-            ? getDisplayUrl(page.arabic_image_url)
-            : null;
-          const isBookmarked = bookmarkPage === page.page_number;
+      {/* Continuous Text */}
+      <div className="container mx-auto max-w-2xl px-4 py-6">
+        {surahs.map((surah) => {
+          const isBookmarked = bookmarkAyah?.surah === surah.number;
 
           return (
             <div
-              key={page.id}
+              key={surah.number}
               ref={(el) => {
-                if (el) pageRefs.current.set(page.page_number, el);
+                if (el) surahRefs.current.set(surah.number, el);
               }}
-              className="relative"
+              className="mb-10"
             >
-              {/* Page info bar */}
-              <div className="flex items-center justify-between px-2 py-1.5 bg-muted/50 rounded-t-lg">
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 font-mono"
-                  >
-                    {page.page_number}
+              {/* Surah Header */}
+              <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="text-xs font-mono px-2 py-0.5">
+                    {surah.number}
                   </Badge>
-                  <span className="text-xs font-medium text-foreground">
-                    {page.surah_name}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {t("الجزء")} {page.juz_number}
-                  </span>
+                  <div>
+                    <h2 className="text-lg font-bold text-foreground font-cairo">
+                      {surah.name}
+                    </h2>
+                    <span className="text-xs text-muted-foreground">
+                      {surah.englishName} • {surah.ayahs.length} {t("آية", "ayahs")}
+                    </span>
+                  </div>
                 </div>
                 <Button
                   variant={isBookmarked ? "default" : "ghost"}
                   size="sm"
-                  className={`h-7 px-2 text-[10px] gap-1 ${
-                    isBookmarked
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground"
+                  className={`h-8 px-2 text-xs gap-1 ${
+                    isBookmarked ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
-                  onClick={() => saveBookmark(page)}
+                  onClick={() => saveBookmark(surah.number, surah.name)}
                   disabled={savingBookmark}
                 >
-                  <BookmarkCheck className="h-3 w-3" />
-                  {isBookmarked
-                    ? t("محفوظ", "Saved")
-                    : t("حفظ هنا", "Save here")}
+                  <BookmarkCheck className="h-3.5 w-3.5" />
+                  {isBookmarked ? t("محفوظ", "Saved") : t("حفظ", "Save")}
                 </Button>
               </div>
 
-              {/* Image */}
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={`${t("الصفحة")} ${page.page_number} - ${page.surah_name}`}
-                  className="w-full rounded-b-lg border border-t-0 border-border"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="w-full h-48 bg-muted/30 rounded-b-lg border border-t-0 border-border flex items-center justify-center">
-                  <span className="text-muted-foreground text-sm">
-                    {t("لا توجد صورة")}
-                  </span>
-                </div>
+              {/* Bismillah - except for Surah 1 (Al-Fatiha) and Surah 9 (At-Tawbah) */}
+              {surah.number !== 1 && surah.number !== 9 && (
+                <p className="text-center text-xl mb-4 text-primary/80" style={{ fontFamily: "'Amiri Quran', serif" }}>
+                  {BISMILLAH}
+                </p>
               )}
+
+              {/* Continuous Ayahs */}
+              <div
+                className="leading-[2.8] text-xl sm:text-2xl text-foreground text-justify"
+                style={{ fontFamily: "'Amiri Quran', serif", wordSpacing: "0.05em" }}
+              >
+                {surah.ayahs.map((ayah) => {
+                  // Remove bismillah from beginning of first ayah (except Al-Fatiha)
+                  let text = ayah.text;
+                  if (ayah.numberInSurah === 1 && surah.number !== 1) {
+                    text = text.replace(BISMILLAH, "").trim();
+                  }
+                  if (!text) return null;
+
+                  return (
+                    <span key={ayah.number}>
+                      {text}
+                      <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle">
+                        ﴿{ayah.numberInSurah.toLocaleString("ar-EG")}﴾
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Scroll to top button */}
+      {/* Scroll to top */}
       {showScrollTop && (
         <Button
           variant="secondary"
