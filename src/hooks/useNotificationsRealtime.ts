@@ -11,7 +11,7 @@ export const useNotificationsRealtime = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel("notifications-changes")
+      .channel(`notifications_changes_${user.id}_${crypto.randomUUID()}`)
       .on(
         "postgres_changes",
         {
