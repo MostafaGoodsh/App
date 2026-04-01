@@ -367,34 +367,35 @@ const drawTripleRingWheel = (
     ctx.shadowBlur = 4;
 
     if (isBonusTrigger) {
-      // Bonus trigger - show "Bonus" / "بونص" with scarab symbol
-      const bonusFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
-      ctx.font = `bold ${bonusFontSize}px ${segFontFamily}`;
+      // Bonus trigger - show scarab symbol (large like center eye) + "Bonus"
+      const scarabSize = Math.round(innerCenterRadius * 0.7);
+      ctx.font = `bold ${scarabSize}px serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
-      // Line 1: Scarab symbol
       ctx.fillStyle = '#D4AF37';
-      const line1Y = ty - bonusFontSize * 0.7;
+      const line1Y = ty - scarabSize * 0.3;
       ctx.strokeText('𓆣', tx, line1Y);
       ctx.fillText('𓆣', tx, line1Y);
       // Line 2: "Bonus" text
+      const bonusFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.fillStyle = '#FFD700';
       ctx.font = `bold ${bonusFontSize - 1}px ${segFontFamily}`;
-      const line2Y = ty + bonusFontSize * 0.5;
+      const line2Y = ty + scarabSize * 0.4;
       ctx.strokeText('Bonus', tx, line2Y);
       ctx.fillText('Bonus', tx, line2Y);
     } else if (isUpgradeTrigger) {
-      // Upgrade trigger - show Was scepter & "Upgrade"
-      const upgFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
-      ctx.font = `bold ${upgFontSize}px ${segFontFamily}`;
+      // Upgrade trigger - show Was scepter (large like center eye) & "Upgrade"
+      const scepterSize = Math.round(innerCenterRadius * 0.7);
+      ctx.font = `bold ${scepterSize}px serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
       ctx.fillStyle = '#90EE90';
-      const line1Y = ty - upgFontSize * 0.7;
+      const line1Y = ty - scepterSize * 0.3;
       ctx.strokeText('𓌀', tx, line1Y);
       ctx.fillText('𓌀', tx, line1Y);
+      const upgFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.font = `bold ${upgFontSize - 1}px ${segFontFamily}`;
-      const line2Y = ty + upgFontSize * 0.5;
+      const line2Y = ty + scepterSize * 0.4;
       ctx.strokeText('⬆ L.E.', tx, line2Y);
       ctx.fillText('⬆ L.E.', tx, line2Y);
     } else {

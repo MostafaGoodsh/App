@@ -6,7 +6,7 @@ import QuranTab from "@/components/tasks/QuranTab";
 import PersonalityTab from "@/components/tasks/PersonalityTab";
 import DailyTasksTab from "@/components/tasks/DailyTasksTab";
 import SectionIntroduction from "@/components/tasks/SectionIntroduction";
-import WheelOfFortune from "@/components/tasks/WheelOfFortune";
+
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 import { useUICardSettings } from "@/hooks/useUICardSettings";
 import { Target, Flame, Clock } from "lucide-react";
@@ -106,7 +106,7 @@ const DailyTasks = () => {
               </CardContent>
             </Card>
 
-            <WheelOfFortune />
+            
           </div>
         </div>
       </div>
