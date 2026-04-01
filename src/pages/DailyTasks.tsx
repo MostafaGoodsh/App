@@ -106,7 +106,7 @@ const DailyTasks = () => {
               </CardContent>
             </Card>
 
-            <WheelOfFortune />
+            
           </div>
         </div>
       </div>
