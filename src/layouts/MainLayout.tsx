@@ -19,9 +19,9 @@ const MainLayoutContent = () => {
   const { dir } = useLanguage();
   
   return (
-    <div className="min-h-screen bg-background text-foreground flex w-full overflow-x-hidden" dir={dir}>
+    <div className="min-h-[100dvh] w-full overflow-x-hidden bg-background text-foreground flex" dir={dir}>
       <AppSidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col">
         <header 
           className="h-16 flex items-center justify-between border-b px-1"
           style={{
@@ -65,7 +65,7 @@ const MainLayoutContent = () => {
             </Button>
           </div>
         </header>
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 min-h-0 w-full max-w-full overflow-x-hidden overflow-y-auto">
           <Outlet />
         </main>
         <AnnouncementDialog />
