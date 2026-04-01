@@ -3013,6 +3013,41 @@ export type Database = {
           },
         ]
       }
+      quran_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          page_id: string
+          page_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_id: string
+          page_number: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_id?: string
+          page_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quran_bookmarks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "quran_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quran_pages: {
         Row: {
           admin_notes: string | null
