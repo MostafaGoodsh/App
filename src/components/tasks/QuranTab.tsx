@@ -1,113 +1,68 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock, ZoomIn, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import SectionIntroduction from "./SectionIntroduction";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-interface QuranPage {
+interface QuranPageRecord {
   id: string;
   page_number: number;
   surah_name: string;
   juz_number: number;
-  arabic_text: string;
-  arabic_image_url?: string;
-  translation_image_url?: string;
   points_reward?: number | null;
 }
 
-const getMinimumReadingTime = (pageNumber: number, textLength: number) => {
-  return Math.max(30, Math.min(120, Math.floor(textLength / 10)));
-};
+interface QuranVerse {
+  id: number;
+  text: string;
+}
 
-const formatQuranText = (text: string) => {
-  const basmala = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
-  let formattedText = text;
-  let extractedBasmala: string | null = null;
+interface QuranSurah {
+  id: number;
+  name: string;
+  transliteration?: string;
+  total_verses: number;
+  verses: QuranVerse[];
+}
 
-  if (text.includes(basmala)) {
-    extractedBasmala = basmala;
-    formattedText = text.replace(basmala, "").trim();
-  }
-
-  return { basmala: extractedBasmala, text: formattedText };
-};
-
-const isPdfUrl = (url: string) => /\.pdf($|[?#])/i.test(url);
-
-const getPdfBaseAndPage = (url: string) => {
-  const [baseUrl, hash = ""] = url.split("#");
-  const pageMatch = hash.match(/page=(\d+)/i);
-  return { baseUrl, pageNumber: pageMatch ? Number(pageMatch[1]) : null };
-};
-
-const getArchiveIdentifier = (pdfUrl: string) => {
-  try {
-    const parsedUrl = new URL(pdfUrl);
-    const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
-    const itemsIndex = pathParts.indexOf("items");
-    if (itemsIndex !== -1 && pathParts[itemsIndex + 1]) return pathParts[itemsIndex + 1];
-    const downloadIndex = pathParts.indexOf("download");
-    if (downloadIndex !== -1 && pathParts[downloadIndex + 1]) return pathParts[downloadIndex + 1];
-    return null;
-  } catch { return null; }
-};
-
-const getArchivePageImageUrl = (pdfUrl: string, pageNumber: number | null) => {
-  if (!pageNumber) return null;
-  const identifier = getArchiveIdentifier(pdfUrl);
-  if (!identifier) return null;
-  return `https://archive.org/download/${identifier}/page/n${pageNumber}.jpg`;
-};
-
-const getPdfViewerUrl = (url: string) => {
-  if (!isPdfUrl(url)) return url;
-  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
-  return pageNumber ? `${baseUrl}#page=${pageNumber}` : baseUrl;
-};
-
-const getBestQuranDisplay = (url: string) => {
-  if (!isPdfUrl(url)) {
-    return { displayUrl: url, openUrl: url, isPdf: false, useIframe: false };
-  }
-  const { baseUrl, pageNumber } = getPdfBaseAndPage(url);
-  const archiveImageUrl = getArchivePageImageUrl(baseUrl, pageNumber);
-  if (archiveImageUrl) {
-    return { displayUrl: archiveImageUrl, openUrl: url, isPdf: true, useIframe: false };
-  }
-  return { displayUrl: getPdfViewerUrl(url), openUrl: url, isPdf: true, useIframe: true };
+const getMinimumReadingTime = (verseCount: number) => {
+  return Math.max(20, Math.min(90, verseCount * 3));
 };
 
 const QuranTab = () => {
   const { user } = useAuth();
   const { t, dir } = useLanguage();
-  const [quranPages, setQuranPages] = useState<QuranPage[]>([]);
+  const [surahs, setSurahs] = useState<QuranSurah[]>([]);
+  const [pageRecords, setPageRecords] = useState<QuranPageRecord[]>([]);
   const [completedPages, setCompletedPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [readingPageId, setReadingPageId] = useState<string | null>(null);
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
   const [readingProgress, setReadingProgress] = useState(0);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      fetchQuranPages();
-      fetchCompletedPages();
-    }
+    if (!user) return;
+
+    const load = async () => {
+      setLoading(true);
+      await Promise.all([fetchQuranText(), fetchPageRecords(), fetchCompletedPages()]);
+      setLoading(false);
+    };
+
+    load();
   }, [user]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (readingPageId && readingStartTime) {
-      const currentPage = quranPages.find(p => p.id === readingPageId);
-      if (currentPage) {
-        const minTime = getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length);
+      const currentSurah = surahs[currentPageIndex];
+      if (currentSurah) {
+        const minTime = getMinimumReadingTime(currentSurah.verses.length);
         interval = setInterval(() => {
           const elapsed = (Date.now() - readingStartTime) / 1000;
           const progress = Math.min(100, (elapsed / minTime) * 100);
@@ -116,31 +71,69 @@ const QuranTab = () => {
         }, 1000);
       }
     }
-    return () => { if (interval) clearInterval(interval); };
-  }, [readingPageId, readingStartTime, quranPages]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [readingPageId, readingStartTime, currentPageIndex, surahs]);
 
-  const fetchQuranPages = async () => {
+  const fetchQuranText = async () => {
     try {
-      const { data, error } = await supabase.from('quran_pages').select('*').eq('is_active', true).order('page_number');
-      if (error) throw error;
-      setQuranPages(data || []);
+      const res = await fetch("https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json");
+      const data = await res.json();
+      setSurahs(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error fetching quran pages:', error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching quran text:", error);
+      toast.error(t("تعذر تحميل نص القرآن", "Failed to load Quran text"));
+    }
+  };
+
+  const fetchPageRecords = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("quran_pages")
+        .select("id, page_number, surah_name, juz_number, points_reward")
+        .eq("is_active", true)
+        .order("page_number");
+      if (error) throw error;
+      setPageRecords(data || []);
+    } catch (error) {
+      console.error("Error fetching quran page records:", error);
+      setPageRecords([]);
     }
   };
 
   const fetchCompletedPages = async () => {
     if (!user) return;
     try {
-      const { data, error } = await supabase.from('user_quran_completions').select('page_id').eq('user_id', user.id);
+      const { data, error } = await supabase
+        .from("user_quran_completions")
+        .select("page_id")
+        .eq("user_id", user.id);
       if (error) throw error;
-      setCompletedPages((data || []).map(d => d.page_id));
+      setCompletedPages((data || []).map((d) => d.page_id));
     } catch (error) {
-      console.error('Error fetching completed pages:', error);
+      console.error("Error fetching completed pages:", error);
     }
   };
+
+  const currentSurah = surahs[currentPageIndex];
+  const fallbackPageId = useMemo(
+    () => `surah-${currentSurah?.id ?? currentPageIndex + 1}`,
+    [currentSurah?.id, currentPageIndex]
+  );
+  const currentRecord = useMemo(() => {
+    if (!currentSurah) return null;
+    return (
+      pageRecords.find((record) => record.page_number === currentSurah.id) ??
+      pageRecords.find((record) => record.surah_name === currentSurah.name) ??
+      null
+    );
+  }, [currentSurah, pageRecords]);
+
+  const currentPageId = currentRecord?.id || fallbackPageId;
+  const isCompleted = completedPages.includes(currentPageId);
+  const isReading = readingPageId === currentPageId;
+  const minReadingTime = currentSurah ? getMinimumReadingTime(currentSurah.verses.length) : 0;
 
   const handleStartReading = (pageId: string) => {
     setReadingPageId(pageId);
@@ -149,193 +142,186 @@ const QuranTab = () => {
   };
 
   const handleCompleteReading = async (pageId: string) => {
-    if (!user || !readingStartTime) return;
-    const currentPage = quranPages.find(p => p.id === pageId);
-    if (!currentPage) return;
+    if (!user || !readingStartTime || !currentSurah || !currentRecord) return;
 
     try {
-      setCompletedPages(prev => [...prev, pageId]);
+      setCompletedPages((prev) => [...prev, pageId]);
       setReadingPageId(null);
       setReadingStartTime(null);
-      
-      const { error } = await supabase.from('user_quran_completions').insert([{
-        user_id: user.id, page_id: pageId,
-        reading_time_seconds: Math.floor((Date.now() - readingStartTime) / 1000),
-      }]);
+
+      const pointsReward = currentRecord.points_reward || 5;
+
+      const { error } = await supabase.from("user_quran_completions").insert([
+        {
+          user_id: user.id,
+          page_id: pageId,
+          reading_time_seconds: Math.floor((Date.now() - readingStartTime) / 1000),
+          points_earned: pointsReward,
+        },
+      ]);
       if (error) throw error;
 
-      const pointsReward = currentPage.points_reward || 5;
-      const { data: xpToken } = await supabase.from('internal_tokens').select('id').eq('symbol', 'XP').eq('is_active', true).single();
+      const { data: xpToken } = await supabase
+        .from("internal_tokens")
+        .select("id")
+        .eq("symbol", "XP")
+        .eq("is_active", true)
+        .single();
 
       if (xpToken) {
-        const { data: existing } = await supabase.from('internal_wallet_balances').select('balance').eq('user_id', user.id).eq('token_id', xpToken.id).single();
+        const { data: existing } = await supabase
+          .from("internal_wallet_balances")
+          .select("balance")
+          .eq("user_id", user.id)
+          .eq("token_id", xpToken.id)
+          .maybeSingle();
+
         if (existing) {
-          await supabase.from('internal_wallet_balances').update({ balance: existing.balance + pointsReward, updated_at: new Date().toISOString() }).eq('user_id', user.id).eq('token_id', xpToken.id);
+          await supabase
+            .from("internal_wallet_balances")
+            .update({ balance: existing.balance + pointsReward, updated_at: new Date().toISOString() })
+            .eq("user_id", user.id)
+            .eq("token_id", xpToken.id);
         } else {
-          await supabase.from('internal_wallet_balances').insert({ user_id: user.id, token_id: xpToken.id, balance: pointsReward });
+          await supabase.from("internal_wallet_balances").insert({
+            user_id: user.id,
+            token_id: xpToken.id,
+            balance: pointsReward,
+          });
         }
       }
 
-      toast.success(`${t("تم إكمال القراءة!")} +${pointsReward} XP 🎉`);
+      toast.success(`${t("تم إكمال القراءة!", "Reading completed!")} +${pointsReward} XP 🎉`);
       setReadingProgress(0);
     } catch (error) {
-      console.error('Error completing quran page:', error);
-      setCompletedPages(prev => prev.filter(id => id !== pageId));
-      toast.error(t('حدث خطأ أثناء إكمال القراءة'));
+      console.error("Error completing quran reading:", error);
+      setCompletedPages((prev) => prev.filter((id) => id !== pageId));
+      toast.error(t("حدث خطأ أثناء إكمال القراءة", "Error completing reading"));
     }
   };
 
-  const currentPage = quranPages[currentPageIndex];
-  const isCompleted = currentPage ? completedPages.includes(currentPage.id) : false;
-  const isReading = currentPage ? readingPageId === currentPage.id : false;
-  const minReadingTime = currentPage ? getMinimumReadingTime(currentPage.page_number, currentPage.arabic_text.length) : 0;
-  const formattedText = currentPage ? formatQuranText(currentPage.arabic_text) : { basmala: null, text: "" };
-  const selectedMedia = selectedImage ? getBestQuranDisplay(selectedImage) : null;
-  const currentPageMedia = currentPage?.arabic_image_url ? getBestQuranDisplay(currentPage.arabic_image_url) : null;
-
   const handleNextPage = () => {
-    if (currentPageIndex < quranPages.length - 1) { setCurrentPageIndex(prev => prev + 1); setReadingPageId(null); setReadingStartTime(null); setReadingProgress(0); }
+    if (currentPageIndex < surahs.length - 1) {
+      setCurrentPageIndex((prev) => prev + 1);
+      setReadingPageId(null);
+      setReadingStartTime(null);
+      setReadingProgress(0);
+    }
   };
+
   const handlePrevPage = () => {
-    if (currentPageIndex > 0) { setCurrentPageIndex(prev => prev - 1); setReadingPageId(null); setReadingStartTime(null); setReadingProgress(0); }
+    if (currentPageIndex > 0) {
+      setCurrentPageIndex((prev) => prev - 1);
+      setReadingPageId(null);
+      setReadingStartTime(null);
+      setReadingProgress(0);
+    }
   };
 
   if (loading) {
     return (
       <div className="text-center py-10">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-        <p className="mt-4 text-muted-foreground">{t("جاري تحميل الصفحات...")}</p>
+        <p className="mt-4 text-muted-foreground">{t("جاري تحميل القرآن...", "Loading Quran...")}</p>
       </div>
     );
   }
 
-  if (quranPages.length === 0) {
+  if (surahs.length === 0) {
     return (
       <div className="text-center py-20">
         <BookOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-        <p className="text-muted-foreground text-lg">{t("لا توجد صفحات متاحة حالياً")}</p>
-        <p className="text-muted-foreground text-sm mt-2">{t("سيتم إضافة صفحات القرآن قريباً")}</p>
+        <p className="text-muted-foreground text-lg">{t("القرآن غير متاح حالياً", "Quran is unavailable right now")}</p>
       </div>
     );
   }
 
   return (
-    <>
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden">
-          {selectedMedia && (
-            selectedMedia.useIframe ? (
-              <iframe src={selectedMedia.displayUrl} title="Quran Page Full Screen" className="w-full h-[90vh]" />
-            ) : (
-              <img src={selectedMedia.displayUrl} alt="Quran Page Full Screen" className="w-full h-full object-contain" loading="lazy" />
-            )
-          )}
-        </DialogContent>
-      </Dialog>
+    <div className="space-y-6" dir={dir}>
+      <div className="flex items-center justify-between gap-2">
+        <Button onClick={handlePrevPage} disabled={currentPageIndex === 0} variant="outline" size="sm">
+          <ChevronRight className="h-4 w-4" />
+        </Button>
 
-      <div className="space-y-6" dir="rtl">
-        <SectionIntroduction sectionType="quran" />
-      
-        <div className="flex items-center justify-between gap-2">
-          <Button onClick={handlePrevPage} disabled={currentPageIndex === 0} variant="outline" size="sm">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          
-          <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1">{t("الصفحة")}</div>
-            <div className="text-lg sm:text-2xl font-bold text-primary">
-              {currentPage?.page_number || (currentPageIndex + 1)} / {quranPages.length}
-            </div>
+        <div className="text-center">
+          <div className="text-xs text-muted-foreground mb-1">{t("السورة", "Surah")}</div>
+          <div className="text-lg sm:text-2xl font-bold text-primary">
+            {currentSurah.id} / {surahs.length}
           </div>
-          
-          <Button onClick={handleNextPage} disabled={currentPageIndex === quranPages.length - 1} variant="outline" size="sm">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
         </div>
 
-        {currentPage && (
-          <Card className="overflow-hidden">
-            <CardContent className="p-4 sm:p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-primary">{currentPage.surah_name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">
-                    +{currentPage.points_reward || 5} XP
-                  </span>
-                  <span className="text-xs text-muted-foreground">{t("الجزء")} {currentPage.juz_number}</span>
-                </div>
-              </div>
-
-              {currentPage.arabic_image_url && currentPageMedia && (
-                <div className="relative cursor-pointer group" onClick={() => setSelectedImage(currentPage.arabic_image_url!)}>
-                  {currentPageMedia.useIframe ? (
-                    <div className="rounded-lg border border-border overflow-hidden bg-muted/20">
-                      <iframe src={currentPageMedia.displayUrl} title={`${t("الصفحة")} ${currentPage.page_number}`} className="w-full h-[420px]" />
-                    </div>
-                  ) : (
-                    <img src={currentPageMedia.displayUrl} alt={`${t("الصفحة")} ${currentPage.page_number}`} className="w-full rounded-lg border border-border" loading="lazy" />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <div className="flex items-center gap-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ZoomIn className="h-8 w-8" />
-                      {currentPageMedia.isPdf && <ExternalLink className="h-5 w-5" />}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {currentPageMedia?.isPdf && (
-                <div className="flex justify-center">
-                  <Button variant="outline" size="sm" className="gap-2" onClick={() => window.open(currentPageMedia.openUrl, "_blank", "noopener,noreferrer")}>
-                    <ExternalLink className="h-4 w-4" />
-                    {t("فتح الصفحة الأصلية")}
-                  </Button>
-                </div>
-              )}
-
-              {formattedText.basmala && (
-                <p className="text-center text-lg font-arabic text-primary font-bold py-2">{formattedText.basmala}</p>
-              )}
-
-              {formattedText.text && (
-                <div className="bg-muted/30 rounded-lg p-4">
-                  <p className="font-arabic text-base sm:text-lg leading-loose text-foreground whitespace-pre-wrap">{formattedText.text}</p>
-                </div>
-              )}
-
-              {isReading && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{t("جاري القراءة...")} ({Math.ceil(minReadingTime - (readingProgress / 100 * minReadingTime))} {t("ثانية متبقية")})</span>
-                  </div>
-                  <Progress value={readingProgress} className="h-2" />
-                </div>
-              )}
-
-              <div className="flex justify-center">
-                {isCompleted ? (
-                  <Button variant="outline" disabled className="gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    {t("تم إكمال القراءة")}
-                  </Button>
-                ) : isReading ? (
-                  <Button variant="outline" disabled className="gap-2">
-                    <Clock className="h-4 w-4 animate-spin" />
-                    {t("جاري القراءة...")}
-                  </Button>
-                ) : (
-                  <Button onClick={() => handleStartReading(currentPage.id)} className="gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    {t("ابدأ القراءة")}
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Button onClick={handleNextPage} disabled={currentPageIndex === surahs.length - 1} variant="outline" size="sm">
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
       </div>
-    </>
+
+      <Card className="overflow-hidden">
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-semibold text-primary">{currentSurah.name}</span>
+            <div className="flex items-center gap-2">
+              {currentRecord && (
+                <span className="text-xs text-muted-foreground">
+                  {t("الجزء", "Juz")} {currentRecord.juz_number}
+                </span>
+              )}
+              <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-bold">
+                +{currentRecord?.points_reward || 5} XP
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-muted/30 rounded-lg p-4 sm:p-5">
+            <p className="font-arabic text-lg sm:text-xl leading-loose text-foreground whitespace-pre-wrap text-right">
+              {currentSurah.verses.map((verse) => (
+                <span key={verse.id}>
+                  {verse.text}
+                  <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle">
+                    ﴿{verse.id.toLocaleString("ar-EG")}﴾
+                  </span>{" "}
+                </span>
+              ))}
+            </p>
+          </div>
+
+          {isReading && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>
+                  {t("جاري القراءة...", "Reading...")} ({Math.ceil(minReadingTime - (readingProgress / 100) * minReadingTime)} {t("ثانية متبقية", "seconds left")})
+                </span>
+              </div>
+              <Progress value={readingProgress} className="h-2" />
+            </div>
+          )}
+
+          <div className="flex justify-center">
+            {!currentRecord ? (
+              <Button variant="outline" disabled className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                {t("العرض متاح - المكافأة غير مفعلة حالياً", "Text is available - reward is unavailable now")}
+              </Button>
+            ) : isCompleted ? (
+              <Button variant="outline" disabled className="gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                {t("تم إكمال القراءة", "Reading completed")}
+              </Button>
+            ) : isReading ? (
+              <Button variant="outline" disabled className="gap-2">
+                <Clock className="h-4 w-4 animate-spin" />
+                {t("جاري القراءة...", "Reading...")}
+              </Button>
+            ) : (
+              <Button onClick={() => handleStartReading(currentPageId)} className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                {t("ابدأ القراءة", "Start reading")}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
