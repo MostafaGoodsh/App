@@ -103,6 +103,7 @@ const UICardSettingsAdmin = lazy(() => import("./pages/UICardSettingsAdmin"));
 const Podcast = lazy(() => import("./pages/Podcast"));
 const PodcastAdmin = lazy(() => import("./pages/PodcastAdmin"));
 const OfficialLinks = lazy(() => import("./pages/OfficialLinks"));
+const QuranScroll = lazy(() => import("./pages/QuranScroll"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
