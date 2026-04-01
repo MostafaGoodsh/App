@@ -227,6 +227,7 @@ const App = () => {
                     <Route path="podcast" element={<RequireAccess><Podcast /></RequireAccess>} />
                     <Route path="official-links" element={<RequireAccess><OfficialLinks /></RequireAccess>} />
                     <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
+                    <Route path="quran-scroll" element={<RequireAuth><QuranScroll /></RequireAuth>} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
