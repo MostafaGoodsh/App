@@ -110,7 +110,7 @@ const DynamicHomeCards = () => {
     fetchCards();
 
     const channel = supabase
-      .channel("home_page_cards_changes")
+      .channel(`home_page_cards_changes_${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "home_page_cards" }, fetchCards)
       .subscribe();
 

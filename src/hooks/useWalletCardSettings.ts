@@ -44,11 +44,15 @@ export const useWalletCardSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+
     const channel = supabase
-      .channel("wallet_card_settings_changes")
+      .channel(`wallet_card_settings_changes_${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "wallet_card_settings" }, fetchSettings)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchSettings]);
 
   const getCardSetting = (key: string) => settings[key];

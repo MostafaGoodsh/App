@@ -70,11 +70,15 @@ export const useUICardSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+
     const channel = supabase
-      .channel("ui_card_settings_changes")
+      .channel(`ui_card_settings_changes_${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "ui_card_settings" }, fetchSettings)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchSettings]);
 
   const getCardSetting = (key: string) => settings[key];
