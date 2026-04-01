@@ -50,7 +50,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[85vh] flex items-end justify-center bg-background">
+        <section className="relative min-h-[60vh] md:min-h-[75vh] flex items-end justify-center bg-background">
           <img
             src={getContent('hero_background', '/lovable-uploads/horus-statue-bg.jpg')}
             alt={getAltText('hero_background', 'تمثال حورس الذهبي - خلفية المنصة')}
@@ -58,16 +58,16 @@ const Index = () => {
             loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-          <div className="relative z-10 container mx-auto px-4 text-center pb-24 md:pb-32">
-            <div className="flex items-center justify-center mb-6">
+          <div className="relative z-10 container mx-auto px-4 text-center pb-12 md:pb-32">
+            <div className="flex items-center justify-center mb-4">
               <div className="text-center">
-                <h1 className="font-playfair text-3xl md:text-6xl lg:text-7xl font-bold text-primary mb-1 md:mb-2">
+                <h1 className="font-playfair text-2xl md:text-6xl lg:text-7xl font-bold text-primary mb-1 md:mb-2">
                   {getContent('app_name', 'Crypto-MSR')}
                 </h1>
-                <p className="font-cairo text-xl md:text-3xl lg:text-4xl text-white/90 mb-8 md:mb-12">
+                <p className="font-cairo text-lg md:text-3xl lg:text-4xl text-white/90 mb-4 md:mb-12">
                   {t(getContent('hero_subtitle', 'منصة مصر الرقمية'), 'Egypt Digital Platform')}
                 </p>
-                <div className="text-3xl md:text-5xl lg:text-6xl text-primary/80 mb-6">
+                <div className="text-2xl md:text-5xl lg:text-6xl text-primary/80 mb-4">
                   𓂀
                 </div>
               </div>
