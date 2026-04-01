@@ -46,8 +46,9 @@ export const useAppContent = () => {
     fetchContent();
     
     // Listen for real-time updates
+    const channelName = `app_content_changes_${Math.random().toString(36).slice(2)}`;
     const subscription = supabase
-      .channel('app_content_changes')
+      .channel(channelName)
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'app_content' },
         (payload) => {
