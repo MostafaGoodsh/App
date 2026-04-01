@@ -82,6 +82,7 @@ const Index = () => {
               <Link to="/early-access">{t(getContent('hero_cta', 'انضم الآن'), 'Join Now')}</Link>
             </Button>
           </div>
+          <WheelOfFortune />
           <RoadmapCardsGrid />
         </section>
         
