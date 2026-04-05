@@ -50,7 +50,7 @@ export default function Learning() {
       <div className="min-h-screen" style={{ backgroundImage: `url('/lovable-uploads/5f71efaf-8d4b-42c4-993b-f0d50e00f50e.png')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
         <div className="min-h-screen bg-background/90">
           <section className="py-8" dir={isArabic ? "rtl" : "ltr"}>
-            <div className="container mx-auto px-4 mb-8" style={{ textAlign: isArabic ? "right" : "left" }}>
+            <div className="container mx-auto px-2 sm:px-4 mb-8" style={{ textAlign: isArabic ? "right" : "left" }}>
               <div className="flex flex-col gap-4" style={{ alignItems: isArabic ? "flex-end" : "flex-start" }}>
                 <h1 className="font-playfair text-2xl md:text-4xl font-bold mb-4">
                   {t("المنصة التفاعلية")} | Timeline

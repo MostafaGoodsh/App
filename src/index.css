@@ -211,18 +211,41 @@ All colors MUST be HSL.
 
   /* Admin tables mobile responsiveness */
   @media (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+    
     .container {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
     }
     
     table {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
     
     table th,
     table td {
-      padding: 0.5rem 0.35rem;
+      padding: 0.4rem 0.25rem;
+    }
+
+    h1 { font-size: 1.25rem; }
+    h2 { font-size: 1.1rem; }
+    h3 { font-size: 1rem; }
+    
+    p, span, li {
+      line-height: 1.5;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    html {
+      font-size: 13px;
+    }
+    
+    .container {
+      padding-left: 0.35rem;
+      padding-right: 0.35rem;
     }
   }
 }

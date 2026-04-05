@@ -116,7 +116,7 @@ export default function Profile() {
         : {}),
     }}>
       <div className="min-h-screen bg-background/90">
-        <div className="container max-w-4xl mx-auto p-6 arabic-content" style={containerStyle}>
+        <div className="container max-w-full sm:max-w-4xl mx-auto px-2 sm:p-6 py-4 arabic-content" style={containerStyle}>
           <ProfileHeader profile={profile} badges={userBadges} isKycVerified={isKycVerified} />
 
           <Tabs defaultValue="overview" className="space-y-4">

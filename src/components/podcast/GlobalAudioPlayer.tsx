@@ -1,7 +1,7 @@
 import { usePodcastContext } from '@/contexts/PodcastContext';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, X, ListMusic, Minimize2, Maximize2, Music } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 const formatTime = (s: number) => {
   if (!s || isNaN(s)) return '0:00';
@@ -23,21 +23,57 @@ const GlobalAudioPlayer = () => {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [mode, setMode] = useState<PlayerMode>('full');
 
+  // Draggable bubble state
+  const [bubblePos, setBubblePos] = useState({ x: -1, y: -1 });
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; dragging: boolean } | null>(null);
+
+  useEffect(() => {
+    if (bubblePos.x === -1) {
+      setBubblePos({ x: window.innerWidth - 72, y: window.innerHeight - 140 });
+    }
+  }, [bubblePos.x]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: bubblePos.x, origY: bubblePos.y, dragging: false };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [bubblePos]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.dragging = true;
+    if (dragRef.current.dragging) {
+      const newX = Math.max(0, Math.min(window.innerWidth - 56, dragRef.current.origX + dx));
+      const newY = Math.max(0, Math.min(window.innerHeight - 56, dragRef.current.origY + dy));
+      setBubblePos({ x: newX, y: newY });
+    }
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    const wasDragging = dragRef.current?.dragging;
+    dragRef.current = null;
+    if (!wasDragging) togglePlay();
+  }, [togglePlay]);
+
   if (!currentEpisode || dismissed) return null;
 
   const displayTitle = currentTrack ? currentTrack.title : currentEpisode.title;
   const progressPct = duration ? (progress / duration) * 100 : 0;
 
-  // Floating bubble mode
+  // Floating draggable bubble mode
   if (mode === 'bubble') {
     return (
-      <div className="fixed bottom-20 right-4 z-50 animate-[fadeIn_0.3s_ease-out]">
-        <button
-          onClick={togglePlay}
-          onDoubleClick={() => setMode('full')}
-          className="relative w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground hover:scale-110 transition-transform duration-200 animate-[glow_2s_ease-in-out_infinite]"
+      <div
+        className="fixed z-50 touch-none select-none"
+        style={{ left: bubblePos.x, top: bubblePos.y }}
+      >
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          className="relative w-14 h-14 rounded-full bg-primary shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground cursor-grab active:cursor-grabbing animate-[glow_2s_ease-in-out_infinite]"
         >
-          {/* Progress ring */}
           <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 56 56">
             <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="2.5" className="opacity-20" />
             <circle
@@ -49,7 +85,7 @@ const GlobalAudioPlayer = () => {
             />
           </svg>
           {isPlaying ? <Pause className="h-5 w-5 relative z-10" /> : <Play className="h-5 w-5 relative z-10 ml-0.5" />}
-        </button>
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -92,7 +128,6 @@ const GlobalAudioPlayer = () => {
   // Full bar mode
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-t border-border shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-      {/* Playlist panel */}
       {showPlaylist && playlistTracks.length > 0 && (
         <div className="max-w-screen-lg mx-auto px-3 pb-1 max-h-48 overflow-y-auto border-b border-border">
           <p className="text-xs font-semibold text-muted-foreground py-1.5">قائمة التشغيل</p>
