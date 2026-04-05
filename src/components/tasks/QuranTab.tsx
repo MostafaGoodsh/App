@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Clock } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Bookmark } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuranPageRecord {
@@ -29,9 +28,7 @@ interface QuranSurah {
   verses: QuranVerse[];
 }
 
-const getMinimumReadingTime = (verseCount: number) => {
-  return Math.max(20, Math.min(90, verseCount * 3));
-};
+const XP_PER_10_AYAHS = 5;
 
 const QuranTab = () => {
   const { user } = useAuth();
@@ -41,40 +38,29 @@ const QuranTab = () => {
   const [completedPages, setCompletedPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [readingPageId, setReadingPageId] = useState<string | null>(null);
-  const [readingStartTime, setReadingStartTime] = useState<number | null>(null);
-  const [readingProgress, setReadingProgress] = useState(0);
+  // Track which ayahs the user has clicked/read
+  const [readAyahs, setReadAyahs] = useState<Set<string>>(new Set());
+  // Track total XP earned this session for this surah
+  const [sessionXpEarned, setSessionXpEarned] = useState(0);
+  // Track last milestone (how many sets of 10 we've rewarded)
+  const [lastMilestone, setLastMilestone] = useState(0);
 
   useEffect(() => {
     if (!user) return;
-
     const load = async () => {
       setLoading(true);
       await Promise.all([fetchQuranText(), fetchPageRecords(), fetchCompletedPages()]);
       setLoading(false);
     };
-
     load();
   }, [user]);
 
+  // Reset read state when changing surah
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (readingPageId && readingStartTime) {
-      const currentSurah = surahs[currentPageIndex];
-      if (currentSurah) {
-        const minTime = getMinimumReadingTime(currentSurah.verses.length);
-        interval = setInterval(() => {
-          const elapsed = (Date.now() - readingStartTime) / 1000;
-          const progress = Math.min(100, (elapsed / minTime) * 100);
-          setReadingProgress(progress);
-          if (progress >= 100) handleCompleteReading(readingPageId);
-        }, 1000);
-      }
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [readingPageId, readingStartTime, currentPageIndex, surahs]);
+    setReadAyahs(new Set());
+    setSessionXpEarned(0);
+    setLastMilestone(0);
+  }, [currentPageIndex]);
 
   const fetchQuranText = async () => {
     try {
@@ -132,35 +118,10 @@ const QuranTab = () => {
 
   const currentPageId = currentRecord?.id || fallbackPageId;
   const isCompleted = completedPages.includes(currentPageId);
-  const isReading = readingPageId === currentPageId;
-  const minReadingTime = currentSurah ? getMinimumReadingTime(currentSurah.verses.length) : 0;
 
-  const handleStartReading = (pageId: string) => {
-    setReadingPageId(pageId);
-    setReadingStartTime(Date.now());
-    setReadingProgress(0);
-  };
-
-  const handleCompleteReading = async (pageId: string) => {
-    if (!user || !readingStartTime || !currentSurah || !currentRecord) return;
-
+  const creditXP = useCallback(async (amount: number) => {
+    if (!user) return;
     try {
-      setCompletedPages((prev) => [...prev, pageId]);
-      setReadingPageId(null);
-      setReadingStartTime(null);
-
-      const pointsReward = currentRecord.points_reward || 5;
-
-      const { error } = await supabase.from("user_quran_completions").insert([
-        {
-          user_id: user.id,
-          page_id: pageId,
-          reading_time_seconds: Math.floor((Date.now() - readingStartTime) / 1000),
-          points_earned: pointsReward,
-        },
-      ]);
-      if (error) throw error;
-
       const { data: xpToken } = await supabase
         .from("internal_tokens")
         .select("id")
@@ -179,49 +140,84 @@ const QuranTab = () => {
         if (existing) {
           await supabase
             .from("internal_wallet_balances")
-            .update({ balance: existing.balance + pointsReward, updated_at: new Date().toISOString() })
+            .update({ balance: existing.balance + amount, updated_at: new Date().toISOString() })
             .eq("user_id", user.id)
             .eq("token_id", xpToken.id);
         } else {
           await supabase.from("internal_wallet_balances").insert({
             user_id: user.id,
             token_id: xpToken.id,
-            balance: pointsReward,
+            balance: amount,
           });
         }
       }
+    } catch (err) {
+      console.error("Error crediting XP:", err);
+    }
+  }, [user]);
 
-      toast.success(`${t("تم إكمال القراءة!", "Reading completed!")} +${pointsReward} XP 🎉`);
-      setReadingProgress(0);
+  const handleAyahClick = useCallback((surahId: number, verseId: number) => {
+    const key = `${surahId}-${verseId}`;
+    setReadAyahs(prev => {
+      if (prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.add(key);
+
+      // Check milestones
+      const totalRead = next.size;
+      const currentMilestoneCount = Math.floor(totalRead / 10);
+      
+      if (currentMilestoneCount > lastMilestone) {
+        const newRewards = (currentMilestoneCount - lastMilestone) * XP_PER_10_AYAHS;
+        setLastMilestone(currentMilestoneCount);
+        setSessionXpEarned(prev => prev + newRewards);
+        creditXP(newRewards);
+        toast.success(`+${newRewards} XP 🎉 (${totalRead} ${t("آية", "ayahs")})`);
+      }
+
+      return next;
+    });
+  }, [lastMilestone, creditXP, t]);
+
+  const handleMarkSurahComplete = async () => {
+    if (!user || !currentSurah) return;
+    const pageId = currentPageId;
+    try {
+      setCompletedPages(prev => [...prev, pageId]);
+      const pointsReward = currentRecord?.points_reward || 5;
+
+      await supabase.from("user_quran_completions").insert([{
+        user_id: user.id,
+        page_id: pageId,
+        reading_time_seconds: 0,
+        points_earned: pointsReward,
+      }]);
+
+      await creditXP(pointsReward);
+      toast.success(`${t("تم إكمال السورة!", "Surah completed!")} +${pointsReward} XP 🎉`);
     } catch (error) {
-      console.error("Error completing quran reading:", error);
-      setCompletedPages((prev) => prev.filter((id) => id !== pageId));
-      toast.error(t("حدث خطأ أثناء إكمال القراءة", "Error completing reading"));
+      console.error("Error completing surah:", error);
+      setCompletedPages(prev => prev.filter(id => id !== pageId));
+      toast.error(t("حدث خطأ", "An error occurred"));
     }
   };
 
   const handleNextPage = () => {
     if (currentPageIndex < surahs.length - 1) {
-      setCurrentPageIndex((prev) => prev + 1);
-      setReadingPageId(null);
-      setReadingStartTime(null);
-      setReadingProgress(0);
+      setCurrentPageIndex(prev => prev + 1);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPageIndex > 0) {
-      setCurrentPageIndex((prev) => prev - 1);
-      setReadingPageId(null);
-      setReadingStartTime(null);
-      setReadingProgress(0);
+      setCurrentPageIndex(prev => prev - 1);
     }
   };
 
   if (loading) {
     return (
       <div className="text-center py-10">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
         <p className="mt-4 text-muted-foreground">{t("جاري تحميل القرآن...", "Loading Quran...")}</p>
       </div>
     );
@@ -236,20 +232,23 @@ const QuranTab = () => {
     );
   }
 
+  const readCount = readAyahs.size;
+  const totalVerses = currentSurah?.verses.length || 0;
+  const readPct = totalVerses > 0 ? Math.round((readCount / totalVerses) * 100) : 0;
+
   return (
-    <div className="space-y-6" dir={dir}>
+    <div className="space-y-4" dir={dir}>
+      {/* Navigation */}
       <div className="flex items-center justify-between gap-2">
         <Button onClick={handlePrevPage} disabled={currentPageIndex === 0} variant="outline" size="sm">
           <ChevronRight className="h-4 w-4" />
         </Button>
-
         <div className="text-center">
-          <div className="text-xs text-muted-foreground mb-1">{t("السورة", "Surah")}</div>
-          <div className="text-lg sm:text-2xl font-bold text-primary">
+          <div className="text-xs text-muted-foreground">{t("السورة", "Surah")}</div>
+          <div className="text-lg font-bold text-primary">
             {currentSurah.id} / {surahs.length}
           </div>
         </div>
-
         <Button onClick={handleNextPage} disabled={currentPageIndex === surahs.length - 1} variant="outline" size="sm">
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -257,6 +256,7 @@ const QuranTab = () => {
 
       <Card className="overflow-hidden">
         <CardContent className="p-4 sm:p-6 space-y-4">
+          {/* Header */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-semibold text-primary">{currentSurah.name}</span>
             <div className="flex items-center gap-2">
@@ -266,58 +266,72 @@ const QuranTab = () => {
                 </span>
               )}
               <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-bold">
-                +{currentRecord?.points_reward || 5} XP
+                {XP_PER_10_AYAHS} XP / 10 {t("آيات", "ayahs")}
               </span>
             </div>
           </div>
 
-          <div className="bg-muted/30 rounded-lg p-4 sm:p-5">
-            <p className="font-arabic text-lg sm:text-xl leading-loose text-foreground whitespace-pre-wrap text-right">
-              {currentSurah.verses.map((verse) => (
-                <span key={verse.id}>
-                  {verse.text}
-                  <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle">
-                    ﴿{verse.id.toLocaleString("ar-EG")}﴾
-                  </span>{" "}
-                </span>
-              ))}
+          {/* Progress bar */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${readPct}%` }}
+              />
+            </div>
+            <span>{readCount}/{totalVerses}</span>
+            {sessionXpEarned > 0 && (
+              <span className="text-primary font-bold">+{sessionXpEarned} XP</span>
+            )}
+          </div>
+
+          {/* Quran text - CENTER aligned */}
+          <div className="bg-muted/30 rounded-lg p-4 sm:p-6">
+            <p className="font-arabic text-lg sm:text-xl leading-[2.5] text-foreground text-center">
+              {currentSurah.verses.map((verse) => {
+                const key = `${currentSurah.id}-${verse.id}`;
+                const isRead = readAyahs.has(key);
+                return (
+                  <span
+                    key={verse.id}
+                    onClick={() => handleAyahClick(currentSurah.id, verse.id)}
+                    className={`cursor-pointer transition-colors duration-200 px-0.5 rounded-sm inline ${
+                      isRead
+                        ? 'bg-primary/20 text-primary'
+                        : 'hover:bg-primary/10'
+                    }`}
+                  >
+                    {verse.text}
+                    <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle select-none">
+                      ﴿{verse.id.toLocaleString("ar-EG")}﴾
+                    </span>{" "}
+                  </span>
+                );
+              })}
             </p>
           </div>
 
-          {isReading && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>
-                  {t("جاري القراءة...", "Reading...")} ({Math.ceil(minReadingTime - (readingProgress / 100) * minReadingTime)} {t("ثانية متبقية", "seconds left")})
-                </span>
-              </div>
-              <Progress value={readingProgress} className="h-2" />
-            </div>
-          )}
-
-          <div className="flex justify-center">
-            {!currentRecord ? (
-              <Button variant="outline" disabled className="gap-2">
-                <BookOpen className="h-4 w-4" />
-                {t("العرض متاح - المكافأة غير مفعلة حالياً", "Text is available - reward is unavailable now")}
-              </Button>
-            ) : isCompleted ? (
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+            {isCompleted ? (
               <Button variant="outline" disabled className="gap-2">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
-                {t("تم إكمال القراءة", "Reading completed")}
-              </Button>
-            ) : isReading ? (
-              <Button variant="outline" disabled className="gap-2">
-                <Clock className="h-4 w-4 animate-spin" />
-                {t("جاري القراءة...", "Reading...")}
+                {t("تم إكمال السورة", "Surah completed")}
               </Button>
             ) : (
-              <Button onClick={() => handleStartReading(currentPageId)} className="gap-2">
-                <BookOpen className="h-4 w-4" />
-                {t("ابدأ القراءة", "Start reading")}
+              <Button
+                onClick={handleMarkSurahComplete}
+                variant="outline"
+                className="gap-2"
+                disabled={readCount === 0}
+              >
+                <Bookmark className="h-4 w-4" />
+                {t("تم - حفظ مكان التوقف", "Done - Save bookmark")}
               </Button>
             )}
+            <p className="text-xs text-muted-foreground text-center">
+              {t("اضغط على كل آية لتظليلها وتسجيل قراءتك", "Tap each ayah to mark it as read")}
+            </p>
           </div>
         </CardContent>
       </Card>
