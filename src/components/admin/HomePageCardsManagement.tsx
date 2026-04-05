@@ -222,7 +222,12 @@ export default function HomePageCardsManagement() {
       widget_config: {},
       is_coming_soon: false,
       title_text_align: 'center',
-      description_text_align: 'center'
+      description_text_align: 'center',
+      card_size: 'large',
+      card_shape: 'rounded',
+      card_animation: 'none',
+      min_height: '',
+      card_opacity: 1,
     });
     setDialogOpen(true);
   };
