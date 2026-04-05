@@ -75,7 +75,7 @@ const Index = () => {
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-4 flex flex-col gap-8 max-w-lg">
+        <section className="container mx-auto px-2 py-4 flex flex-col gap-6 max-w-full sm:max-w-2xl">
           <DynamicHomeCards />
           <div className="flex flex-col items-center justify-center gap-4 mt-8">
             <Button asChild size="lg" variant="outline" className="font-cairo w-full sm:w-auto min-w-[180px]">
