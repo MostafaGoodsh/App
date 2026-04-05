@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUICardSettings } from "@/hooks/useUICardSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
