@@ -7,8 +7,6 @@ import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import PodcastCard from "@/components/podcast/PodcastCard";
 import WheelOfFortune from "@/components/tasks/WheelOfFortune";
-import LiveStreamCard from "@/components/engagement/LiveStreamCard";
-import PodcastCard from "@/components/podcast/PodcastCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
