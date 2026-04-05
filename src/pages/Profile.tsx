@@ -53,7 +53,7 @@ export default function Profile() {
     if (!targetUserId) return;
 
     const fetchSurveys = async () => {
-      const { data } = await supabase.from('survey_responses' as any).select('id, survey_id, created_at, surveys:survey_id(title)').eq('user_id', targetUserId).order('created_at', { ascending: false });
+      const { data } = await supabase.from('survey_responses').select('id, survey_id, completed_at, surveys(title)').eq('user_id', targetUserId).order('completed_at', { ascending: false });
       if (data) setCompletedSurveys(data);
     };
 
@@ -264,8 +264,8 @@ export default function Profile() {
                     <div className="space-y-2">
                       {completedSurveys.map((survey: any) => (
                         <div key={survey.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                          <span className="text-sm font-cairo">{(survey.surveys as any)?.title || t('استبيان')}</span>
-                          <span className="text-xs text-muted-foreground">{new Date(survey.created_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</span>
+                          <span className="text-sm font-cairo">{survey.surveys?.title || t('استبيان')}</span>
+                          <span className="text-xs text-muted-foreground">{new Date(survey.completed_at).toLocaleDateString(language === 'ar' || language === 'both' ? 'ar-SA' : language === 'ru' ? 'ru-RU' : 'en-US')}</span>
                         </div>
                       ))}
                     </div>
