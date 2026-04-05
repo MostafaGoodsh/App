@@ -863,7 +863,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
               <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
-              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "تم تطبيق الترقية على حسابك" : "Upgrade applied to your account"}</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "𓆣 مكسب مضاعف ×2 على حسابك" : "𓆣 Double reward ×2 applied"}</p>
             </div>
           </div>
         )}
