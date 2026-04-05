@@ -879,7 +879,7 @@ const WheelOfFortune = () => {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="arabic-text">
-                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? (language === "ar" || language === "both" ? 'حلقة $MS-RA تدور...' : '$MS-RA ring spinning...') : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
+                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة EGP تدور...' : 'EGP ring spinning...') : isBonusAnimating ? (language === "ar" || language === "both" ? 'حلقة $MS-RA تدور...' : '$MS-RA ring spinning...') : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
                 </span>
               </>
             ) : (
