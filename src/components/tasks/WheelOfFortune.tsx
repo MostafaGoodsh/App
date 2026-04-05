@@ -201,8 +201,9 @@ const drawTripleRingWheel = (
     ctx.fill();
   }
 
-  // === RING 3 (outermost): EGP rewards - scarab = x2 ===
+  // === RING 3 (outermost): EGP rewards - ONE scarab segment = x2 ===
   const ring3SegAngle = (2 * Math.PI) / upgradeSegments.length;
+  const ring3ScarabIdx = 0; // First segment is the x2 scarab
   upgradeSegments.forEach((seg, i) => {
     const startAngle = i * ring3SegAngle + upgradeRotation;
     const endAngle = startAngle + ring3SegAngle;
@@ -212,7 +213,15 @@ const drawTripleRingWheel = (
     ctx.arc(center, center, ring3Inner, endAngle, startAngle, true);
     ctx.closePath();
 
-    ctx.fillStyle = seg.color;
+    const isScarab = i === ring3ScarabIdx;
+    if (isScarab) {
+      const grad = ctx.createRadialGradient(center, center, ring3Inner, center, center, ring3Outer);
+      grad.addColorStop(0, '#2E8B57');
+      grad.addColorStop(1, '#1B5E3A');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = seg.color;
+    }
     ctx.fill();
     ctx.strokeStyle = outerStroke;
     ctx.lineWidth = 1.5;
@@ -232,26 +241,32 @@ const drawTripleRingWheel = (
     ctx.strokeStyle = 'rgba(0,0,0,0.9)';
     ctx.lineWidth = 3.5;
 
-    // Large scarab symbol (x2 multiplier ring)
-    const scarabSize = Math.max(18, Math.round((ring3Outer - ring3Inner) * 0.45));
-    ctx.font = `bold ${scarabSize}px serif`;
-    ctx.fillStyle = '#D4AF37';
-    ctx.strokeText('𓆣', tx, ty - scarabSize * 0.35);
-    ctx.fillText('𓆣', tx, ty - scarabSize * 0.35);
-
-    // Number + EGP below scarab
-    const cleanLabel = stripUnit(seg.label);
-    const numFontSize = Math.max(11, parseInt(segFontSize) || 14);
-    ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.35);
-    ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.35);
-
-    // Small "EGP" label
-    ctx.font = `bold ${Math.max(9, numFontSize - 3)}px ${segFontFamily}`;
-    ctx.fillStyle = '#FFD700';
-    ctx.strokeText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
-    ctx.fillText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
+    if (isScarab) {
+      // Large scarab symbol (x2 multiplier)
+      const scarabSize = Math.max(22, Math.round((ring3Outer - ring3Inner) * 0.55));
+      ctx.font = `bold ${scarabSize}px serif`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeText('𓆣', tx, ty - 4);
+      ctx.fillText('𓆣', tx, ty - 4);
+      // x2 label
+      const labelSize = Math.max(10, scarabSize - 8);
+      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#90EE90';
+      ctx.strokeText('×2', tx, ty + scarabSize * 0.45);
+      ctx.fillText('×2', tx, ty + scarabSize * 0.45);
+    } else {
+      // Normal EGP segment - number + EGP only
+      const cleanLabel = stripUnit(seg.label);
+      const numFontSize = Math.max(13, parseInt(segFontSize) || 15);
+      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeText(cleanLabel, tx, ty - 4);
+      ctx.fillText(cleanLabel, tx, ty - 4);
+      ctx.font = `bold ${Math.max(9, numFontSize - 3)}px ${segFontFamily}`;
+      ctx.fillStyle = '#90EE90';
+      ctx.strokeText('EGP', tx, ty + numFontSize - 2);
+      ctx.fillText('EGP', tx, ty + numFontSize - 2);
+    }
 
     ctx.shadowBlur = 0;
     ctx.restore();
@@ -264,8 +279,11 @@ const drawTripleRingWheel = (
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // === RING 2 (middle): $MS-RA tokens ===
+  // === RING 2 (middle): $MS-RA tokens - ONE scarab for transition ===
   const ring2SegAngle = (2 * Math.PI) / msraSegments.length;
+  // Find the upgrade trigger segment, or use last index as scarab
+  const ring2ScarabIdx = msraSegments.findIndex((s) => isUpgradeTriggerSegment(s as any));
+  const actualRing2Scarab = ring2ScarabIdx >= 0 ? ring2ScarabIdx : msraSegments.length - 1;
   msraSegments.forEach((seg, i) => {
     const startAngle = i * ring2SegAngle + outerRotation;
     const endAngle = startAngle + ring2SegAngle;
@@ -275,7 +293,15 @@ const drawTripleRingWheel = (
     ctx.arc(center, center, ring2Inner, endAngle, startAngle, true);
     ctx.closePath();
 
-    ctx.fillStyle = seg.color;
+    const isScarab = i === actualRing2Scarab;
+    if (isScarab) {
+      const grad = ctx.createRadialGradient(center, center, ring2Inner, center, center, ring2Outer);
+      grad.addColorStop(0, '#C5A028');
+      grad.addColorStop(1, '#8B6914');
+      ctx.fillStyle = grad;
+    } else {
+      ctx.fillStyle = seg.color;
+    }
     ctx.fill();
     ctx.strokeStyle = middleStroke;
     ctx.lineWidth = 1.5;
@@ -295,26 +321,31 @@ const drawTripleRingWheel = (
     ctx.strokeStyle = 'rgba(0,0,0,0.9)';
     ctx.lineWidth = 3.5;
 
-    // Large scarab symbol
-    const scarabSize = Math.max(16, Math.round((ring2Outer - ring2Inner) * 0.4));
-    ctx.font = `bold ${scarabSize}px serif`;
-    ctx.fillStyle = '#D4AF37';
-    ctx.strokeText('𓆣', tx, ty - scarabSize * 0.3);
-    ctx.fillText('𓆣', tx, ty - scarabSize * 0.3);
-
-    // Number below scarab
-    const cleanLabel = stripUnit(seg.label);
-    const numFontSize = Math.max(11, parseInt(segFontSize) || 14);
-    ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.3);
-    ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.3);
-
-    // Small "$MS-RA" label
-    ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
-    ctx.fillStyle = '#FFD700';
-    ctx.strokeText('$MS-RA', tx, ty + scarabSize * 0.3 + numFontSize);
-    ctx.fillText('$MS-RA', tx, ty + scarabSize * 0.3 + numFontSize);
+    if (isScarab) {
+      // Large scarab - transitions to outer EGP ring
+      const scarabSize = Math.max(20, Math.round((ring2Outer - ring2Inner) * 0.5));
+      ctx.font = `bold ${scarabSize}px serif`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeText('𓆣', tx, ty - 4);
+      ctx.fillText('𓆣', tx, ty - 4);
+      const labelSize = Math.max(9, scarabSize - 8);
+      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#90EE90';
+      ctx.strokeText('→ EGP', tx, ty + scarabSize * 0.4);
+      ctx.fillText('→ EGP', tx, ty + scarabSize * 0.4);
+    } else {
+      // Normal $MS-RA segment - number + currency only
+      const cleanLabel = stripUnit(seg.label);
+      const numFontSize = Math.max(12, parseInt(segFontSize) || 14);
+      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeText(cleanLabel, tx, ty - 4);
+      ctx.fillText(cleanLabel, tx, ty - 4);
+      ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeText('$MS-RA', tx, ty + numFontSize - 2);
+      ctx.fillText('$MS-RA', tx, ty + numFontSize - 2);
+    }
 
     ctx.shadowBlur = 0;
     ctx.restore();
@@ -386,24 +417,21 @@ const drawTripleRingWheel = (
     ctx.shadowBlur = 4;
 
     if (isBonusTrigger) {
-      // Bonus trigger - show scarab symbol (large like center eye) + "Bonus"
-      const scarabSize = Math.round(innerCenterRadius * 0.7);
+      // Bonus trigger - show large scarab (transition to MS-RA ring)
+      const scarabSize = Math.max(18, Math.round(innerCenterRadius * 0.8));
       ctx.font = `bold ${scarabSize}px serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
-      ctx.fillStyle = '#D4AF37';
-      const line1Y = ty - scarabSize * 0.3;
-      ctx.strokeText('𓆣', tx, line1Y);
-      ctx.fillText('𓆣', tx, line1Y);
-      // Line 2: "Bonus" text
-      const bonusFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.fillStyle = '#FFD700';
-      ctx.font = `bold ${bonusFontSize - 1}px ${segFontFamily}`;
-      const line2Y = ty + scarabSize * 0.4;
-      ctx.strokeText('Bonus', tx, line2Y);
-      ctx.fillText('Bonus', tx, line2Y);
+      ctx.strokeText('𓆣', tx, ty - 4);
+      ctx.fillText('𓆣', tx, ty - 4);
+      const labelSize = Math.max(9, scarabSize - 8);
+      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#D4AF37';
+      ctx.strokeText('→ $MS-RA', tx, ty + scarabSize * 0.4);
+      ctx.fillText('→ $MS-RA', tx, ty + scarabSize * 0.4);
     } else if (isUpgradeTrigger) {
-      // Upgrade trigger - show Was scepter (large like center eye) & "Upgrade"
+      // Upgrade trigger - Was scepter (transition to EGP ring)
       const scepterSize = Math.round(innerCenterRadius * 0.7);
       ctx.font = `bold ${scepterSize}px serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
@@ -415,29 +443,22 @@ const drawTripleRingWheel = (
       const upgFontSize = Math.max(11, (parseInt(segFontSize) || 15) - 2);
       ctx.font = `bold ${upgFontSize - 1}px ${segFontFamily}`;
       const line2Y = ty + scepterSize * 0.4;
-      ctx.strokeText('⬆ L.E.', tx, line2Y);
-      ctx.fillText('⬆ L.E.', tx, line2Y);
+      ctx.strokeText('→ EGP', tx, line2Y);
+      ctx.fillText('→ EGP', tx, line2Y);
     } else {
-      // Normal XP segment - scarab + number + XP
-      const scarabSize = Math.max(14, Math.round((ring1Outer - innerCenterRadius) * 0.35));
-      ctx.font = `bold ${scarabSize}px serif`;
+      // Normal XP segment - number + XP only (NO scarab)
+      const numFontSize = Math.max(12, parseInt(segFontSize) || 14);
+      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
-      ctx.fillStyle = '#D4AF37';
-      ctx.strokeText('𓆣', tx, ty - scarabSize * 0.3);
-      ctx.fillText('𓆣', tx, ty - scarabSize * 0.3);
-
-      const cleanLabel = stripUnit(seg.label);
-      const numFontSize = Math.max(10, parseInt(segFontSize) || 13);
-      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
       ctx.fillStyle = '#ffffff';
-      ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.25);
-      ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.25);
-
+      const cleanLabel = stripUnit(seg.label);
+      ctx.strokeText(cleanLabel, tx, ty - 4);
+      ctx.fillText(cleanLabel, tx, ty - 4);
       ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
       ctx.fillStyle = '#FFD700';
-      ctx.strokeText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
-      ctx.fillText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
+      ctx.strokeText('XP', tx, ty + numFontSize - 2);
+      ctx.fillText('XP', tx, ty + numFontSize - 2);
     }
     ctx.shadowBlur = 0;
     ctx.restore();
