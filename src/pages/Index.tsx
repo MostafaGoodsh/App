@@ -86,8 +86,8 @@ const Index = () => {
           <RoadmapCardsGrid />
         </section>
         
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-full px-2 sm:max-w-2xl md:max-w-4xl lg:max-w-5xl space-y-6">
+        <section className="py-8 px-2">
+          <div className="container mx-auto max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl space-y-6">
             <MsRaCurrencyCard isVerified={isIdentityVerified} />
             <TotalMiningDisplay />
             <ReferralCard />
