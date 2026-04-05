@@ -713,7 +713,7 @@ const WheelOfFortune = () => {
           setResult(language === "ar" || language === "both" ? "☥ بونص! الحلقة الوسطى تدور..." : "☥ Bonus! The middle ring is spinning...");
           setTimeout(() => spinBonusRing(), 800);
         } else if (winner.reward_type === "upgrade") {
-          setResult(language === "ar" || language === "both" ? "⬆ ترقية! الحلقة الخارجية تدور..." : "⬆ Upgrade! The outer ring is spinning...");
+          setResult(language === "ar" || language === "both" ? "⬆ EGP! الحلقة الخارجية تدور..." : "⬆ EGP! The outer ring is spinning...");
           setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
           const extraSpins = Math.floor(winner.reward_value);
@@ -815,7 +815,7 @@ const WheelOfFortune = () => {
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-4 py-1.5 animate-pulse">
-                <span className="text-emerald-400 text-xs font-bold">𓌀 {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
+                <span className="text-emerald-400 text-xs font-bold">𓆣 EGP ×2 🎰</span>
               </div>
             </div>
           )}
