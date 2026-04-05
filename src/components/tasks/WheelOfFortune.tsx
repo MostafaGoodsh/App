@@ -757,10 +757,15 @@ const WheelOfFortune = () => {
   if (!settings?.is_visible || segments.length === 0) return null;
 
   const anyAnimating = isAnimating || isBonusAnimating || isUpgradeAnimating;
+  const wheelCardSetting = getCardSetting('wheel_of_fortune');
+  const hasWheelCustom = wheelCardSetting?.background_image || wheelCardSetting?.background_gradient || wheelCardSetting?.background_color;
+  const wheelCardStyle = hasWheelCustom ? getCardStyle('wheel_of_fortune') : {};
 
   return (
-    <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative">
-      {/* Egyptian corner decorations - larger and better positioned */}
+    <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative" style={wheelCardStyle}>
+      {wheelCardSetting?.background_image && (
+        <div className="absolute inset-0 z-0" style={{ backgroundColor: `rgba(0,0,0,${wheelCardSetting.overlay_opacity || 0.6})` }} />
+      )}
       <div className="absolute top-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓅃</div>
       <div className="absolute top-3 right-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓁢</div>
       <div className="absolute bottom-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓆣</div>
