@@ -200,7 +200,7 @@ const drawTripleRingWheel = (
     ctx.fill();
   }
 
-  // === RING 3 (outermost): Upgrade rewards ===
+  // === RING 3 (outermost): EGP rewards - scarab = x2 ===
   const ring3SegAngle = (2 * Math.PI) / upgradeSegments.length;
   upgradeSegments.forEach((seg, i) => {
     const startAngle = i * ring3SegAngle + upgradeRotation;
@@ -226,23 +226,32 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
-    ctx.fillStyle = '#ffffff';
-    const fontSize = Math.max(12, parseInt(segFontSize) || 15);
-    ctx.font = `bold ${fontSize}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
     ctx.shadowBlur = 6;
     ctx.strokeStyle = 'rgba(0,0,0,0.9)';
     ctx.lineWidth = 3.5;
 
+    // Large scarab symbol (x2 multiplier ring)
+    const scarabSize = Math.max(18, Math.round((ring3Outer - ring3Inner) * 0.45));
+    ctx.font = `bold ${scarabSize}px serif`;
+    ctx.fillStyle = '#D4AF37';
+    ctx.strokeText('𓆣', tx, ty - scarabSize * 0.35);
+    ctx.fillText('𓆣', tx, ty - scarabSize * 0.35);
+
+    // Number + EGP below scarab
     const cleanLabel = stripUnit(seg.label);
-    const maxW = (ring3Outer - ring3Inner) * 0.82;
-    const lines = wrapText(ctx, cleanLabel, maxW);
-    const lineH = size < 400 ? 13 : 16;
-    const startY = ty - ((lines.length - 1) * lineH) / 2;
-    lines.forEach((line, li) => {
-      ctx.strokeText(line, tx, startY + li * lineH);
-      ctx.fillText(line, tx, startY + li * lineH);
-    });
+    const numFontSize = Math.max(11, parseInt(segFontSize) || 14);
+    ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.35);
+    ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.35);
+
+    // Small "EGP" label
+    ctx.font = `bold ${Math.max(9, numFontSize - 3)}px ${segFontFamily}`;
+    ctx.fillStyle = '#FFD700';
+    ctx.strokeText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
+    ctx.fillText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
+
     ctx.shadowBlur = 0;
     ctx.restore();
   });
