@@ -282,7 +282,12 @@ export default function HomePageCardsManagement() {
         widget_config: editingCard.widget_config || {},
         is_coming_soon: editingCard.is_coming_soon || false,
         title_text_align: editingCard.title_text_align || 'center',
-        description_text_align: editingCard.description_text_align || 'center'
+        description_text_align: editingCard.description_text_align || 'center',
+        card_size: editingCard.card_size || 'large',
+        card_shape: editingCard.card_shape || 'rounded',
+        card_animation: editingCard.card_animation || 'none',
+        min_height: editingCard.min_height || null,
+        card_opacity: editingCard.card_opacity ?? 1,
       };
 
       if (isNewCard) {
@@ -468,11 +473,12 @@ export default function HomePageCardsManagement() {
           
           {editingCard && (
             <Tabs defaultValue="basic" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">أساسي</TabsTrigger>
-                <TabsTrigger value="styling">التصميم</TabsTrigger>
-                <TabsTrigger value="fonts">الخطوط</TabsTrigger>
-                <TabsTrigger value="widgets">الويدجتات</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="basic" className="text-xs">أساسي</TabsTrigger>
+                <TabsTrigger value="styling" className="text-xs">التصميم</TabsTrigger>
+                <TabsTrigger value="shape" className="text-xs">الشكل</TabsTrigger>
+                <TabsTrigger value="fonts" className="text-xs">الخطوط</TabsTrigger>
+                <TabsTrigger value="widgets" className="text-xs">ويدجت</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4">
