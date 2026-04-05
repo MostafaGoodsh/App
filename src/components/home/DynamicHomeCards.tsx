@@ -80,41 +80,47 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
   const opacity = card.card_opacity ?? 1;
   const customMinHeight = card.min_height || undefined;
 
+  // Coming soon → not clickable
+  if (card.is_coming_soon) {
+    return (
+      <div className="group">
+        <article
+          dir={isArabic ? "rtl" : "ltr"}
+          className={`relative overflow-hidden ${shapeClass} border border-border/50 bg-card/30 backdrop-blur-sm ${animationClass} cursor-default opacity-70`}
+          style={{ ...gradientStyle, minHeight: customMinHeight }}
+        >
+          {hasValidImage && (
+            <img src={card.background_image!} alt={displayTitle}
+              className="absolute inset-0 w-full h-full object-cover opacity-25" loading="lazy" onError={() => setImgError(true)} />
+          )}
+          <div className={`relative p-8 ${sizeClass} flex flex-col justify-end items-stretch bg-gradient-to-t from-background/90 via-background/60 to-transparent`} style={{ minHeight: customMinHeight }}>
+            <h2 className="font-cairo mb-3 text-primary/60 font-bold w-full" style={titleStyle}>{displayTitle}</h2>
+            {displayDesc && <p className="font-cairo text-white/60 leading-relaxed w-full" style={descStyle}>{displayDesc}</p>}
+            <span className="mt-2 inline-block text-xs bg-primary/20 text-primary px-3 py-1 rounded-full w-fit animate-pulse">{t("قريباً")}</span>
+          </div>
+        </article>
+      </div>
+    );
+  }
+
+  // Use route_path if set, otherwise /card/:slug for internal pages
+  const linkTo = card.route_path || `/card/${card.slug}`;
+
   return (
-    <Link to={card.route_path || `/${card.slug}`} className="group">
+    <Link to={linkTo} className="group">
       <article
         dir={isArabic ? "rtl" : "ltr"}
         className={`relative overflow-hidden ${shapeClass} border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm ${animationClass}`}
         style={{ ...gradientStyle, opacity, minHeight: customMinHeight }}
       >
         {hasValidImage && (
-          <img
-            src={card.background_image!}
-            alt={displayTitle}
+          <img src={card.background_image!} alt={displayTitle}
             className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
+            loading="lazy" onError={() => setImgError(true)} />
         )}
-        <div className={`relative p-8 ${sizeClass} flex flex-col justify-end items-stretch bg-gradient-to-t from-background/90 via-background/60 to-transparent`}
-          style={{ minHeight: customMinHeight }}
-        >
-          <h2
-            className="font-cairo mb-3 text-primary transition-colors duration-300 font-bold w-full"
-            style={titleStyle}
-          >
-            {displayTitle}
-          </h2>
-          {displayDesc && (
-            <p className="font-cairo text-white/90 leading-relaxed w-full" style={descStyle}>
-              {displayDesc}
-            </p>
-          )}
-          {card.is_coming_soon && (
-            <span className="mt-2 inline-block text-xs bg-primary/20 text-primary px-3 py-1 rounded-full w-fit">
-              {t("قريباً")}
-            </span>
-          )}
+        <div className={`relative p-8 ${sizeClass} flex flex-col justify-end items-stretch bg-gradient-to-t from-background/90 via-background/60 to-transparent`} style={{ minHeight: customMinHeight }}>
+          <h2 className="font-cairo mb-3 text-primary transition-colors duration-300 font-bold w-full" style={titleStyle}>{displayTitle}</h2>
+          {displayDesc && <p className="font-cairo text-white/90 leading-relaxed w-full" style={descStyle}>{displayDesc}</p>}
           <div className="mt-4 w-12 h-0.5 bg-gradient-to-r from-primary/50 via-primary to-primary/50 group-hover:w-20 transition-all duration-300" />
         </div>
       </article>
