@@ -6,6 +6,9 @@ import AnubisCard from "@/components/AnubisCard";
 import { ExternalReelsCard } from "@/components/reels/ExternalReelsCard";
 import LiveStreamCard from "@/components/engagement/LiveStreamCard";
 import PodcastCard from "@/components/podcast/PodcastCard";
+import WheelOfFortune from "@/components/tasks/WheelOfFortune";
+import LiveStreamCard from "@/components/engagement/LiveStreamCard";
+import PodcastCard from "@/components/podcast/PodcastCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTypographyStyles, useTypography } from "@/hooks/useTypography";
 import { buildHomeCardTypographyStyles, getCardTypographySectionKey } from "@/utils/homeCardTypography";
@@ -18,6 +21,7 @@ const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePag
   reels: ExternalReelsCard,
   live_stream: LiveStreamCard,
   podcast: PodcastCard,
+  wheel: WheelOfFortune as React.ComponentType<{ card?: HomePageCard }>,
 };
 
 const getShapeClasses = (shape: string) => {

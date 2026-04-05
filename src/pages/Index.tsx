@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
-import WheelOfFortune from "@/components/tasks/WheelOfFortune";
+
 import DynamicHomeCards from "@/components/home/DynamicHomeCards";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -82,7 +82,7 @@ const Index = () => {
               <Link to="/early-access">{t(getContent('hero_cta', 'انضم الآن'), 'Join Now')}</Link>
             </Button>
           </div>
-          <WheelOfFortune />
+          
           <RoadmapCardsGrid />
         </section>
         
