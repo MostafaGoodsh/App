@@ -22,4 +22,9 @@ export interface HomePageCard {
   text_color: string | null;
   title_font_size: string | null;
   content_font_size: string | null;
+  card_size: string;
+  card_shape: string;
+  card_animation: string;
+  min_height: string | null;
+  card_opacity: number | null;
 }

@@ -70,6 +70,11 @@ interface HomePageCard {
   is_coming_soon: boolean;
   title_text_align: string;
   description_text_align: string;
+  card_size: string;
+  card_shape: string;
+  card_animation: string;
+  min_height: string;
+  card_opacity: number;
 }
 
 export default function HomePageCardsManagement() {
