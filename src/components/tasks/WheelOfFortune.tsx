@@ -472,6 +472,7 @@ const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 *
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
   const { language, t, dir } = useLanguage();
+  const { getCardStyle, getCardSetting } = useUICardSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [upgradeRotation, setUpgradeRotation] = useState(0);
   const [outerRotation, setOuterRotation] = useState(0);
