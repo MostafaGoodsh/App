@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useWheelOfFortune } from "@/hooks/useWheelOfFortune";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUICardSettings } from "@/hooks/useUICardSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,14 +22,14 @@ const FALLBACK_BONUS_SEGMENTS = [
 ];
 
 const FALLBACK_UPGRADE_SEGMENTS = [
-  { label: 'ترقية تعدين', label_en: 'Mining Upgrade', value: 1, probability: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
-  { label: '+10% معدل', label_en: '+10% Rate', value: 10, probability: 2, color: '#1a1a2e', reward_type: 'rate_boost' },
-  { label: '+5 قوة', label_en: '+5 Strength', value: 5, probability: 1.5, color: '#228B22', reward_type: 'strength_boost' },
-  { label: 'ترقية مجانية', label_en: 'Free Upgrade', value: 1, probability: 0.5, color: '#2d2d44', reward_type: 'free_upgrade' },
-  { label: '+20% XP', label_en: '+20% XP', value: 20, probability: 1, color: '#3CB371', reward_type: 'xp_boost' },
-  { label: 'نقاط مضاعفة', label_en: 'Double Points', value: 2, probability: 0.8, color: '#0d0d1a', reward_type: 'double_points' },
-  { label: 'ترقية سريعة', label_en: 'Quick Upgrade', value: 1, probability: 0.7, color: '#32CD32', reward_type: 'quick_upgrade' },
-  { label: '+50 قوة', label_en: '+50 Strength', value: 50, probability: 0.3, color: '#1f1f35', reward_type: 'strength_boost' },
+  { label: '5 EGP', label_en: '5 EGP', value: 5, probability: 2, color: '#2E8B57', reward_type: 'egp' },
+  { label: '10 EGP', label_en: '10 EGP', value: 10, probability: 1.5, color: '#1a1a2e', reward_type: 'egp' },
+  { label: '20 EGP', label_en: '20 EGP', value: 20, probability: 1, color: '#228B22', reward_type: 'egp' },
+  { label: '50 EGP', label_en: '50 EGP', value: 50, probability: 0.5, color: '#2d2d44', reward_type: 'egp' },
+  { label: '1 EGP', label_en: '1 EGP', value: 1, probability: 3, color: '#3CB371', reward_type: 'egp' },
+  { label: '100 EGP', label_en: '100 EGP', value: 100, probability: 0.3, color: '#0d0d1a', reward_type: 'egp' },
+  { label: '2 EGP', label_en: '2 EGP', value: 2, probability: 2.5, color: '#32CD32', reward_type: 'egp' },
+  { label: '25 EGP', label_en: '25 EGP', value: 25, probability: 0.8, color: '#1f1f35', reward_type: 'egp' },
 ];
 
 type BonusSegment = {
@@ -200,7 +201,7 @@ const drawTripleRingWheel = (
     ctx.fill();
   }
 
-  // === RING 3 (outermost): Upgrade rewards ===
+  // === RING 3 (outermost): EGP rewards - scarab = x2 ===
   const ring3SegAngle = (2 * Math.PI) / upgradeSegments.length;
   upgradeSegments.forEach((seg, i) => {
     const startAngle = i * ring3SegAngle + upgradeRotation;
@@ -226,23 +227,32 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
-    ctx.fillStyle = '#ffffff';
-    const fontSize = Math.max(12, parseInt(segFontSize) || 15);
-    ctx.font = `bold ${fontSize}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
     ctx.shadowBlur = 6;
     ctx.strokeStyle = 'rgba(0,0,0,0.9)';
     ctx.lineWidth = 3.5;
 
+    // Large scarab symbol (x2 multiplier ring)
+    const scarabSize = Math.max(18, Math.round((ring3Outer - ring3Inner) * 0.45));
+    ctx.font = `bold ${scarabSize}px serif`;
+    ctx.fillStyle = '#D4AF37';
+    ctx.strokeText('𓆣', tx, ty - scarabSize * 0.35);
+    ctx.fillText('𓆣', tx, ty - scarabSize * 0.35);
+
+    // Number + EGP below scarab
     const cleanLabel = stripUnit(seg.label);
-    const maxW = (ring3Outer - ring3Inner) * 0.82;
-    const lines = wrapText(ctx, cleanLabel, maxW);
-    const lineH = size < 400 ? 13 : 16;
-    const startY = ty - ((lines.length - 1) * lineH) / 2;
-    lines.forEach((line, li) => {
-      ctx.strokeText(line, tx, startY + li * lineH);
-      ctx.fillText(line, tx, startY + li * lineH);
-    });
+    const numFontSize = Math.max(11, parseInt(segFontSize) || 14);
+    ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.35);
+    ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.35);
+
+    // Small "EGP" label
+    ctx.font = `bold ${Math.max(9, numFontSize - 3)}px ${segFontFamily}`;
+    ctx.fillStyle = '#FFD700';
+    ctx.strokeText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
+    ctx.fillText('EGP', tx, ty + scarabSize * 0.35 + numFontSize);
+
     ctx.shadowBlur = 0;
     ctx.restore();
   });
@@ -280,23 +290,32 @@ const drawTripleRingWheel = (
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.direction = 'ltr';
-    ctx.fillStyle = '#ffffff';
-    const fontSize = Math.max(12, parseInt(segFontSize) || 15);
-    ctx.font = `bold ${fontSize}px ${segFontFamily}`;
     ctx.shadowColor = 'rgba(0,0,0,0.95)';
     ctx.shadowBlur = 6;
     ctx.strokeStyle = 'rgba(0,0,0,0.9)';
     ctx.lineWidth = 3.5;
 
+    // Large scarab symbol
+    const scarabSize = Math.max(16, Math.round((ring2Outer - ring2Inner) * 0.4));
+    ctx.font = `bold ${scarabSize}px serif`;
+    ctx.fillStyle = '#D4AF37';
+    ctx.strokeText('𓆣', tx, ty - scarabSize * 0.3);
+    ctx.fillText('𓆣', tx, ty - scarabSize * 0.3);
+
+    // Number below scarab
     const cleanLabel = stripUnit(seg.label);
-    const maxW = (ring2Outer - ring2Inner) * 0.82;
-    const lines = wrapText(ctx, cleanLabel, maxW);
-    const lineH = size < 400 ? 13 : 16;
-    const startY = ty - ((lines.length - 1) * lineH) / 2;
-    lines.forEach((line, li) => {
-      ctx.strokeText(line, tx, startY + li * lineH);
-      ctx.fillText(line, tx, startY + li * lineH);
-    });
+    const numFontSize = Math.max(11, parseInt(segFontSize) || 14);
+    ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.3);
+    ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.3);
+
+    // Small "$MS-RA" label
+    ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
+    ctx.fillStyle = '#FFD700';
+    ctx.strokeText('$MS-RA', tx, ty + scarabSize * 0.3 + numFontSize);
+    ctx.fillText('$MS-RA', tx, ty + scarabSize * 0.3 + numFontSize);
+
     ctx.shadowBlur = 0;
     ctx.restore();
   });
@@ -399,20 +418,26 @@ const drawTripleRingWheel = (
       ctx.strokeText('⬆ L.E.', tx, line2Y);
       ctx.fillText('⬆ L.E.', tx, line2Y);
     } else {
-      ctx.fillStyle = '#ffffff';
-      const fontSize = Math.max(12, parseInt(segFontSize) || 15);
-      ctx.font = `bold ${fontSize}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      // Normal XP segment - scarab + number + XP
+      const scarabSize = Math.max(14, Math.round((ring1Outer - innerCenterRadius) * 0.35));
+      ctx.font = `bold ${scarabSize}px serif`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
+      ctx.fillStyle = '#D4AF37';
+      ctx.strokeText('𓆣', tx, ty - scarabSize * 0.3);
+      ctx.fillText('𓆣', tx, ty - scarabSize * 0.3);
+
       const cleanLabel = stripUnit(seg.label);
-      const maxW = (ring1Outer - innerCenterRadius) * 0.82;
-      const txtLines = wrapText(ctx, cleanLabel, maxW);
-      const lineH = size < 400 ? 13 : 16;
-      const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
-      txtLines.forEach((line, li) => {
-        ctx.strokeText(line, tx, startTxtY + li * lineH);
-        ctx.fillText(line, tx, startTxtY + li * lineH);
-      });
+      const numFontSize = Math.max(10, parseInt(segFontSize) || 13);
+      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.25);
+      ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.25);
+
+      ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
+      ctx.fillText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
     }
     ctx.shadowBlur = 0;
     ctx.restore();
@@ -447,6 +472,7 @@ const normalizeAngle = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 *
 const WheelOfFortune = () => {
   const { segments, settings, todaySpins, setTodaySpins, spinning, loading, canSpin, isFree, spinWheel, processBonusReward } = useWheelOfFortune();
   const { language, t, dir } = useLanguage();
+  const { getCardStyle, getCardSetting } = useUICardSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [upgradeRotation, setUpgradeRotation] = useState(0);
   const [outerRotation, setOuterRotation] = useState(0);
@@ -689,7 +715,7 @@ const WheelOfFortune = () => {
           setResult(language === "ar" || language === "both" ? "☥ بونص! الحلقة الوسطى تدور..." : "☥ Bonus! The middle ring is spinning...");
           setTimeout(() => spinBonusRing(), 800);
         } else if (winner.reward_type === "upgrade") {
-          setResult(language === "ar" || language === "both" ? "⬆ ترقية! الحلقة الخارجية تدور..." : "⬆ Upgrade! The outer ring is spinning...");
+          setResult(language === "ar" || language === "both" ? "⬆ EGP! الحلقة الخارجية تدور..." : "⬆ EGP! The outer ring is spinning...");
           setTimeout(() => spinUpgradeRing(), 800);
         } else if (winner.reward_type === "free_spin") {
           const extraSpins = Math.floor(winner.reward_value);
@@ -731,10 +757,15 @@ const WheelOfFortune = () => {
   if (!settings?.is_visible || segments.length === 0) return null;
 
   const anyAnimating = isAnimating || isBonusAnimating || isUpgradeAnimating;
+  const wheelCardSetting = getCardSetting('wheel_of_fortune');
+  const hasWheelCustom = wheelCardSetting?.background_image || wheelCardSetting?.background_gradient || wheelCardSetting?.background_color;
+  const wheelCardStyle = hasWheelCustom ? getCardStyle('wheel_of_fortune') : {};
 
   return (
-    <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative">
-      {/* Egyptian corner decorations - larger and better positioned */}
+    <Card className="border-amber-500/40 bg-gradient-to-b from-[#1a1a2e] to-[#0d0d1a] overflow-hidden relative" style={wheelCardStyle}>
+      {wheelCardSetting?.background_image && (
+        <div className="absolute inset-0 z-0" style={{ backgroundColor: `rgba(0,0,0,${wheelCardSetting.overlay_opacity || 0.6})` }} />
+      )}
       <div className="absolute top-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓅃</div>
       <div className="absolute top-3 right-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓁢</div>
       <div className="absolute bottom-3 left-4 text-amber-500/50 text-2xl select-none drop-shadow-[0_0_4px_rgba(212,175,55,0.3)]">𓆣</div>
@@ -791,7 +822,7 @@ const WheelOfFortune = () => {
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-4 py-1.5 animate-pulse">
-                <span className="text-emerald-400 text-xs font-bold">𓌀 {language === "ar" || language === "both" ? "ترقية" : "Upgrade"} 🎰</span>
+                <span className="text-emerald-400 text-xs font-bold">𓆣 EGP ×2 🎰</span>
               </div>
             </div>
           )}
@@ -801,7 +832,7 @@ const WheelOfFortune = () => {
         <div className="flex flex-wrap items-center justify-center gap-4 text-[10px]" dir={dir}>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-            <span className="text-emerald-400/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الخارجية: ترقيات" : "Outer: Upgrades"}</span>
+            <span className="text-emerald-400/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الخارجية: EGP 𓆣×2" : "Outer: EGP 𓆣×2"}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
@@ -839,7 +870,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
               <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
-              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "تم تطبيق الترقية على حسابك" : "Upgrade applied to your account"}</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "𓆣 مكسب مضاعف ×2 على حسابك" : "𓆣 Double reward ×2 applied"}</p>
             </div>
           </div>
         )}
@@ -855,7 +886,7 @@ const WheelOfFortune = () => {
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span className="arabic-text">
-                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة الترقية تدور...' : 'Upgrade ring spinning...') : isBonusAnimating ? (language === "ar" || language === "both" ? 'حلقة $MS-RA تدور...' : '$MS-RA ring spinning...') : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
+                  {isUpgradeAnimating ? (language === "ar" || language === "both" ? 'حلقة EGP تدور...' : 'EGP ring spinning...') : isBonusAnimating ? (language === "ar" || language === "both" ? 'حلقة $MS-RA تدور...' : '$MS-RA ring spinning...') : (language === "ar" || language === "both" ? 'جاري التدوير...' : 'Spinning...')}
                 </span>
               </>
             ) : (
