@@ -417,20 +417,26 @@ const drawTripleRingWheel = (
       ctx.strokeText('⬆ L.E.', tx, line2Y);
       ctx.fillText('⬆ L.E.', tx, line2Y);
     } else {
-      ctx.fillStyle = '#ffffff';
-      const fontSize = Math.max(12, parseInt(segFontSize) || 15);
-      ctx.font = `bold ${fontSize}px ${segFontFamily}`;
-      ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+      // Normal XP segment - scarab + number + XP
+      const scarabSize = Math.max(14, Math.round((ring1Outer - innerCenterRadius) * 0.35));
+      ctx.font = `bold ${scarabSize}px serif`;
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
+      ctx.fillStyle = '#D4AF37';
+      ctx.strokeText('𓆣', tx, ty - scarabSize * 0.3);
+      ctx.fillText('𓆣', tx, ty - scarabSize * 0.3);
+
       const cleanLabel = stripUnit(seg.label);
-      const maxW = (ring1Outer - innerCenterRadius) * 0.82;
-      const txtLines = wrapText(ctx, cleanLabel, maxW);
-      const lineH = size < 400 ? 13 : 16;
-      const startTxtY = ty - ((txtLines.length - 1) * lineH) / 2;
-      txtLines.forEach((line, li) => {
-        ctx.strokeText(line, tx, startTxtY + li * lineH);
-        ctx.fillText(line, tx, startTxtY + li * lineH);
-      });
+      const numFontSize = Math.max(10, parseInt(segFontSize) || 13);
+      ctx.font = `bold ${numFontSize}px ${segFontFamily}`;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeText(cleanLabel, tx, ty + scarabSize * 0.25);
+      ctx.fillText(cleanLabel, tx, ty + scarabSize * 0.25);
+
+      ctx.font = `bold ${Math.max(8, numFontSize - 4)}px ${segFontFamily}`;
+      ctx.fillStyle = '#FFD700';
+      ctx.strokeText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
+      ctx.fillText('XP', tx, ty + scarabSize * 0.25 + numFontSize);
     }
     ctx.shadowBlur = 0;
     ctx.restore();
