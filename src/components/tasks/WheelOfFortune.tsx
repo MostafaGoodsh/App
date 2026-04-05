@@ -21,14 +21,14 @@ const FALLBACK_BONUS_SEGMENTS = [
 ];
 
 const FALLBACK_UPGRADE_SEGMENTS = [
-  { label: 'ترقية تعدين', label_en: 'Mining Upgrade', value: 1, probability: 1, color: '#2E8B57', reward_type: 'mining_upgrade' },
-  { label: '+10% معدل', label_en: '+10% Rate', value: 10, probability: 2, color: '#1a1a2e', reward_type: 'rate_boost' },
-  { label: '+5 قوة', label_en: '+5 Strength', value: 5, probability: 1.5, color: '#228B22', reward_type: 'strength_boost' },
-  { label: 'ترقية مجانية', label_en: 'Free Upgrade', value: 1, probability: 0.5, color: '#2d2d44', reward_type: 'free_upgrade' },
-  { label: '+20% XP', label_en: '+20% XP', value: 20, probability: 1, color: '#3CB371', reward_type: 'xp_boost' },
-  { label: 'نقاط مضاعفة', label_en: 'Double Points', value: 2, probability: 0.8, color: '#0d0d1a', reward_type: 'double_points' },
-  { label: 'ترقية سريعة', label_en: 'Quick Upgrade', value: 1, probability: 0.7, color: '#32CD32', reward_type: 'quick_upgrade' },
-  { label: '+50 قوة', label_en: '+50 Strength', value: 50, probability: 0.3, color: '#1f1f35', reward_type: 'strength_boost' },
+  { label: '5 EGP', label_en: '5 EGP', value: 5, probability: 2, color: '#2E8B57', reward_type: 'egp' },
+  { label: '10 EGP', label_en: '10 EGP', value: 10, probability: 1.5, color: '#1a1a2e', reward_type: 'egp' },
+  { label: '20 EGP', label_en: '20 EGP', value: 20, probability: 1, color: '#228B22', reward_type: 'egp' },
+  { label: '50 EGP', label_en: '50 EGP', value: 50, probability: 0.5, color: '#2d2d44', reward_type: 'egp' },
+  { label: '1 EGP', label_en: '1 EGP', value: 1, probability: 3, color: '#3CB371', reward_type: 'egp' },
+  { label: '100 EGP', label_en: '100 EGP', value: 100, probability: 0.3, color: '#0d0d1a', reward_type: 'egp' },
+  { label: '2 EGP', label_en: '2 EGP', value: 2, probability: 2.5, color: '#32CD32', reward_type: 'egp' },
+  { label: '25 EGP', label_en: '25 EGP', value: 25, probability: 0.8, color: '#1f1f35', reward_type: 'egp' },
 ];
 
 type BonusSegment = {
