@@ -1031,6 +1031,10 @@ export type Database = {
           background_color: string | null
           background_gradient: string | null
           background_image: string | null
+          card_animation: string
+          card_opacity: number | null
+          card_shape: string
+          card_size: string
           card_type: string
           content_font_size: string | null
           created_at: string
@@ -1047,6 +1051,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_coming_soon: boolean | null
+          min_height: string | null
           page_content: string | null
           page_content_en: string | null
           route_path: string | null
@@ -1064,6 +1069,10 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          card_animation?: string
+          card_opacity?: number | null
+          card_shape?: string
+          card_size?: string
           card_type?: string
           content_font_size?: string | null
           created_at?: string
@@ -1080,6 +1089,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_coming_soon?: boolean | null
+          min_height?: string | null
           page_content?: string | null
           page_content_en?: string | null
           route_path?: string | null
@@ -1097,6 +1107,10 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          card_animation?: string
+          card_opacity?: number | null
+          card_shape?: string
+          card_size?: string
           card_type?: string
           content_font_size?: string | null
           created_at?: string
@@ -1113,6 +1127,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_coming_soon?: boolean | null
+          min_height?: string | null
           page_content?: string | null
           page_content_en?: string | null
           route_path?: string | null

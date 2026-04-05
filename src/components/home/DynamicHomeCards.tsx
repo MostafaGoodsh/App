@@ -20,6 +20,35 @@ const SpecialCardComponents: Record<string, React.ComponentType<{ card?: HomePag
   podcast: PodcastCard,
 };
 
+const getShapeClasses = (shape: string) => {
+  switch (shape) {
+    case 'square': return 'rounded-none';
+    case 'circle': return 'rounded-full';
+    case 'pill': return 'rounded-[9999px]';
+    default: return 'rounded-xl';
+  }
+};
+
+const getAnimationClasses = (animation: string) => {
+  switch (animation) {
+    case 'pulse': return 'animate-pulse';
+    case 'bounce': return 'animate-bounce';
+    case 'slide': return 'animate-[slideIn_0.6s_ease-out]';
+    case 'fade': return 'animate-[fadeIn_0.8s_ease-out]';
+    case 'glow': return 'animate-[glow_2s_ease-in-out_infinite]';
+    default: return '';
+  }
+};
+
+const getSizeClasses = (size: string) => {
+  switch (size) {
+    case 'small': return 'min-h-[160px] md:min-h-[180px]';
+    case 'medium': return 'min-h-[220px] md:min-h-[250px]';
+    case 'full': return 'min-h-[350px] md:min-h-[400px]';
+    default: return 'min-h-[280px] md:min-h-[320px]';
+  }
+};
+
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
   const { getSetting } = useTypography();
@@ -45,12 +74,18 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
   const baseContentStyle = getTypographyStyles(sectionSetting, "content") as React.CSSProperties;
   const { titleStyle, descStyle } = buildHomeCardTypographyStyles(card, baseTitleStyle, baseContentStyle);
 
+  const shapeClass = getShapeClasses(card.card_shape || 'rounded');
+  const animationClass = getAnimationClasses(card.card_animation || 'none');
+  const sizeClass = getSizeClasses(card.card_size || 'large');
+  const opacity = card.card_opacity ?? 1;
+  const customMinHeight = card.min_height || undefined;
+
   return (
     <Link to={card.route_path || `/${card.slug}`} className="group">
       <article
         dir={isArabic ? "rtl" : "ltr"}
-        className="relative overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm"
-        style={gradientStyle}
+        className={`relative overflow-hidden ${shapeClass} border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm ${animationClass}`}
+        style={{ ...gradientStyle, opacity, minHeight: customMinHeight }}
       >
         {hasValidImage && (
           <img
@@ -61,7 +96,9 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
             onError={() => setImgError(true)}
           />
         )}
-        <div className="relative p-8 min-h-[280px] md:min-h-[320px] flex flex-col justify-end items-stretch bg-gradient-to-t from-background/90 via-background/60 to-transparent">
+        <div className={`relative p-8 ${sizeClass} flex flex-col justify-end items-stretch bg-gradient-to-t from-background/90 via-background/60 to-transparent`}
+          style={{ minHeight: customMinHeight }}
+        >
           <h2
             className="font-cairo mb-3 text-primary transition-colors duration-300 font-bold w-full"
             style={titleStyle}

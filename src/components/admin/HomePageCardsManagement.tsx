@@ -70,6 +70,11 @@ interface HomePageCard {
   is_coming_soon: boolean;
   title_text_align: string;
   description_text_align: string;
+  card_size: string;
+  card_shape: string;
+  card_animation: string;
+  min_height: string;
+  card_opacity: number;
 }
 
 export default function HomePageCardsManagement() {
@@ -217,7 +222,12 @@ export default function HomePageCardsManagement() {
       widget_config: {},
       is_coming_soon: false,
       title_text_align: 'center',
-      description_text_align: 'center'
+      description_text_align: 'center',
+      card_size: 'large',
+      card_shape: 'rounded',
+      card_animation: 'none',
+      min_height: '',
+      card_opacity: 1,
     });
     setDialogOpen(true);
   };
@@ -272,7 +282,12 @@ export default function HomePageCardsManagement() {
         widget_config: editingCard.widget_config || {},
         is_coming_soon: editingCard.is_coming_soon || false,
         title_text_align: editingCard.title_text_align || 'center',
-        description_text_align: editingCard.description_text_align || 'center'
+        description_text_align: editingCard.description_text_align || 'center',
+        card_size: editingCard.card_size || 'large',
+        card_shape: editingCard.card_shape || 'rounded',
+        card_animation: editingCard.card_animation || 'none',
+        min_height: editingCard.min_height || null,
+        card_opacity: editingCard.card_opacity ?? 1,
       };
 
       if (isNewCard) {
@@ -458,11 +473,12 @@ export default function HomePageCardsManagement() {
           
           {editingCard && (
             <Tabs defaultValue="basic" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="basic">أساسي</TabsTrigger>
-                <TabsTrigger value="styling">التصميم</TabsTrigger>
-                <TabsTrigger value="fonts">الخطوط</TabsTrigger>
-                <TabsTrigger value="widgets">الويدجتات</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="basic" className="text-xs">أساسي</TabsTrigger>
+                <TabsTrigger value="styling" className="text-xs">التصميم</TabsTrigger>
+                <TabsTrigger value="shape" className="text-xs">الشكل</TabsTrigger>
+                <TabsTrigger value="fonts" className="text-xs">الخطوط</TabsTrigger>
+                <TabsTrigger value="widgets" className="text-xs">ويدجت</TabsTrigger>
               </TabsList>
 
               <TabsContent value="basic" className="space-y-4">
@@ -571,6 +587,108 @@ export default function HomePageCardsManagement() {
                 <div className="space-y-2">
                   <Label>Gradient الخلفية</Label>
                   <Input value={editingCard.background_gradient} onChange={(e) => setEditingCard({...editingCard, background_gradient: e.target.value})} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="shape" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>حجم الكارت</Label>
+                    <Select value={editingCard.card_size || 'large'} onValueChange={(value) => setEditingCard({...editingCard, card_size: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">صغير (Small)</SelectItem>
+                        <SelectItem value="medium">متوسط (Medium)</SelectItem>
+                        <SelectItem value="large">كبير (Large)</SelectItem>
+                        <SelectItem value="full">كامل العرض (Full)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>شكل الكارت</Label>
+                    <Select value={editingCard.card_shape || 'rounded'} onValueChange={(value) => setEditingCard({...editingCard, card_shape: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="square">مربع (Square)</SelectItem>
+                        <SelectItem value="rounded">مستدير الحواف (Rounded)</SelectItem>
+                        <SelectItem value="circle">دائري (Circle)</SelectItem>
+                        <SelectItem value="pill">كبسولة (Pill)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>حركة الكارت</Label>
+                    <Select value={editingCard.card_animation || 'none'} onValueChange={(value) => setEditingCard({...editingCard, card_animation: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">بدون حركة</SelectItem>
+                        <SelectItem value="pulse">نبض (Pulse)</SelectItem>
+                        <SelectItem value="bounce">ارتداد (Bounce)</SelectItem>
+                        <SelectItem value="slide">انزلاق (Slide)</SelectItem>
+                        <SelectItem value="fade">تلاشي (Fade In)</SelectItem>
+                        <SelectItem value="glow">توهج (Glow)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>الشفافية ({((editingCard.card_opacity ?? 1) * 100).toFixed(0)}%)</Label>
+                    <Input
+                      type="range"
+                      min="0.1"
+                      max="1"
+                      step="0.05"
+                      value={editingCard.card_opacity ?? 1}
+                      onChange={(e) => setEditingCard({...editingCard, card_opacity: parseFloat(e.target.value)})}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>ارتفاع مخصص (مثال: 200px, 50vh)</Label>
+                  <Input
+                    value={editingCard.min_height || ''}
+                    onChange={(e) => setEditingCard({...editingCard, min_height: e.target.value})}
+                    placeholder="اتركه فارغ للارتفاع التلقائي"
+                  />
+                </div>
+
+                {/* Preview */}
+                <div className="space-y-2">
+                  <Label>معاينة الشكل</Label>
+                  <div className="flex justify-center p-4 bg-muted/30 rounded-lg">
+                    <div
+                      className={`bg-primary/20 border-2 border-primary/40 flex items-center justify-center text-xs text-muted-foreground transition-all duration-500 ${
+                        editingCard.card_animation === 'pulse' ? 'animate-pulse' :
+                        editingCard.card_animation === 'bounce' ? 'animate-bounce' : ''
+                      }`}
+                      style={{
+                        width: editingCard.card_size === 'small' ? '120px' :
+                               editingCard.card_size === 'medium' ? '180px' :
+                               editingCard.card_size === 'full' ? '100%' : '240px',
+                        height: editingCard.card_shape === 'circle' ? (
+                          editingCard.card_size === 'small' ? '120px' :
+                          editingCard.card_size === 'medium' ? '180px' : '240px'
+                        ) : '80px',
+                        borderRadius: editingCard.card_shape === 'square' ? '0' :
+                                      editingCard.card_shape === 'rounded' ? '0.75rem' :
+                                      editingCard.card_shape === 'circle' ? '50%' :
+                                      '9999px',
+                        opacity: editingCard.card_opacity ?? 1,
+                      }}
+                    >
+                      معاينة
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
