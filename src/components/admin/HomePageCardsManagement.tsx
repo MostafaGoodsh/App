@@ -692,6 +692,7 @@ export default function HomePageCardsManagement() {
                 </div>
               </TabsContent>
 
+              <TabsContent value="fonts" className="space-y-4">
                 {/* Text Alignment */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
