@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import RoadmapCardsGrid from "@/components/roadmap/RoadmapCardsGrid";
+import { WheelOfFortune } from "@/components/tasks/WheelOfFortune";
 
 import DynamicHomeCards from "@/components/home/DynamicHomeCards";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -50,7 +51,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[60vh] md:min-h-[75vh] flex items-end justify-center bg-background">
+        <section className="relative min-h-[40vh] md:min-h-[60vh] flex items-end justify-center bg-background">
           <img
             src={getContent('hero_background', '/lovable-uploads/horus-statue-bg.jpg')}
             alt={getAltText('hero_background', 'تمثال حورس الذهبي - خلفية المنصة')}
@@ -58,7 +59,7 @@ const Index = () => {
             loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
-          <div className="relative z-10 container mx-auto px-4 text-center pb-12 md:pb-32">
+          <div className="relative z-10 container mx-auto px-4 text-center pb-6 md:pb-32">
             <div className="flex items-center justify-center mb-4">
               <div className="text-center">
                 <h1 className="font-playfair text-2xl md:text-6xl lg:text-7xl font-bold text-primary mb-1 md:mb-2">
@@ -83,6 +84,7 @@ const Index = () => {
             </Button>
           </div>
           
+          <WheelOfFortune />
           <RoadmapCardsGrid />
         </section>
         

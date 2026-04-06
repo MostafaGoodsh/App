@@ -121,10 +121,11 @@ const CardPage = () => {
             dangerouslySetInnerHTML={{ __html: sanitizeHTML(pageContent) }}
           />
         ) : (
-          <Card>
+          <Card className="text-center py-12">
             <CardHeader>
-              <CardTitle>{t("قريباً")}</CardTitle>
-              <CardDescription>{t("المحتوى قيد الإعداد وسيتم نشره قريباً")}</CardDescription>
+              <div className="text-4xl mb-4">🚧</div>
+              <CardTitle className="text-xl">{t("قريباً", "Coming Soon")}</CardTitle>
+              <CardDescription className="text-base mt-2">{t("المحتوى قيد الإعداد وسيتم نشره قريباً، ترقبوا التحديثات!", "Content is being prepared and will be published soon. Stay tuned!")}</CardDescription>
             </CardHeader>
           </Card>
         )}
