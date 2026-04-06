@@ -2896,12 +2896,15 @@ export type Database = {
           followers_count: number | null
           following_count: number | null
           full_name: string | null
+          full_name_en: string | null
           has_access: boolean | null
           has_anubis_access: boolean | null
           has_early_access: boolean | null
           id: string
           instagram_url: string | null
           is_verified: boolean | null
+          job_title: string | null
+          job_title_en: string | null
           linkedin_url: string | null
           marital_status: string | null
           phone: string | null
@@ -2930,12 +2933,15 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          full_name_en?: string | null
           has_access?: boolean | null
           has_anubis_access?: boolean | null
           has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
+          job_title?: string | null
+          job_title_en?: string | null
           linkedin_url?: string | null
           marital_status?: string | null
           phone?: string | null
@@ -2964,12 +2970,15 @@ export type Database = {
           followers_count?: number | null
           following_count?: number | null
           full_name?: string | null
+          full_name_en?: string | null
           has_access?: boolean | null
           has_anubis_access?: boolean | null
           has_early_access?: boolean | null
           id?: string
           instagram_url?: string | null
           is_verified?: boolean | null
+          job_title?: string | null
+          job_title_en?: string | null
           linkedin_url?: string | null
           marital_status?: string | null
           phone?: string | null

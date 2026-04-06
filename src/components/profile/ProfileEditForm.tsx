@@ -18,6 +18,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'الاسم مطلوب'),
+  full_name_en: z.string().optional().or(z.literal('')),
+  job_title: z.string().optional().or(z.literal('')),
+  job_title_en: z.string().optional().or(z.literal('')),
   email: z.string().email('إيميل غير صالح').optional().or(z.literal('')),
   phone: z.string().optional(),
   bio: z.string().max(500, 'البايو يجب أن يكون أقل من 500 حرف').optional(),
@@ -65,6 +68,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       full_name: profile.full_name || '',
+      full_name_en: profile.full_name_en || '',
+      job_title: profile.job_title || '',
+      job_title_en: profile.job_title_en || '',
       email: profile.email || '',
       phone: profile.phone || '',
       bio: profile.bio || '',
@@ -82,6 +88,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   useEffect(() => {
     form.reset({
       full_name: profile.full_name || '',
+      full_name_en: profile.full_name_en || '',
+      job_title: profile.job_title || '',
+      job_title_en: profile.job_title_en || '',
       email: profile.email || '',
       phone: profile.phone || '',
       bio: profile.bio || '',
@@ -124,11 +133,26 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="full_name">{t("الاسم الكامل", "Full Name")} *</Label>
-                <Input id="full_name" {...form.register('full_name')} placeholder={t("أدخل اسمك", "Enter your name")} />
+                <Label htmlFor="full_name">{t("الاسم بالعربي", "Name (Arabic)")} *</Label>
+                <Input id="full_name" {...form.register('full_name')} placeholder={t("أدخل اسمك بالعربي", "Enter your Arabic name")} />
                 {form.formState.errors.full_name && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.full_name.message}</p>
                 )}
+              </div>
+              
+              <div>
+                <Label htmlFor="full_name_en">{t("الاسم بالإنجليزي", "Name (English)")}</Label>
+                <Input id="full_name_en" {...form.register('full_name_en')} placeholder="Enter your English name" dir="ltr" />
+              </div>
+              
+              <div>
+                <Label htmlFor="job_title">{t("الوظيفة بالعربي", "Job Title (Arabic)")}</Label>
+                <Input id="job_title" {...form.register('job_title')} placeholder={t("مثال: مهندس برمجيات", "e.g. Software Engineer")} />
+              </div>
+              
+              <div>
+                <Label htmlFor="job_title_en">{t("الوظيفة بالإنجليزي", "Job Title (English)")}</Label>
+                <Input id="job_title_en" {...form.register('job_title_en')} placeholder="e.g. Software Engineer" dir="ltr" />
               </div>
               
               <div>
