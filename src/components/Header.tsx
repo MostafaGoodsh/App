@@ -14,17 +14,26 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useProfile } from "@/hooks/useProfile";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUICardSettings } from "@/hooks/useUICardSettings";
 
 const Header = () => {
   const { user } = useAuth();
   const { getContent } = useAppContent();
   const { profile } = useProfile();
   const { t } = useLanguage();
+  const { getCardStyle, getCardSetting } = useUICardSettings();
+  
+  const headerSetting = getCardSetting('header_main');
+  const headerStyle = getCardStyle('header_main');
+  const hasCustomHeader = headerSetting?.background_image || headerSetting?.background_gradient || headerSetting?.background_color;
   
   console.log("Header rendered, NotificationBell should render");
   
   return (
-    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <header
+      className={`sticky top-0 z-50 border-b ${!hasCustomHeader ? 'bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60' : ''}`}
+      style={hasCustomHeader ? { ...headerStyle, position: 'sticky', top: 0, zIndex: 50 } : undefined}
+    >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <svg className="h-14 w-14 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
