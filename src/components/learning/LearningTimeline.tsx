@@ -270,7 +270,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center">
+      <div className="w-full px-2 sm:px-4 py-8 text-center">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3 mx-auto"></div>
           <div className="space-y-6">
@@ -282,7 +282,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl" dir={isArabic ? "rtl" : "ltr"}>
+    <div className="w-full px-2 sm:px-4 py-6 sm:py-8 max-w-4xl mx-auto" dir={isArabic ? "rtl" : "ltr"}>
       {/* Create Post Button */}
       <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
         <DialogTrigger asChild>
