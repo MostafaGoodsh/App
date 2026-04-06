@@ -8,7 +8,7 @@ import { usePointsConversion } from "@/hooks/usePointsConversion";
 import { useMining } from "@/hooks/useMining";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 
-const CARD_KEY = "profile_account_stats";
+const CARD_KEY = "profile_stats";
 
 export function AccountStatsCard() {
   const { pointsBalance, getPointsBalance, loading: pointsLoading } = usePointsConversion();

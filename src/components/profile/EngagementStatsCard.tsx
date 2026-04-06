@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Flame, Trophy, Calendar, Target, Activity } from "lucide-react";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
 
-const CARD_KEY = "profile_engagement_stats";
+const CARD_KEY = "profile_engagement";
 
 export function EngagementStatsCard() {
   const { stats, updateEngagementStats, loading } = useEngagementStats();
