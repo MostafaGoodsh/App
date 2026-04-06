@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift } from "lucide-react";
 import { toast } from "sonner";
+import wheelBgDefault from "@/assets/wheel-bg.jpg";
 
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
@@ -242,18 +243,12 @@ const drawTripleRingWheel = (
     ctx.lineWidth = 3.5;
 
     if (isScarab) {
-      // Large scarab symbol (x2 multiplier)
-      const scarabSize = Math.max(22, Math.round((ring3Outer - ring3Inner) * 0.55));
+      // Large scarab symbol only
+      const scarabSize = Math.max(26, Math.round((ring3Outer - ring3Inner) * 0.6));
       ctx.font = `bold ${scarabSize}px serif`;
       ctx.fillStyle = '#FFD700';
-      ctx.strokeText('𓆣', tx, ty - 4);
-      ctx.fillText('𓆣', tx, ty - 4);
-      // x2 label
-      const labelSize = Math.max(10, scarabSize - 8);
-      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
-      ctx.fillStyle = '#90EE90';
-      ctx.strokeText('×2', tx, ty + scarabSize * 0.45);
-      ctx.fillText('×2', tx, ty + scarabSize * 0.45);
+      ctx.strokeText('𓆣', tx, ty);
+      ctx.fillText('𓆣', tx, ty);
     } else {
       // Normal EGP segment - number + EGP only
       const cleanLabel = stripUnit(seg.label);
@@ -322,17 +317,12 @@ const drawTripleRingWheel = (
     ctx.lineWidth = 3.5;
 
     if (isScarab) {
-      // Large scarab - transitions to outer EGP ring
-      const scarabSize = Math.max(20, Math.round((ring2Outer - ring2Inner) * 0.5));
+      // Large scarab only
+      const scarabSize = Math.max(24, Math.round((ring2Outer - ring2Inner) * 0.55));
       ctx.font = `bold ${scarabSize}px serif`;
       ctx.fillStyle = '#FFD700';
-      ctx.strokeText('𓆣', tx, ty - 4);
-      ctx.fillText('𓆣', tx, ty - 4);
-      const labelSize = Math.max(9, scarabSize - 8);
-      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
-      ctx.fillStyle = '#90EE90';
-      ctx.strokeText('→ EGP', tx, ty + scarabSize * 0.4);
-      ctx.fillText('→ EGP', tx, ty + scarabSize * 0.4);
+      ctx.strokeText('𓆣', tx, ty);
+      ctx.fillText('𓆣', tx, ty);
     } else {
       // Normal $MS-RA segment - number + currency only
       const cleanLabel = stripUnit(seg.label);
@@ -417,19 +407,14 @@ const drawTripleRingWheel = (
     ctx.shadowBlur = 4;
 
     if (isBonusTrigger) {
-      // Bonus trigger - show large scarab (transition to MS-RA ring)
-      const scarabSize = Math.max(18, Math.round(innerCenterRadius * 0.8));
+      // Bonus trigger - scarab only
+      const scarabSize = Math.max(22, Math.round(innerCenterRadius * 0.85));
       ctx.font = `bold ${scarabSize}px serif`;
       ctx.strokeStyle = 'rgba(0,0,0,0.9)';
       ctx.lineWidth = 3.5;
       ctx.fillStyle = '#FFD700';
-      ctx.strokeText('𓆣', tx, ty - 4);
-      ctx.fillText('𓆣', tx, ty - 4);
-      const labelSize = Math.max(9, scarabSize - 8);
-      ctx.font = `bold ${labelSize}px ${segFontFamily}`;
-      ctx.fillStyle = '#D4AF37';
-      ctx.strokeText('→ $MS-RA', tx, ty + scarabSize * 0.4);
-      ctx.fillText('→ $MS-RA', tx, ty + scarabSize * 0.4);
+      ctx.strokeText('𓆣', tx, ty);
+      ctx.fillText('𓆣', tx, ty);
     } else if (isUpgradeTrigger) {
       // Upgrade trigger - Was scepter (transition to EGP ring)
       const scepterSize = Math.round(innerCenterRadius * 0.7);
@@ -579,16 +564,15 @@ const WheelOfFortune = () => {
         wheel_border_color: settings.wheel_border_color ?? '#D4AF37',
       };
 
-      // Load background image if set
-      if (settings.wheel_background_image) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          ws.bgImage = img;
-          (window as any).__wheelSettings = ws;
-        };
-        img.src = settings.wheel_background_image;
-      }
+      // Load background image - use uploaded default or admin setting
+      const bgSrc = settings.wheel_background_image || wheelBgDefault;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ws.bgImage = img;
+        (window as any).__wheelSettings = ws;
+      };
+      img.src = bgSrc;
 
       (window as any).__wheelSettings = ws;
     }
