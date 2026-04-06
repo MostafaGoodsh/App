@@ -18,6 +18,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const profileSchema = z.object({
   full_name: z.string().min(1, 'الاسم مطلوب'),
+  full_name_en: z.string().optional().or(z.literal('')),
+  job_title: z.string().optional().or(z.literal('')),
+  job_title_en: z.string().optional().or(z.literal('')),
   email: z.string().email('إيميل غير صالح').optional().or(z.literal('')),
   phone: z.string().optional(),
   bio: z.string().max(500, 'البايو يجب أن يكون أقل من 500 حرف').optional(),
