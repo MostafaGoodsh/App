@@ -495,6 +495,7 @@ const WheelOfFortune = () => {
   const [bonusSegments, setBonusSegments] = useState<BonusSegment[]>(FALLBACK_BONUS_SEGMENTS);
   const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>(FALLBACK_UPGRADE_SEGMENTS);
   const [lastSpinCost, setLastSpinCost] = useState(0);
+  const [bgImageReady, setBgImageReady] = useState(0);
 
   // Fetch outer + upgrade segments from DB
   useEffect(() => {
@@ -565,12 +566,30 @@ const WheelOfFortune = () => {
       };
 
       // Load background image - use uploaded default or admin setting
+      // Load background image - use uploaded default or admin setting
       const bgSrc = settings.wheel_background_image || wheelBgDefault;
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         ws.bgImage = img;
         (window as any).__wheelSettings = ws;
+        setBgImageReady((prev) => prev + 1); // trigger canvas redraw
+      };
+      img.onerror = () => {
+        // Try default if admin image fails
+        if (bgSrc !== wheelBgDefault) {
+          const fallback = new Image();
+          fallback.crossOrigin = 'anonymous';
+          fallback.onload = () => {
+            ws.bgImage = fallback;
+            (window as any).__wheelSettings = ws;
+            setBgImageReady((prev) => prev + 1);
+          };
+          fallback.src = wheelBgDefault;
+        } else {
+          (window as any).__wheelSettings = ws;
+          setBgImageReady((prev) => prev + 1);
+        }
       };
       img.src = bgSrc;
 
@@ -585,7 +604,7 @@ const WheelOfFortune = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings]);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings, bgImageReady]);
 
   // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
