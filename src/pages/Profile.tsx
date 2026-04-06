@@ -145,8 +145,8 @@ export default function Profile() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <Card>
-                <CardHeader><CardTitle className="text-right">{t("معلومات الملف الشخصي")}</CardTitle></CardHeader>
+              <StyledCard cardKey="profile_info">
+                <CardHeader><StyledCardTitle cardKey="profile_info" className="text-right">{t("معلومات الملف الشخصي")}</StyledCardTitle></CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 justify-end">
@@ -198,14 +198,14 @@ export default function Profile() {
                   </div>
                   )}
                 </CardContent>
-              </Card>
+              </StyledCard>
 
 
-              <Card>
+              <StyledCard cardKey="profile_xp">
                 <CardHeader>
-                  <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <StyledCardTitle cardKey="profile_xp" className="text-right flex items-center gap-2 justify-end">
                     <span>{t("نقاط الخبرة")}</span><Star className="w-5 h-5 text-primary" />
-                  </CardTitle>
+                  </StyledCardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
@@ -219,13 +219,13 @@ export default function Profile() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </StyledCard>
 
-              <Card>
+              <StyledCard cardKey="profile_wallets">
                 <CardHeader>
-                  <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <StyledCardTitle cardKey="profile_wallets" className="text-right flex items-center gap-2 justify-end">
                     <span>{t("المحافظ المربوطة")}</span><Wallet className="w-5 h-5 text-primary" />
-                  </CardTitle>
+                  </StyledCardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
@@ -252,13 +252,13 @@ export default function Profile() {
                     )}
                   </div>
                 </CardContent>
-              </Card>
+              </StyledCard>
 
-              <Card>
+              <StyledCard cardKey="profile_surveys">
                 <CardHeader>
-                  <CardTitle className="text-right flex items-center gap-2 justify-end">
+                  <StyledCardTitle cardKey="profile_surveys" className="text-right flex items-center gap-2 justify-end">
                     <span>{t("الاستبيانات المكتملة")}</span><ClipboardList className="w-5 h-5 text-primary" />
-                  </CardTitle>
+                  </StyledCardTitle>
                 </CardHeader>
                 <CardContent>
                   {completedSurveys.length > 0 ? (
@@ -274,7 +274,7 @@ export default function Profile() {
                     <p className="text-sm text-muted-foreground text-center font-cairo py-2">{t("لم يتم إكمال أي استبيان بعد")}</p>
                   )}
                 </CardContent>
-              </Card>
+              </StyledCard>
 
               {customization.show_stats && isOwnProfile && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
