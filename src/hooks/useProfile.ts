@@ -7,6 +7,7 @@ export interface Profile {
   id: string;
   user_id: string;
   full_name: string | null;
+  full_name_en: string | null;
   email: string | null;
   phone: string | null;
   avatar_url: string | null;
@@ -26,6 +27,8 @@ export interface Profile {
   date_of_birth: string | null;
   marital_status: string | null;
   country: string | null;
+  job_title: string | null;
+  job_title_en: string | null;
   created_at: string;
   updated_at: string;
 }
