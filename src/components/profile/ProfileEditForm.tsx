@@ -68,6 +68,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       full_name: profile.full_name || '',
+      full_name_en: profile.full_name_en || '',
+      job_title: profile.job_title || '',
+      job_title_en: profile.job_title_en || '',
       email: profile.email || '',
       phone: profile.phone || '',
       bio: profile.bio || '',
@@ -85,6 +88,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   useEffect(() => {
     form.reset({
       full_name: profile.full_name || '',
+      full_name_en: profile.full_name_en || '',
+      job_title: profile.job_title || '',
+      job_title_en: profile.job_title_en || '',
       email: profile.email || '',
       phone: profile.phone || '',
       bio: profile.bio || '',
