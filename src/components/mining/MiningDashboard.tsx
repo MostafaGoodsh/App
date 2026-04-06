@@ -57,11 +57,11 @@ const MiningDashboard = () => {
   const progressToNext = getProgressToNextLevel();
 
   if (loading) {
-    return (<div className="p-6"><div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div><p className="text-muted-foreground mt-2">{t("جاري تحميل بيانات التعدين...")}</p></div></div>);
+    return (<div className="px-2 sm:px-4 py-4"><div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div><p className="text-muted-foreground mt-2">{t("جاري تحميل بيانات التعدين...")}</p></div></div>);
   }
 
   if (error) {
-    return (<div className="p-6"><Card><CardContent className="text-center py-8"><p className="text-destructive">{t("خطأ")}: {error}</p><Button onClick={() => window.location.reload()} className="mt-4">{t("إعادة المحاولة")}</Button></CardContent></Card></div>);
+    return (<div className="px-2 sm:px-4 py-4"><Card><CardContent className="text-center py-8"><p className="text-destructive">{t("خطأ")}: {error}</p><Button onClick={() => window.location.reload()} className="mt-4">{t("إعادة المحاولة")}</Button></CardContent></Card></div>);
   }
 
   return (
