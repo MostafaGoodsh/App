@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { StyledCard, StyledCardTitle, CardContent, CardHeader } from "@/components/ui/styled-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -358,7 +358,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
       {/* Posts Timeline */}
       <div className="space-y-6">
         {posts.map((post) => (
-          <Card key={post.id} className="overflow-hidden">
+          <StyledCard key={post.id} cardKey={`learning_post_${category}`} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -457,7 +457,7 @@ export default function LearningTimeline({ category = 'crypto' }: { category?: '
                 </div>
               )}
             </CardContent>
-          </Card>
+          </StyledCard>
         ))}
       </div>
     </div>
