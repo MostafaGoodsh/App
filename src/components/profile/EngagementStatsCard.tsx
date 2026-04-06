@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StyledCard, StyledCardTitle, CardContent, CardHeader } from "@/components/ui/styled-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Flame, Trophy, Calendar, Target, Activity } from "lucide-react";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
+
+const CARD_KEY = "profile_engagement_stats";
 
 export function EngagementStatsCard() {
   const { stats, updateEngagementStats, loading } = useEngagementStats();
@@ -33,11 +35,11 @@ export function EngagementStatsCard() {
   };
 
   return (
-    <Card className="bg-gray-900 border-gray-700">
+    <StyledCard cardKey={CARD_KEY} className="bg-card border-border">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg font-bold text-white arabic-text">
+        <StyledCardTitle cardKey={CARD_KEY} className="text-lg font-bold arabic-text">
           إحصائيات التفاعل
-        </CardTitle>
+        </StyledCardTitle>
         <Button
           variant="outline"
           size="sm"
@@ -129,6 +131,6 @@ export function EngagementStatsCard() {
           يتم تحديث الإحصائيات تلقائياً كل 5 دقائق
         </div>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 }

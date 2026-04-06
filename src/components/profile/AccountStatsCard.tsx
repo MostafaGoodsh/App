@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StyledCard, StyledCardTitle, CardContent, CardHeader } from "@/components/ui/styled-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +7,8 @@ import { RefreshCw, Coins, Shield, TrendingUp, Zap } from "lucide-react";
 import { usePointsConversion } from "@/hooks/usePointsConversion";
 import { useMining } from "@/hooks/useMining";
 import { useEngagementStats } from "@/hooks/useEngagementStats";
+
+const CARD_KEY = "profile_account_stats";
 
 export function AccountStatsCard() {
   const { pointsBalance, getPointsBalance, loading: pointsLoading } = usePointsConversion();
@@ -57,9 +59,9 @@ export function AccountStatsCard() {
   const status = getMiningStatus();
 
   return (
-    <Card className="bg-gray-900 border-gray-700">
+    <StyledCard cardKey={CARD_KEY} className="bg-card border-border">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg font-bold text-white arabic-text">إحصائيات الحساب</CardTitle>
+        <StyledCardTitle cardKey={CARD_KEY} className="text-lg font-bold arabic-text">إحصائيات الحساب</StyledCardTitle>
         <Button
           variant="outline"
           size="sm"
@@ -176,6 +178,6 @@ export function AccountStatsCard() {
           آخر تحديث: {new Date().toLocaleString('ar-SA')}
         </div>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 }
