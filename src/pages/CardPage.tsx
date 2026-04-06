@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import WheelOfFortune from "@/components/tasks/WheelOfFortune";
 
 const sanitizeHTML = (dirty: string) =>
   DOMPurify.sanitize(dirty, {
@@ -111,7 +112,21 @@ const CardPage = () => {
           </div>
         </div>
 
-        {pageContent ? (
+        {card.card_type === "wheel" || card.slug === "earn" ? (
+          <div className="space-y-6">
+            <WheelOfFortune />
+            {pageContent && (
+              <div
+                className="prose prose-lg max-w-none dark:prose-invert
+                  [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg
+                  [&_video]:max-w-full [&_video]:h-auto [&_video]:rounded-lg
+                  [&_iframe]:max-w-full [&_iframe]:aspect-video"
+                style={{ fontSize: card.content_font_size || "1rem" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHTML(pageContent) }}
+              />
+            )}
+          </div>
+        ) : pageContent ? (
           <div
             className="prose prose-lg max-w-none dark:prose-invert
               [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg
