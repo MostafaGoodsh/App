@@ -495,6 +495,7 @@ const WheelOfFortune = () => {
   const [bonusSegments, setBonusSegments] = useState<BonusSegment[]>(FALLBACK_BONUS_SEGMENTS);
   const [upgradeSegments, setUpgradeSegments] = useState<UpgradeSegment[]>(FALLBACK_UPGRADE_SEGMENTS);
   const [lastSpinCost, setLastSpinCost] = useState(0);
+  const [bgImageReady, setBgImageReady] = useState(0);
 
   // Fetch outer + upgrade segments from DB
   useEffect(() => {
