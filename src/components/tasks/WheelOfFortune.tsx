@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift } from "lucide-react";
 import { toast } from "sonner";
+import wheelBgDefault from "@/assets/wheel-bg.jpg";
 
 const EGYPTIAN_SYMBOLS = ['☥', '𓂀', '𓆣', '𓊽', '𓌀', '𓁢', '𓃭', '𓅃'];
 
@@ -563,16 +564,15 @@ const WheelOfFortune = () => {
         wheel_border_color: settings.wheel_border_color ?? '#D4AF37',
       };
 
-      // Load background image if set
-      if (settings.wheel_background_image) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          ws.bgImage = img;
-          (window as any).__wheelSettings = ws;
-        };
-        img.src = settings.wheel_background_image;
-      }
+      // Load background image - use uploaded default or admin setting
+      const bgSrc = settings.wheel_background_image || wheelBgDefault;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ws.bgImage = img;
+        (window as any).__wheelSettings = ws;
+      };
+      img.src = bgSrc;
 
       (window as any).__wheelSettings = ws;
     }
