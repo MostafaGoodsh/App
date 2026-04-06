@@ -51,7 +51,7 @@ const Index = () => {
         <link rel="canonical" href={canonical} />
       </Helmet>
       <main>
-        <section className="relative min-h-[60vh] md:min-h-[80vh] flex items-end justify-center bg-background">
+        <section className="relative min-h-[80vh] md:min-h-screen flex items-end justify-center bg-background">
           <img
             src={getContent('hero_background', '/lovable-uploads/horus-statue-bg.jpg')}
             alt={getAltText('hero_background', 'تمثال حورس الذهبي - خلفية المنصة')}
