@@ -566,12 +566,30 @@ const WheelOfFortune = () => {
       };
 
       // Load background image - use uploaded default or admin setting
+      // Load background image - use uploaded default or admin setting
       const bgSrc = settings.wheel_background_image || wheelBgDefault;
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         ws.bgImage = img;
         (window as any).__wheelSettings = ws;
+        setBgImageReady((prev) => prev + 1); // trigger canvas redraw
+      };
+      img.onerror = () => {
+        // Try default if admin image fails
+        if (bgSrc !== wheelBgDefault) {
+          const fallback = new Image();
+          fallback.crossOrigin = 'anonymous';
+          fallback.onload = () => {
+            ws.bgImage = fallback;
+            (window as any).__wheelSettings = ws;
+            setBgImageReady((prev) => prev + 1);
+          };
+          fallback.src = wheelBgDefault;
+        } else {
+          (window as any).__wheelSettings = ws;
+          setBgImageReady((prev) => prev + 1);
+        }
       };
       img.src = bgSrc;
 
