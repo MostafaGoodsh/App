@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useUICardSettings } from '@/hooks/useUICardSettings';
-import { Camera, Trash2, User, BadgeCheck, ShieldCheck, Calendar, Star, Heart, MapPin } from 'lucide-react';
+import { Camera, Trash2, User, BadgeCheck, ShieldCheck, Calendar, Star, Heart, MapPin, Briefcase } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { FollowButton } from './FollowButton';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Country code to flag emoji
 const countryFlags: Record<string, string> = {
   EG: '🇪🇬', SA: '🇸🇦', AE: '🇦🇪', KW: '🇰🇼', QA: '🇶🇦', BH: '🇧🇭', OM: '🇴🇲',
   IQ: '🇮🇶', JO: '🇯🇴', LB: '🇱🇧', PS: '🇵🇸', SY: '🇸🇾', YE: '🇾🇪', LY: '🇱🇾',
@@ -60,6 +59,12 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
+function formatDate(dateStr: string, isArabic: boolean): string {
+  return new Date(dateStr).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
+
 interface ProfileHeaderProps {
   profile: Profile;
   badges?: any[];
@@ -105,6 +110,7 @@ export function ProfileHeader({ profile, badges = [], isKycVerified = false }: P
   const flag = countryCode ? countryFlags[countryCode] : null;
   const countryName = countryCode ? (isArabic ? countryNames[countryCode]?.ar : countryNames[countryCode]?.en) : null;
   const maritalLabel = profile.marital_status ? (isArabic ? maritalStatusLabels[profile.marital_status]?.ar : maritalStatusLabels[profile.marital_status]?.en) : null;
+  const jobTitle = isArabic ? (profile.job_title || profile.job_title_en) : (profile.job_title_en || profile.job_title);
 
   return (
     <Card className={`mb-4 overflow-hidden border-primary/20 ${hasCustom ? 'relative' : ''}`} dir={isArabic ? 'rtl' : 'ltr'} style={cardStyle}>
@@ -112,22 +118,22 @@ export function ProfileHeader({ profile, badges = [], isKycVerified = false }: P
         <div className="absolute inset-0 z-0" style={{ backgroundColor: `rgba(0,0,0,${setting.overlay_opacity || 0.6})` }} />
       )}
       {/* Top decorative bar */}
-      <div className="h-2 bg-gradient-to-r from-primary via-primary/60 to-primary/20 relative z-10" />
+      <div className="h-1.5 bg-gradient-to-r from-primary via-primary/60 to-primary/20 relative z-10" />
       
-      <div className="p-4 sm:p-5 relative z-10">
-        {/* ID Card Layout */}
+      <div className="p-4 sm:p-6 relative z-10">
+        {/* Avatar + Verification badges row */}
         <div className="flex items-start gap-4">
           {/* Large Avatar */}
           <div className="relative group flex-shrink-0">
-            <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-4 border-primary/30 shadow-xl ring-2 ring-primary/10">
+            <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-primary/30 shadow-xl ring-2 ring-primary/10">
               <AvatarImage 
                 src={profile.avatar_url || undefined} 
                 alt={profile.full_name || t('صورة شخصية', 'Profile picture')} 
               />
-              <AvatarFallback className="text-2xl sm:text-3xl bg-primary/10 text-primary">
+              <AvatarFallback className="text-3xl sm:text-4xl bg-primary/10 text-primary">
                 {profile.full_name 
                   ? profile.full_name.charAt(0).toUpperCase()
-                  : <User className="w-10 h-10" />
+                  : <User className="w-12 h-12" />
                 }
               </AvatarFallback>
             </Avatar>
@@ -151,13 +157,21 @@ export function ProfileHeader({ profile, badges = [], isKycVerified = false }: P
             <Input id="avatar-upload" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
           </div>
           
-          {/* Profile Info */}
-          <div className="flex-1 min-w-0 space-y-1 pt-0.5">
-            {/* Name + Verified */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-bold truncate">
-                {profile.full_name || t('المستخدم', 'User')}
-              </h1>
+          {/* Name + Badges */}
+          <div className="flex-1 min-w-0 space-y-2 pt-1">
+            {/* Arabic Name */}
+            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate font-cairo">
+              {profile.full_name || t('المستخدم', 'User')}
+            </h1>
+            {/* English Name */}
+            {profile.full_name_en && (
+              <p className="text-sm text-muted-foreground/80 font-medium -mt-1" dir="ltr">
+                {profile.full_name_en}
+              </p>
+            )}
+            
+            {/* Verification badges */}
+            <div className="flex flex-wrap gap-1.5">
               {profile.is_verified && (
                 <Badge variant="default" className="flex items-center gap-1 text-[10px] px-2 py-0.5 bg-primary/90">
                   <BadgeCheck className="w-3 h-3" />
@@ -171,79 +185,110 @@ export function ProfileHeader({ profile, badges = [], isKycVerified = false }: P
                 </Badge>
               )}
             </div>
-            
-            {/* Email */}
-            <p className="text-[11px] text-muted-foreground truncate">{profile.email}</p>
-            
-            {/* Info chips row */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              {/* Country flag */}
-              {flag && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
-                  <span className="text-sm">{flag}</span>
-                  <span>{countryName}</span>
-                </span>
-              )}
-              
-              {/* Age */}
-              {age !== null && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
-                  <Calendar className="w-3 h-3" />
-                  <span>{age} {t('سنة', 'yrs')}</span>
-                </span>
-              )}
-              
-              {/* Marital status */}
-              {maritalLabel && (
-                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
-                  <Heart className="w-3 h-3" />
-                  <span>{maritalLabel}</span>
-                </span>
-              )}
-              
-              {/* Join date */}
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">
-                <Calendar className="w-3 h-3" />
-                <span>{new Date(profile.created_at).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}</span>
-              </span>
-            </div>
 
-            {/* Bio */}
-            {profile.bio && (
-              <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed pt-0.5">
-                {profile.bio}
-              </p>
+            {/* Job title */}
+            {jobTitle && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Briefcase className="w-3.5 h-3.5 text-primary/60" />
+                <span>{jobTitle}</span>
+              </div>
             )}
-            
+
             {/* Follow button */}
             {!isOwnProfile && profile.is_verified && profile.user_id && (
               <div className="pt-1">
                 <FollowButton userId={profile.user_id} isVerified={profile.is_verified} />
               </div>
             )}
-            
+
             {uploading && (
               <p className="text-xs text-primary">{t("جاري رفع الصورة...", "Uploading...")}</p>
             )}
           </div>
         </div>
 
-        {/* Badges */}
-        {badges.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-border/50">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Star className="w-3.5 h-3.5 text-primary" />
-              <span className="text-xs font-medium text-muted-foreground">{t("البادجات", "Badges")}</span>
+        {/* Separator */}
+        <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+        {/* Details grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Email */}
+          <div className="col-span-2 flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
+            <span className="text-primary/60">✉</span>
+            <span className="truncate">{profile.email}</span>
+          </div>
+
+          {/* Country */}
+          {flag && (
+            <div className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+              <span className="text-sm">{flag}</span>
+              <span className="text-muted-foreground">{countryName}</span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {badges.map((ub: any) => (
-                <div key={ub.id} className="flex items-center gap-1 px-2 py-0.5 rounded-full border bg-muted/30 text-[11px]" style={{ borderColor: (ub.badges as any)?.badge_color }}>
-                  <span>{(ub.badges as any)?.icon_emoji}</span>
-                  <span className="font-cairo" style={{ color: (ub.badges as any)?.badge_color }}>{(ub.badges as any)?.name}</span>
-                </div>
-              ))}
+          )}
+
+          {/* Age */}
+          {age !== null && (
+            <div className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+              <Calendar className="w-3.5 h-3.5 text-primary/60" />
+              <span className="text-muted-foreground">{age} {t('سنة', 'yrs')}</span>
+            </div>
+          )}
+
+          {/* Date of birth */}
+          {profile.date_of_birth && (
+            <div className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+              <Calendar className="w-3.5 h-3.5 text-primary/60" />
+              <span className="text-muted-foreground">{formatDate(profile.date_of_birth, isArabic)}</span>
+            </div>
+          )}
+
+          {/* Marital status */}
+          {maritalLabel && (
+            <div className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+              <Heart className="w-3.5 h-3.5 text-primary/60" />
+              <span className="text-muted-foreground">{maritalLabel}</span>
+            </div>
+          )}
+
+          {/* Join date */}
+          <div className="flex items-center gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2">
+            <Calendar className="w-3.5 h-3.5 text-primary/60" />
+            <div className="flex flex-col">
+              <span className="text-[10px] text-muted-foreground/60">{t('انضم', 'Joined')}</span>
+              <span className="text-muted-foreground">{formatDate(profile.created_at, isArabic)}</span>
             </div>
           </div>
+        </div>
+
+        {/* Bio */}
+        {profile.bio && (
+          <>
+            <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <p className="text-xs text-muted-foreground/80 leading-relaxed italic px-1">
+              "{profile.bio}"
+            </p>
+          </>
+        )}
+
+        {/* Badges */}
+        {badges.length > 0 && (
+          <>
+            <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <Star className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground">{t("البادجات", "Badges")}</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {badges.map((ub: any) => (
+                  <div key={ub.id} className="flex items-center gap-1 px-2 py-0.5 rounded-full border bg-muted/30 text-[11px]" style={{ borderColor: (ub.badges as any)?.badge_color }}>
+                    <span>{(ub.badges as any)?.icon_emoji}</span>
+                    <span className="font-cairo" style={{ color: (ub.badges as any)?.badge_color }}>{(ub.badges as any)?.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </Card>
