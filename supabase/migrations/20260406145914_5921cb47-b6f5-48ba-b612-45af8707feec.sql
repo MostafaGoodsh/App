@@ -1,0 +1,1 @@
+UPDATE home_page_cards SET slug = 'earn', card_type = 'wheel' WHERE title = 'Earn' AND slug = 'الخريطة الزمنية | Time mapping';
