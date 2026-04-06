@@ -604,7 +604,7 @@ const WheelOfFortune = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     drawTripleRingWheel(ctx, canvas, displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation);
-  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings]);
+  }, [displaySegments, displayBonusSegments, displayUpgradeSegments, upgradeRotation, outerRotation, innerRotation, settings, bgImageReady]);
 
   // Spin the UPGRADE ring (3rd ring) when triggered
   const spinUpgradeRing = useCallback(() => {
