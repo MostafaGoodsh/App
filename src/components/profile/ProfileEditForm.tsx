@@ -133,11 +133,26 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="full_name">{t("الاسم الكامل", "Full Name")} *</Label>
-                <Input id="full_name" {...form.register('full_name')} placeholder={t("أدخل اسمك", "Enter your name")} />
+                <Label htmlFor="full_name">{t("الاسم بالعربي", "Name (Arabic)")} *</Label>
+                <Input id="full_name" {...form.register('full_name')} placeholder={t("أدخل اسمك بالعربي", "Enter your Arabic name")} />
                 {form.formState.errors.full_name && (
                   <p className="text-sm text-destructive mt-1">{form.formState.errors.full_name.message}</p>
                 )}
+              </div>
+              
+              <div>
+                <Label htmlFor="full_name_en">{t("الاسم بالإنجليزي", "Name (English)")}</Label>
+                <Input id="full_name_en" {...form.register('full_name_en')} placeholder="Enter your English name" dir="ltr" />
+              </div>
+              
+              <div>
+                <Label htmlFor="job_title">{t("الوظيفة بالعربي", "Job Title (Arabic)")}</Label>
+                <Input id="job_title" {...form.register('job_title')} placeholder={t("مثال: مهندس برمجيات", "e.g. Software Engineer")} />
+              </div>
+              
+              <div>
+                <Label htmlFor="job_title_en">{t("الوظيفة بالإنجليزي", "Job Title (English)")}</Label>
+                <Input id="job_title_en" {...form.register('job_title_en')} placeholder="e.g. Software Engineer" dir="ltr" />
               </div>
               
               <div>
