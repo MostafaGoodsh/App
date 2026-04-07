@@ -4318,6 +4318,134 @@ export type Database = {
         }
         Relationships: []
       }
+      virtual_card_transactions: {
+        Row: {
+          amount: number
+          card_id: string
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          merchant_category: string | null
+          merchant_name: string | null
+          reference_id: string | null
+          source_token_symbol: string | null
+          source_type: string | null
+          status: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          card_id: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          merchant_category?: string | null
+          merchant_name?: string | null
+          reference_id?: string | null
+          source_token_symbol?: string | null
+          source_type?: string | null
+          status?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          card_id?: string
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          merchant_category?: string | null
+          merchant_name?: string | null
+          reference_id?: string | null
+          source_token_symbol?: string | null
+          source_type?: string | null
+          status?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "virtual_card_transactions_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "virtual_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      virtual_cards: {
+        Row: {
+          balance: number | null
+          card_color: string | null
+          card_holder_name: string | null
+          card_number_last4: string
+          card_type: string
+          created_at: string | null
+          currency: string | null
+          cvv_hash: string
+          daily_limit: number | null
+          expiry_month: number
+          expiry_year: number
+          id: string
+          is_contactless_enabled: boolean | null
+          is_international_enabled: boolean | null
+          is_online_enabled: boolean | null
+          monthly_limit: number | null
+          status: string
+          total_spent: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          card_color?: string | null
+          card_holder_name?: string | null
+          card_number_last4?: string
+          card_type?: string
+          created_at?: string | null
+          currency?: string | null
+          cvv_hash?: string
+          daily_limit?: number | null
+          expiry_month?: number
+          expiry_year?: number
+          id?: string
+          is_contactless_enabled?: boolean | null
+          is_international_enabled?: boolean | null
+          is_online_enabled?: boolean | null
+          monthly_limit?: number | null
+          status?: string
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          card_color?: string | null
+          card_holder_name?: string | null
+          card_number_last4?: string
+          card_type?: string
+          created_at?: string | null
+          currency?: string | null
+          cvv_hash?: string
+          daily_limit?: number | null
+          expiry_month?: number
+          expiry_year?: number
+          id?: string
+          is_contactless_enabled?: boolean | null
+          is_international_enabled?: boolean | null
+          is_online_enabled?: boolean | null
+          monthly_limit?: number | null
+          status?: string
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       wallet_access_audit: {
         Row: {
           access_type: string
@@ -5289,6 +5417,10 @@ export type Database = {
           p_mfa_token?: string
           p_wallet_id: string
         }
+        Returns: Json
+      }
+      topup_virtual_card: {
+        Args: { p_amount: number; p_card_id: string; p_token_symbol?: string }
         Returns: Json
       }
       unverify_user_profile: { Args: { p_user_id: string }; Returns: boolean }
