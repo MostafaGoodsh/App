@@ -51,7 +51,7 @@ const VirtualCardAdmin = () => {
   };
 
   return (
-    <AdminPageShell title="إدارة البطاقات الافتراضية" titleEn="Virtual Cards Management">
+    <AdminPageShell>
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Card className="bg-card/50">
