@@ -52,6 +52,10 @@ const VirtualCardAdmin = () => {
 
   return (
     <AdminPageShell>
+      <h1 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <CreditCard className="w-6 h-6 text-primary" />
+        إدارة البطاقات الافتراضية | Virtual Cards Management
+      </h1>
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <Card className="bg-card/50">
