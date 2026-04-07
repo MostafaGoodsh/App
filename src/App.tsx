@@ -104,6 +104,8 @@ const Podcast = lazy(() => import("./pages/Podcast"));
 const PodcastAdmin = lazy(() => import("./pages/PodcastAdmin"));
 const OfficialLinks = lazy(() => import("./pages/OfficialLinks"));
 const QuranScroll = lazy(() => import("./pages/QuranScroll"));
+const VirtualCard = lazy(() => import("./pages/VirtualCard"));
+const VirtualCardAdmin = lazy(() => import("./pages/VirtualCardAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -227,7 +229,10 @@ const App = () => {
                     <Route path="podcast" element={<RequireAccess><Podcast /></RequireAccess>} />
                     <Route path="official-links" element={<RequireAccess><OfficialLinks /></RequireAccess>} />
                     <Route path="card/:slug" element={<RequireAccess><CardPage /></RequireAccess>} />
+                    <Route path="virtual-card" element={<RequireAuth><VirtualCard /></RequireAuth>} />
                     <Route path="quran-scroll" element={<RequireAuth><QuranScroll /></RequireAuth>} />
+                    <Route path="admin/virtual-cards" element={<RequireAdmin><VirtualCardAdmin /></RequireAdmin>} />
+                      <Route path="*" element={<NotFound />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
