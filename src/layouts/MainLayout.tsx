@@ -44,6 +44,11 @@ const MainLayoutContent = () => {
                 </Avatar>
               </Link>
             )}
+            <Link to="/support">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                <MessageSquare className="h-5 w-5" />
+              </Button>
+            </Link>
             <NotificationBell />
           </div>
           <div className="flex items-center gap-0.5">
