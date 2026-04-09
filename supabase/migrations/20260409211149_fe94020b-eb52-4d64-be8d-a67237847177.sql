@@ -1,0 +1,1 @@
+ALTER TABLE public.home_page_cards ADD COLUMN background_video text DEFAULT NULL;

@@ -1031,6 +1031,7 @@ export type Database = {
           background_color: string | null
           background_gradient: string | null
           background_image: string | null
+          background_video: string | null
           card_animation: string
           card_opacity: number | null
           card_shape: string
@@ -1069,6 +1070,7 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          background_video?: string | null
           card_animation?: string
           card_opacity?: number | null
           card_shape?: string
@@ -1107,6 +1109,7 @@ export type Database = {
           background_color?: string | null
           background_gradient?: string | null
           background_image?: string | null
+          background_video?: string | null
           card_animation?: string
           card_opacity?: number | null
           card_shape?: string
