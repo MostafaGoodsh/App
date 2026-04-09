@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -36,14 +37,16 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <svg className="h-14 w-14 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="6" r="3"/>
-            <path d="M12 9v6"/>
-            <path d="M9 12h6"/>
-            <path d="M8 21h8"/>
-            <path d="M10 18v3"/>
-            <path d="M14 18v3"/>
-          </svg>
+          <div className="h-11 w-11 rounded-full ring-2 ring-amber-500/30 flex items-center justify-center bg-background">
+            <svg className="h-7 w-7 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="6" r="3"/>
+              <path d="M12 9v6"/>
+              <path d="M9 12h6"/>
+              <path d="M8 21h8"/>
+              <path d="M10 18v3"/>
+              <path d="M14 18v3"/>
+            </svg>
+          </div>
           <Link to="/" className="font-cairo text-base font-bold flex items-center gap-1 text-primary">
             <span className="font-bold">Crypto-msr</span>
             <span>(منصة مصر الرقمية)</span>
@@ -97,6 +100,11 @@ const Header = () => {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <Link to="/support">
+            <Button variant="ghost" size="icon" className="relative">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+          </Link>
           <NotificationBell />
           {user ? (
             <>

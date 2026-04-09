@@ -14,6 +14,8 @@ export const SUPPORTED_LANGUAGES: Record<AppLanguage, LanguageLabels> = {
   ru: { native: "Русский", flag: "🇷🇺" },
 };
 
+export const VISIBLE_LANGUAGES: AppLanguage[] = ["ar", "en", "ru"];
+
 type TranslationKey = string;
 type Translations = Record<AppLanguage, Record<TranslationKey, string>>;
 
