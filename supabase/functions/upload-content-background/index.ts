@@ -66,27 +66,35 @@ Deno.serve(async (req) => {
       })
     }
 
-    if (!file.type.startsWith('image/')) {
-      return new Response(JSON.stringify({ error: 'File must be an image' }), {
+    const isImage = file.type.startsWith('image/')
+    const isVideo = file.type.startsWith('video/')
+
+    if (!isImage && !isVideo) {
+      return new Response(JSON.stringify({ error: 'File must be an image or video' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return new Response(JSON.stringify({ error: 'File size must be less than 5MB' }), {
+    // Images: 5MB max, Videos: 20MB max
+    const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      return new Response(JSON.stringify({ error: `File size must be less than ${isVideo ? '20MB' : '5MB'}` }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const safeName = `home-card-${Date.now()}.jpg`
-    const filePath = `home-cards/${user.id}/${safeName}`
+    const ext = isVideo ? 'mp4' : 'jpg'
+    const prefix = isVideo ? 'home-video' : 'home-card'
+    const safeName = `${prefix}-${Date.now()}.${ext}`
+    const folder = isVideo ? 'home-videos' : 'home-cards'
+    const filePath = `${folder}/${user.id}/${safeName}`
 
     const { error: uploadError } = await supabase.storage
       .from('content-backgrounds')
       .upload(filePath, file, {
-        contentType: 'image/jpeg',
+        contentType: file.type,
         upsert: true,
         cacheControl: '3600',
       })
@@ -100,7 +108,7 @@ Deno.serve(async (req) => {
     } = supabase.storage.from('content-backgrounds').getPublicUrl(filePath)
 
     return new Response(
-      JSON.stringify({ success: true, url: publicUrl, path: filePath }),
+      JSON.stringify({ success: true, url: publicUrl, path: filePath, type: isVideo ? 'video' : 'image' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

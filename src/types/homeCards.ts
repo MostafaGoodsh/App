@@ -27,4 +27,5 @@ export interface HomePageCard {
   card_animation: string;
   min_height: string | null;
   card_opacity: number | null;
+  background_video: string | null;
 }
