@@ -52,27 +52,25 @@ const LuckyDice = () => {
   }, [rolling, toast]);
 
   return (
-    <div className="rounded-2xl bg-gradient-to-b from-[#1a1a2e] to-[#0f0f1a] border border-[#D4AF37]/30 p-4 space-y-4">
+    <div className="space-y-3">
       <div className="text-center">
-        <h3 className="text-lg font-bold text-[#D4AF37]">🎲 Lucky Dice</h3>
+        <h3 className="text-base font-bold text-[#D4AF37]">𓂀 Lucky Dice</h3>
         <p className="text-[10px] text-[#D4AF37]/40">نرد الحظ</p>
       </div>
 
-      {/* Dice */}
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-3">
         {dice.map((d, i) => (
           <div
             key={i}
-            className={`w-20 h-20 rounded-xl bg-black/60 border-2 border-[#D4AF37]/40 flex items-center justify-center text-5xl transition-transform ${rolling ? 'animate-bounce' : ''}`}
+            className={`w-16 h-16 rounded-xl bg-black/50 border border-[#D4AF37]/30 flex items-center justify-center text-4xl transition-transform ${rolling ? 'animate-bounce' : ''}`}
           >
             {DICE_FACES[d - 1]}
           </div>
         ))}
       </div>
 
-      {/* Total */}
       <div className="text-center">
-        <p className="text-2xl font-bold text-[#D4AF37]">{dice[0] + dice[1]}</p>
+        <p className="text-xl font-bold text-[#D4AF37]">{dice[0] + dice[1]}</p>
         {lastWin !== null && !rolling && (
           lastWin > 0 ? (
             <p className="text-[#D4AF37] font-bold text-sm animate-bounce">+{lastWin} XP 🎉</p>
@@ -82,17 +80,15 @@ const LuckyDice = () => {
         )}
       </div>
 
-      {/* Roll Button */}
       <Button
         onClick={roll}
         disabled={rolling}
-        className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold text-base h-11"
+        className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold text-sm h-10"
       >
         {rolling ? '...' : 'ROLL'}
       </Button>
 
-      {/* Payout Table */}
-      <div className="grid grid-cols-2 gap-1 text-[10px] text-[#D4AF37]/50">
+      <div className="grid grid-cols-2 gap-1 text-[9px] text-[#D4AF37]/40">
         <span>Double 6 → 200 XP</span>
         <span>Lucky 7 → 50 XP</span>
         <span>Any Double → 30 XP</span>
