@@ -1574,7 +1574,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
-const DEFAULT_LANGUAGE: AppLanguage = "both";
+const DEFAULT_LANGUAGE: AppLanguage = "ar";
 
 const isSupportedLanguage = (value: string | null): value is AppLanguage => {
   return !!value && value in SUPPORTED_LANGUAGES;

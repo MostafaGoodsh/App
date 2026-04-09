@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/useProfile";
 import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
 import GlobalAudioPlayer from "@/components/podcast/GlobalAudioPlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { MessageSquare } from "lucide-react";
 
 const MainLayoutContent = () => {
   const { getContent } = useAppContent();
@@ -43,6 +44,11 @@ const MainLayoutContent = () => {
                 </Avatar>
               </Link>
             )}
+            <Link to="/support">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9">
+                <MessageSquare className="h-5 w-5" />
+              </Button>
+            </Link>
             <NotificationBell />
           </div>
           <div className="flex items-center gap-0.5">
@@ -57,7 +63,7 @@ const MainLayoutContent = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10"
+              className="h-9 w-9 rounded-full ring-2 ring-primary/30"
               onClick={toggleSidebar}
             >
               <span className="text-2xl text-primary font-bold">𓋹</span>
