@@ -63,7 +63,7 @@ const MainLayoutContent = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10"
+              className="h-9 w-9 rounded-full ring-2 ring-primary/30"
               onClick={toggleSidebar}
             >
               <span className="text-2xl text-primary font-bold">𓋹</span>
