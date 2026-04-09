@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { useVirtualCard } from '@/hooks/useVirtualCard';
 
 interface Props {
@@ -19,32 +19,32 @@ const CreateCardDialog = ({ createCard }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full gap-2 bg-gradient-to-r from-[#D4AF37] to-[#B8941F] text-black hover:from-[#C4A032] hover:to-[#A88520]" size="lg">
+        <Button className="w-full gap-2 bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold" size="lg">
           <Plus className="w-5 h-5" />
-          إنشاء كارت جديد | Create New Card
+          Create New Card
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm bg-black/95 border-[#D4AF37]/30">
         <DialogHeader>
-          <DialogTitle className="text-center">اختر نوع الكارت | Choose Card Type</DialogTitle>
+          <DialogTitle className="text-center text-[#D4AF37]">Choose Card Type</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4 mt-4">
           <button
             onClick={() => handleCreate('visa')}
-            className="p-6 rounded-xl border-2 border-border hover:border-[#D4AF37] transition-all flex flex-col items-center gap-3 hover:bg-[#D4AF37]/5"
+            className="p-6 rounded-xl border-2 border-[#D4AF37]/20 hover:border-[#D4AF37] transition-all flex flex-col items-center gap-3 hover:bg-[#D4AF37]/5 bg-black/30"
           >
-            <div className="text-3xl font-bold italic text-blue-500">VISA</div>
-            <p className="text-xs text-muted-foreground">فيزا افتراضي</p>
+            <div className="text-3xl font-bold italic text-[#D4AF37]">VISA</div>
+            <p className="text-xs text-[#D4AF37]/50">Virtual Visa</p>
           </button>
           <button
             onClick={() => handleCreate('mastercard')}
-            className="p-6 rounded-xl border-2 border-border hover:border-[#D4AF37] transition-all flex flex-col items-center gap-3 hover:bg-[#D4AF37]/5"
+            className="p-6 rounded-xl border-2 border-[#D4AF37]/20 hover:border-[#D4AF37] transition-all flex flex-col items-center gap-3 hover:bg-[#D4AF37]/5 bg-black/30"
           >
             <div className="flex -space-x-2 mb-1">
-              <div className="w-8 h-8 rounded-full bg-red-500" />
-              <div className="w-8 h-8 rounded-full bg-yellow-500 opacity-80" />
+              <div className="w-8 h-8 rounded-full bg-[#D4AF37]" />
+              <div className="w-8 h-8 rounded-full bg-[#D4AF37]/50" />
             </div>
-            <p className="text-xs text-muted-foreground">ماستركارد افتراضي</p>
+            <p className="text-xs text-[#D4AF37]/50">Virtual Mastercard</p>
           </button>
         </div>
       </DialogContent>
