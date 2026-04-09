@@ -99,7 +99,7 @@ const Header = () => {
           </NavigationMenu>
         </nav>
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          <LanguageSwitcher />
+          <span className="hidden sm:block"><LanguageSwitcher /></span>
           <Link to="/support">
             <Button variant="ghost" size="icon" className="relative h-9 w-9">
               <MessageSquare className="h-5 w-5" />
