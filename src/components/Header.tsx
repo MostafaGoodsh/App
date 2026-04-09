@@ -35,7 +35,7 @@ const Header = () => {
       className={`sticky top-0 z-50 border-b ${!hasCustomHeader ? 'bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60' : ''}`}
       style={hasCustomHeader ? { ...headerStyle, position: 'sticky', top: 0, zIndex: 50 } : undefined}
     >
-      <div className="container mx-auto px-2 sm:px-4 h-14 flex items-center justify-between gap-1">
+      <div className="mx-auto px-2 sm:px-4 h-14 flex items-center justify-between gap-1 w-full">
         <div className="flex items-center gap-2 min-w-0">
           <div className="h-9 w-9 sm:h-11 sm:w-11 rounded-full ring-2 ring-amber-500/30 flex items-center justify-center bg-background shrink-0">
             <svg className="h-5 w-5 sm:h-7 sm:w-7 text-amber-500 drop-shadow-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
