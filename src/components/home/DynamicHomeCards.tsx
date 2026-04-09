@@ -53,6 +53,7 @@ const getSizeClasses = (size: string) => {
 
 const LinkCard = ({ card }: { card: HomePageCard }) => {
   const [imgError, setImgError] = useState(false);
+  const [vidError, setVidError] = useState(false);
   const { getSetting } = useTypography();
   const { language, t } = useLanguage();
   const sectionKey = getCardTypographySectionKey(card.card_type);
@@ -64,7 +65,7 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
 
   const hasValidImage =
     card.background_image && !card.background_image.includes("placeholder") && !imgError;
-
+  const hasValidVideo = card.background_video && !vidError;
   const gradientStyle =
     !hasValidImage && card.background_gradient
       ? ({ background: card.background_gradient } as React.CSSProperties)
