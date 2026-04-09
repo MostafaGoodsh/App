@@ -92,7 +92,12 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
           className={`relative overflow-hidden ${shapeClass} border border-border/50 bg-card/30 backdrop-blur-sm ${animationClass} cursor-default opacity-70`}
           style={{ ...gradientStyle, minHeight: customMinHeight }}
         >
-          {hasValidImage && (
+          {hasValidVideo && (
+            <video src={card.background_video!} autoPlay muted loop playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-25"
+              onError={() => setVidError(true)} />
+          )}
+          {!hasValidVideo && hasValidImage && (
             <img src={card.background_image!} alt={displayTitle}
               className="absolute inset-0 w-full h-full object-cover opacity-25" loading="lazy" onError={() => setImgError(true)} />
           )}
@@ -116,7 +121,12 @@ const LinkCard = ({ card }: { card: HomePageCard }) => {
         className={`relative overflow-hidden ${shapeClass} border border-border/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer bg-card/30 backdrop-blur-sm ${animationClass}`}
         style={{ ...gradientStyle, opacity, minHeight: customMinHeight }}
       >
-        {hasValidImage && (
+        {hasValidVideo && (
+          <video src={card.background_video!} autoPlay muted loop playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
+            onError={() => setVidError(true)} />
+        )}
+        {!hasValidVideo && hasValidImage && (
           <img src={card.background_image!} alt={displayTitle}
             className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-300"
             loading="lazy" onError={() => setImgError(true)} />
