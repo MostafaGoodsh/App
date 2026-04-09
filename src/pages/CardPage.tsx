@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import WheelOfFortune from "@/components/tasks/WheelOfFortune";
+import SlotMachine from "@/components/games/SlotMachine";
+import LuckyDice from "@/components/games/LuckyDice";
 
 const sanitizeHTML = (dirty: string) =>
   DOMPurify.sanitize(dirty, {
@@ -115,6 +117,10 @@ const CardPage = () => {
         {card.card_type === "wheel" || card.slug === "earn" ? (
           <div className="space-y-6">
             <WheelOfFortune />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SlotMachine />
+              <LuckyDice />
+            </div>
             {pageContent && (
               <div
                 className="prose prose-lg max-w-none dark:prose-invert
