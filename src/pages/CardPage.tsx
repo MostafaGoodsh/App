@@ -115,9 +115,9 @@ const CardPage = () => {
         </div>
 
         {card.card_type === "wheel" || card.slug === "earn" ? (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <WheelOfFortune />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-gradient-to-b from-[#1a1a2e] to-[#0f0f1a] border border-[#D4AF37]/20 p-4">
               <SlotMachine />
               <LuckyDice />
             </div>
