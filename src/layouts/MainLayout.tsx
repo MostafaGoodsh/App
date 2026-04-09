@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/useProfile";
 import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
 import GlobalAudioPlayer from "@/components/podcast/GlobalAudioPlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { MessageSquare } from "lucide-react";
 
 const MainLayoutContent = () => {
   const { getContent } = useAppContent();
