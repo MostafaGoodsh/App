@@ -571,6 +571,64 @@ export default function HomePageCardsManagement() {
                       </Button>
                     </div>
                   )}
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1">
+                    <Video className="h-4 w-4" />
+                    فيديو الخلفية (اختياري - أقصى 20MB)
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 cursor-pointer">
+                      <Input
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        onChange={async (event) => {
+                          const file = event.target.files?.[0];
+                          if (!file || !editingCard) return;
+                          if (!file.type.startsWith('video/')) {
+                            toast({ title: "خطأ", description: "يجب اختيار ملف فيديو", variant: "destructive" });
+                            return;
+                          }
+                          if (file.size > 20 * 1024 * 1024) {
+                            toast({ title: "خطأ", description: "حجم الفيديو كبير جداً. الحد الأقصى 20 ميجابايت", variant: "destructive" });
+                            return;
+                          }
+                          setUploading(true);
+                          try {
+                            const formData = new FormData();
+                            formData.append("file", file);
+                            const { data, error: uploadError } = await supabase.functions.invoke("upload-content-background", { body: formData });
+                            if (uploadError) throw uploadError;
+                            if (!data?.success || !data?.url) throw new Error(data?.error || "فشل في رفع الفيديو");
+                            setEditingCard({ ...editingCard, background_video: data.url });
+                            toast({ title: "تم رفع الفيديو بنجاح" });
+                          } catch (error: any) {
+                            toast({ title: "خطأ", description: error.message || "فشل في رفع الفيديو", variant: "destructive" });
+                          } finally {
+                            setUploading(false);
+                          }
+                        }}
+                        disabled={uploading}
+                        className="cursor-pointer"
+                      />
+                    </label>
+                    {uploading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                  </div>
+                  {editingCard.background_video && (
+                    <div className="mt-2 flex items-center gap-3">
+                      <video src={editingCard.background_video} className="w-32 h-20 object-cover rounded border" muted />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs text-destructive"
+                        onClick={() => setEditingCard({...editingCard, background_video: null})}
+                      >
+                        <Trash2 className="h-3 w-3 ml-1" />
+                        حذف
+                      </Button>
+                    </div>
+                  )}
+                </div>
                   {isImageRequired(editingCard) && !editingCard.background_image && (
                     <p className="text-xs text-destructive">صورة الخلفية مطلوبة لهذا النوع من البطاقات</p>
                   )}
