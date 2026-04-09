@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff, Clock, Upload, Loader2, ImageIcon } from "lucide-react";
+import { Save, RefreshCw, Plus, Edit, Trash2, ArrowUp, ArrowDown, Home, Eye, EyeOff, Clock, Upload, Loader2, ImageIcon, Video } from "lucide-react";
 
 const SPECIAL_CARD_TYPES = ['tasks', 'anubis', 'reels', 'live_stream'];
 
@@ -75,6 +75,7 @@ interface HomePageCard {
   card_animation: string;
   min_height: string;
   card_opacity: number;
+  background_video: string | null;
 }
 
 export default function HomePageCardsManagement() {
@@ -228,6 +229,7 @@ export default function HomePageCardsManagement() {
       card_animation: 'none',
       min_height: '',
       card_opacity: 1,
+      background_video: null,
     });
     setDialogOpen(true);
   };
@@ -288,6 +290,7 @@ export default function HomePageCardsManagement() {
         card_animation: editingCard.card_animation || 'none',
         min_height: editingCard.min_height || null,
         card_opacity: editingCard.card_opacity ?? 1,
+        background_video: editingCard.background_video || null,
       };
 
       if (isNewCard) {
