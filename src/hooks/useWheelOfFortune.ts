@@ -121,12 +121,13 @@ export function useWheelOfFortune() {
     setSpinning(true);
     try {
       // Use server-side RPC for secure spin execution
-      const { data, error } = await supabase.rpc('execute_wheel_spin', {
+      const { data: rawData, error } = await supabase.rpc('execute_wheel_spin' as any, {
         p_user_id: user.id,
       });
 
       if (error) throw error;
 
+      const data = rawData as any;
       if (!data?.success) {
         toast.error(data?.error || "حدث خطأ أثناء تدوير العجلة");
         return null;
