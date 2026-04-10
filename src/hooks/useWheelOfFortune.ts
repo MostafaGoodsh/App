@@ -120,43 +120,32 @@ export function useWheelOfFortune() {
 
     setSpinning(true);
     try {
-      const totalProb = segments.reduce((s, seg) => s + seg.probability, 0);
-      let rand = Math.random() * totalProb;
-      let winner = segments[0];
-      for (const seg of segments) {
-        rand -= seg.probability;
-        if (rand <= 0) {
-          winner = seg;
-          break;
-        }
-      }
-
-      const costXp = isFree() ? 0 : settings.spin_cost_xp;
-
-      const { error } = await supabase.from("wheel_spin_history").insert({
-        user_id: user.id,
-        segment_id: winner.id,
-        reward_type: winner.reward_type,
-        reward_value: winner.reward_value,
-        xp_cost: costXp,
+      // Use server-side RPC for secure spin execution
+      const { data, error } = await supabase.rpc('execute_wheel_spin', {
+        p_user_id: user.id,
       });
 
       if (error) throw error;
 
-      const { data: rewardResult, error: rewardError } = await supabase.rpc('process_wheel_reward', {
-        p_user_id: user.id,
-        p_reward_type: winner.reward_type,
-        p_reward_value: winner.reward_value,
-        p_spin_cost: costXp,
-        p_is_bonus: false,
-      });
-
-      if (rewardError) {
-        console.error('Reward processing error:', rewardError);
+      if (!data?.success) {
+        toast.error(data?.error || "حدث خطأ أثناء تدوير العجلة");
+        return null;
       }
 
+      const winner: WheelSegment = {
+        id: data.segment.id,
+        label: data.segment.label,
+        label_en: data.segment.label_en,
+        reward_type: data.segment.reward_type,
+        reward_value: data.segment.reward_value,
+        reward_description: data.segment.reward_description,
+        color: data.segment.color,
+        probability: data.segment.probability,
+        display_order: data.segment.display_order,
+      };
+
       setTodaySpins((p) => p + 1);
-      return { ...winner, _rewardResult: rewardResult } as any;
+      return { ...winner, _rewardResult: data.reward_result } as any;
     } catch (e: any) {
       toast.error("حدث خطأ أثناء تدوير العجلة");
       console.error(e);
@@ -164,7 +153,7 @@ export function useWheelOfFortune() {
     } finally {
       setSpinning(false);
     }
-  }, [user, settings, segments, spinning, isFree]);
+  }, [user, settings, spinning]);
 
   const processBonusReward = useCallback(async (msraValue: number) => {
     if (!user) return null;
