@@ -61,7 +61,7 @@ const MarketMap = ({
         .from("market_locations_public" as any)
         .select("id, name, name_en, description, location_type, latitude, longitude, address, website, logo_url, accepts_msra");
       if (error) throw error;
-      setLocations(data || []);
+      setLocations((data as any) || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
