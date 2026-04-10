@@ -2060,6 +2060,13 @@ export type Database = {
             referencedRelation: "market_locations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "market_products_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "market_locations_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mfa_sessions: {
@@ -5201,6 +5208,69 @@ export type Database = {
           subscription_type?: string | null
           two_factor_enabled?: boolean | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      market_locations_public: {
+        Row: {
+          accepts_msra: boolean | null
+          address: string | null
+          bio: string | null
+          cooperation_note: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          latitude: number | null
+          location_type: string | null
+          logo_url: string | null
+          longitude: number | null
+          name: string | null
+          name_en: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          accepts_msra?: boolean | null
+          address?: string | null
+          bio?: string | null
+          cooperation_note?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          location_type?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          name_en?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          accepts_msra?: boolean | null
+          address?: string | null
+          bio?: string | null
+          cooperation_note?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          latitude?: number | null
+          location_type?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string | null
+          name_en?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          website?: string | null
         }
         Relationships: []
       }
