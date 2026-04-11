@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 const SYMBOLS = ['☥', '𓆣', '𓂀', '𓌀', '𓊽', '𓋹', '𓃭', '𓅃'];
 const COLS = 5;
 const ROWS = 3;
+const SPIN_COST = 10;
 
 const getRandomSymbol = () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 const getRandomColumn = () => Array.from({ length: ROWS }, () => getRandomSymbol());
@@ -70,7 +71,6 @@ const SlotMachine = () => {
                 bestWin = 20; bestRow = r;
               }
             }
-            // Middle row bonus
             const mid = finalReels.map(col => col[1]);
             if (mid.every(s => s === mid[0]) && bestWin < 500) {
               bestWin = mid[0] === '𓆣' ? 500 : 200;
@@ -94,21 +94,27 @@ const SlotMachine = () => {
         <p className="text-[10px] text-[#D4AF37]/40">ماكينة الحظ</p>
       </div>
 
-      {/* Reel Grid: 5 rows × 3 columns */}
-      <div className="relative rounded-xl bg-black/60 border border-[#D4AF37]/20 p-2 overflow-hidden">
-        {/* Middle row highlight */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2.2rem] bg-[#D4AF37]/10 border-y border-[#D4AF37]/30 pointer-events-none z-10" />
+      {/* Spin Cost */}
+      <div className="text-center">
+        <span className="text-xs text-[#D4AF37]/60 bg-black/40 px-3 py-1 rounded-full border border-[#D4AF37]/20">
+          سعر التدوير: {SPIN_COST} XP
+        </span>
+      </div>
+
+      {/* Reel Grid */}
+      <div className="relative rounded-xl bg-black/60 border border-[#D4AF37]/20 p-3 overflow-hidden">
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3rem] bg-[#D4AF37]/10 border-y border-[#D4AF37]/30 pointer-events-none z-10" />
         
-        <div className="grid gap-[2px]">
+        <div className="grid gap-1">
           {Array.from({ length: ROWS }).map((_, row) => (
             <div
               key={row}
-              className={`flex justify-center gap-1 ${winRow === row && !spinning ? 'animate-pulse' : ''}`}
+              className={`flex justify-center gap-1.5 ${winRow === row && !spinning ? 'animate-pulse' : ''}`}
             >
               {reels.map((reel, col) => (
                 <div
                   key={col}
-                  className={`w-[3.2rem] h-[2rem] rounded bg-black/50 flex items-center justify-center text-lg transition-all
+                  className={`w-[3.6rem] h-[2.6rem] rounded-lg bg-black/50 flex items-center justify-center text-2xl transition-all
                     ${row === 1 ? 'border border-[#D4AF37]/20' : ''}
                     ${spinning ? 'blur-[1px]' : ''}`}
                 >
@@ -126,7 +132,7 @@ const SlotMachine = () => {
           {lastWin > 0 ? (
             <p className="text-[#D4AF37] font-bold text-sm animate-bounce">+{lastWin} XP 🎉</p>
           ) : (
-            <p className="text-[#D4AF37]/40 text-xs">Try again!</p>
+            <p className="text-[#D4AF37]/40 text-xs">حاول مرة تانية!</p>
           )}
         </div>
       )}
@@ -136,8 +142,21 @@ const SlotMachine = () => {
         disabled={spinning}
         className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold text-sm h-10"
       >
-        {spinning ? '...' : 'SPIN'}
+        {spinning ? '...' : `SPIN (-${SPIN_COST} XP)`}
       </Button>
+
+      {/* Win Rules */}
+      <div className="rounded-lg bg-black/40 border border-[#D4AF37]/15 p-2.5 space-y-1">
+        <p className="text-[10px] text-[#D4AF37]/70 font-bold text-center mb-1">قواعد المكسب</p>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-[#D4AF37]/50">
+          <span>5× 𓆣 جعران → 1000 XP</span>
+          <span>5× صف الوسط 𓆣 → 500 XP</span>
+          <span>5× أي رمز → 300 XP</span>
+          <span>5× صف الوسط → 200 XP</span>
+          <span>4× تطابق → 100 XP</span>
+          <span>3× تطابق → 20 XP</span>
+        </div>
+      </div>
     </div>
   );
 };

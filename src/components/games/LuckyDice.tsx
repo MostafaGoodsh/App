@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+const ROLL_COST = 5;
 
 const LuckyDice = () => {
   const { toast } = useToast();
@@ -58,6 +59,13 @@ const LuckyDice = () => {
         <p className="text-[10px] text-[#D4AF37]/40">نرد الحظ</p>
       </div>
 
+      {/* Roll Cost */}
+      <div className="text-center">
+        <span className="text-xs text-[#D4AF37]/60 bg-black/40 px-3 py-1 rounded-full border border-[#D4AF37]/20">
+          سعر الرمية: {ROLL_COST} XP
+        </span>
+      </div>
+
       <div className="flex justify-center gap-3">
         {dice.map((d, i) => (
           <div
@@ -75,7 +83,7 @@ const LuckyDice = () => {
           lastWin > 0 ? (
             <p className="text-[#D4AF37] font-bold text-sm animate-bounce">+{lastWin} XP 🎉</p>
           ) : (
-            <p className="text-[#D4AF37]/40 text-xs">Try again!</p>
+            <p className="text-[#D4AF37]/40 text-xs">حاول مرة تانية!</p>
           )
         )}
       </div>
@@ -85,14 +93,18 @@ const LuckyDice = () => {
         disabled={rolling}
         className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold text-sm h-10"
       >
-        {rolling ? '...' : 'ROLL'}
+        {rolling ? '...' : `ROLL (-${ROLL_COST} XP)`}
       </Button>
 
-      <div className="grid grid-cols-2 gap-1 text-[9px] text-[#D4AF37]/40">
-        <span>Double 6 → 200 XP</span>
-        <span>Lucky 7 → 50 XP</span>
-        <span>Any Double → 30 XP</span>
-        <span>10+ → 15 XP</span>
+      {/* Win Rules */}
+      <div className="rounded-lg bg-black/40 border border-[#D4AF37]/15 p-2.5 space-y-1">
+        <p className="text-[10px] text-[#D4AF37]/70 font-bold text-center mb-1">قواعد المكسب</p>
+        <div className="grid grid-cols-2 gap-1 text-[9px] text-[#D4AF37]/50">
+          <span>Double 6 (12) → 200 XP</span>
+          <span>Lucky 7 → 50 XP</span>
+          <span>أي دبل → 30 XP</span>
+          <span>10+ → 15 XP</span>
+        </div>
       </div>
     </div>
   );
