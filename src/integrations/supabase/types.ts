@@ -5334,6 +5334,7 @@ export type Database = {
         Args: { p_wallet_id: string }
         Returns: Json
       }
+      execute_wheel_spin: { Args: { p_user_id: string }; Returns: Json }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_identity_verification_admin_view: {
         Args: never
