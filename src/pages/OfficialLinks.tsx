@@ -27,8 +27,22 @@ const categoryLabels: Record<string, { ar: string; en: string }> = {
   website: { ar: "مواقع رسمية", en: "Official Websites" },
   community: { ar: "مجتمع", en: "Community" },
   support: { ar: "دعم", en: "Support" },
+  blockchain: { ar: "بلوكتشين", en: "Blockchain" },
   other: { ar: "أخرى", en: "Other" },
 };
+
+/**
+ * Get a favicon URL for a given link URL using Google's favicon service.
+ * Falls back to the link's icon_url if provided.
+ */
+function getFaviconUrl(url: string): string {
+  try {
+    const domain = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  } catch {
+    return '';
+  }
+}
 
 const OfficialLinks = () => {
   const { t, language, dir } = useLanguage();
@@ -104,6 +118,7 @@ const OfficialLinks = () => {
                 {catLinks.map((link) => {
                   const title = (!isArabic && link.title_en) ? link.title_en : link.title;
                   const desc = (!isArabic && link.description_en) ? link.description_en : link.description;
+                  const iconSrc = link.icon_url || getFaviconUrl(link.url);
                   return (
                     <a
                       key={link.id}
@@ -114,17 +129,20 @@ const OfficialLinks = () => {
                     >
                       <Card className="transition-all hover:border-primary/40 hover:shadow-lg">
                         <CardContent className="p-4 flex items-center gap-3">
-                          {link.icon_url ? (
+                          {iconSrc ? (
                             <img
-                              src={link.icon_url}
+                              src={iconSrc}
                               alt=""
-                              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                              className="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-muted/30 p-1"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                              }}
                             />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <ExternalLink className="w-5 h-5 text-primary" />
-                            </div>
-                          )}
+                          ) : null}
+                          <div className={`w-10 h-10 rounded-lg bg-primary/10 items-center justify-center flex-shrink-0 ${iconSrc ? 'hidden' : 'flex'}`}>
+                            <ExternalLink className="w-5 h-5 text-primary" />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-cairo font-medium text-sm truncate">
                               {title}

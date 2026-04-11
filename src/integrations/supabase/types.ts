@@ -2841,6 +2841,7 @@ export type Database = {
           theme_mode: string | null
           updated_at: string
           user_id: string | null
+          visible_fields: Json | null
         }
         Insert: {
           background_color?: string | null
@@ -2865,6 +2866,7 @@ export type Database = {
           theme_mode?: string | null
           updated_at?: string
           user_id?: string | null
+          visible_fields?: Json | null
         }
         Update: {
           background_color?: string | null
@@ -2889,6 +2891,7 @@ export type Database = {
           theme_mode?: string | null
           updated_at?: string
           user_id?: string | null
+          visible_fields?: Json | null
         }
         Relationships: []
       }
