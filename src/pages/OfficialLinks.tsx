@@ -150,7 +150,8 @@ const OfficialLinks = () => {
                 {catLinks.map((link) => {
                   const title = (!isArabic && link.title_en) ? link.title_en : link.title;
                   const desc = (!isArabic && link.description_en) ? link.description_en : link.description;
-                  const iconSrc = link.icon_url || getFaviconUrl(link.url);
+                  const brand = getBrandIcon(link.url);
+                  const iconSrc = link.icon_url || (!brand ? getFaviconUrl(link.url) : '');
                   return (
                     <a
                       key={link.id}
@@ -161,18 +162,23 @@ const OfficialLinks = () => {
                     >
                       <Card className="transition-all hover:border-primary/40 hover:shadow-lg">
                         <CardContent className="p-4 flex items-center gap-3">
-                          {iconSrc ? (
+                          {brand && !link.icon_url ? (
+                            <div className={`w-10 h-10 rounded-lg ${brand.bg} flex items-center justify-center flex-shrink-0 text-white text-lg`}>
+                              {brand.emoji}
+                            </div>
+                          ) : iconSrc ? (
                             <img
                               src={iconSrc}
                               alt=""
                               className="w-10 h-10 rounded-lg object-contain flex-shrink-0 bg-muted/30 p-1"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
-                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                const next = (e.target as HTMLImageElement).nextElementSibling;
+                                if (next) next.classList.remove('hidden');
                               }}
                             />
                           ) : null}
-                          <div className={`w-10 h-10 rounded-lg bg-primary/10 items-center justify-center flex-shrink-0 ${iconSrc ? 'hidden' : 'flex'}`}>
+                          <div className={`w-10 h-10 rounded-lg bg-primary/10 items-center justify-center flex-shrink-0 ${iconSrc || brand ? 'hidden' : 'flex'}`}>
                             <ExternalLink className="w-5 h-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
