@@ -102,19 +102,19 @@ const SlotMachine = () => {
       </div>
 
       {/* Reel Grid */}
-      <div className="relative rounded-xl bg-black/60 border border-[#D4AF37]/20 p-3 overflow-hidden">
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3rem] bg-[#D4AF37]/10 border-y border-[#D4AF37]/30 pointer-events-none z-10" />
+      <div className="relative rounded-xl bg-black/60 border border-[#D4AF37]/20 p-2 overflow-hidden">
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2.8rem] bg-[#D4AF37]/10 border-y border-[#D4AF37]/30 pointer-events-none z-10" />
         
         <div className="grid gap-1">
           {Array.from({ length: ROWS }).map((_, row) => (
             <div
               key={row}
-              className={`flex justify-center gap-1.5 ${winRow === row && !spinning ? 'animate-pulse' : ''}`}
+              className={`flex justify-center gap-1 ${winRow === row && !spinning ? 'animate-pulse' : ''}`}
             >
               {reels.map((reel, col) => (
                 <div
                   key={col}
-                  className={`w-[3.6rem] h-[2.6rem] rounded-lg bg-black/50 flex items-center justify-center text-2xl transition-all
+                  className={`w-[2.8rem] h-[2.4rem] rounded-lg bg-black/50 flex items-center justify-center text-xl transition-all
                     ${row === 1 ? 'border border-[#D4AF37]/20' : ''}
                     ${spinning ? 'blur-[1px]' : ''}`}
                 >

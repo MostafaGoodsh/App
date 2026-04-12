@@ -31,10 +31,42 @@ const categoryLabels: Record<string, { ar: string; en: string }> = {
   other: { ar: "أخرى", en: "Other" },
 };
 
-/**
- * Get a favicon URL for a given link URL using Google's favicon service.
- * Falls back to the link's icon_url if provided.
- */
+/** Well-known brand icons mapped by domain keyword */
+const BRAND_ICONS: Record<string, { emoji: string; bg: string }> = {
+  'telegram': { emoji: '✈️', bg: 'bg-blue-500' },
+  't.me': { emoji: '✈️', bg: 'bg-blue-500' },
+  'twitter': { emoji: '🐦', bg: 'bg-sky-500' },
+  'x.com': { emoji: '𝕏', bg: 'bg-black' },
+  'facebook': { emoji: '📘', bg: 'bg-blue-600' },
+  'instagram': { emoji: '📷', bg: 'bg-pink-500' },
+  'youtube': { emoji: '▶️', bg: 'bg-red-600' },
+  'tiktok': { emoji: '🎵', bg: 'bg-black' },
+  'discord': { emoji: '💬', bg: 'bg-indigo-600' },
+  'reddit': { emoji: '🔴', bg: 'bg-orange-600' },
+  'linkedin': { emoji: '💼', bg: 'bg-blue-700' },
+  'github': { emoji: '🐙', bg: 'bg-gray-800' },
+  'whatsapp': { emoji: '💚', bg: 'bg-green-500' },
+  'etherscan': { emoji: '⟠', bg: 'bg-blue-900' },
+  'bscscan': { emoji: '⛓️', bg: 'bg-yellow-500' },
+  'solscan': { emoji: '◎', bg: 'bg-purple-600' },
+  'polygonscan': { emoji: '⬡', bg: 'bg-purple-700' },
+  'blockchain': { emoji: '⛓️', bg: 'bg-blue-800' },
+  'coinmarketcap': { emoji: '📊', bg: 'bg-blue-600' },
+  'coingecko': { emoji: '🦎', bg: 'bg-green-600' },
+  'dextools': { emoji: '📈', bg: 'bg-cyan-700' },
+  'medium': { emoji: '📝', bg: 'bg-black' },
+};
+
+function getBrandIcon(url: string): { emoji: string; bg: string } | null {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    for (const [key, value] of Object.entries(BRAND_ICONS)) {
+      if (hostname.includes(key)) return value;
+    }
+  } catch {}
+  return null;
+}
+
 function getFaviconUrl(url: string): string {
   try {
     const domain = new URL(url).hostname;
