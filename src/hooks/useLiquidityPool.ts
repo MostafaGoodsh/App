@@ -101,6 +101,41 @@ export const useLiquidityPool = (poolSlug?: string) => {
     }
   }, [activePool?.id, user?.id]);
 
+  // Real-time subscriptions for pool updates
+  useEffect(() => {
+    if (!activePool) return;
+
+    const poolChannel = supabase
+      .channel(`pool-realtime-${activePool.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'liquidity_pools',
+        filter: `id=eq.${activePool.id}`,
+      }, (payload) => {
+        if (payload.new) {
+          setActivePool(payload.new as unknown as LiquidityPool);
+          // Also update in pools array
+          setPools(prev => prev.map(p => p.id === activePool.id ? payload.new as unknown as LiquidityPool : p));
+        }
+      })
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'liquidity_transactions',
+        filter: `pool_id=eq.${activePool.id}`,
+      }, (payload) => {
+        if (payload.new) {
+          setTransactions(prev => [payload.new as unknown as LiquidityTransaction, ...prev].slice(0, 50));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(poolChannel);
+    };
+  }, [activePool?.id]);
+
   const fetchPools = async () => {
     const { data } = await supabase
       .from('liquidity_pools')
@@ -119,16 +154,17 @@ export const useLiquidityPool = (poolSlug?: string) => {
   };
 
   const fetchPoolDetails = async (poolId: string) => {
-    const promises = [
+    const promises: any[] = [
       supabase.from('pool_staking_plans').select('*').eq('pool_id', poolId).eq('is_active', true),
       supabase.from('pool_auto_routing').select('*').eq('pool_id', poolId),
       supabase.from('pool_charity_programs').select('*').eq('pool_id', poolId).eq('is_active', true),
+      // Fetch ALL pool transactions (not just user's) to show platform deposits, wheel taxes, etc.
+      supabase.from('liquidity_transactions').select('*').eq('pool_id', poolId).order('created_at', { ascending: false }).limit(50),
     ];
 
     if (user?.id) {
       promises.push(
-        supabase.from('liquidity_positions').select('*').eq('pool_id', poolId).eq('user_id', user.id) as any,
-        supabase.from('liquidity_transactions').select('*').eq('pool_id', poolId).eq('user_id', user.id).order('created_at', { ascending: false }).limit(50) as any,
+        supabase.from('liquidity_positions').select('*').eq('pool_id', poolId).eq('user_id', user.id),
       );
     }
 
@@ -137,10 +173,10 @@ export const useLiquidityPool = (poolSlug?: string) => {
     setStakingPlans((results[0].data || []) as unknown as StakingPlan[]);
     setAutoRouting((results[1].data || []) as unknown as AutoRouting[]);
     setCharityPrograms((results[2].data || []) as unknown as CharityProgram[]);
+    setTransactions((results[3].data || []) as unknown as LiquidityTransaction[]);
     
-    if (user?.id && results[3]) {
-      setPositions((results[3].data || []) as unknown as LiquidityPosition[]);
-      setTransactions((results[4]?.data || []) as unknown as LiquidityTransaction[]);
+    if (user?.id && results[4]) {
+      setPositions((results[4].data || []) as unknown as LiquidityPosition[]);
     }
   };
 
@@ -148,7 +184,6 @@ export const useLiquidityPool = (poolSlug?: string) => {
     if (!user?.id || !activePool) return false;
     
     try {
-      // إنشاء أو تحديث المركز
       const existingPosition = positions.find(p => p.status === 'active' && !p.is_staked);
       const lpTokens = amount * (1 - activePool.fee_percentage / 100);
       
@@ -174,7 +209,6 @@ export const useLiquidityPool = (poolSlug?: string) => {
         });
       }
 
-      // تسجيل المعاملة
       await supabase.from('liquidity_transactions').insert({
         user_id: user.id,
         pool_id: activePool.id,
