@@ -194,6 +194,24 @@ export const useInternalWallet = () => {
     initializeWallet();
   }, []);
 
+  // Real-time balance updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('wallet-balances-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'internal_wallet_balances',
+      }, () => {
+        loadBalances();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return {
     tokens,
     balances,

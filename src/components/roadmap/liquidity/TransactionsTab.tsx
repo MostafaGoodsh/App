@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { History, ArrowDownCircle, ArrowUpCircle, Lock, Unlock, Zap, Heart, Settings2 } from 'lucide-react';
+import { History, ArrowDownCircle, ArrowUpCircle, Lock, Unlock, Zap, Heart, Settings2, Gamepad2, ShoppingCart, Coins, Pickaxe } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { useLiquidityPool } from '@/hooks/useLiquidityPool';
 
@@ -19,6 +19,22 @@ const getTxTypeConfig = (t: (ar: string, en?: string) => string) => ({
   limit_order: { icon: Settings2, label: t('أمر محدد', 'Limit Order'), color: 'text-orange-400' },
 });
 
+const getSourceConfig = (t: (ar: string, en?: string) => string) => ({
+  wheel_win_tax: { icon: Gamepad2, label: t('ضريبة عجلة الحظ', 'Wheel Win Tax'), currency: '$MS-RA' },
+  wheel_spin_cost: { icon: Gamepad2, label: t('تكلفة لفة', 'Spin Cost'), currency: '$MS-RA' },
+  wheel_loss: { icon: Gamepad2, label: t('خسارة عجلة', 'Wheel Loss'), currency: '$MS-RA' },
+  wheel_bonus_tax: { icon: Gamepad2, label: t('ضريبة بونص', 'Bonus Tax'), currency: '$MS-RA' },
+  slot_win_tax: { icon: Gamepad2, label: t('ضريبة سلوت', 'Slot Tax'), currency: '$MS-RA' },
+  slot_loss: { icon: Gamepad2, label: t('خسارة سلوت', 'Slot Loss'), currency: '$MS-RA' },
+  dice_win_tax: { icon: Gamepad2, label: t('ضريبة نرد', 'Dice Tax'), currency: '$MS-RA' },
+  dice_loss: { icon: Gamepad2, label: t('خسارة نرد', 'Dice Loss'), currency: '$MS-RA' },
+  payment: { icon: ShoppingCart, label: t('عملية شراء', 'Purchase'), currency: 'EGP → $MS-RA' },
+  presale: { icon: Coins, label: t('بيع مبكر', 'Presale'), currency: '$MS-RA' },
+  mining: { icon: Pickaxe, label: t('تعدين', 'Mining'), currency: '$MS-RA' },
+  conversion: { icon: Coins, label: t('تحويل نقاط', 'Points Conversion'), currency: 'XP → $MS-RA' },
+  recharge: { icon: ShoppingCart, label: t('شحن رصيد', 'Recharge'), currency: 'EGP' },
+});
+
 const getStatusLabels = (t: (ar: string, en?: string) => string) => ({
   completed: { label: t('مكتمل', 'Completed'), variant: 'default' as const },
   pending: { label: t('معلق', 'Pending'), variant: 'secondary' as const },
@@ -29,6 +45,7 @@ const getStatusLabels = (t: (ar: string, en?: string) => string) => ({
 export const TransactionsTab = ({ pool }: { pool: PoolHook }) => {
   const { t } = useLanguage();
   const txTypeConfig = getTxTypeConfig(t);
+  const sourceConfig = getSourceConfig(t);
   const statusLabels = getStatusLabels(t);
 
   if (pool.transactions.length === 0) {
@@ -53,9 +70,13 @@ export const TransactionsTab = ({ pool }: { pool: PoolHook }) => {
       </CardHeader>
       <CardContent className="space-y-2">
         {pool.transactions.map(tx => {
-          const config = (txTypeConfig as any)[tx.transaction_type] || txTypeConfig.deposit;
+          const source = tx.source_type ? (sourceConfig as any)[tx.source_type] : null;
+          const config = source 
+            ? { ...((txTypeConfig as any)[tx.transaction_type] || txTypeConfig.deposit), label: source.label, icon: source.icon }
+            : (txTypeConfig as any)[tx.transaction_type] || txTypeConfig.deposit;
           const status = (statusLabels as any)[tx.status] || statusLabels.completed;
           const Icon = config.icon;
+          const currencyLabel = source?.currency || '$MS-RA';
 
           return (
             <div key={tx.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border/30 bg-muted/20">
@@ -68,15 +89,18 @@ export const TransactionsTab = ({ pool }: { pool: PoolHook }) => {
                   <p className="text-[9px] text-muted-foreground">
                     {new Date(tx.created_at).toLocaleDateString('ar', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
+                  {tx.notes && (
+                    <p className="text-[8px] text-muted-foreground/60 max-w-[160px] truncate">{tx.notes}</p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
                 <p className={`text-xs font-bold ${
                   ['deposit', 'stake', 'reward', 'auto_compound', 'platform_deposit'].includes(tx.transaction_type) 
                     ? 'text-green-400' : 'text-red-400'
-                }`}>
+                }` } dir="ltr">
                   {['withdraw', 'charity_out'].includes(tx.transaction_type) ? '-' : '+'}
-                  {tx.amount.toFixed(2)}
+                  {tx.amount.toFixed(2)} <span className="text-[8px] opacity-70">{currencyLabel}</span>
                 </p>
                 <Badge variant={status.variant} className="text-[8px] px-1 py-0">{status.label}</Badge>
               </div>
