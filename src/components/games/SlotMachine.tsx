@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const SYMBOLS = ['☥', '𓆣', '𓂀', '𓌀', '𓊽', '𓋹', '𓃭', '𓅃'];
 const COLS = 5;
@@ -12,18 +14,61 @@ const getRandomColumn = () => Array.from({ length: ROWS }, () => getRandomSymbol
 
 const SlotMachine = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [reels, setReels] = useState<string[][]>(() =>
     Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => '𓆣'))
   );
   const [spinning, setSpinning] = useState(false);
   const [lastWin, setLastWin] = useState<number | null>(null);
+  const [netResult, setNetResult] = useState<{ userGot: number; poolGot: number; type: string } | null>(null);
   const [winRow, setWinRow] = useState<number | null>(null);
   const intervalRefs = useRef<NodeJS.Timeout[]>([]);
 
+  const processReward = async (winAmount: number) => {
+    if (!user?.id) return;
+    
+    try {
+      if (winAmount > 0) {
+        // Win: user gets 80%, pool gets 20%
+        const { data } = await supabase.rpc('process_wheel_reward', {
+          p_user_id: user.id,
+          p_reward_type: 'xp',
+          p_reward_value: winAmount,
+          p_spin_cost: SPIN_COST,
+          p_is_bonus: false,
+        });
+        const result = data as any;
+        setNetResult({
+          userGot: result?.user_credited || 0,
+          poolGot: result?.pool_credited || 0,
+          type: 'win',
+        });
+      } else {
+        // Loss: 100% of spin cost goes to pool
+        const { data } = await supabase.rpc('process_wheel_reward', {
+          p_user_id: user.id,
+          p_reward_type: 'nothing',
+          p_reward_value: 0,
+          p_spin_cost: SPIN_COST,
+          p_is_bonus: false,
+        });
+        const result = data as any;
+        setNetResult({
+          userGot: 0,
+          poolGot: result?.pool_credited || 0,
+          type: 'loss',
+        });
+      }
+    } catch (err) {
+      console.error('Slot reward error:', err);
+    }
+  };
+
   const spin = useCallback(() => {
-    if (spinning) return;
+    if (spinning || !user?.id) return;
     setSpinning(true);
     setLastWin(null);
+    setNetResult(null);
     setWinRow(null);
 
     const finalReels = Array.from({ length: COLS }, () => getRandomColumn());
@@ -78,6 +123,10 @@ const SlotMachine = () => {
             }
             setLastWin(bestWin);
             if (bestRow !== null && bestWin > 0) setWinRow(bestRow);
+            
+            // Process reward through server
+            processReward(bestWin);
+
             if (bestWin >= 500) toast({ title: '🏆 JACKPOT!', description: `+${bestWin} XP` });
             else if (bestWin >= 100) toast({ title: '🎉 Winner!', description: `+${bestWin} XP` });
             else if (bestWin > 0) toast({ title: '✨ Small win!', description: `+${bestWin} XP` });
@@ -85,7 +134,7 @@ const SlotMachine = () => {
         }
       }, 800 + i * 500);
     });
-  }, [spinning, toast]);
+  }, [spinning, toast, user?.id]);
 
   return (
     <div className="space-y-3">
@@ -126,20 +175,42 @@ const SlotMachine = () => {
         </div>
       </div>
 
-      {/* Result */}
+      {/* Detailed Result */}
       {lastWin !== null && !spinning && (
-        <div className="text-center">
+        <div className="rounded-lg bg-black/50 border border-[#D4AF37]/20 p-3 space-y-1.5">
           {lastWin > 0 ? (
-            <p className="text-[#D4AF37] font-bold text-sm animate-bounce">+{lastWin} XP 🎉</p>
+            <>
+              <p className="text-[#D4AF37] font-bold text-sm text-center animate-bounce">🎉 مكسب: {lastWin} XP</p>
+              {netResult && (
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-md p-1.5 text-center">
+                    <p className="text-green-400 font-bold">+{netResult.userGot} XP</p>
+                    <p className="text-green-400/60">لك (80%)</p>
+                  </div>
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-md p-1.5 text-center">
+                    <p className="text-blue-400 font-bold">{netResult.poolGot.toFixed(2)} $MS-RA</p>
+                    <p className="text-blue-400/60">المجمع (20%)</p>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
-            <p className="text-[#D4AF37]/40 text-xs">حاول مرة تانية!</p>
+            <>
+              <p className="text-[#D4AF37]/50 text-xs text-center">حاول مرة تانية! 💫</p>
+              {netResult && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-md p-1.5 text-center text-[10px]">
+                  <p className="text-red-400 font-bold">-{SPIN_COST} XP → {netResult.poolGot.toFixed(2)} $MS-RA</p>
+                  <p className="text-red-400/60">100% لمجمع السيولة</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
 
       <Button
         onClick={spin}
-        disabled={spinning}
+        disabled={spinning || !user?.id}
         className="w-full bg-[#D4AF37] text-black hover:bg-[#C4A032] font-bold text-sm h-10"
       >
         {spinning ? '...' : `SPIN (-${SPIN_COST} XP)`}
@@ -155,6 +226,10 @@ const SlotMachine = () => {
           <span>5× صف الوسط → 200 XP</span>
           <span>4× تطابق → 100 XP</span>
           <span>3× تطابق → 20 XP</span>
+        </div>
+        <div className="border-t border-[#D4AF37]/10 mt-1.5 pt-1.5 text-[9px] text-[#D4AF37]/40 text-center space-y-0.5">
+          <p>🏆 مكسب: 80% لك + 20% لمجمع السيولة</p>
+          <p>💀 خسارة: 100% لمجمع السيولة</p>
         </div>
       </div>
     </div>
