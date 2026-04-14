@@ -846,7 +846,7 @@ const WheelOfFortune = () => {
           {isUpgradeAnimating && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="bg-emerald-500/20 backdrop-blur-sm rounded-full px-4 py-1.5 animate-pulse">
-                <span className="text-emerald-400 text-xs font-bold">𓆣 EGP ×2 🎰</span>
+                <span className="text-emerald-400 text-xs font-bold">𓆣 جنيه مصري 🎰</span>
               </div>
             </div>
           )}
@@ -856,7 +856,7 @@ const WheelOfFortune = () => {
         <div className="flex flex-wrap items-center justify-center gap-4 text-[10px]" dir={dir}>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-            <span className="text-emerald-400/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الخارجية: EGP 𓆣×2" : "Outer: EGP 𓆣×2"}</span>
+            <span className="text-emerald-400/70 arabic-text font-medium">{language === "ar" || language === "both" ? "الخارجية: جنيه مصري 𓆣" : "Outer: EGP 𓆣"}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
@@ -894,7 +894,7 @@ const WheelOfFortune = () => {
           <div className="text-center animate-in fade-in zoom-in duration-500">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
               <p className="text-emerald-400 font-bold text-lg">{upgradeResult}</p>
-              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "𓆣 مكسب مضاعف ×2 على حسابك" : "𓆣 Double reward ×2 applied"}</p>
+              <p className="text-emerald-500/70 text-xs arabic-text">{language === "ar" || language === "both" ? "80% لمحفظتك | 20% مجمع السيولة" : "80% to wallet | 20% to pool"}</p>
             </div>
           </div>
         )}
