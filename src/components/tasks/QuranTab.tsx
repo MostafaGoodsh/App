@@ -38,12 +38,42 @@ const QuranTab = () => {
   const [completedPages, setCompletedPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  // Track which ayahs the user has clicked/read
   const [readAyahs, setReadAyahs] = useState<Set<string>>(new Set());
-  // Track total XP earned this session for this surah
   const [sessionXpEarned, setSessionXpEarned] = useState(0);
-  // Track last milestone (how many sets of 10 we've rewarded)
   const [lastMilestone, setLastMilestone] = useState(0);
+  const lastAyahRef = useRef<HTMLSpanElement>(null);
+  const [hasBookmark, setHasBookmark] = useState(false);
+
+  const storageKey = user ? `quran-bookmark-${user.id}` : null;
+
+  // Load bookmark on mount
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const bookmark = JSON.parse(saved);
+        setCurrentPageIndex(bookmark.surahIndex ?? 0);
+        setReadAyahs(new Set(bookmark.readAyahs ?? []));
+        setLastMilestone(bookmark.lastMilestone ?? 0);
+        setSessionXpEarned(bookmark.sessionXp ?? 0);
+        setHasBookmark(true);
+      }
+    } catch {}
+  }, [storageKey]);
+
+  // Save bookmark whenever readAyahs or surah changes
+  useEffect(() => {
+    if (!storageKey || readAyahs.size === 0) return;
+    const bookmark = {
+      surahIndex: currentPageIndex,
+      readAyahs: Array.from(readAyahs),
+      lastMilestone,
+      sessionXp: sessionXpEarned,
+    };
+    localStorage.setItem(storageKey, JSON.stringify(bookmark));
+    setHasBookmark(true);
+  }, [readAyahs, currentPageIndex, lastMilestone, sessionXpEarned, storageKey]);
 
   useEffect(() => {
     if (!user) return;
@@ -54,13 +84,6 @@ const QuranTab = () => {
     };
     load();
   }, [user]);
-
-  // Reset read state when changing surah
-  useEffect(() => {
-    setReadAyahs(new Set());
-    setSessionXpEarned(0);
-    setLastMilestone(0);
-  }, [currentPageIndex]);
 
   const fetchQuranText = async () => {
     try {
