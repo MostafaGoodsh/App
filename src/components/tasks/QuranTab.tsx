@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Bookmark, Navigation } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuranPageRecord {
@@ -38,12 +38,42 @@ const QuranTab = () => {
   const [completedPages, setCompletedPages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  // Track which ayahs the user has clicked/read
   const [readAyahs, setReadAyahs] = useState<Set<string>>(new Set());
-  // Track total XP earned this session for this surah
   const [sessionXpEarned, setSessionXpEarned] = useState(0);
-  // Track last milestone (how many sets of 10 we've rewarded)
   const [lastMilestone, setLastMilestone] = useState(0);
+  const lastAyahRef = useRef<HTMLSpanElement>(null);
+  const [hasBookmark, setHasBookmark] = useState(false);
+
+  const storageKey = user ? `quran-bookmark-${user.id}` : null;
+
+  // Load bookmark on mount
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const bookmark = JSON.parse(saved);
+        setCurrentPageIndex(bookmark.surahIndex ?? 0);
+        setReadAyahs(new Set(bookmark.readAyahs ?? []));
+        setLastMilestone(bookmark.lastMilestone ?? 0);
+        setSessionXpEarned(bookmark.sessionXp ?? 0);
+        setHasBookmark(true);
+      }
+    } catch {}
+  }, [storageKey]);
+
+  // Save bookmark whenever readAyahs or surah changes
+  useEffect(() => {
+    if (!storageKey || readAyahs.size === 0) return;
+    const bookmark = {
+      surahIndex: currentPageIndex,
+      readAyahs: Array.from(readAyahs),
+      lastMilestone,
+      sessionXp: sessionXpEarned,
+    };
+    localStorage.setItem(storageKey, JSON.stringify(bookmark));
+    setHasBookmark(true);
+  }, [readAyahs, currentPageIndex, lastMilestone, sessionXpEarned, storageKey]);
 
   useEffect(() => {
     if (!user) return;
@@ -54,13 +84,6 @@ const QuranTab = () => {
     };
     load();
   }, [user]);
-
-  // Reset read state when changing surah
-  useEffect(() => {
-    setReadAyahs(new Set());
-    setSessionXpEarned(0);
-    setLastMilestone(0);
-  }, [currentPageIndex]);
 
   const fetchQuranText = async () => {
     try {
@@ -204,13 +227,21 @@ const QuranTab = () => {
 
   const handleNextPage = () => {
     if (currentPageIndex < surahs.length - 1) {
-      setCurrentPageIndex(prev => prev + 1);
+      const newIndex = currentPageIndex + 1;
+      setCurrentPageIndex(newIndex);
+      setReadAyahs(new Set());
+      setSessionXpEarned(0);
+      setLastMilestone(0);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPageIndex > 0) {
-      setCurrentPageIndex(prev => prev - 1);
+      const newIndex = currentPageIndex - 1;
+      setCurrentPageIndex(newIndex);
+      setReadAyahs(new Set());
+      setSessionXpEarned(0);
+      setLastMilestone(0);
     }
   };
 
@@ -238,6 +269,32 @@ const QuranTab = () => {
 
   return (
     <div className="space-y-4" dir={dir}>
+      {/* Go to bookmark */}
+      {hasBookmark && (
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full gap-2"
+          onClick={() => {
+            if (!storageKey) return;
+            try {
+              const saved = localStorage.getItem(storageKey);
+              if (saved) {
+                const bookmark = JSON.parse(saved);
+                setCurrentPageIndex(bookmark.surahIndex ?? 0);
+                setReadAyahs(new Set(bookmark.readAyahs ?? []));
+                setLastMilestone(bookmark.lastMilestone ?? 0);
+                setSessionXpEarned(bookmark.sessionXp ?? 0);
+                setTimeout(() => lastAyahRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+              }
+            } catch {}
+          }}
+        >
+          <Navigation className="h-4 w-4" />
+          {t("انتقل لآخر توقف", "Go to last bookmark")}
+        </Button>
+      )}
+
       {/* Navigation */}
       <div className="flex items-center justify-between gap-2">
         <Button onClick={handlePrevPage} disabled={currentPageIndex === 0} variant="outline" size="sm">
@@ -288,12 +345,16 @@ const QuranTab = () => {
           {/* Quran text - CENTER aligned */}
           <div className="bg-muted/30 rounded-lg p-4 sm:p-6">
             <p className="font-arabic text-lg sm:text-xl leading-[2.5] text-foreground text-center">
-              {currentSurah.verses.map((verse) => {
+              {currentSurah.verses.map((verse, idx) => {
                 const key = `${currentSurah.id}-${verse.id}`;
                 const isRead = readAyahs.has(key);
+                // Find last read ayah for scroll ref
+                const allReadInSurah = currentSurah.verses.filter(v => readAyahs.has(`${currentSurah.id}-${v.id}`));
+                const isLastRead = allReadInSurah.length > 0 && allReadInSurah[allReadInSurah.length - 1].id === verse.id;
                 return (
                   <span
                     key={verse.id}
+                    ref={isLastRead ? lastAyahRef : undefined}
                     onClick={() => handleAyahClick(currentSurah.id, verse.id)}
                     className={`cursor-pointer transition-colors duration-200 px-0.5 rounded-sm inline ${
                       isRead
