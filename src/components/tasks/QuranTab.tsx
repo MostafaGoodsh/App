@@ -261,6 +261,32 @@ const QuranTab = () => {
 
   return (
     <div className="space-y-4" dir={dir}>
+      {/* Go to bookmark */}
+      {hasBookmark && (
+        <Button
+          variant="default"
+          size="sm"
+          className="w-full gap-2"
+          onClick={() => {
+            if (!storageKey) return;
+            try {
+              const saved = localStorage.getItem(storageKey);
+              if (saved) {
+                const bookmark = JSON.parse(saved);
+                setCurrentPageIndex(bookmark.surahIndex ?? 0);
+                setReadAyahs(new Set(bookmark.readAyahs ?? []));
+                setLastMilestone(bookmark.lastMilestone ?? 0);
+                setSessionXpEarned(bookmark.sessionXp ?? 0);
+                setTimeout(() => lastAyahRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+              }
+            } catch {}
+          }}
+        >
+          <Navigation className="h-4 w-4" />
+          {t("انتقل لآخر توقف", "Go to last bookmark")}
+        </Button>
+      )}
+
       {/* Navigation */}
       <div className="flex items-center justify-between gap-2">
         <Button onClick={handlePrevPage} disabled={currentPageIndex === 0} variant="outline" size="sm">
