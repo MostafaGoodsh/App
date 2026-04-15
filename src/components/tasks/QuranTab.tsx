@@ -227,13 +227,21 @@ const QuranTab = () => {
 
   const handleNextPage = () => {
     if (currentPageIndex < surahs.length - 1) {
-      setCurrentPageIndex(prev => prev + 1);
+      const newIndex = currentPageIndex + 1;
+      setCurrentPageIndex(newIndex);
+      setReadAyahs(new Set());
+      setSessionXpEarned(0);
+      setLastMilestone(0);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPageIndex > 0) {
-      setCurrentPageIndex(prev => prev - 1);
+      const newIndex = currentPageIndex - 1;
+      setCurrentPageIndex(newIndex);
+      setReadAyahs(new Set());
+      setSessionXpEarned(0);
+      setLastMilestone(0);
     }
   };
 
