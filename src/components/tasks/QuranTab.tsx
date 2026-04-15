@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, CheckCircle2, Bookmark, Navigation } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuranPageRecord {
