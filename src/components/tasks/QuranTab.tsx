@@ -337,12 +337,16 @@ const QuranTab = () => {
           {/* Quran text - CENTER aligned */}
           <div className="bg-muted/30 rounded-lg p-4 sm:p-6">
             <p className="font-arabic text-lg sm:text-xl leading-[2.5] text-foreground text-center">
-              {currentSurah.verses.map((verse) => {
+              {currentSurah.verses.map((verse, idx) => {
                 const key = `${currentSurah.id}-${verse.id}`;
                 const isRead = readAyahs.has(key);
+                // Find last read ayah for scroll ref
+                const allReadInSurah = currentSurah.verses.filter(v => readAyahs.has(`${currentSurah.id}-${v.id}`));
+                const isLastRead = allReadInSurah.length > 0 && allReadInSurah[allReadInSurah.length - 1].id === verse.id;
                 return (
                   <span
                     key={verse.id}
+                    ref={isLastRead ? lastAyahRef : undefined}
                     onClick={() => handleAyahClick(currentSurah.id, verse.id)}
                     className={`cursor-pointer transition-colors duration-200 px-0.5 rounded-sm inline ${
                       isRead
