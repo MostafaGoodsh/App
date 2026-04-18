@@ -197,7 +197,7 @@ export const useInternalWallet = () => {
   // Real-time balance updates
   useEffect(() => {
     const channel = supabase
-      .channel('wallet-balances-realtime')
+      .channel(`wallet-balances-realtime-${crypto.randomUUID()}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
