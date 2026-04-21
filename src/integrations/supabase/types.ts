@@ -556,6 +556,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_contributor_applications: {
+        Row: {
+          admin_notes: string | null
+          contribution_type: string
+          country: string | null
+          created_at: string
+          email: string
+          experience_summary: string | null
+          expertise_areas: string[] | null
+          full_name: string
+          id: string
+          investment_range: string | null
+          motivation: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_links: Json | null
+          status: string
+          technical_resources: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          contribution_type?: string
+          country?: string | null
+          created_at?: string
+          email: string
+          experience_summary?: string | null
+          expertise_areas?: string[] | null
+          full_name: string
+          id?: string
+          investment_range?: string | null
+          motivation?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_links?: Json | null
+          status?: string
+          technical_resources?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          contribution_type?: string
+          country?: string | null
+          created_at?: string
+          email?: string
+          experience_summary?: string | null
+          expertise_areas?: string[] | null
+          full_name?: string
+          id?: string
+          investment_range?: string | null
+          motivation?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_links?: Json | null
+          status?: string
+          technical_resources?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       callout_card_content: {
         Row: {
           contact_button_text: string | null

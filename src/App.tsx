@@ -106,6 +106,7 @@ const OfficialLinks = lazy(() => import("./pages/OfficialLinks"));
 const QuranScroll = lazy(() => import("./pages/QuranScroll"));
 const VirtualCard = lazy(() => import("./pages/VirtualCard"));
 const VirtualCardAdmin = lazy(() => import("./pages/VirtualCardAdmin"));
+const BlockChain = lazy(() => import("./pages/BlockChain"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -232,6 +233,7 @@ const App = () => {
                     <Route path="virtual-card" element={<RequireAuth><VirtualCard /></RequireAuth>} />
                     <Route path="quran-scroll" element={<RequireAuth><QuranScroll /></RequireAuth>} />
                     <Route path="admin/virtual-cards" element={<RequireAdmin><VirtualCardAdmin /></RequireAdmin>} />
+                    <Route path="blockchain" element={<BlockChain />} />
                       <Route path="*" element={<NotFound />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
