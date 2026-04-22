@@ -2,310 +2,392 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-import {
-  Network, Cpu, Coins, Users, Shield, Layers, Zap, Globe,
-  CheckCircle2, Clock, XCircle, Sparkles, ArrowRight, Database
-} from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Sparkles, ArrowRight, Loader2, LogIn } from "lucide-react";
+
+type PageContent = {
+  id: string;
+  section_key: string;
+  title: string;
+  title_en: string | null;
+  description: string | null;
+  description_en: string | null;
+  content: string | null;
+  content_en: string | null;
+  image_url: string | null;
+  icon: string | null;
+};
+
+type ContributionType = {
+  type_key: string;
+  name: string;
+  name_en: string | null;
+  description: string | null;
+  description_en: string | null;
+  icon: string;
+  color: string;
+  required_points: number;
+  benefits: string | null;
+  benefits_en: string | null;
+};
+
+type Task = {
+  id: string;
+  task_key: string;
+  title: string;
+  title_en: string | null;
+  description: string | null;
+  description_en: string | null;
+  contribution_type_key: string | null;
+  points_reward: number;
+  frequency: string;
+  icon: string;
+};
 
 type Application = {
   id: string;
   status: string;
   contribution_type: string;
-  created_at: string;
-  admin_notes: string | null;
+  contribution_role: string | null;
 };
 
-const contributionTypes = [
-  { value: "validator", labelAr: "مُشغّل عقدة (Validator)", labelEn: "Validator Node Operator", icon: Shield },
-  { value: "developer", labelAr: "مطوّر (Developer)", labelEn: "Developer", icon: Cpu },
-  { value: "investor", labelAr: "مستثمر مؤسس", labelEn: "Founding Investor", icon: Coins },
-  { value: "community", labelAr: "سفير مجتمع", labelEn: "Community Ambassador", icon: Users },
-];
-
-const capabilities = [
-  { icon: Network, titleAr: "FireFly SuperNode", titleEn: "FireFly SuperNode", descAr: "نود مؤسسي على Kaleido يربط Ethereum وIPFS وموصّلات التوكنز ERC20/ERC721.", descEn: "Enterprise node on Kaleido connecting Ethereum, IPFS, and ERC20/ERC721 token connectors." },
-  { icon: Layers, titleAr: "تعدد Namespaces", titleEn: "Multi-Namespace", descAr: "بيئتان منفصلتان (XcX و Goodsh) لفصل بيئات التطوير والإنتاج.", descEn: "Two isolated namespaces (XcX & Goodsh) for staging and production." },
-  { icon: Coins, titleAr: "إصدار التوكنز", titleEn: "Token Issuance", descAr: "إنشاء وإدارة عملات قابلة للتداول (ERC20) وأصول رقمية فريدة (ERC721/NFT).", descEn: "Mint and manage fungible (ERC20) and non-fungible (ERC721/NFT) assets." },
-  { icon: Database, titleAr: "تخزين IPFS", titleEn: "IPFS Storage", descAr: "تخزين لامركزي للوثائق والملفات مع روابط ثابتة (CID) قابلة للتحقق.", descEn: "Decentralized storage for documents with verifiable content IDs (CIDs)." },
-  { icon: Zap, titleAr: "بث الرسائل", titleEn: "Message Broadcasting", descAr: "إرسال بيانات وأحداث على السلسلة بشكل موثّق وقابل للمراجعة.", descEn: "Broadcast verifiable, auditable data and events on-chain." },
-  { icon: Globe, titleAr: "جاهز للتوسع", titleEn: "Scale Ready", descAr: "بنية تحتية مرنة قابلة للتوسع نحو شبكة عامة كاملة لاحقاً.", descEn: "Flexible infrastructure ready to expand into a full public network." },
-];
+type Contributor = {
+  total_points: number;
+  current_streak: number;
+  contribution_type_key: string;
+};
 
 export default function BlockChain() {
   const { user } = useAuth();
   const { language, dir } = useLanguage();
   const isAr = language === "ar";
 
-  const [loading, setLoading] = useState(false);
-  const [existingApp, setExistingApp] = useState<Application | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [contents, setContents] = useState<PageContent[]>([]);
+  const [types, setTypes] = useState<ContributionType[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [contributorsCount, setContributorsCount] = useState(0);
+  const [myApplication, setMyApplication] = useState<Application | null>(null);
+  const [myContributor, setMyContributor] = useState<Contributor | null>(null);
+  const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
+
   const [form, setForm] = useState({
     full_name: "",
-    email: user?.email || "",
-    phone: "",
-    country: "",
-    contribution_type: "validator",
-    expertise_areas: "",
-    experience_summary: "",
+    email: "",
+    contribution_role: "routine",
     motivation: "",
-    technical_resources: "",
-    investment_range: "",
   });
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("blockchain_contributor_applications")
-        .select("id,status,contribution_type,created_at,admin_notes")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (data) setExistingApp(data as Application);
-      setForm((f) => ({ ...f, email: user.email || f.email }));
-    })();
-  }, [user]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      toast({ title: isAr ? "يجب تسجيل الدخول" : "Sign in required", variant: "destructive" });
-      return;
-    }
-    if (!form.full_name || !form.email || !form.motivation) {
-      toast({ title: isAr ? "يرجى إكمال الحقول المطلوبة" : "Please complete required fields", variant: "destructive" });
-      return;
-    }
+  const loadData = async () => {
     setLoading(true);
-    const { error, data } = await supabase
-      .from("blockchain_contributor_applications")
-      .insert({
-        user_id: user.id,
-        full_name: form.full_name,
-        email: form.email,
-        phone: form.phone || null,
-        country: form.country || null,
-        contribution_type: form.contribution_type,
-        expertise_areas: form.expertise_areas
-          ? form.expertise_areas.split(",").map((s) => s.trim()).filter(Boolean)
-          : null,
-        experience_summary: form.experience_summary || null,
-        motivation: form.motivation,
-        technical_resources: form.technical_resources || null,
-        investment_range: form.investment_range || null,
-      })
-      .select("id,status,contribution_type,created_at,admin_notes")
-      .single();
-    setLoading(false);
-    if (error) {
-      toast({ title: isAr ? "فشل الإرسال" : "Submission failed", description: error.message, variant: "destructive" });
-      return;
+    const [c, t, k, ctrCount] = await Promise.all([
+      supabase.from("blockchain_page_content").select("*").eq("is_active", true).order("display_order"),
+      supabase.from("blockchain_contribution_types").select("*").eq("is_active", true).order("display_order"),
+      supabase.from("blockchain_tasks").select("*").eq("is_active", true).order("display_order"),
+      supabase.from("blockchain_contributors").select("id", { count: "exact", head: true }).eq("status", "active"),
+    ]);
+    setContents((c.data as any) || []);
+    setTypes((t.data as any) || []);
+    setTasks((k.data as any) || []);
+    setContributorsCount(ctrCount.count || 0);
+
+    if (user) {
+      const [app, ctr, today] = await Promise.all([
+        supabase.from("blockchain_contributor_applications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase.from("blockchain_contributors").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("blockchain_task_completions").select("task_id").eq("user_id", user.id).eq("completion_date", new Date().toISOString().split("T")[0]),
+      ]);
+      setMyApplication((app.data as any) || null);
+      setMyContributor((ctr.data as any) || null);
+      setCompletedToday(new Set((today.data || []).map((x: any) => x.task_id)));
     }
-    setExistingApp(data as Application);
-    toast({ title: isAr ? "تم استلام طلبك" : "Application received", description: isAr ? "سنراجع طلبك ونعود إليك قريباً." : "We'll review your application shortly." });
+    setLoading(false);
   };
 
-  const StatusBadge = ({ status }: { status: string }) => {
-    const map: Record<string, { ar: string; en: string; Icon: typeof Clock; cls: string }> = {
-      pending: { ar: "قيد المراجعة", en: "Pending Review", Icon: Clock, cls: "bg-amber-500/15 text-amber-500 border-amber-500/30" },
-      approved: { ar: "تمت الموافقة", en: "Approved", Icon: CheckCircle2, cls: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" },
-      rejected: { ar: "تم الرفض", en: "Rejected", Icon: XCircle, cls: "bg-rose-500/15 text-rose-500 border-rose-500/30" },
-    };
-    const s = map[status] || map.pending;
-    return (
-      <Badge variant="outline" className={s.cls}>
-        <s.Icon className="h-3 w-3 mr-1" />
-        {isAr ? s.ar : s.en}
-      </Badge>
-    );
+  useEffect(() => { loadData(); }, [user?.id]);
+
+  const submitApplication = async () => {
+    if (!user) return;
+    if (!form.full_name || !form.email) {
+      toast({ title: isAr ? "الرجاء ملء البيانات" : "Please fill required fields", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("blockchain_contributor_applications").insert({
+      user_id: user.id,
+      full_name: form.full_name,
+      email: form.email,
+      contribution_type: form.contribution_role,
+      contribution_role: form.contribution_role,
+      motivation: form.motivation,
+      status: "pending",
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: isAr ? "تم إرسال طلبك ✅" : "Application sent ✅", description: isAr ? "سنراجع طلبك قريباً" : "We'll review your application soon" });
+    loadData();
   };
+
+  const completeTask = async (task: Task) => {
+    if (!user) return;
+    if (completedToday.has(task.id) && task.frequency === "daily") {
+      toast({ title: isAr ? "تم إنجازها اليوم" : "Already completed today" });
+      return;
+    }
+    const { error } = await supabase.from("blockchain_task_completions").insert({
+      user_id: user.id,
+      task_id: task.id,
+      points_earned: task.points_reward,
+      completion_date: new Date().toISOString().split("T")[0],
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: isAr ? `+${task.points_reward} نقطة 🎉` : `+${task.points_reward} pts 🎉` });
+    loadData();
+  };
+
+  const getContent = (key: string) => contents.find(c => c.section_key === key);
+  const getText = (c: PageContent | undefined, field: "title" | "description" | "content") => {
+    if (!c) return "";
+    const en = (c as any)[`${field}_en`];
+    return isAr ? (c as any)[field] : (en || (c as any)[field]);
+  };
+
+  const hero = getContent("hero");
+  const howItWorks = getContent("how_it_works");
+  const examplePi = getContent("example_pi");
+  const yourRole = getContent("your_role");
+  const rewards = getContent("rewards");
+
+  // Network growth visualization (target: 10,000 contributors)
+  const networkTarget = 10000;
+  const networkProgress = Math.min((contributorsCount / networkTarget) * 100, 100);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+
+  const isContributor = !!myContributor;
+  const userType = myContributor ? types.find(t => t.type_key === myContributor.contribution_type_key) : null;
+  const myTasks = tasks.filter(t => !myContributor || !t.contribution_type_key || t.contribution_type_key === myContributor.contribution_type_key || t.contribution_type_key === "routine");
 
   return (
-    <div dir={dir} className="min-h-[calc(100dvh-4rem)] w-full bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.15),transparent_50%),radial-gradient(circle_at_70%_80%,hsl(var(--accent)/0.12),transparent_50%)]" />
-        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              {isAr ? "مرحلة التأسيس | Founding Phase" : "Founding Phase"}
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-4">
-            {isAr ? "ساهم في تأسيس بلوكتشين MSR" : "Help Build the MSR Blockchain"}
-          </h1>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mb-6">
-            {isAr
-              ? "نبني شبكة بلوكتشين خاصة بمنصة MSR على بنية FireFly SuperNode من Kaleido. ندعو مشتركي المنصة للانضمام كمؤسسين: مشغلي عُقد، مطوّرين، مستثمرين، وسفراء مجتمع."
-              : "We're building MSR's blockchain on Kaleido's FireFly SuperNode infrastructure. We invite our platform members to join as founders: validators, developers, investors, and community ambassadors."}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button size="lg" asChild>
-              <a href="#apply">
-                {isAr ? "قدّم طلبك الآن" : "Apply Now"}
-                <ArrowRight className={`h-4 w-4 ${isAr ? "mr-2 rotate-180" : "ml-2"}`} />
-              </a>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <a href="#capabilities">{isAr ? "اكتشف الإمكانات" : "Explore Capabilities"}</a>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Capabilities */}
-      <section id="capabilities" className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2">
-          {isAr ? "إمكانات الشبكة" : "Network Capabilities"}
-        </h2>
-        <p className="text-muted-foreground mb-8">
-          {isAr ? "ما يمكنك بناؤه فوق بنيتنا التحتية" : "What you can build on top of our infrastructure"}
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {capabilities.map((c, i) => (
-            <Card key={i} className="border-primary/10 hover:border-primary/40 transition-colors">
-              <CardHeader>
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                  <c.icon className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-lg">{isAr ? c.titleAr : c.titleEn}</CardTitle>
-                <CardDescription>{isAr ? c.descAr : c.descEn}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Application */}
-      <section id="apply" className="mx-auto max-w-3xl px-4 py-12">
-        <Card className="border-primary/20 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {isAr ? "طلب الانضمام كمؤسس" : "Founding Contributor Application"}
-            </CardTitle>
-            <CardDescription>
-              {isAr
-                ? "املأ النموذج وسيتواصل معك فريق التأسيس بعد المراجعة."
-                : "Fill the form and our founding team will reach out after review."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!user ? (
-              <div className="text-center py-8 space-y-4">
-                <p className="text-muted-foreground">
-                  {isAr ? "يجب تسجيل الدخول لتقديم طلب." : "Please sign in to apply."}
-                </p>
-                <Button asChild><Link to="/auth">{isAr ? "تسجيل الدخول" : "Sign In"}</Link></Button>
-              </div>
-            ) : existingApp ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
-                  <div>
-                    <div className="text-sm text-muted-foreground mb-1">
-                      {isAr ? "حالة طلبك" : "Application Status"}
-                    </div>
-                    <StatusBadge status={existingApp.status} />
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(existingApp.created_at).toLocaleDateString()}
-                  </div>
-                </div>
-                {existingApp.admin_notes && (
-                  <div className="p-4 rounded-lg border bg-card">
-                    <div className="text-sm font-medium mb-1">
-                      {isAr ? "ملاحظات الإدارة:" : "Admin Notes:"}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{existingApp.admin_notes}</p>
-                  </div>
-                )}
-                <p className="text-sm text-muted-foreground text-center">
-                  {isAr
-                    ? "سنعلمك بأي تحديث على طلبك عبر الإشعارات."
-                    : "We'll notify you of any updates via notifications."}
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="full_name">{isAr ? "الاسم الكامل *" : "Full Name *"}</Label>
-                    <Input id="full_name" required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">{isAr ? "البريد الإلكتروني *" : "Email *"}</Label>
-                    <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">{isAr ? "الهاتف" : "Phone"}</Label>
-                    <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">{isAr ? "الدولة" : "Country"}</Label>
-                    <Input id="country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-                  </div>
-                </div>
-
-                <div>
-                  <Label>{isAr ? "نوع المساهمة *" : "Contribution Type *"}</Label>
-                  <Select value={form.contribution_type} onValueChange={(v) => setForm({ ...form, contribution_type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {contributionTypes.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{isAr ? t.labelAr : t.labelEn}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="expertise_areas">
-                    {isAr ? "مجالات الخبرة (مفصولة بفاصلة)" : "Expertise Areas (comma separated)"}
-                  </Label>
-                  <Input id="expertise_areas" placeholder={isAr ? "Solidity, DevOps, Tokenomics" : "Solidity, DevOps, Tokenomics"} value={form.expertise_areas} onChange={(e) => setForm({ ...form, expertise_areas: e.target.value })} />
-                </div>
-
-                <div>
-                  <Label htmlFor="experience_summary">{isAr ? "ملخص خبرتك" : "Experience Summary"}</Label>
-                  <Textarea id="experience_summary" rows={3} value={form.experience_summary} onChange={(e) => setForm({ ...form, experience_summary: e.target.value })} />
-                </div>
-
-                <div>
-                  <Label htmlFor="motivation">{isAr ? "لماذا تريد المساهمة؟ *" : "Why do you want to contribute? *"}</Label>
-                  <Textarea id="motivation" required rows={4} value={form.motivation} onChange={(e) => setForm({ ...form, motivation: e.target.value })} />
-                </div>
-
-                <div>
-                  <Label htmlFor="technical_resources">
-                    {isAr ? "الموارد التقنية المتاحة (للمشغّلين)" : "Available Technical Resources (for validators)"}
-                  </Label>
-                  <Textarea id="technical_resources" rows={2} placeholder={isAr ? "سعر السيرفر، النطاق الترددي، الموقع..." : "Server specs, bandwidth, location..."} value={form.technical_resources} onChange={(e) => setForm({ ...form, technical_resources: e.target.value })} />
-                </div>
-
-                <div>
-                  <Label htmlFor="investment_range">
-                    {isAr ? "نطاق الاستثمار (للمستثمرين)" : "Investment Range (for investors)"}
-                  </Label>
-                  <Input id="investment_range" placeholder={isAr ? "مثال: 5,000 - 25,000 USD" : "e.g., $5,000 - $25,000"} value={form.investment_range} onChange={(e) => setForm({ ...form, investment_range: e.target.value })} />
-                </div>
-
-                <Button type="submit" disabled={loading} className="w-full" size="lg">
-                  {loading ? (isAr ? "جاري الإرسال..." : "Submitting...") : (isAr ? "إرسال الطلب" : "Submit Application")}
-                </Button>
-              </form>
-            )}
+    <div className="container mx-auto px-4 py-6 max-w-5xl space-y-6" dir={dir}>
+      {/* HERO */}
+      {hero && (
+        <Card className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
+          <CardContent className="p-6 md:p-10 text-center space-y-3">
+            <div className="text-6xl mb-2">{hero.icon}</div>
+            <h1 className="text-3xl md:text-4xl font-bold">{getText(hero, "title")}</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{getText(hero, "description")}</p>
+            {hero.content && <p className="text-sm leading-relaxed max-w-2xl mx-auto">{getText(hero, "content")}</p>}
           </CardContent>
         </Card>
-      </section>
+      )}
+
+      {/* Network Stats */}
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              {isAr ? "نمو شبكتنا" : "Our Network Growth"}
+            </h2>
+            <Badge variant="secondary" className="text-sm">
+              {contributorsCount.toLocaleString()} / {networkTarget.toLocaleString()} {isAr ? "مساهم" : "contributors"}
+            </Badge>
+          </div>
+          <Progress value={networkProgress} className="h-3" />
+          <p className="text-sm text-muted-foreground text-center">
+            {isAr
+              ? `اكتملت الشبكة بنسبة ${networkProgress.toFixed(1)}% — كل مساهم جديد يقربنا من الإطلاق الرسمي 🚀`
+              : `Network is ${networkProgress.toFixed(1)}% complete — every new contributor brings us closer to launch 🚀`}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* My Status (if contributor) */}
+      {isContributor && userType && (
+        <Card className="border-2" style={{ borderColor: userType.color }}>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+              <span className="flex items-center gap-2">
+                <span className="text-3xl">{userType.icon}</span>
+                {isAr ? "أنت" : "You are a"} <span style={{ color: userType.color }}>{isAr ? userType.name : userType.name_en}</span>
+              </span>
+              <div className="flex gap-3 text-sm">
+                <Badge>🏆 {myContributor.total_points} {isAr ? "نقطة" : "pts"}</Badge>
+                <Badge variant="outline">🔥 {myContributor.current_streak} {isAr ? "أيام" : "days"}</Badge>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{isAr ? userType.benefits : userType.benefits_en}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Daily Tasks (if contributor) */}
+      {isContributor && myTasks.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{isAr ? "مهامك اليوم" : "Your Tasks Today"}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {myTasks.map(task => {
+              const done = completedToday.has(task.id);
+              return (
+                <div key={task.id} className={`flex items-center justify-between p-3 rounded-lg border ${done ? "bg-muted/40 opacity-60" : "hover:bg-muted/40"}`}>
+                  <div className="flex items-center gap-3 flex-1">
+                    <span className="text-2xl">{task.icon}</span>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{isAr ? task.title : task.title_en || task.title}</p>
+                      <p className="text-xs text-muted-foreground">{isAr ? task.description : task.description_en || task.description}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant={done ? "ghost" : "default"} disabled={done} onClick={() => completeTask(task)}>
+                    {done ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : `+${task.points_reward}`}
+                  </Button>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* How it works */}
+      {howItWorks && (
+        <Card>
+          <CardContent className="p-6 space-y-2">
+            <div className="text-4xl">{howItWorks.icon}</div>
+            <h2 className="text-2xl font-bold">{getText(howItWorks, "title")}</h2>
+            <p className="text-muted-foreground">{getText(howItWorks, "description")}</p>
+            {howItWorks.content && <p className="text-sm leading-relaxed mt-2 whitespace-pre-line">{getText(howItWorks, "content")}</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pi example */}
+      {examplePi && (
+        <Card className="bg-amber-500/5 border-amber-500/20">
+          <CardContent className="p-6 space-y-2">
+            <div className="text-4xl">{examplePi.icon}</div>
+            <h2 className="text-xl font-bold">{getText(examplePi, "title")}</h2>
+            <p className="text-muted-foreground text-sm">{getText(examplePi, "description")}</p>
+            {examplePi.content && <p className="text-sm leading-relaxed mt-2 whitespace-pre-line">{getText(examplePi, "content")}</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Contribution Types */}
+      {yourRole && (
+        <div className="space-y-3">
+          <Card>
+            <CardContent className="p-6 space-y-2">
+              <div className="text-4xl">{yourRole.icon}</div>
+              <h2 className="text-2xl font-bold">{getText(yourRole, "title")}</h2>
+              <p className="text-muted-foreground">{getText(yourRole, "description")}</p>
+            </CardContent>
+          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {types.map(t => (
+              <Card key={t.type_key} className="border-2 hover:shadow-lg transition-shadow" style={{ borderColor: `${t.color}40` }}>
+                <CardContent className="p-5 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl">{t.icon}</span>
+                    <div>
+                      <h3 className="font-bold text-lg" style={{ color: t.color }}>{isAr ? t.name : t.name_en}</h3>
+                      <Badge variant="outline" className="text-xs">{t.required_points} {isAr ? "نقطة مطلوبة" : "pts required"}</Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{isAr ? t.description : t.description_en}</p>
+                  <div className="text-xs pt-2 border-t">
+                    <span className="font-semibold">{isAr ? "المزايا: " : "Benefits: "}</span>
+                    {isAr ? t.benefits : t.benefits_en}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Rewards */}
+      {rewards && (
+        <Card className="bg-gradient-to-br from-primary/10 to-accent/10">
+          <CardContent className="p-6 space-y-2">
+            <div className="text-4xl">{rewards.icon}</div>
+            <h2 className="text-2xl font-bold">{getText(rewards, "title")}</h2>
+            <p className="text-muted-foreground">{getText(rewards, "description")}</p>
+            {rewards.content && <p className="text-sm leading-relaxed mt-2 whitespace-pre-line">{getText(rewards, "content")}</p>}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Application form / Status */}
+      {!user ? (
+        <Card className="text-center">
+          <CardContent className="p-6 space-y-3">
+            <p className="text-muted-foreground">{isAr ? "سجّل دخولك لتقديم طلب الانضمام" : "Sign in to apply"}</p>
+            <Button asChild><Link to="/auth"><LogIn className="h-4 w-4 me-2" />{isAr ? "تسجيل الدخول" : "Sign In"}</Link></Button>
+          </CardContent>
+        </Card>
+      ) : isContributor ? null : myApplication ? (
+        <Card>
+          <CardHeader><CardTitle>{isAr ? "حالة طلبك" : "Your Application Status"}</CardTitle></CardHeader>
+          <CardContent className="flex items-center gap-3">
+            {myApplication.status === "pending" && <><Clock className="h-5 w-5 text-amber-500" /><span>{isAr ? "طلبك قيد المراجعة" : "Application under review"}</span></>}
+            {myApplication.status === "approved" && <><CheckCircle2 className="h-5 w-5 text-green-500" /><span>{isAr ? "تمت الموافقة! حدّث الصفحة" : "Approved! Refresh the page"}</span></>}
+            {myApplication.status === "rejected" && <><XCircle className="h-5 w-5 text-destructive" /><span>{isAr ? "تم رفض الطلب" : "Application rejected"}</span></>}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><ArrowRight className="h-5 w-5" />{isAr ? "انضم لتأسيس الشبكة" : "Join & Build the Network"}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div><Label>{isAr ? "الاسم الكامل" : "Full Name"} *</Label><Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} /></div>
+              <div><Label>{isAr ? "البريد الإلكتروني" : "Email"} *</Label><Input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+            </div>
+            <div>
+              <Label>{isAr ? "أرغب أن أكون" : "I want to be"} *</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                {types.map(t => (
+                  <button
+                    key={t.type_key}
+                    type="button"
+                    onClick={() => setForm({ ...form, contribution_role: t.type_key })}
+                    className={`p-3 rounded-lg border-2 transition-all text-center ${form.contribution_role === t.type_key ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                  >
+                    <div className="text-2xl">{t.icon}</div>
+                    <div className="text-xs font-medium mt-1">{isAr ? t.name : t.name_en}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div><Label>{isAr ? "لماذا تريد الانضمام؟ (اختياري)" : "Why do you want to join? (optional)"}</Label><Textarea rows={3} value={form.motivation} onChange={e => setForm({ ...form, motivation: e.target.value })} /></div>
+            <Button onClick={submitApplication} disabled={submitting} className="w-full">
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : (isAr ? "إرسال الطلب" : "Submit Application")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
