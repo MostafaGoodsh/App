@@ -556,9 +556,64 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_contribution_types: {
+        Row: {
+          benefits: string | null
+          benefits_en: string | null
+          color: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_en: string | null
+          required_points: number | null
+          type_key: string
+          updated_at: string
+        }
+        Insert: {
+          benefits?: string | null
+          benefits_en?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_en?: string | null
+          required_points?: number | null
+          type_key: string
+          updated_at?: string
+        }
+        Update: {
+          benefits?: string | null
+          benefits_en?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_en?: string | null
+          required_points?: number | null
+          type_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blockchain_contributor_applications: {
         Row: {
           admin_notes: string | null
+          contribution_role: string | null
           contribution_type: string
           country: string | null
           created_at: string
@@ -580,6 +635,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          contribution_role?: string | null
           contribution_type?: string
           country?: string | null
           created_at?: string
@@ -601,6 +657,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          contribution_role?: string | null
           contribution_type?: string
           country?: string | null
           created_at?: string
@@ -619,6 +676,194 @@ export type Database = {
           technical_resources?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      blockchain_contributors: {
+        Row: {
+          approved_by: string | null
+          contribution_type_key: string
+          created_at: string
+          current_streak: number | null
+          id: string
+          joined_at: string
+          last_activity_date: string | null
+          notes: string | null
+          status: string
+          total_points: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          contribution_type_key?: string
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          joined_at?: string
+          last_activity_date?: string | null
+          notes?: string | null
+          status?: string
+          total_points?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          contribution_type_key?: string
+          created_at?: string
+          current_streak?: number | null
+          id?: string
+          joined_at?: string
+          last_activity_date?: string | null
+          notes?: string | null
+          status?: string
+          total_points?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      blockchain_page_content: {
+        Row: {
+          content: string | null
+          content_en: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          section_key: string
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          content_en?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          section_key: string
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          content_en?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          section_key?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blockchain_task_completions: {
+        Row: {
+          completion_date: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          points_earned: number | null
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          completion_date?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          completion_date?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          points_earned?: number | null
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blockchain_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "blockchain_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blockchain_tasks: {
+        Row: {
+          contribution_type_key: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          display_order: number | null
+          frequency: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          points_reward: number | null
+          task_key: string
+          task_type: string
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          contribution_type_key?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          frequency?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          task_key: string
+          task_type?: string
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contribution_type_key?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_order?: number | null
+          frequency?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          points_reward?: number | null
+          task_key?: string
+          task_type?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
