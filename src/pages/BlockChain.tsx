@@ -186,7 +186,7 @@ export default function BlockChain() {
   const myTasks = tasks.filter(t => !myContributor || !t.contribution_type_key || t.contribution_type_key === myContributor.contribution_type_key || t.contribution_type_key === "routine");
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-5xl space-y-6" dir={dir}>
+    <div className="container mx-auto px-4 py-6 max-w-5xl space-y-6 font-cairo" dir={dir}>
       {/* HERO */}
       {hero && (
         <Card className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-primary/20">
