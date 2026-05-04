@@ -23,8 +23,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Normalize base URL: remove trailing slash and strip /api if present
-    const baseUrl = apiUrl.replace(/\/$/, '').replace(/\/api$/, '');
+    // Normalize base URL: remove trailing slash, strip /ui or /api if present
+    const baseUrl = apiUrl
+      .replace(/\/$/, '')
+      .replace(/\/ui$/, '')
+      .replace(/\/api$/, '');
     const authHeader = 'Basic ' + btoa(`${username}:${password}`);
 
     // 1) Get node status
