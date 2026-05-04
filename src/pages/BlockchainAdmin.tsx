@@ -292,6 +292,48 @@ export default function BlockchainAdmin() {
     task_type: "daily", contribution_type_key: "routine", points_reward: 5, frequency: "daily",
     icon: "✓", display_order: 0, is_active: true,
   });
+  const newSuperNode = (): SuperNode => ({
+    id: "", user_id: null, display_name: "", display_name_en: "",
+    entity_type: "institution", economic_category: "general",
+    description: "", description_en: "", logo_url: "", website_url: "",
+    revenue_share_percent: 0, governance_weight: 1,
+    status: "active", is_public: true, display_order: 0,
+  });
+
+  const saveSuperNode = async () => {
+    if (!editSuperNode) return;
+    const payload: any = { ...editSuperNode };
+    delete payload.id;
+    if (!payload.user_id) delete payload.user_id;
+    const { error } = editSuperNode.id
+      ? await supabase.from("blockchain_super_nodes" as any).update(payload).eq("id", editSuperNode.id)
+      : await supabase.from("blockchain_super_nodes" as any).insert(payload);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: isAr ? "تم الحفظ" : "Saved" });
+    setEditSuperNode(null);
+    loadAll();
+  };
+
+  const deleteSuperNode = async (id: string) => {
+    if (!confirm(isAr ? "تأكيد الحذف؟" : "Confirm delete?")) return;
+    await supabase.from("blockchain_super_nodes" as any).delete().eq("id", id);
+    loadAll();
+  };
+
+  const updatePolicy = async (p: Policy, patch: Partial<Policy>) => {
+    const { error } = await supabase.from("blockchain_network_policy" as any).update(patch).eq("id", p.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setPolicies(prev => prev.map(x => x.id === p.id ? { ...x, ...patch } : x));
+  };
+
+  const updateSettings = async (patch: Partial<BCSettings>) => {
+    if (!settings) return;
+    const { error } = await supabase.from("blockchain_settings" as any).update(patch).eq("id", settings.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setSettings({ ...settings, ...patch });
+    toast({ title: isAr ? "تم التحديث" : "Updated" });
+  };
+
 
   const pendingCount = applications.filter(a => a.status === "pending").length;
 
