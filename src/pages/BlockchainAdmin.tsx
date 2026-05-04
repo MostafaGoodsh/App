@@ -690,6 +690,75 @@ export default function BlockchainAdmin() {
           <DialogFooter><Button variant="outline" onClick={() => setEditTask(null)}>{isAr ? "إلغاء" : "Cancel"}</Button><Button onClick={saveTask}>{isAr ? "حفظ" : "Save"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* === Edit Super Node Dialog === */}
+      <Dialog open={!!editSuperNode} onOpenChange={(o) => !o && setEditSuperNode(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto max-w-2xl">
+          <DialogHeader><DialogTitle>{editSuperNode?.id ? (isAr ? "تعديل سوبر نود" : "Edit Super Node") : (isAr ? "سوبر نود جديد" : "New Super Node")}</DialogTitle></DialogHeader>
+          {editSuperNode && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{isAr ? "الاسم (عربي)" : "Name (AR)"}</Label><Input value={editSuperNode.display_name} onChange={e => setEditSuperNode({ ...editSuperNode, display_name: e.target.value })} /></div>
+                <div><Label>Name (EN)</Label><Input value={editSuperNode.display_name_en || ""} onChange={e => setEditSuperNode({ ...editSuperNode, display_name_en: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{isAr ? "نوع الكيان" : "Entity Type"}</Label>
+                  <Select value={editSuperNode.entity_type} onValueChange={v => setEditSuperNode({ ...editSuperNode, entity_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="founder">{isAr ? "مؤسس" : "Founder"}</SelectItem>
+                      <SelectItem value="institution">{isAr ? "مؤسسة" : "Institution"}</SelectItem>
+                      <SelectItem value="government">{isAr ? "حكومي" : "Government"}</SelectItem>
+                      <SelectItem value="premium_user">{isAr ? "مستخدم مميز" : "Premium User"}</SelectItem>
+                      <SelectItem value="external_partner">{isAr ? "شريك خارجي" : "External Partner"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{isAr ? "الفئة الاقتصادية" : "Economic Category"}</Label>
+                  <Select value={editSuperNode.economic_category} onValueChange={v => setEditSuperNode({ ...editSuperNode, economic_category: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">{isAr ? "عام" : "General"}</SelectItem>
+                      <SelectItem value="coins">{isAr ? "عملات" : "Coins"}</SelectItem>
+                      <SelectItem value="rwa">RWA</SelectItem>
+                      <SelectItem value="affiliate">Affiliate</SelectItem>
+                      <SelectItem value="regulatory">{isAr ? "تنظيمي" : "Regulatory"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div><Label>{isAr ? "الوصف (عربي)" : "Description (AR)"}</Label><Textarea rows={2} value={editSuperNode.description || ""} onChange={e => setEditSuperNode({ ...editSuperNode, description: e.target.value })} /></div>
+              <div><Label>Description (EN)</Label><Textarea rows={2} value={editSuperNode.description_en || ""} onChange={e => setEditSuperNode({ ...editSuperNode, description_en: e.target.value })} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{isAr ? "رابط الشعار" : "Logo URL"}</Label><Input value={editSuperNode.logo_url || ""} onChange={e => setEditSuperNode({ ...editSuperNode, logo_url: e.target.value })} /></div>
+                <div><Label>Website</Label><Input value={editSuperNode.website_url || ""} onChange={e => setEditSuperNode({ ...editSuperNode, website_url: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><Label>{isAr ? "حصة الإيرادات %" : "Revenue Share %"}</Label><Input type="number" value={editSuperNode.revenue_share_percent} onChange={e => setEditSuperNode({ ...editSuperNode, revenue_share_percent: parseFloat(e.target.value) || 0 })} /></div>
+                <div><Label>{isAr ? "وزن الحوكمة" : "Governance Weight"}</Label><Input type="number" value={editSuperNode.governance_weight} onChange={e => setEditSuperNode({ ...editSuperNode, governance_weight: parseInt(e.target.value) || 1 })} /></div>
+                <div><Label>{isAr ? "ترتيب" : "Order"}</Label><Input type="number" value={editSuperNode.display_order} onChange={e => setEditSuperNode({ ...editSuperNode, display_order: parseInt(e.target.value) || 0 })} /></div>
+              </div>
+              <div><Label>{isAr ? "معرّف المستخدم (اختياري)" : "User ID (optional)"}</Label><Input value={editSuperNode.user_id || ""} onChange={e => setEditSuperNode({ ...editSuperNode, user_id: e.target.value || null })} /></div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2"><Switch checked={editSuperNode.is_public} onCheckedChange={v => setEditSuperNode({ ...editSuperNode, is_public: v })} /><Label>{isAr ? "ظاهر للجمهور" : "Public"}</Label></div>
+                <div>
+                  <Select value={editSuperNode.status} onValueChange={v => setEditSuperNode({ ...editSuperNode, status: v })}>
+                    <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">{isAr ? "نشط" : "Active"}</SelectItem>
+                      <SelectItem value="pending">{isAr ? "قيد المراجعة" : "Pending"}</SelectItem>
+                      <SelectItem value="suspended">{isAr ? "موقوف" : "Suspended"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" onClick={() => setEditSuperNode(null)}>{isAr ? "إلغاء" : "Cancel"}</Button><Button onClick={saveSuperNode}>{isAr ? "حفظ" : "Save"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
