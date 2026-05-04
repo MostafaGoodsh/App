@@ -724,6 +724,51 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_network_policy: {
+        Row: {
+          allowed_device: string
+          contribution_type_key: string
+          created_at: string
+          id: string
+          is_open_for_applications: boolean
+          kyc_required: boolean
+          max_contributors: number | null
+          min_points: number
+          notes: string | null
+          required_streak_days: number
+          revenue_share_percent: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_device?: string
+          contribution_type_key: string
+          created_at?: string
+          id?: string
+          is_open_for_applications?: boolean
+          kyc_required?: boolean
+          max_contributors?: number | null
+          min_points?: number
+          notes?: string | null
+          required_streak_days?: number
+          revenue_share_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_device?: string
+          contribution_type_key?: string
+          created_at?: string
+          id?: string
+          is_open_for_applications?: boolean
+          kyc_required?: boolean
+          max_contributors?: number | null
+          min_points?: number
+          notes?: string | null
+          required_streak_days?: number
+          revenue_share_percent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blockchain_page_content: {
         Row: {
           content: string | null
@@ -772,6 +817,123 @@ export type Database = {
           title?: string
           title_en?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      blockchain_settings: {
+        Row: {
+          created_at: string
+          id: string
+          node_sale_active: boolean
+          node_sale_description: string | null
+          node_sale_description_en: string | null
+          node_sale_title: string | null
+          node_sale_title_en: string | null
+          show_node_sale_section: boolean
+          show_super_nodes_section: boolean
+          super_nodes_description: string | null
+          super_nodes_description_en: string | null
+          super_nodes_title: string
+          super_nodes_title_en: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          node_sale_active?: boolean
+          node_sale_description?: string | null
+          node_sale_description_en?: string | null
+          node_sale_title?: string | null
+          node_sale_title_en?: string | null
+          show_node_sale_section?: boolean
+          show_super_nodes_section?: boolean
+          super_nodes_description?: string | null
+          super_nodes_description_en?: string | null
+          super_nodes_title?: string
+          super_nodes_title_en?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          node_sale_active?: boolean
+          node_sale_description?: string | null
+          node_sale_description_en?: string | null
+          node_sale_title?: string | null
+          node_sale_title_en?: string | null
+          show_node_sale_section?: boolean
+          show_super_nodes_section?: boolean
+          super_nodes_description?: string | null
+          super_nodes_description_en?: string | null
+          super_nodes_title?: string
+          super_nodes_title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      blockchain_super_nodes: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          description: string | null
+          description_en: string | null
+          display_name: string
+          display_name_en: string | null
+          display_order: number
+          economic_category: string
+          entity_type: string
+          governance_weight: number
+          id: string
+          is_public: boolean
+          logo_url: string | null
+          revenue_share_percent: number
+          status: string
+          updated_at: string
+          user_id: string | null
+          website_url: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_name: string
+          display_name_en?: string | null
+          display_order?: number
+          economic_category?: string
+          entity_type?: string
+          governance_weight?: number
+          id?: string
+          is_public?: boolean
+          logo_url?: string | null
+          revenue_share_percent?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          description?: string | null
+          description_en?: string | null
+          display_name?: string
+          display_name_en?: string | null
+          display_order?: number
+          economic_category?: string
+          entity_type?: string
+          governance_weight?: number
+          id?: string
+          is_public?: boolean
+          logo_url?: string | null
+          revenue_share_percent?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
