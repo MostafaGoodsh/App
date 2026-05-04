@@ -117,16 +117,20 @@ export default function BlockChain() {
 
   const loadData = async () => {
     setLoading(true);
-    const [c, t, k, ctrCount] = await Promise.all([
+    const [c, t, k, ctrCount, sn, st] = await Promise.all([
       supabase.from("blockchain_page_content").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_contribution_types").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_tasks").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_contributors").select("id", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("blockchain_super_nodes" as any).select("*").eq("is_public", true).eq("status", "active").order("display_order"),
+      supabase.from("blockchain_settings" as any).select("*").maybeSingle(),
     ]);
     setContents((c.data as any) || []);
     setTypes((t.data as any) || []);
     setTasks((k.data as any) || []);
     setContributorsCount(ctrCount.count || 0);
+    setSuperNodes((sn.data as any) || []);
+    setBcSettings((st.data as any) || null);
 
     if (user) {
       const [app, ctr, today] = await Promise.all([
