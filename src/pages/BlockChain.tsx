@@ -65,6 +65,32 @@ type Contributor = {
   contribution_type_key: string;
 };
 
+type SuperNode = {
+  id: string;
+  display_name: string;
+  display_name_en: string | null;
+  entity_type: string;
+  economic_category: string;
+  description: string | null;
+  description_en: string | null;
+  logo_url: string | null;
+  website_url: string | null;
+};
+
+type BCSettings = {
+  show_super_nodes_section: boolean;
+  show_node_sale_section: boolean;
+  node_sale_active: boolean;
+  super_nodes_title: string;
+  super_nodes_title_en: string;
+  super_nodes_description: string | null;
+  super_nodes_description_en: string | null;
+  node_sale_title: string | null;
+  node_sale_title_en: string | null;
+  node_sale_description: string | null;
+  node_sale_description_en: string | null;
+};
+
 export default function BlockChain() {
   const { user } = useAuth();
   const { language, dir } = useLanguage();
@@ -78,6 +104,8 @@ export default function BlockChain() {
   const [myApplication, setMyApplication] = useState<Application | null>(null);
   const [myContributor, setMyContributor] = useState<Contributor | null>(null);
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
+  const [superNodes, setSuperNodes] = useState<SuperNode[]>([]);
+  const [bcSettings, setBcSettings] = useState<BCSettings | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
