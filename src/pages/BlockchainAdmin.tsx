@@ -358,13 +358,101 @@ export default function BlockchainAdmin() {
       </div>
 
       <Tabs defaultValue="applications" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 md:grid-cols-5 h-auto">
+        <TabsList className="w-full grid grid-cols-2 md:grid-cols-7 h-auto">
           <TabsTrigger value="applications" className="gap-1"><Users className="h-4 w-4" />{isAr ? "الطلبات" : "Applications"} {pendingCount > 0 && <Badge className="ml-1">{pendingCount}</Badge>}</TabsTrigger>
           <TabsTrigger value="contributors" className="gap-1"><Sparkles className="h-4 w-4" />{isAr ? "المساهمون" : "Contributors"}</TabsTrigger>
+          <TabsTrigger value="supernodes" className="gap-1"><Crown className="h-4 w-4" />{isAr ? "السوبر نودز" : "Super Nodes"}</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1"><Settings className="h-4 w-4" />{isAr ? "إعدادات" : "Settings"}</TabsTrigger>
           <TabsTrigger value="content" className="gap-1"><FileText className="h-4 w-4" />{isAr ? "المحتوى" : "Content"}</TabsTrigger>
           <TabsTrigger value="types" className="gap-1"><Layers className="h-4 w-4" />{isAr ? "الأنواع" : "Types"}</TabsTrigger>
           <TabsTrigger value="tasks" className="gap-1"><ListChecks className="h-4 w-4" />{isAr ? "المهام" : "Tasks"}</TabsTrigger>
         </TabsList>
+
+        {/* === Super Nodes === */}
+        <TabsContent value="supernodes" className="space-y-3 mt-4">
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <p className="text-sm text-muted-foreground">{isAr ? "تعيين يدوي للمؤسسين والمؤسسات والشركاء" : "Manually assign founders, institutions, and partners"}</p>
+            <Button onClick={() => setEditSuperNode(newSuperNode())} size="sm"><Plus className="h-4 w-4 me-1" />{isAr ? "إضافة سوبر نود" : "Add Super Node"}</Button>
+          </div>
+          {superNodes.length === 0 && <p className="text-center text-muted-foreground py-8">{isAr ? "لا يوجد سوبر نودز بعد" : "No super nodes yet"}</p>}
+          {superNodes.map(sn => (
+            <Card key={sn.id} className="border-l-4" style={{ borderLeftColor: '#D4AF37' }}>
+              <CardContent className="p-4 flex flex-wrap justify-between gap-3">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <h3 className="font-semibold">{sn.display_name}</h3>
+                    <Badge variant="outline">{sn.entity_type}</Badge>
+                    <Badge variant="secondary">{sn.economic_category}</Badge>
+                    {!sn.is_public && <Badge variant="destructive">{isAr ? "مخفي" : "Hidden"}</Badge>}
+                    <Badge>{sn.revenue_share_percent}%</Badge>
+                  </div>
+                  {sn.description && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{sn.description}</p>}
+                </div>
+                <div className="flex gap-1">
+                  <Button size="icon" variant="ghost" onClick={() => setEditSuperNode(sn)}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => deleteSuperNode(sn.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        {/* === Settings (Network Policy + Visibility) === */}
+        <TabsContent value="settings" className="space-y-4 mt-4">
+          {settings && (
+            <Card>
+              <CardHeader><CardTitle className="text-base">{isAr ? "إظهار/إخفاء أقسام الواجهة" : "Public Sections Visibility"}</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between"><Label>{isAr ? "إظهار قسم السوبر نودز" : "Show Super Nodes section"}</Label><Switch checked={settings.show_super_nodes_section} onCheckedChange={v => updateSettings({ show_super_nodes_section: v })} /></div>
+                <div className="flex items-center justify-between"><Label>{isAr ? "إظهار قسم بيع النودز" : "Show Node Sale section"}</Label><Switch checked={settings.show_node_sale_section} onCheckedChange={v => updateSettings({ show_node_sale_section: v })} /></div>
+                <div className="flex items-center justify-between"><Label>{isAr ? "تفعيل البيع الرسمي" : "Node sale active"}</Label><Switch checked={settings.node_sale_active} onCheckedChange={v => updateSettings({ node_sale_active: v })} /></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t">
+                  <div><Label>{isAr ? "عنوان السوبر نودز (AR)" : "Super Nodes Title (AR)"}</Label><Input value={settings.super_nodes_title} onChange={e => setSettings({ ...settings, super_nodes_title: e.target.value })} onBlur={e => updateSettings({ super_nodes_title: e.target.value })} /></div>
+                  <div><Label>Super Nodes Title (EN)</Label><Input value={settings.super_nodes_title_en} onChange={e => setSettings({ ...settings, super_nodes_title_en: e.target.value })} onBlur={e => updateSettings({ super_nodes_title_en: e.target.value })} /></div>
+                  <div><Label>{isAr ? "عنوان بيع النودز (AR)" : "Node Sale Title (AR)"}</Label><Input value={settings.node_sale_title || ""} onChange={e => setSettings({ ...settings, node_sale_title: e.target.value })} onBlur={e => updateSettings({ node_sale_title: e.target.value })} /></div>
+                  <div><Label>Node Sale Title (EN)</Label><Input value={settings.node_sale_title_en || ""} onChange={e => setSettings({ ...settings, node_sale_title_en: e.target.value })} onBlur={e => updateSettings({ node_sale_title_en: e.target.value })} /></div>
+                  <div className="md:col-span-2"><Label>{isAr ? "وصف بيع النودز (AR)" : "Node Sale Description (AR)"}</Label><Textarea rows={2} value={settings.node_sale_description || ""} onChange={e => setSettings({ ...settings, node_sale_description: e.target.value })} onBlur={e => updateSettings({ node_sale_description: e.target.value })} /></div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">{isAr ? "سياسة الشبكة (لكل دور)" : "Network Policy (per role)"}</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {policies.map(p => (
+                <div key={p.id} className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <Badge variant="outline" className="text-sm">{p.contribution_type_key}</Badge>
+                    <div className="flex items-center gap-2 text-xs"><Label>{isAr ? "مفتوح للتقديم" : "Open"}</Label><Switch checked={p.is_open_for_applications} onCheckedChange={v => updatePolicy(p, { is_open_for_applications: v })} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div><Label className="text-xs">{isAr ? "حد أدنى نقاط" : "Min pts"}</Label><Input type="number" defaultValue={p.min_points} onBlur={e => updatePolicy(p, { min_points: parseInt(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "Streak أيام" : "Streak"}</Label><Input type="number" defaultValue={p.required_streak_days} onBlur={e => updatePolicy(p, { required_streak_days: parseInt(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "حصة %" : "Share %"}</Label><Input type="number" defaultValue={p.revenue_share_percent} onBlur={e => updatePolicy(p, { revenue_share_percent: parseFloat(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "حد أقصى" : "Max"}</Label><Input type="number" defaultValue={p.max_contributors || 0} onBlur={e => updatePolicy(p, { max_contributors: parseInt(e.target.value) || null })} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 items-center">
+                    <div>
+                      <Label className="text-xs">{isAr ? "الجهاز" : "Device"}</Label>
+                      <Select defaultValue={p.allowed_device} onValueChange={v => updatePolicy(p, { allowed_device: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">{isAr ? "أي" : "Any"}</SelectItem>
+                          <SelectItem value="mobile">{isAr ? "موبايل" : "Mobile"}</SelectItem>
+                          <SelectItem value="desktop">{isAr ? "كمبيوتر" : "Desktop"}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2 mt-5"><Switch checked={p.kyc_required} onCheckedChange={v => updatePolicy(p, { kyc_required: v })} /><Label className="text-xs">{isAr ? "يتطلب KYC" : "KYC required"}</Label></div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
 
         {/* === Applications === */}
         <TabsContent value="applications" className="space-y-3 mt-4">
