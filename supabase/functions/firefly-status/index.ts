@@ -23,8 +23,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Normalize base URL: remove trailing slash and strip /api if present
-    const baseUrl = apiUrl.replace(/\/$/, '').replace(/\/api$/, '');
+    // Normalize: extract scheme://userinfo@host only, drop any path/query
+    let baseUrl: string;
+    try {
+      const u = new URL(apiUrl);
+      const userInfo = u.username
+        ? `${u.username}${u.password ? ':' + u.password : ''}@`
+        : '';
+      baseUrl = `${u.protocol}//${userInfo}${u.host}`;
+    } catch {
+      baseUrl = apiUrl.replace(/\/$/, '');
+    }
     const authHeader = 'Basic ' + btoa(`${username}:${password}`);
 
     // 1) Get node status
