@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, CheckCircle2, XCircle, Users, Layers, ListChecks, FileText, Sparkles } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, CheckCircle2, XCircle, Users, Layers, ListChecks, FileText, Sparkles, Crown, Settings } from "lucide-react";
 
 type PageContent = {
   id: string;
@@ -86,6 +86,52 @@ type Contributor = {
   joined_at: string;
 };
 
+type SuperNode = {
+  id: string;
+  user_id: string | null;
+  display_name: string;
+  display_name_en: string | null;
+  entity_type: string;
+  economic_category: string;
+  description: string | null;
+  description_en: string | null;
+  logo_url: string | null;
+  website_url: string | null;
+  revenue_share_percent: number;
+  governance_weight: number;
+  status: string;
+  is_public: boolean;
+  display_order: number;
+};
+
+type Policy = {
+  id: string;
+  contribution_type_key: string;
+  min_points: number;
+  required_streak_days: number;
+  kyc_required: boolean;
+  allowed_device: string;
+  max_contributors: number | null;
+  revenue_share_percent: number;
+  is_open_for_applications: boolean;
+  notes: string | null;
+};
+
+type BCSettings = {
+  id: string;
+  show_super_nodes_section: boolean;
+  show_node_sale_section: boolean;
+  node_sale_active: boolean;
+  super_nodes_title: string;
+  super_nodes_title_en: string;
+  super_nodes_description: string | null;
+  super_nodes_description_en: string | null;
+  node_sale_title: string | null;
+  node_sale_title_en: string | null;
+  node_sale_description: string | null;
+  node_sale_description_en: string | null;
+};
+
 export default function BlockchainAdmin() {
   const { language } = useLanguage();
   const isAr = language === "ar";
@@ -96,25 +142,35 @@ export default function BlockchainAdmin() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [superNodes, setSuperNodes] = useState<SuperNode[]>([]);
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [settings, setSettings] = useState<BCSettings | null>(null);
 
   const [editContent, setEditContent] = useState<PageContent | null>(null);
   const [editType, setEditType] = useState<ContributionType | null>(null);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [editSuperNode, setEditSuperNode] = useState<SuperNode | null>(null);
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, t, k, a, ctr] = await Promise.all([
+    const [c, t, k, a, ctr, sn, po, st] = await Promise.all([
       supabase.from("blockchain_page_content").select("*").order("display_order"),
       supabase.from("blockchain_contribution_types").select("*").order("display_order"),
       supabase.from("blockchain_tasks").select("*").order("display_order"),
       supabase.from("blockchain_contributor_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("blockchain_contributors").select("*").order("total_points", { ascending: false }),
+      supabase.from("blockchain_super_nodes" as any).select("*").order("display_order"),
+      supabase.from("blockchain_network_policy" as any).select("*").order("contribution_type_key"),
+      supabase.from("blockchain_settings" as any).select("*").maybeSingle(),
     ]);
     setContents((c.data as any) || []);
     setTypes((t.data as any) || []);
     setTasks((k.data as any) || []);
     setApplications((a.data as any) || []);
     setContributors((ctr.data as any) || []);
+    setSuperNodes((sn.data as any) || []);
+    setPolicies((po.data as any) || []);
+    setSettings((st.data as any) || null);
     setLoading(false);
   };
 
@@ -236,6 +292,48 @@ export default function BlockchainAdmin() {
     task_type: "daily", contribution_type_key: "routine", points_reward: 5, frequency: "daily",
     icon: "✓", display_order: 0, is_active: true,
   });
+  const newSuperNode = (): SuperNode => ({
+    id: "", user_id: null, display_name: "", display_name_en: "",
+    entity_type: "institution", economic_category: "general",
+    description: "", description_en: "", logo_url: "", website_url: "",
+    revenue_share_percent: 0, governance_weight: 1,
+    status: "active", is_public: true, display_order: 0,
+  });
+
+  const saveSuperNode = async () => {
+    if (!editSuperNode) return;
+    const payload: any = { ...editSuperNode };
+    delete payload.id;
+    if (!payload.user_id) delete payload.user_id;
+    const { error } = editSuperNode.id
+      ? await supabase.from("blockchain_super_nodes" as any).update(payload).eq("id", editSuperNode.id)
+      : await supabase.from("blockchain_super_nodes" as any).insert(payload);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: isAr ? "تم الحفظ" : "Saved" });
+    setEditSuperNode(null);
+    loadAll();
+  };
+
+  const deleteSuperNode = async (id: string) => {
+    if (!confirm(isAr ? "تأكيد الحذف؟" : "Confirm delete?")) return;
+    await supabase.from("blockchain_super_nodes" as any).delete().eq("id", id);
+    loadAll();
+  };
+
+  const updatePolicy = async (p: Policy, patch: Partial<Policy>) => {
+    const { error } = await supabase.from("blockchain_network_policy" as any).update(patch).eq("id", p.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setPolicies(prev => prev.map(x => x.id === p.id ? { ...x, ...patch } : x));
+  };
+
+  const updateSettings = async (patch: Partial<BCSettings>) => {
+    if (!settings) return;
+    const { error } = await supabase.from("blockchain_settings" as any).update(patch).eq("id", settings.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    setSettings({ ...settings, ...patch });
+    toast({ title: isAr ? "تم التحديث" : "Updated" });
+  };
+
 
   const pendingCount = applications.filter(a => a.status === "pending").length;
 
@@ -260,13 +358,101 @@ export default function BlockchainAdmin() {
       </div>
 
       <Tabs defaultValue="applications" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 md:grid-cols-5 h-auto">
+        <TabsList className="w-full grid grid-cols-2 md:grid-cols-7 h-auto">
           <TabsTrigger value="applications" className="gap-1"><Users className="h-4 w-4" />{isAr ? "الطلبات" : "Applications"} {pendingCount > 0 && <Badge className="ml-1">{pendingCount}</Badge>}</TabsTrigger>
           <TabsTrigger value="contributors" className="gap-1"><Sparkles className="h-4 w-4" />{isAr ? "المساهمون" : "Contributors"}</TabsTrigger>
+          <TabsTrigger value="supernodes" className="gap-1"><Crown className="h-4 w-4" />{isAr ? "السوبر نودز" : "Super Nodes"}</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1"><Settings className="h-4 w-4" />{isAr ? "إعدادات" : "Settings"}</TabsTrigger>
           <TabsTrigger value="content" className="gap-1"><FileText className="h-4 w-4" />{isAr ? "المحتوى" : "Content"}</TabsTrigger>
           <TabsTrigger value="types" className="gap-1"><Layers className="h-4 w-4" />{isAr ? "الأنواع" : "Types"}</TabsTrigger>
           <TabsTrigger value="tasks" className="gap-1"><ListChecks className="h-4 w-4" />{isAr ? "المهام" : "Tasks"}</TabsTrigger>
         </TabsList>
+
+        {/* === Super Nodes === */}
+        <TabsContent value="supernodes" className="space-y-3 mt-4">
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <p className="text-sm text-muted-foreground">{isAr ? "تعيين يدوي للمؤسسين والمؤسسات والشركاء" : "Manually assign founders, institutions, and partners"}</p>
+            <Button onClick={() => setEditSuperNode(newSuperNode())} size="sm"><Plus className="h-4 w-4 me-1" />{isAr ? "إضافة سوبر نود" : "Add Super Node"}</Button>
+          </div>
+          {superNodes.length === 0 && <p className="text-center text-muted-foreground py-8">{isAr ? "لا يوجد سوبر نودز بعد" : "No super nodes yet"}</p>}
+          {superNodes.map(sn => (
+            <Card key={sn.id} className="border-l-4" style={{ borderLeftColor: '#D4AF37' }}>
+              <CardContent className="p-4 flex flex-wrap justify-between gap-3">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <h3 className="font-semibold">{sn.display_name}</h3>
+                    <Badge variant="outline">{sn.entity_type}</Badge>
+                    <Badge variant="secondary">{sn.economic_category}</Badge>
+                    {!sn.is_public && <Badge variant="destructive">{isAr ? "مخفي" : "Hidden"}</Badge>}
+                    <Badge>{sn.revenue_share_percent}%</Badge>
+                  </div>
+                  {sn.description && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{sn.description}</p>}
+                </div>
+                <div className="flex gap-1">
+                  <Button size="icon" variant="ghost" onClick={() => setEditSuperNode(sn)}><Pencil className="h-4 w-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => deleteSuperNode(sn.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        {/* === Settings (Network Policy + Visibility) === */}
+        <TabsContent value="settings" className="space-y-4 mt-4">
+          {settings && (
+            <Card>
+              <CardHeader><CardTitle className="text-base">{isAr ? "إظهار/إخفاء أقسام الواجهة" : "Public Sections Visibility"}</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between"><Label>{isAr ? "إظهار قسم السوبر نودز" : "Show Super Nodes section"}</Label><Switch checked={settings.show_super_nodes_section} onCheckedChange={v => updateSettings({ show_super_nodes_section: v })} /></div>
+                <div className="flex items-center justify-between"><Label>{isAr ? "إظهار قسم بيع النودز" : "Show Node Sale section"}</Label><Switch checked={settings.show_node_sale_section} onCheckedChange={v => updateSettings({ show_node_sale_section: v })} /></div>
+                <div className="flex items-center justify-between"><Label>{isAr ? "تفعيل البيع الرسمي" : "Node sale active"}</Label><Switch checked={settings.node_sale_active} onCheckedChange={v => updateSettings({ node_sale_active: v })} /></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t">
+                  <div><Label>{isAr ? "عنوان السوبر نودز (AR)" : "Super Nodes Title (AR)"}</Label><Input value={settings.super_nodes_title} onChange={e => setSettings({ ...settings, super_nodes_title: e.target.value })} onBlur={e => updateSettings({ super_nodes_title: e.target.value })} /></div>
+                  <div><Label>Super Nodes Title (EN)</Label><Input value={settings.super_nodes_title_en} onChange={e => setSettings({ ...settings, super_nodes_title_en: e.target.value })} onBlur={e => updateSettings({ super_nodes_title_en: e.target.value })} /></div>
+                  <div><Label>{isAr ? "عنوان بيع النودز (AR)" : "Node Sale Title (AR)"}</Label><Input value={settings.node_sale_title || ""} onChange={e => setSettings({ ...settings, node_sale_title: e.target.value })} onBlur={e => updateSettings({ node_sale_title: e.target.value })} /></div>
+                  <div><Label>Node Sale Title (EN)</Label><Input value={settings.node_sale_title_en || ""} onChange={e => setSettings({ ...settings, node_sale_title_en: e.target.value })} onBlur={e => updateSettings({ node_sale_title_en: e.target.value })} /></div>
+                  <div className="md:col-span-2"><Label>{isAr ? "وصف بيع النودز (AR)" : "Node Sale Description (AR)"}</Label><Textarea rows={2} value={settings.node_sale_description || ""} onChange={e => setSettings({ ...settings, node_sale_description: e.target.value })} onBlur={e => updateSettings({ node_sale_description: e.target.value })} /></div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">{isAr ? "سياسة الشبكة (لكل دور)" : "Network Policy (per role)"}</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {policies.map(p => (
+                <div key={p.id} className="border rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <Badge variant="outline" className="text-sm">{p.contribution_type_key}</Badge>
+                    <div className="flex items-center gap-2 text-xs"><Label>{isAr ? "مفتوح للتقديم" : "Open"}</Label><Switch checked={p.is_open_for_applications} onCheckedChange={v => updatePolicy(p, { is_open_for_applications: v })} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div><Label className="text-xs">{isAr ? "حد أدنى نقاط" : "Min pts"}</Label><Input type="number" defaultValue={p.min_points} onBlur={e => updatePolicy(p, { min_points: parseInt(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "Streak أيام" : "Streak"}</Label><Input type="number" defaultValue={p.required_streak_days} onBlur={e => updatePolicy(p, { required_streak_days: parseInt(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "حصة %" : "Share %"}</Label><Input type="number" defaultValue={p.revenue_share_percent} onBlur={e => updatePolicy(p, { revenue_share_percent: parseFloat(e.target.value) || 0 })} /></div>
+                    <div><Label className="text-xs">{isAr ? "حد أقصى" : "Max"}</Label><Input type="number" defaultValue={p.max_contributors || 0} onBlur={e => updatePolicy(p, { max_contributors: parseInt(e.target.value) || null })} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 items-center">
+                    <div>
+                      <Label className="text-xs">{isAr ? "الجهاز" : "Device"}</Label>
+                      <Select defaultValue={p.allowed_device} onValueChange={v => updatePolicy(p, { allowed_device: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="any">{isAr ? "أي" : "Any"}</SelectItem>
+                          <SelectItem value="mobile">{isAr ? "موبايل" : "Mobile"}</SelectItem>
+                          <SelectItem value="desktop">{isAr ? "كمبيوتر" : "Desktop"}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2 mt-5"><Switch checked={p.kyc_required} onCheckedChange={v => updatePolicy(p, { kyc_required: v })} /><Label className="text-xs">{isAr ? "يتطلب KYC" : "KYC required"}</Label></div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
 
         {/* === Applications === */}
         <TabsContent value="applications" className="space-y-3 mt-4">
@@ -502,6 +688,75 @@ export default function BlockchainAdmin() {
             </div>
           )}
           <DialogFooter><Button variant="outline" onClick={() => setEditTask(null)}>{isAr ? "إلغاء" : "Cancel"}</Button><Button onClick={saveTask}>{isAr ? "حفظ" : "Save"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* === Edit Super Node Dialog === */}
+      <Dialog open={!!editSuperNode} onOpenChange={(o) => !o && setEditSuperNode(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto max-w-2xl">
+          <DialogHeader><DialogTitle>{editSuperNode?.id ? (isAr ? "تعديل سوبر نود" : "Edit Super Node") : (isAr ? "سوبر نود جديد" : "New Super Node")}</DialogTitle></DialogHeader>
+          {editSuperNode && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{isAr ? "الاسم (عربي)" : "Name (AR)"}</Label><Input value={editSuperNode.display_name} onChange={e => setEditSuperNode({ ...editSuperNode, display_name: e.target.value })} /></div>
+                <div><Label>Name (EN)</Label><Input value={editSuperNode.display_name_en || ""} onChange={e => setEditSuperNode({ ...editSuperNode, display_name_en: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>{isAr ? "نوع الكيان" : "Entity Type"}</Label>
+                  <Select value={editSuperNode.entity_type} onValueChange={v => setEditSuperNode({ ...editSuperNode, entity_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="founder">{isAr ? "مؤسس" : "Founder"}</SelectItem>
+                      <SelectItem value="institution">{isAr ? "مؤسسة" : "Institution"}</SelectItem>
+                      <SelectItem value="government">{isAr ? "حكومي" : "Government"}</SelectItem>
+                      <SelectItem value="premium_user">{isAr ? "مستخدم مميز" : "Premium User"}</SelectItem>
+                      <SelectItem value="external_partner">{isAr ? "شريك خارجي" : "External Partner"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>{isAr ? "الفئة الاقتصادية" : "Economic Category"}</Label>
+                  <Select value={editSuperNode.economic_category} onValueChange={v => setEditSuperNode({ ...editSuperNode, economic_category: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">{isAr ? "عام" : "General"}</SelectItem>
+                      <SelectItem value="coins">{isAr ? "عملات" : "Coins"}</SelectItem>
+                      <SelectItem value="rwa">RWA</SelectItem>
+                      <SelectItem value="affiliate">Affiliate</SelectItem>
+                      <SelectItem value="regulatory">{isAr ? "تنظيمي" : "Regulatory"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div><Label>{isAr ? "الوصف (عربي)" : "Description (AR)"}</Label><Textarea rows={2} value={editSuperNode.description || ""} onChange={e => setEditSuperNode({ ...editSuperNode, description: e.target.value })} /></div>
+              <div><Label>Description (EN)</Label><Textarea rows={2} value={editSuperNode.description_en || ""} onChange={e => setEditSuperNode({ ...editSuperNode, description_en: e.target.value })} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{isAr ? "رابط الشعار" : "Logo URL"}</Label><Input value={editSuperNode.logo_url || ""} onChange={e => setEditSuperNode({ ...editSuperNode, logo_url: e.target.value })} /></div>
+                <div><Label>Website</Label><Input value={editSuperNode.website_url || ""} onChange={e => setEditSuperNode({ ...editSuperNode, website_url: e.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><Label>{isAr ? "حصة الإيرادات %" : "Revenue Share %"}</Label><Input type="number" value={editSuperNode.revenue_share_percent} onChange={e => setEditSuperNode({ ...editSuperNode, revenue_share_percent: parseFloat(e.target.value) || 0 })} /></div>
+                <div><Label>{isAr ? "وزن الحوكمة" : "Governance Weight"}</Label><Input type="number" value={editSuperNode.governance_weight} onChange={e => setEditSuperNode({ ...editSuperNode, governance_weight: parseInt(e.target.value) || 1 })} /></div>
+                <div><Label>{isAr ? "ترتيب" : "Order"}</Label><Input type="number" value={editSuperNode.display_order} onChange={e => setEditSuperNode({ ...editSuperNode, display_order: parseInt(e.target.value) || 0 })} /></div>
+              </div>
+              <div><Label>{isAr ? "معرّف المستخدم (اختياري)" : "User ID (optional)"}</Label><Input value={editSuperNode.user_id || ""} onChange={e => setEditSuperNode({ ...editSuperNode, user_id: e.target.value || null })} /></div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2"><Switch checked={editSuperNode.is_public} onCheckedChange={v => setEditSuperNode({ ...editSuperNode, is_public: v })} /><Label>{isAr ? "ظاهر للجمهور" : "Public"}</Label></div>
+                <div>
+                  <Select value={editSuperNode.status} onValueChange={v => setEditSuperNode({ ...editSuperNode, status: v })}>
+                    <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">{isAr ? "نشط" : "Active"}</SelectItem>
+                      <SelectItem value="pending">{isAr ? "قيد المراجعة" : "Pending"}</SelectItem>
+                      <SelectItem value="suspended">{isAr ? "موقوف" : "Suspended"}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" onClick={() => setEditSuperNode(null)}>{isAr ? "إلغاء" : "Cancel"}</Button><Button onClick={saveSuperNode}>{isAr ? "حفظ" : "Save"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

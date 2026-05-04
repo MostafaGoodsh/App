@@ -65,6 +65,32 @@ type Contributor = {
   contribution_type_key: string;
 };
 
+type SuperNode = {
+  id: string;
+  display_name: string;
+  display_name_en: string | null;
+  entity_type: string;
+  economic_category: string;
+  description: string | null;
+  description_en: string | null;
+  logo_url: string | null;
+  website_url: string | null;
+};
+
+type BCSettings = {
+  show_super_nodes_section: boolean;
+  show_node_sale_section: boolean;
+  node_sale_active: boolean;
+  super_nodes_title: string;
+  super_nodes_title_en: string;
+  super_nodes_description: string | null;
+  super_nodes_description_en: string | null;
+  node_sale_title: string | null;
+  node_sale_title_en: string | null;
+  node_sale_description: string | null;
+  node_sale_description_en: string | null;
+};
+
 export default function BlockChain() {
   const { user } = useAuth();
   const { language, dir } = useLanguage();
@@ -78,6 +104,8 @@ export default function BlockChain() {
   const [myApplication, setMyApplication] = useState<Application | null>(null);
   const [myContributor, setMyContributor] = useState<Contributor | null>(null);
   const [completedToday, setCompletedToday] = useState<Set<string>>(new Set());
+  const [superNodes, setSuperNodes] = useState<SuperNode[]>([]);
+  const [bcSettings, setBcSettings] = useState<BCSettings | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
@@ -89,16 +117,20 @@ export default function BlockChain() {
 
   const loadData = async () => {
     setLoading(true);
-    const [c, t, k, ctrCount] = await Promise.all([
+    const [c, t, k, ctrCount, sn, st] = await Promise.all([
       supabase.from("blockchain_page_content").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_contribution_types").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_tasks").select("*").eq("is_active", true).order("display_order"),
       supabase.from("blockchain_contributors").select("id", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("blockchain_super_nodes" as any).select("*").eq("is_public", true).eq("status", "active").order("display_order"),
+      supabase.from("blockchain_settings" as any).select("*").maybeSingle(),
     ]);
     setContents((c.data as any) || []);
     setTypes((t.data as any) || []);
     setTasks((k.data as any) || []);
     setContributorsCount(ctrCount.count || 0);
+    setSuperNodes((sn.data as any) || []);
+    setBcSettings((st.data as any) || null);
 
     if (user) {
       const [app, ctr, today] = await Promise.all([
@@ -220,7 +252,64 @@ export default function BlockChain() {
         </CardContent>
       </Card>
 
-      {/* My Status (if contributor) */}
+      {/* Super Nodes Council */}
+      {bcSettings?.show_super_nodes_section && superNodes.length > 0 && (
+        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-background">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="text-2xl">🏛️</span>
+              {isAr ? bcSettings.super_nodes_title : bcSettings.super_nodes_title_en}
+            </CardTitle>
+            {(bcSettings.super_nodes_description || bcSettings.super_nodes_description_en) && (
+              <p className="text-sm text-muted-foreground">{isAr ? bcSettings.super_nodes_description : bcSettings.super_nodes_description_en}</p>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {superNodes.map(sn => (
+                <div key={sn.id} className="p-3 rounded-lg border border-amber-500/20 bg-background/50 flex gap-3 items-start">
+                  {sn.logo_url ? (
+                    <img src={sn.logo_url} alt={sn.display_name} className="w-12 h-12 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-2xl">🏛️</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{isAr ? sn.display_name : (sn.display_name_en || sn.display_name)}</p>
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      <Badge variant="outline" className="text-[10px]">{sn.entity_type}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{sn.economic_category}</Badge>
+                    </div>
+                    {(sn.description || sn.description_en) && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{isAr ? sn.description : (sn.description_en || sn.description)}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Node Sale (Coming Soon / Active) */}
+      {bcSettings?.show_node_sale_section && (
+        <Card className="border-primary/30">
+          <CardContent className="p-6 space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="text-2xl">🛒</span>
+                {isAr ? bcSettings.node_sale_title : bcSettings.node_sale_title_en}
+              </h2>
+              <Badge variant={bcSettings.node_sale_active ? "default" : "secondary"}>
+                {bcSettings.node_sale_active ? (isAr ? "متاح الآن" : "Live") : (isAr ? "قريباً" : "Coming Soon")}
+              </Badge>
+            </div>
+            {(bcSettings.node_sale_description || bcSettings.node_sale_description_en) && (
+              <p className="text-sm text-muted-foreground">{isAr ? bcSettings.node_sale_description : bcSettings.node_sale_description_en}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {isContributor && userType && (
         <Card className="border-2" style={{ borderColor: userType.color }}>
           <CardHeader>
