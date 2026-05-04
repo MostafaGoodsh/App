@@ -252,7 +252,64 @@ export default function BlockChain() {
         </CardContent>
       </Card>
 
-      {/* My Status (if contributor) */}
+      {/* Super Nodes Council */}
+      {bcSettings?.show_super_nodes_section && superNodes.length > 0 && (
+        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-background">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="text-2xl">🏛️</span>
+              {isAr ? bcSettings.super_nodes_title : bcSettings.super_nodes_title_en}
+            </CardTitle>
+            {(bcSettings.super_nodes_description || bcSettings.super_nodes_description_en) && (
+              <p className="text-sm text-muted-foreground">{isAr ? bcSettings.super_nodes_description : bcSettings.super_nodes_description_en}</p>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {superNodes.map(sn => (
+                <div key={sn.id} className="p-3 rounded-lg border border-amber-500/20 bg-background/50 flex gap-3 items-start">
+                  {sn.logo_url ? (
+                    <img src={sn.logo_url} alt={sn.display_name} className="w-12 h-12 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-2xl">🏛️</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{isAr ? sn.display_name : (sn.display_name_en || sn.display_name)}</p>
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      <Badge variant="outline" className="text-[10px]">{sn.entity_type}</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{sn.economic_category}</Badge>
+                    </div>
+                    {(sn.description || sn.description_en) && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{isAr ? sn.description : (sn.description_en || sn.description)}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Node Sale (Coming Soon / Active) */}
+      {bcSettings?.show_node_sale_section && (
+        <Card className="border-primary/30">
+          <CardContent className="p-6 space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <span className="text-2xl">🛒</span>
+                {isAr ? bcSettings.node_sale_title : bcSettings.node_sale_title_en}
+              </h2>
+              <Badge variant={bcSettings.node_sale_active ? "default" : "secondary"}>
+                {bcSettings.node_sale_active ? (isAr ? "متاح الآن" : "Live") : (isAr ? "قريباً" : "Coming Soon")}
+              </Badge>
+            </div>
+            {(bcSettings.node_sale_description || bcSettings.node_sale_description_en) && (
+              <p className="text-sm text-muted-foreground">{isAr ? bcSettings.node_sale_description : bcSettings.node_sale_description_en}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {isContributor && userType && (
         <Card className="border-2" style={{ borderColor: userType.color }}>
           <CardHeader>
