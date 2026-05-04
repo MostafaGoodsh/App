@@ -86,6 +86,52 @@ type Contributor = {
   joined_at: string;
 };
 
+type SuperNode = {
+  id: string;
+  user_id: string | null;
+  display_name: string;
+  display_name_en: string | null;
+  entity_type: string;
+  economic_category: string;
+  description: string | null;
+  description_en: string | null;
+  logo_url: string | null;
+  website_url: string | null;
+  revenue_share_percent: number;
+  governance_weight: number;
+  status: string;
+  is_public: boolean;
+  display_order: number;
+};
+
+type Policy = {
+  id: string;
+  contribution_type_key: string;
+  min_points: number;
+  required_streak_days: number;
+  kyc_required: boolean;
+  allowed_device: string;
+  max_contributors: number | null;
+  revenue_share_percent: number;
+  is_open_for_applications: boolean;
+  notes: string | null;
+};
+
+type BCSettings = {
+  id: string;
+  show_super_nodes_section: boolean;
+  show_node_sale_section: boolean;
+  node_sale_active: boolean;
+  super_nodes_title: string;
+  super_nodes_title_en: string;
+  super_nodes_description: string | null;
+  super_nodes_description_en: string | null;
+  node_sale_title: string | null;
+  node_sale_title_en: string | null;
+  node_sale_description: string | null;
+  node_sale_description_en: string | null;
+};
+
 export default function BlockchainAdmin() {
   const { language } = useLanguage();
   const isAr = language === "ar";
@@ -96,25 +142,35 @@ export default function BlockchainAdmin() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [contributors, setContributors] = useState<Contributor[]>([]);
+  const [superNodes, setSuperNodes] = useState<SuperNode[]>([]);
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [settings, setSettings] = useState<BCSettings | null>(null);
 
   const [editContent, setEditContent] = useState<PageContent | null>(null);
   const [editType, setEditType] = useState<ContributionType | null>(null);
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [editSuperNode, setEditSuperNode] = useState<SuperNode | null>(null);
 
   const loadAll = async () => {
     setLoading(true);
-    const [c, t, k, a, ctr] = await Promise.all([
+    const [c, t, k, a, ctr, sn, po, st] = await Promise.all([
       supabase.from("blockchain_page_content").select("*").order("display_order"),
       supabase.from("blockchain_contribution_types").select("*").order("display_order"),
       supabase.from("blockchain_tasks").select("*").order("display_order"),
       supabase.from("blockchain_contributor_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("blockchain_contributors").select("*").order("total_points", { ascending: false }),
+      supabase.from("blockchain_super_nodes" as any).select("*").order("display_order"),
+      supabase.from("blockchain_network_policy" as any).select("*").order("contribution_type_key"),
+      supabase.from("blockchain_settings" as any).select("*").maybeSingle(),
     ]);
     setContents((c.data as any) || []);
     setTypes((t.data as any) || []);
     setTasks((k.data as any) || []);
     setApplications((a.data as any) || []);
     setContributors((ctr.data as any) || []);
+    setSuperNodes((sn.data as any) || []);
+    setPolicies((po.data as any) || []);
+    setSettings((st.data as any) || null);
     setLoading(false);
   };
 
