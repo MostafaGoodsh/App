@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, CheckCircle2, XCircle, Users, Layers, ListChecks, FileText, Sparkles } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, CheckCircle2, XCircle, Users, Layers, ListChecks, FileText, Sparkles, Crown, Settings } from "lucide-react";
 
 type PageContent = {
   id: string;
