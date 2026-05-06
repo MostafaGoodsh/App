@@ -1029,6 +1029,48 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_user_keys: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          eth_address: string | null
+          firefly_identity: string | null
+          firefly_key: string | null
+          id: string
+          metadata: Json | null
+          namespace: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          eth_address?: string | null
+          firefly_identity?: string | null
+          firefly_key?: string | null
+          id?: string
+          metadata?: Json | null
+          namespace?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          eth_address?: string | null
+          firefly_identity?: string | null
+          firefly_key?: string | null
+          id?: string
+          metadata?: Json | null
+          namespace?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       callout_card_content: {
         Row: {
           contact_button_text: string | null
@@ -1742,6 +1784,9 @@ export type Database = {
           decimals: number
           description: string | null
           exchange_rate_usd: number
+          firefly_namespace: string | null
+          firefly_pool_id: string | null
+          firefly_pool_status: string | null
           icon_url: string | null
           id: string
           is_active: boolean
@@ -1755,6 +1800,9 @@ export type Database = {
           decimals?: number
           description?: string | null
           exchange_rate_usd?: number
+          firefly_namespace?: string | null
+          firefly_pool_id?: string | null
+          firefly_pool_status?: string | null
           icon_url?: string | null
           id?: string
           is_active?: boolean
@@ -1768,6 +1816,9 @@ export type Database = {
           decimals?: number
           description?: string | null
           exchange_rate_usd?: number
+          firefly_namespace?: string | null
+          firefly_pool_id?: string | null
+          firefly_pool_status?: string | null
           icon_url?: string | null
           id?: string
           is_active?: boolean

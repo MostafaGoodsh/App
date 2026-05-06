@@ -11,6 +11,7 @@ import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
 import GlobalAudioPlayer from "@/components/podcast/GlobalAudioPlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MessageSquare } from "lucide-react";
+import { useBlockchainKey } from "@/hooks/useBlockchainKey";
 
 const MainLayoutContent = () => {
   const { getContent } = useAppContent();
@@ -18,6 +19,7 @@ const MainLayoutContent = () => {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { dir } = useLanguage();
+  useBlockchainKey(); // Auto-register every authenticated user on Kaleido network
   
   return (
     <div className="min-h-[100dvh] w-full overflow-x-hidden bg-background text-foreground flex" dir={dir}>
