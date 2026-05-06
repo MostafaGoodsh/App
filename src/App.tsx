@@ -108,6 +108,7 @@ const VirtualCard = lazy(() => import("./pages/VirtualCard"));
 const VirtualCardAdmin = lazy(() => import("./pages/VirtualCardAdmin"));
 const BlockChain = lazy(() => import("./pages/BlockChain"));
 const BlockchainAdmin = lazy(() => import("./pages/BlockchainAdmin"));
+const BlockchainNetworkAdmin = lazy(() => import("./pages/BlockchainNetworkAdmin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -236,6 +237,7 @@ const App = () => {
                     <Route path="admin/virtual-cards" element={<RequireAdmin><VirtualCardAdmin /></RequireAdmin>} />
                     <Route path="blockchain" element={<BlockChain />} />
                     <Route path="admin/blockchain" element={<RequireAdmin><BlockchainAdmin /></RequireAdmin>} />
+                    <Route path="admin/blockchain-network" element={<RequireAdmin><BlockchainNetworkAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
