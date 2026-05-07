@@ -3987,6 +3987,60 @@ export type Database = {
         }
         Relationships: []
       }
+      sidebar_items: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon_name: string
+          id: string
+          is_admin_only: boolean
+          is_visible: boolean
+          key: string
+          min_access_level: Database["public"]["Enums"]["access_level"]
+          require_auth: boolean
+          section: string
+          title_ar: string
+          title_en: string | null
+          title_ru: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_admin_only?: boolean
+          is_visible?: boolean
+          key: string
+          min_access_level?: Database["public"]["Enums"]["access_level"]
+          require_auth?: boolean
+          section?: string
+          title_ar: string
+          title_en?: string | null
+          title_ru?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_admin_only?: boolean
+          is_visible?: boolean
+          key?: string
+          min_access_level?: Database["public"]["Enums"]["access_level"]
+          require_auth?: boolean
+          section?: string
+          title_ar?: string
+          title_en?: string | null
+          title_ru?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           admin_response: string | null
@@ -5918,6 +5972,10 @@ export type Database = {
         }[]
       }
       get_total_mining_stats: { Args: never; Returns: Json }
+      get_user_access_level: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["access_level"]
+      }
       get_wallet_security_with_logging: {
         Args: { p_wallet_id: string }
         Returns: {
@@ -6059,6 +6117,7 @@ export type Database = {
       verify_user_profile: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
+      access_level: "none" | "early_access" | "kyc_verified" | "admin"
       app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -6187,6 +6246,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_level: ["none", "early_access", "kyc_verified", "admin"],
       app_role: ["admin", "moderator", "user"],
     },
   },
