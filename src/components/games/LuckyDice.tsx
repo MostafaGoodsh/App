@@ -1,12 +1,15 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useGameSettings } from '@/hooks/useGameSettings';
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-const ROLL_COST = 5;
 
 const LuckyDice = () => {
   const { toast } = useToast();
+  const { settings } = useGameSettings('lucky_dice');
+  const ROLL_COST = settings?.spin_cost_xp ?? 5;
+  const REWARDS = settings?.rewards ?? { double_six: 200, lucky_seven: 50, any_double: 30, ten_plus: 15 };
   const [dice, setDice] = useState<[number, number]>([1, 1]);
   const [rolling, setRolling] = useState(false);
   const [lastWin, setLastWin] = useState<number | null>(null);
@@ -34,23 +37,31 @@ const LuckyDice = () => {
         const isDouble = d1 === d2;
         
         if (total === 12) {
-          setLastWin(200);
-          toast({ title: '🏆 Double Six!', description: '+200 XP' });
+          setLastWin(REWARDS.double_six);
+          toast({ title: '🏆 Double Six!', description: `+${REWARDS.double_six} XP` });
         } else if (total === 7) {
-          setLastWin(50);
-          toast({ title: '🍀 Lucky 7!', description: '+50 XP' });
+          setLastWin(REWARDS.lucky_seven);
+          toast({ title: '🍀 Lucky 7!', description: `+${REWARDS.lucky_seven} XP` });
         } else if (isDouble) {
-          setLastWin(30);
-          toast({ title: '🎯 Double!', description: '+30 XP' });
+          setLastWin(REWARDS.any_double);
+          toast({ title: '🎯 Double!', description: `+${REWARDS.any_double} XP` });
         } else if (total >= 10) {
-          setLastWin(15);
-          toast({ title: '✨ Nice roll!', description: '+15 XP' });
+          setLastWin(REWARDS.ten_plus);
+          toast({ title: '✨ Nice roll!', description: `+${REWARDS.ten_plus} XP` });
         } else {
           setLastWin(0);
         }
       }
     }, 80);
-  }, [rolling, toast]);
+  }, [rolling, toast, REWARDS]);
+
+  if (settings && !settings.is_active) {
+    return (
+      <div className="text-center py-6 text-[#D4AF37]/60 text-sm">
+        🚧 اللعبة غير مفعّلة حالياً
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -100,10 +111,10 @@ const LuckyDice = () => {
       <div className="rounded-lg bg-black/40 border border-[#D4AF37]/15 p-2.5 space-y-1">
         <p className="text-[10px] text-[#D4AF37]/70 font-bold text-center mb-1">قواعد المكسب</p>
         <div className="grid grid-cols-2 gap-1 text-[9px] text-[#D4AF37]/50">
-          <span>Double 6 (12) → 200 XP</span>
-          <span>Lucky 7 → 50 XP</span>
-          <span>أي دبل → 30 XP</span>
-          <span>10+ → 15 XP</span>
+          <span>Double 6 (12) → {REWARDS.double_six} XP</span>
+          <span>Lucky 7 → {REWARDS.lucky_seven} XP</span>
+          <span>أي دبل → {REWARDS.any_double} XP</span>
+          <span>10+ → {REWARDS.ten_plus} XP</span>
         </div>
       </div>
     </div>

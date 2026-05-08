@@ -1541,6 +1541,39 @@ export type Database = {
         }
         Relationships: []
       }
+      game_settings: {
+        Row: {
+          created_at: string
+          game_key: string
+          id: string
+          is_active: boolean
+          rewards: Json
+          spin_cost_xp: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          game_key: string
+          id?: string
+          is_active?: boolean
+          rewards?: Json
+          spin_cost_xp?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          game_key?: string
+          id?: string
+          is_active?: boolean
+          rewards?: Json
+          spin_cost_xp?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       home_page_cards: {
         Row: {
           background_color: string | null
@@ -3622,7 +3655,9 @@ export type Database = {
           page_number: number
           points_reward: number | null
           surah_name: string
+          translation_en: string | null
           translation_image_url: string | null
+          translation_ru: string | null
           translation_text: string | null
           updated_at: string
         }
@@ -3638,7 +3673,9 @@ export type Database = {
           page_number: number
           points_reward?: number | null
           surah_name: string
+          translation_en?: string | null
           translation_image_url?: string | null
+          translation_ru?: string | null
           translation_text?: string | null
           updated_at?: string
         }
@@ -3654,7 +3691,9 @@ export type Database = {
           page_number?: number
           points_reward?: number | null
           surah_name?: string
+          translation_en?: string | null
           translation_image_url?: string | null
+          translation_ru?: string | null
           translation_text?: string | null
           updated_at?: string
         }

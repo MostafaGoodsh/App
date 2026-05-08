@@ -27,8 +27,9 @@ const BISMILLAH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلر
 
 const QuranScroll = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [surahs, setSurahs] = useState<Surah[]>([]);
+  const [translations, setTranslations] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bookmarkAyah, setBookmarkAyah] = useState<{ surah: number; ayah: number } | null>(null);
@@ -40,6 +41,10 @@ const QuranScroll = () => {
     fetchQuranText();
     if (user) fetchBookmark();
   }, [user]);
+
+  useEffect(() => {
+    fetchTranslations();
+  }, [language]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 600);
@@ -61,6 +66,31 @@ const QuranScroll = () => {
       setError(t("حدث خطأ في تحميل النص", "Error loading text"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTranslations = async () => {
+    const lang = (language as string) || "ar";
+    if (lang === "ar") {
+      setTranslations({});
+      return;
+    }
+    const edition = lang === "ru" ? "ru.kuliev" : "en.sahih";
+    try {
+      const res = await fetch(`https://api.alquran.cloud/v1/quran/${edition}`);
+      const json = await res.json();
+      if (json.code === 200 && json.data?.surahs) {
+        const map: Record<number, string> = {};
+        json.data.surahs.forEach((s: any) => {
+          s.ayahs.forEach((a: any) => {
+            // unique key per ayah: surah*1000+numberInSurah
+            map[s.number * 1000 + a.numberInSurah] = a.text;
+          });
+        });
+        setTranslations(map);
+      }
+    } catch (err) {
+      console.error("Error fetching translations:", err);
     }
   };
 
@@ -248,6 +278,8 @@ const QuranScroll = () => {
                     text = text.replace(BISMILLAH, "").trim();
                   }
                   if (!text) return null;
+                  const translation = translations[surah.number * 1000 + ayah.numberInSurah];
+                  const showTranslation = (language === "en" || language === "ru") && translation;
 
                   return (
                     <span key={ayah.number}>
@@ -255,6 +287,15 @@ const QuranScroll = () => {
                       <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle">
                         ﴿{ayah.numberInSurah.toLocaleString("ar-EG")}﴾
                       </span>
+                      {showTranslation && (
+                        <span
+                          dir={language === "ru" ? "ltr" : "ltr"}
+                          className="block text-sm text-muted-foreground italic mt-1 mb-3 leading-relaxed text-left"
+                          style={{ fontFamily: "system-ui, sans-serif" }}
+                        >
+                          {translation}
+                        </span>
+                      )}
                     </span>
                   );
                 })}

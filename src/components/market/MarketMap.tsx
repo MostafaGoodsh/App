@@ -145,6 +145,24 @@ const MarketMap = ({
               referrerPolicy="no-referrer-when-downgrade"
               title="خريطة المتعاونين"
             />
+            {/* Center crosshair indicator */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-10">
+              <div className="relative flex flex-col items-center">
+                <MapPin
+                  className="w-10 h-10 text-primary drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
+                  fill="hsl(var(--primary))"
+                  strokeWidth={1.5}
+                />
+                <div className="w-2 h-2 rounded-full bg-primary border-2 border-background -mt-1 shadow-lg" />
+              </div>
+            </div>
+            {user && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+                <span className="text-[10px] bg-black/70 text-white px-2 py-1 rounded-full backdrop-blur-sm">
+                  📍 موقعك سيُسجَّل عند المؤشر
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

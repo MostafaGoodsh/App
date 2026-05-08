@@ -3,11 +3,11 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useGameSettings } from '@/hooks/useGameSettings';
 
 const SYMBOLS = ['☥', '𓆣', '𓂀', '𓌀', '𓊽', '𓋹', '𓃭', '𓅃'];
 const COLS = 5;
 const ROWS = 3;
-const SPIN_COST = 10;
 const SUPER_SYMBOL = '𓆣'; // Scarab - super symbol
 
 const getRandomSymbol = () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
@@ -18,6 +18,12 @@ type WinCell = { row: number; col: number };
 const SlotMachine = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { settings } = useGameSettings('lucky_slots');
+  const SPIN_COST = settings?.spin_cost_xp ?? 10;
+  const REWARDS = settings?.rewards ?? {
+    five_super: 1000, five_mid_super: 500, five_any: 300,
+    five_mid: 200, four_match: 100, three_match: 20,
+  };
   const [reels, setReels] = useState<string[][]>(() =>
     Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => '𓆣'))
   );
@@ -112,21 +118,21 @@ const SlotMachine = () => {
 
               if (match.count === 5) {
                 const isSuper = match.symbol === SUPER_SYMBOL;
-                const win = isSuper ? 1000 : 300;
+                const win = isSuper ? REWARDS.five_super : REWARDS.five_any;
                 if (win > bestWin) {
                   bestWin = win;
                   bestCells = match.indices.map(c => ({ row: r, col: c }));
                   bestSymbol = match.symbol;
                 }
               } else if (match.count === 4) {
-                const win = 100;
+                const win = REWARDS.four_match;
                 if (win > bestWin) {
                   bestWin = win;
                   bestCells = match.indices.map(c => ({ row: r, col: c }));
                   bestSymbol = match.symbol;
                 }
-              } else if (match.count === 3 && bestWin < 20) {
-                bestWin = 20;
+              } else if (match.count === 3 && bestWin < REWARDS.three_match) {
+                bestWin = REWARDS.three_match;
                 bestCells = match.indices.map(c => ({ row: r, col: c }));
                 bestSymbol = match.symbol;
               }
@@ -136,7 +142,7 @@ const SlotMachine = () => {
             const mid = finalReels.map(col => col[1]);
             const midMatch = findBestMatch(mid);
             if (midMatch.count === 5) {
-              const midWin = midMatch.symbol === SUPER_SYMBOL ? 500 : 200;
+              const midWin = midMatch.symbol === SUPER_SYMBOL ? REWARDS.five_mid_super : REWARDS.five_mid;
               if (midWin > bestWin) {
                 bestWin = midWin;
                 bestCells = midMatch.indices.map(c => ({ row: 1, col: c }));
@@ -159,7 +165,15 @@ const SlotMachine = () => {
         }
       }, 800 + i * 500);
     });
-  }, [spinning, toast, user?.id]);
+  }, [spinning, toast, user?.id, SPIN_COST, REWARDS]);
+
+  if (settings && !settings.is_active) {
+    return (
+      <div className="text-center py-6 text-[#D4AF37]/60 text-sm">
+        🚧 اللعبة غير مفعّلة حالياً
+      </div>
+    );
+  }
 
   const isCellWin = (row: number, col: number) =>
     winCells.some(c => c.row === row && c.col === col);
@@ -256,12 +270,12 @@ const SlotMachine = () => {
       <div className="rounded-lg bg-black/40 border border-[#D4AF37]/15 p-2.5 space-y-1">
         <p className="text-[10px] text-[#D4AF37]/70 font-bold text-center mb-1">قواعد المكسب</p>
         <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[9px] text-[#D4AF37]/50">
-          <span>5× ⭐𓆣 جعران → 1000 XP</span>
-          <span>5× صف الوسط ⭐𓆣 → 500 XP</span>
-          <span>5× أي رمز → 300 XP</span>
-          <span>5× صف الوسط → 200 XP</span>
-          <span>4× تطابق → 100 XP</span>
-          <span>3× تطابق → 20 XP</span>
+          <span>5× ⭐𓆣 جعران → {REWARDS.five_super} XP</span>
+          <span>5× صف الوسط ⭐𓆣 → {REWARDS.five_mid_super} XP</span>
+          <span>5× أي رمز → {REWARDS.five_any} XP</span>
+          <span>5× صف الوسط → {REWARDS.five_mid} XP</span>
+          <span>4× تطابق → {REWARDS.four_match} XP</span>
+          <span>3× تطابق → {REWARDS.three_match} XP</span>
         </div>
         <div className="border-t border-[#D4AF37]/10 mt-1.5 pt-1.5 text-[9px] text-[#D4AF37]/40 text-center space-y-0.5">
           <p>🏆 مكسب: 80% لك + 20% مجمع السيولة</p>
