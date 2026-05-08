@@ -278,6 +278,8 @@ const QuranScroll = () => {
                     text = text.replace(BISMILLAH, "").trim();
                   }
                   if (!text) return null;
+                  const translation = translations[surah.number * 1000 + ayah.numberInSurah];
+                  const showTranslation = (language === "en" || language === "ru") && translation;
 
                   return (
                     <span key={ayah.number}>
@@ -285,6 +287,15 @@ const QuranScroll = () => {
                       <span className="inline-flex items-center justify-center mx-1 text-primary/70 text-sm font-mono align-middle">
                         ﴿{ayah.numberInSurah.toLocaleString("ar-EG")}﴾
                       </span>
+                      {showTranslation && (
+                        <span
+                          dir={language === "ru" ? "ltr" : "ltr"}
+                          className="block text-sm text-muted-foreground italic mt-1 mb-3 leading-relaxed text-left"
+                          style={{ fontFamily: "system-ui, sans-serif" }}
+                        >
+                          {translation}
+                        </span>
+                      )}
                     </span>
                   );
                 })}
