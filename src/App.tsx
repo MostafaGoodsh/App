@@ -92,6 +92,7 @@ const MarketLocationProfile = lazy(() => import("./pages/MarketLocationProfile")
 const TypographyAdmin = lazy(() => import("./pages/TypographyAdmin"));
 const LiquidityPoolAdmin = lazy(() => import("./pages/LiquidityPoolAdmin"));
 const WheelAdmin = lazy(() => import("./pages/WheelAdmin"));
+const GamesAdmin = lazy(() => import("./pages/GamesAdmin"));
 const CryptoPaymentAddressesAdmin = lazy(() => import("./pages/CryptoPaymentAddressesAdmin"));
 const FamilyAdmin = lazy(() => import("./pages/FamilyAdmin"));
 const PlatformMessageAdmin = lazy(() => import("./pages/PlatformMessageAdmin"));
@@ -240,6 +241,7 @@ const App = () => {
                     <Route path="admin/blockchain" element={<RequireAdmin><BlockchainAdmin /></RequireAdmin>} />
                    <Route path="admin/blockchain-network" element={<RequireAdmin><BlockchainNetworkAdmin /></RequireAdmin>} />
                    <Route path="admin/sidebar" element={<RequireAdmin><SidebarManagementAdmin /></RequireAdmin>} />
+                   <Route path="admin/games" element={<RequireAdmin><GamesAdmin /></RequireAdmin>} />
                       <Route path="*" element={<NotFound />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
