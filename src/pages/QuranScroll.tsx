@@ -280,7 +280,7 @@ const QuranScroll = () => {
                   }
                   if (!text) return null;
                   const translation = translations[surah.number * 1000 + ayah.numberInSurah];
-                  const showTranslation = (language === "en" || language === "ru") && translation;
+                  const showTranslation = language !== "ar" && !!translation;
 
                   return (
                     <span key={ayah.number}>
