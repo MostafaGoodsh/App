@@ -1,0 +1,82 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract WalletManager is Ownable, ReentrancyGuard {
+    // User wallet info
+    struct UserWallet {
+        address walletAddress;
+        bool kycVerified;
+        uint256 createdAt;
+        uint256 lastTransactionAt;
+    }
+
+    mapping(address => UserWallet) public userWallets;
+    mapping(address => address[]) public userTransactionHistory;
+
+    IERC20 public msraToken;
+
+    event WalletCreated(address indexed user, address indexed wallet);
+    event KYCStatusUpdated(address indexed user, bool verified);
+    event TransactionRecorded(address indexed from, address indexed to, uint256 amount);
+
+    constructor(address _msraToken) {
+        msraToken = IERC20(_msraToken);
+    }
+
+    // Register wallet for user
+    function registerWallet(address user) external onlyOwner {
+        require(userWallets[user].walletAddress == address(0), "Wallet already registered");
+        
+        userWallets[user] = UserWallet({
+            walletAddress: user,
+            kycVerified: false,
+            createdAt: block.timestamp,
+            lastTransactionAt: 0
+        });
+
+        emit WalletCreated(user, user);
+    }
+
+    // Update KYC verification status
+    function updateKYCStatus(address user, bool verified) external onlyOwner {
+        require(userWallets[user].walletAddress != address(0), "Wallet not registered");
+        userWallets[user].kycVerified = verified;
+        emit KYCStatusUpdated(user, verified);
+    }
+
+    // Transfer tokens with transaction recording
+    function transferWithRecord(
+        address from,
+        address to,
+        uint256 amount
+    ) external nonReentrant {
+        require(userWallets[from].walletAddress != address(0), "Sender wallet not registered");
+        require(userWallets[from].kycVerified, "Sender not KYC verified");
+
+        // If large amount, recipient must also be KYC verified
+        if (amount > 10000 * 10 ** 18) {
+            require(userWallets[to].kycVerified || msg.sender == owner(), "Recipient KYC required for large transfers");
+        }
+
+        require(msraToken.transferFrom(from, to, amount), "Transfer failed");
+
+        userWallets[from].lastTransactionAt = block.timestamp;
+        userTransactionHistory[from].push(to);
+
+        emit TransactionRecorded(from, to, amount);
+    }
+
+    // Get user wallet info
+    function getWalletInfo(address user) external view returns (UserWallet memory) {
+        return userWallets[user];
+    }
+
+    // Get transaction history count
+    function getTransactionCount(address user) external view returns (uint256) {
+        return userTransactionHistory[user].length;
+    }
+}
