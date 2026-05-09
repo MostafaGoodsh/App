@@ -1,6 +1,12 @@
 import { ethers } from "ethers";
 import MsrTokenABI from "@/contracts/MsrToken.abi.json";
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 // عناوين العقود على الشبكات المختلفة
 const CONTRACT_ADDRESSES = {
   ethereum: "0x...", // استبدل بعنوان العقد على Ethereum
