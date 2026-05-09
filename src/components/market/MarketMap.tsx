@@ -50,9 +50,20 @@ const MarketMap = ({
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selectedCoords, setSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 26.8206, lng: 30.8025 });
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     fetchLocations();
+  }, []);
+
+  // Try to center map on user's GPS once on mount
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {}
+    );
   }, []);
 
   const fetchLocations = async () => {
@@ -69,23 +80,23 @@ const MarketMap = ({
     }
   };
 
+  const recenterOnMe = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const handleAddLocation = () => {
-    // Use browser geolocation or default to Egypt center
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setSelectedCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setShowForm(true);
-        },
-        () => {
-          setSelectedCoords({ lat: 30.0444, lng: 31.2357 });
-          setShowForm(true);
-        }
-      );
-    } else {
-      setSelectedCoords({ lat: 30.0444, lng: 31.2357 });
-      setShowForm(true);
-    }
+    // Submit using current map center (where the crosshair points)
+    setSelectedCoords({ lat: mapCenter.lat, lng: mapCenter.lng });
+    setShowForm(true);
   };
 
   const handleFormSuccess = () => {
@@ -94,14 +105,10 @@ const MarketMap = ({
     fetchLocations();
   };
 
-  // Build Google Maps embed URL with markers
+  // Build Google Maps embed URL centered on mapCenter
   const getEmbedUrl = () => {
-    if (locations.length === 0) {
-      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d7000000!2d30.8025!3d26.8206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2seg!4v1`;
-    }
-    // Show first location
-    const loc = locations[0];
-    return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d500000!2d${loc.longitude}!3d${loc.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2seg!4v1`;
+    const { lat, lng } = mapCenter;
+    return `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
   };
 
   const openInGoogleMaps = (lat: number, lng: number, name: string) => {
