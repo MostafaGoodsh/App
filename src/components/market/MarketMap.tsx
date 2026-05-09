@@ -127,22 +127,29 @@ const MarketMap = ({
             </div>
           </CardTitle>
           {user && (
-            <div className="flex items-center justify-between">
-              <p className="text-white/60 text-sm text-right flex-1">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-white/60 text-xs text-right flex-1">
                 {intro}
                 {introEn && <span className="block text-white/50">{introEn}</span>}
               </p>
-              <Button size="sm" onClick={handleAddLocation} className="gap-1 shrink-0 mr-2">
-                <Plus className="w-4 h-4" />
-                إضافة
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button size="sm" variant="outline" onClick={recenterOnMe} disabled={locating} className="gap-1">
+                  <Navigation className="w-4 h-4" />
+                  {locating ? "..." : "موقعي"}
+                </Button>
+                <Button size="sm" onClick={handleAddLocation} className="gap-1">
+                  <Plus className="w-4 h-4" />
+                  إضافة هنا
+                </Button>
+              </div>
             </div>
           )}
         </CardHeader>
         <CardContent className="p-0 overflow-hidden rounded-b-lg">
-          {/* Google Maps Embed */}
+          {/* Google Maps Embed centered on mapCenter */}
           <div className="relative w-full" style={{ height: "350px" }}>
             <iframe
+              key={`${mapCenter.lat}-${mapCenter.lng}`}
               src={getEmbedUrl()}
               width="100%"
               height="100%"
@@ -152,7 +159,7 @@ const MarketMap = ({
               referrerPolicy="no-referrer-when-downgrade"
               title="خريطة المتعاونين"
             />
-            {/* Center crosshair indicator */}
+            {/* Center crosshair indicator (marks where the new location will be saved) */}
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-10">
               <div className="relative flex flex-col items-center">
                 <MapPin
@@ -166,7 +173,7 @@ const MarketMap = ({
             {user && (
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
                 <span className="text-[10px] bg-black/70 text-white px-2 py-1 rounded-full backdrop-blur-sm">
-                  📍 موقعك سيُسجَّل عند المؤشر
+                  📍 اضغط "موقعي" ثم "إضافة هنا" — يمكنك تعديل الإحداثيات في النموذج
                 </span>
               </div>
             )}
