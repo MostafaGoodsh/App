@@ -11,7 +11,7 @@ export interface SidebarItemRow {
   icon_name: string;
   display_order: number;
   is_visible: boolean;
-  min_access_level: "none" | "early_access" | "kyc_verified" | "admin";
+  min_access_level: "early_access" | "kyc_verified" | "admin";
   require_auth: boolean;
   is_admin_only: boolean;
   section: string;
