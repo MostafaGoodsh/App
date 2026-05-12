@@ -16,7 +16,6 @@ import { useProfile } from "@/hooks/useProfile";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUICardSettings } from "@/hooks/useUICardSettings";
-import { useAccessLevel, meetsAccess } from "@/hooks/useAccessLevel";
 
 const Header = () => {
   const { user } = useAuth();
@@ -24,8 +23,6 @@ const Header = () => {
   const { profile } = useProfile();
   const { t } = useLanguage();
   const { getCardStyle, getCardSetting } = useUICardSettings();
-  const { level } = useAccessLevel();
-  const showWallet = meetsAccess(level, "kyc_verified");
   
   const headerSetting = getCardSetting('header_main');
   const headerStyle = getCardStyle('header_main');
@@ -58,16 +55,14 @@ const Header = () => {
         <nav aria-label="التنقل الرئيسي" className="hidden lg:block">
           <NavigationMenu>
             <NavigationMenuList>
-              {showWallet && (
-                <NavigationMenuItem>
-                  <NavLink 
-                    to="/wallet" 
-                    className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
-                  >
-                    المحفظة (Wallet)
-                  </NavLink>
-                </NavigationMenuItem>
-              )}
+              <NavigationMenuItem>
+                <NavLink 
+                  to="/wallet" 
+                  className="inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors text-white hover:text-primary focus:outline-none"
+                >
+                  المحفظة (Wallet)
+                </NavLink>
+              </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink 
                   to="/early-access" 
