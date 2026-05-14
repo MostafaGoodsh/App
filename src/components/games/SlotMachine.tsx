@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useGameSettings } from '@/hooks/useGameSettings';
 
-const SYMBOLS = ['☥', '𓆣', '𓂀', '𓌀', '𓊽', '𓋹', '𓃭', '𓅃'];
+const SYMBOLS = ['𓆣', '𓂀', '𓌀', '𓊽', '𓋹', '𓃭', '𓅃'];
 const COLS = 5;
 const ROWS = 3;
 const SUPER_SYMBOL = '𓆣'; // Scarab - super symbol
