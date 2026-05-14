@@ -1,3 +1,4 @@
+import { Home, User } from 'lucide-react';
 import { Link, NavLink } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import {
