@@ -53,6 +53,7 @@ const Header = () => {
             <span className="hidden sm:inline">(منصة مصر الرقمية)</span>
           </Link>
         </div>
+        
         <nav aria-label="التنقل الرئيسي" className="hidden lg:block">
           <NavigationMenu>
             <NavigationMenuList>
