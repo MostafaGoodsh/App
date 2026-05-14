@@ -75,6 +75,7 @@ const QuranScroll = () => {
       setTranslations({});
       return;
     }
+    // 'both' falls back to English translation alongside Arabic text
     const edition = lang === "ru" ? "ru.kuliev" : "en.sahih";
     try {
       const res = await fetch(`https://api.alquran.cloud/v1/quran/${edition}`);
@@ -279,7 +280,7 @@ const QuranScroll = () => {
                   }
                   if (!text) return null;
                   const translation = translations[surah.number * 1000 + ayah.numberInSurah];
-                  const showTranslation = (language === "en" || language === "ru") && translation;
+                  const showTranslation = language !== "ar" && !!translation;
 
                   return (
                     <span key={ayah.number}>

@@ -1,6 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import * as Icons from "lucide-react";
-import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets, Disc, Landmark, LayoutGrid, Headphones, Network, SlidersHorizontal } from "lucide-react";
+import { Users, BookOpen, ClipboardList, Home, LogOut, LogIn, Shield, Settings, Zap, Star, User, TrendingUp, Calendar, Wallet, Tags, MessageSquare, Map, UserCheck, Video, Coins, Award, Megaphone, Globe, Type, Droplets, Disc, Landmark, LayoutGrid, Headphones, Network } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,32 +19,27 @@ import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useAccessLevel, meetsAccess, AccessLevel } from "@/hooks/useAccessLevel";
-import { useSidebarItems } from "@/hooks/useSidebarItems";
 
 export function AppSidebar() {
   const { open, isMobile } = useSidebar();
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
   const { getContent } = useAppContent();
-  const { t, language } = useLanguage();
-  const { level } = useAccessLevel();
-  const { items: dynamicItems } = useSidebarItems(false);
+  const { t } = useLanguage();
 
-  const visibleItems = dynamicItems.filter((it) => {
-    if (it.require_auth && !user) return false;
-    if (it.is_admin_only && !isAdmin) return false;
-    return meetsAccess(level, it.min_access_level as AccessLevel);
-  });
-
-  const titleFor = (it: typeof dynamicItems[number]) =>
-    (language === "en" && it.title_en) ? it.title_en :
-    (language === "ru" && it.title_ru) ? it.title_ru : it.title_ar;
+  const menuItems = [
+    { title: t("البروفايل"), url: "/profile", icon: User, requireAuth: true },
+    { title: t("الرئيسية"), url: "/", icon: Home },
+    { title: t("المحفظة"), url: "/wallet", icon: Wallet, requireAuth: true },
+    { title: t("الدفع بـ Pi"), url: "/pi-payment", icon: Coins },
+    { title: t("التعلم"), url: "/learning", icon: BookOpen },
+    { title: t("البث المباشر"), url: "/live-streams", icon: Video },
+    { title: t("الاستبيانات"), url: "/surveys", icon: ClipboardList, requireAuth: true },
+    { title: t("رسالة جديدة"), url: "/support", icon: MessageSquare, requireAuth: true },
+  ];
 
   const adminMenuItems = [
     { title: t("إدارة المستخدمين"), url: "/admin/users", icon: Users },
     { title: t("إدارة الوصول المبكر"), url: "/admin/early-access", icon: UserCheck },
-    { title: t("إدارة الشريط الجانبي"), url: "/admin/sidebar", icon: SlidersHorizontal },
     { title: t("رسائل الدعم"), url: "/admin/support", icon: MessageSquare },
     { title: t("إدارة الحسابات المعتمدة"), url: "/admin/verified-accounts", icon: Shield },
     { title: t("إدارة الهوية"), url: "/admin/kyc", icon: Shield },
@@ -91,9 +85,6 @@ export function AppSidebar() {
   const getNavClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50";
 
-  // Hide sidebar entirely for users with no access (early access pending)
-  if (user && level === "none" && !isAdmin) return null;
-
   return (
     <Sidebar
       className={`${!open && !isMobile ? "w-10" : "w-48"}`}
@@ -110,19 +101,35 @@ export function AppSidebar() {
           <SidebarGroupLabel>{t("التنقل الرئيسي")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleItems.map((item) => {
-                const IconCmp = (Icons as any)[item.icon_name] || Icons.Circle;
+              {menuItems.map((item) => {
+                if (item.requireAuth && !user) return null;
                 return (
-                  <SidebarMenuItem key={item.id}>
+                  <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild>
                       <NavLink to={item.url} className={getNavClass}>
-                        <IconCmp className="h-4 w-4" />
-                        {(open || isMobile) && <span>{titleFor(item)}</span>}
+                        <item.icon className="h-4 w-4" />
+                        {(open || isMobile) && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("الوصول المبكر")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink to="/early-access" className={getNavClass}>
+                    <Users className="h-4 w-4" />
+                    {(open || isMobile) && <span>{t("انضم الآن")}</span>}
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

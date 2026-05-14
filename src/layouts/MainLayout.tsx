@@ -9,7 +9,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import AnnouncementDialog from "@/components/announcements/AnnouncementDialog";
 import GlobalAudioPlayer from "@/components/podcast/GlobalAudioPlayer";
-import WelcomeDialog from "@/components/WelcomeDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MessageSquare } from "lucide-react";
 import { useBlockchainKey } from "@/hooks/useBlockchainKey";
@@ -78,7 +77,6 @@ const MainLayoutContent = () => {
           <Outlet />
         </main>
         <AnnouncementDialog />
-        <WelcomeDialog />
         <GlobalAudioPlayer />
       </div>
     </div>

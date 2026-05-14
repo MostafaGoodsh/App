@@ -41,18 +41,6 @@ export default function EarlyAccessManagement() {
         .eq("user_id", userId);
 
       if (error) throw error;
-
-      // Send welcome notification on approval
-      if (hasAccess) {
-        await supabase.from("notifications").insert({
-          user_id: userId,
-          type: "welcome",
-          title: "🎉 مرحباً بك في منصة مصر الرقمية",
-          message:
-            "تم قبول طلبك بنجاح! نرحب بك في عائلتنا. ابدأ رحلتك الآن بإكمال الاستبيان التعريفي ثم تقديم تحقق الهوية للحصول على الوصول الكامل لكل مزايا المنصة.",
-          action_url: "/surveys",
-        });
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profiles-early-access"] });
