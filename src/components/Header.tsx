@@ -8,8 +8,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";0
 import { signOut } from "@/lib/auth";
 import { useAppContent } from "@/hooks/useAppContent";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -110,10 +109,6 @@ const Header = () => {
   </div>
   {/* أيقونات أخرى موجودة (مثل الإشعارات) */}
    {/* أيقونة Profile بنفس شكل الدائرة */}
-  </div>
-   <div className="flex flex-col items-center gap-1 group">
-    <div className="w-10 h-10 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-all flex items-center justify-center">
-      <User className="w-5 h-5 text-primary" />
     </div>
     <span className="text-xs text-muted-foreground">الملف</span>l   </
   <div className="flex items-center gap-1 sm:gap-2 shrink-0">
