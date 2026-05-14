@@ -108,10 +108,8 @@ const Header = () => {
     </div>
     <span className="text-xs text-muted-foreground">الرئيسية</span>
   </div>
-
   {/* أيقونات أخرى موجودة (مثل الإشعارات) */}
-
-  {/* أيقونة Profile بنفس شكل الدائرة */}
+   {/* أيقونة Profile بنفس شكل الدائرة */}
   </div>
    <div className="flex flex-col items-center gap-1 group">
     <div className="w-10 h-10 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-all flex items-center justify-center">
