@@ -23,7 +23,6 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export function AppSidebar() {
   const { open, isMobile } = useSidebar();
   const location = useLocation();
-  const { user, isAdmin } = useAuth();
   const { getContent } = useAppContent();
   const { t } = useLanguage();
 

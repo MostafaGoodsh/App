@@ -108,6 +108,7 @@ const QuranScroll = lazy(() => import("./pages/QuranScroll"));
 const VirtualCard = lazy(() => import("./pages/VirtualCard"));
 const VirtualCardAdmin = lazy(() => import("./pages/VirtualCardAdmin"));
 const BlockChain = lazy(() => import("./pages/BlockChain"));
+const SidebarManagementAdmin = lazy(() => import("./pages/SidebarAdmin"));
 const BlockchainAdmin = lazy(() => import("./pages/BlockchainAdmin"));
 const BlockchainNetworkAdmin = lazy(() => import("./pages/BlockchainNetworkAdmin"));
 
